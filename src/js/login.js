@@ -117,7 +117,7 @@ export function renderLogin(container) {
   //     loginBtn.textContent = "Login";
   //   }, 600);
   // });
-  renderDashboard(container, "stock-keeper");
+  renderDashboard(container, "driver");
 }
 
 export function renderDashboard(container, role) {

@@ -1,3 +1,5 @@
+import logo from "../../assets/logo-tr.png";
+
 class CashierDashboard {
   constructor(container) {
     this.container = container;
@@ -55,16 +57,16 @@ class CashierDashboard {
       <div class="${
         this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-cyan-700 to-cyan-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
-        <div class="p-6 border-b border-cyan-600">
-          <h1 class="text-2xl font-bold">Cashier</h1>
-          <p class="text-cyan-200 text-sm mt-1">Transaction Management</p>
-        </div>
+                <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
+        
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${item.id}" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+            <button data-section="${
+              item.id
+            }" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                 this.currentSection === item.id
                   ? "bg-white text-cyan-700 font-semibold shadow-lg"
                   : "text-cyan-100 hover:bg-cyan-600"
@@ -105,7 +107,9 @@ class CashierDashboard {
         <div class="flex items-center gap-6">
           <div class="flex items-center gap-2 text-gray-600">
             ${this.getIcon("clock")}
-            <span class="font-mono text-sm" id="currentTime">${this.currentTime}</span>
+            <span class="font-mono text-sm" id="currentTime">${
+              this.currentTime
+            }</span>
           </div>
 
           <div class="relative">
@@ -194,24 +198,37 @@ class CashierDashboard {
 
   getIcon(name) {
     const icons = {
-      dollar: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-      "credit-card": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>',
-      receipt: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
-      "trending-up": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>',
-      "rotate-ccw": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>',
-      "bar-chart": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>',
-      users: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>',
-      clock: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+      dollar:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+      "credit-card":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>',
+      receipt:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
+      "trending-up":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>',
+      "rotate-ccw":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>',
+      "bar-chart":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>',
+      users:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>',
+      clock:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
       bell: '<svg class="w-5 h-5 text-gray-600 cursor-pointer hover:text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>',
       user: '<svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>',
-      "log-out": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>',
+      "log-out":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>',
       menu: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>',
       x: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
       plus: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>',
-      trash: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>',
-      "shopping-cart": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>',
-      check: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
-      banknote: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>',
+      trash:
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>',
+      "shopping-cart":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>',
+      check:
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+      banknote:
+        '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>',
     };
     return icons[name] || "";
   }
@@ -220,7 +237,13 @@ class CashierDashboard {
 class SalesTransaction {
   constructor() {
     this.cartItems = [
-      { id: "1", name: "Britol Air Freshener", quantity: 2, price: 250, total: 500 },
+      {
+        id: "1",
+        name: "Britol Air Freshener",
+        quantity: 2,
+        price: 250,
+        total: 500,
+      },
       { id: "2", name: "Handwash 500ml", quantity: 1, price: 180, total: 180 },
     ];
   }
@@ -290,7 +313,9 @@ class SalesTransaction {
         <!-- Cart Items -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800">Cart Items (${this.cartItems.length})</h3>
+            <h3 class="text-lg font-semibold text-gray-800">Cart Items (${
+              this.cartItems.length
+            })</h3>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full">
@@ -304,19 +329,31 @@ class SalesTransaction {
                 </tr>
               </thead>
               <tbody>
-                ${this.cartItems.map((item) => `
+                ${this.cartItems
+                  .map(
+                    (item) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm text-gray-800">${item.name}</td>
-                    <td class="px-6 py-4 text-sm text-gray-800">${item.quantity}</td>
-                    <td class="px-6 py-4 text-sm text-gray-800">Rs. ${item.price.toFixed(2)}</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">Rs. ${item.total.toFixed(2)}</td>
+                    <td class="px-6 py-4 text-sm text-gray-800">${
+                      item.name
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-800">${
+                      item.quantity
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-800">Rs. ${item.price.toFixed(
+                      2
+                    )}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">Rs. ${item.total.toFixed(
+                      2
+                    )}</td>
                     <td class="px-6 py-4 text-sm">
                       <button class="text-red-600 hover:text-red-800 transition-colors">
                         ${this.getIcon("trash")}
                       </button>
                     </td>
                   </tr>
-                `).join("")}
+                `
+                  )
+                  .join("")}
               </tbody>
             </table>
           </div>
@@ -327,9 +364,11 @@ class SalesTransaction {
 
   getIcon(name) {
     const icons = {
-      "shopping-cart": '<svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>',
+      "shopping-cart":
+        '<svg class="w-5 h-5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>',
       plus: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>',
-      trash: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>',
+      trash:
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>',
     };
     return icons[name] || "";
   }
@@ -338,23 +377,61 @@ class SalesTransaction {
 class PaymentProcessing {
   constructor() {
     this.payments = [
-      { id: "1", method: "Cash", amount: 5000, reference: "TXN001", timestamp: "2024-10-19 10:30 AM", status: "completed" },
-      { id: "2", method: "Card", amount: 3500, reference: "TXN002", timestamp: "2024-10-19 11:15 AM", status: "completed" },
-      { id: "3", method: "Cheque", amount: 2000, reference: "CHQ001", timestamp: "2024-10-19 12:00 PM", status: "pending" },
+      {
+        id: "1",
+        method: "Cash",
+        amount: 5000,
+        reference: "TXN001",
+        timestamp: "2024-10-19 10:30 AM",
+        status: "completed",
+      },
+      {
+        id: "2",
+        method: "Card",
+        amount: 3500,
+        reference: "TXN002",
+        timestamp: "2024-10-19 11:15 AM",
+        status: "completed",
+      },
+      {
+        id: "3",
+        method: "Cheque",
+        amount: 2000,
+        reference: "CHQ001",
+        timestamp: "2024-10-19 12:00 PM",
+        status: "pending",
+      },
     ];
     this.selectedMethod = "cash";
   }
 
   render() {
-    const totalProcessed = this.payments.filter((p) => p.status === "completed").reduce((sum, p) => sum + p.amount, 0);
+    const totalProcessed = this.payments
+      .filter((p) => p.status === "completed")
+      .reduce((sum, p) => sum + p.amount, 0);
 
     return `
       <div class="space-y-6">
         <!-- Payment Methods -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          ${this.renderPaymentMethod("cash", "Cash", "banknote", "bg-green-100 text-green-600")}
-          ${this.renderPaymentMethod("card", "Card", "credit-card", "bg-blue-100 text-blue-600")}
-          ${this.renderPaymentMethod("cheque", "Cheque", "dollar", "bg-purple-100 text-purple-600")}
+          ${this.renderPaymentMethod(
+            "cash",
+            "Cash",
+            "banknote",
+            "bg-green-100 text-green-600"
+          )}
+          ${this.renderPaymentMethod(
+            "card",
+            "Card",
+            "credit-card",
+            "bg-blue-100 text-blue-600"
+          )}
+          ${this.renderPaymentMethod(
+            "cheque",
+            "Cheque",
+            "dollar",
+            "bg-purple-100 text-purple-600"
+          )}
         </div>
 
         <!-- Payment Form -->
@@ -389,15 +466,21 @@ class PaymentProcessing {
             <div class="space-y-4">
               <div class="bg-white rounded-lg p-4">
                 <p class="text-gray-600 text-sm">Total Processed Today</p>
-                <p class="text-3xl font-bold text-cyan-600">Rs. ${totalProcessed.toFixed(2)}</p>
+                <p class="text-3xl font-bold text-cyan-600">Rs. ${totalProcessed.toFixed(
+                  2
+                )}</p>
               </div>
               <div class="bg-white rounded-lg p-4">
                 <p class="text-gray-600 text-sm">Completed Transactions</p>
-                <p class="text-2xl font-bold text-green-600">${this.payments.filter((p) => p.status === "completed").length}</p>
+                <p class="text-2xl font-bold text-green-600">${
+                  this.payments.filter((p) => p.status === "completed").length
+                }</p>
               </div>
               <div class="bg-white rounded-lg p-4">
                 <p class="text-gray-600 text-sm">Pending Transactions</p>
-                <p class="text-2xl font-bold text-yellow-600">${this.payments.filter((p) => p.status === "pending").length}</p>
+                <p class="text-2xl font-bold text-yellow-600">${
+                  this.payments.filter((p) => p.status === "pending").length
+                }</p>
               </div>
             </div>
           </div>
@@ -420,12 +503,22 @@ class PaymentProcessing {
                 </tr>
               </thead>
               <tbody>
-                ${this.payments.map((payment) => `
+                ${this.payments
+                  .map(
+                    (payment) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm text-gray-800">${payment.method}</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">Rs. ${payment.amount.toFixed(2)}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${payment.reference}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${payment.timestamp}</td>
+                    <td class="px-6 py-4 text-sm text-gray-800">${
+                      payment.method
+                    }</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">Rs. ${payment.amount.toFixed(
+                      2
+                    )}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      payment.reference
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      payment.timestamp
+                    }</td>
                     <td class="px-6 py-4 text-sm">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
                         payment.status === "completed"
@@ -434,11 +527,16 @@ class PaymentProcessing {
                           ? "bg-yellow-100 text-yellow-800"
                           : "bg-red-100 text-red-800"
                       }">
-                        ${payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                        ${
+                          payment.status.charAt(0).toUpperCase() +
+                          payment.status.slice(1)
+                        }
                       </span>
                     </td>
                   </tr>
-                `).join("")}
+                `
+                  )
+                  .join("")}
               </tbody>
             </table>
           </div>
@@ -451,7 +549,9 @@ class PaymentProcessing {
     const isSelected = this.selectedMethod === id;
     return `
       <button class="p-4 rounded-lg border-2 transition-all ${
-        isSelected ? "border-cyan-600 bg-cyan-50" : "border-gray-200 hover:border-cyan-300"
+        isSelected
+          ? "border-cyan-600 bg-cyan-50"
+          : "border-gray-200 hover:border-cyan-300"
       }">
         <div class="${colorClass} w-12 h-12 rounded-lg flex items-center justify-center mb-3">
           ${this.getIcon(icon)}
@@ -463,23 +563,164 @@ class PaymentProcessing {
 
   getIcon(name) {
     const icons = {
-      banknote: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>',
-      "credit-card": '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>',
-      dollar: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-      check: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+      banknote:
+        '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>',
+      "credit-card":
+        '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>',
+      dollar:
+        '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+      check:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
     };
     return icons[name] || "";
   }
 }
 
 class ReceiptManagement {
+  constructor() {
+    this.receipts = [
+      {
+        id: "1",
+        transactionId: "TXN001",
+        date: "2024-10-19 10:30 AM",
+        amount: 5500,
+        items: 3,
+        status: "printed",
+      },
+      {
+        id: "2",
+        transactionId: "TXN002",
+        date: "2024-10-19 11:15 AM",
+        amount: 3850,
+        items: 2,
+        status: "printed",
+      },
+      {
+        id: "3",
+        transactionId: "TXN003",
+        date: "2024-10-19 12:00 PM",
+        amount: 2200,
+        items: 1,
+        status: "pending",
+      },
+    ];
+  }
+
   render() {
+    const totalAmount = this.receipts.reduce((sum, r) => sum + r.amount, 0);
+    const printedCount = this.receipts.filter(
+      (r) => r.status === "printed"
+    ).length;
+    const pendingCount = this.receipts.filter(
+      (r) => r.status === "pending"
+    ).length;
+
     return `
       <div class="space-y-6">
-        <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm text-center">
-          <svg class="w-16 h-16 text-cyan-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          <h3 class="text-2xl font-bold text-gray-900 mb-2">Receipt Management</h3>
-          <p class="text-gray-600">Generate and manage transaction receipts</p>
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900">Receipt Management</h3>
+          <p class="text-gray-600 mt-1">Manage and track transaction receipts</p>
+        </div>
+
+        <!-- Receipt Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-cyan-600">
+            <p class="text-gray-600 text-sm">Total Receipts</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">${
+              this.receipts.length
+            }</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
+            <p class="text-gray-600 text-sm">Printed</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">${printedCount}</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
+            <p class="text-gray-600 text-sm">Pending</p>
+            <p class="text-3xl font-bold text-yellow-600 mt-2">${pendingCount}</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
+            <p class="text-gray-600 text-sm">Total Amount</p>
+            <p class="text-3xl font-bold text-blue-600 mt-2">Rs. ${totalAmount.toFixed(
+              2
+            )}</p>
+          </div>
+        </div>
+
+        <!-- Receipts Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Receipt History</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Transaction ID</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date & Time</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Items</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${this.receipts
+                  .map(
+                    (receipt) => `
+                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
+                      receipt.transactionId
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      receipt.date
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${
+                      receipt.items
+                    }</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">Rs. ${receipt.amount.toFixed(
+                      2
+                    )}</td>
+                    <td class="px-6 py-4 text-sm">
+                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                        receipt.status === "printed"
+                          ? "bg-green-100 text-green-800"
+                          : receipt.status === "pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-blue-100 text-blue-800"
+                      }">
+                        ${
+                          receipt.status.charAt(0).toUpperCase() +
+                          receipt.status.slice(1)
+                        }
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                      <div class="flex items-center gap-2">
+                        <button class="text-cyan-600 hover:text-cyan-800 transition-colors" title="Print">
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                          </svg>
+                        </button>
+                        <button class="text-blue-600 hover:text-blue-800 transition-colors" title="Download">
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                          </svg>
+                        </button>
+                        <button class="text-gray-600 hover:text-gray-800 transition-colors" title="View">
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     `;
@@ -510,19 +751,25 @@ class CashFlowSummary {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-md p-6 border border-green-200">
             <p class="text-gray-600 text-sm">Total Inflow</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${totalInflow.toFixed(2)}</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${totalInflow.toFixed(
+              2
+            )}</p>
             <p class="text-xs text-gray-500 mt-2">This week</p>
           </div>
 
           <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg shadow-md p-6 border border-red-200">
             <p class="text-gray-600 text-sm">Total Outflow</p>
-            <p class="text-3xl font-bold text-red-600 mt-2">Rs. ${totalOutflow.toFixed(2)}</p>
+            <p class="text-3xl font-bold text-red-600 mt-2">Rs. ${totalOutflow.toFixed(
+              2
+            )}</p>
             <p class="text-xs text-gray-500 mt-2">This week</p>
           </div>
 
           <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg shadow-md p-6 border border-cyan-200">
             <p class="text-gray-600 text-sm">Net Cash Flow</p>
-            <p class="text-3xl font-bold text-cyan-600 mt-2">Rs. ${netCash.toFixed(2)}</p>
+            <p class="text-3xl font-bold text-cyan-600 mt-2">Rs. ${netCash.toFixed(
+              2
+            )}</p>
             <p class="text-xs text-gray-500 mt-2">This week</p>
           </div>
         </div>
@@ -540,13 +787,160 @@ class CashFlowSummary {
 }
 
 class RefundManagement {
+  constructor() {
+    this.refunds = [
+      {
+        id: "1",
+        transactionId: "TXN001",
+        amount: 500,
+        reason: "Damaged product",
+        date: "2024-10-19 10:45 AM",
+        status: "approved",
+      },
+      {
+        id: "2",
+        transactionId: "TXN002",
+        amount: 1200,
+        reason: "Wrong item delivered",
+        date: "2024-10-19 11:30 AM",
+        status: "pending",
+      },
+      {
+        id: "3",
+        transactionId: "TXN003",
+        amount: 300,
+        reason: "Customer request",
+        date: "2024-10-19 12:15 PM",
+        status: "rejected",
+      },
+    ];
+  }
+
   render() {
+    const totalRefunded = this.refunds
+      .filter((r) => r.status === "approved")
+      .reduce((sum, r) => sum + r.amount, 0);
+    const approvedCount = this.refunds.filter(
+      (r) => r.status === "approved"
+    ).length;
+    const pendingCount = this.refunds.filter(
+      (r) => r.status === "pending"
+    ).length;
+
     return `
       <div class="space-y-6">
-        <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm text-center">
-          <svg class="w-16 h-16 text-cyan-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
-          <h3 class="text-2xl font-bold text-gray-900 mb-2">Refund Management</h3>
-          <p class="text-gray-600">Process customer refunds and returns</p>
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">Refund Management</h3>
+            <p class="text-gray-600 mt-1">Process customer refunds and returns</p>
+          </div>
+          <button class="bg-cyan-600 text-white px-6 py-2 rounded-lg hover:bg-cyan-700 transition-colors flex items-center gap-2 font-medium">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+            </svg>
+            New Refund Request
+          </button>
+        </div>
+
+        <!-- Refund Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-cyan-600">
+            <p class="text-gray-600 text-sm">Total Refunds</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">${
+              this.refunds.length
+            }</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
+            <p class="text-gray-600 text-sm">Approved</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">${approvedCount}</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
+            <p class="text-gray-600 text-sm">Pending</p>
+            <p class="text-3xl font-bold text-yellow-600 mt-2">${pendingCount}</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
+            <p class="text-gray-600 text-sm">Total Refunded</p>
+            <p class="text-3xl font-bold text-red-600 mt-2">Rs. ${totalRefunded.toFixed(
+              2
+            )}</p>
+          </div>
+        </div>
+
+        <!-- Refunds Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">Refund Requests</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Transaction ID</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Reason</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${this.refunds
+                  .map(
+                    (refund) => `
+                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
+                      refund.transactionId
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">Rs. ${refund.amount.toFixed(
+                      2
+                    )}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      refund.reason
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      refund.date
+                    }</td>
+                    <td class="px-6 py-4 text-sm">
+                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                        refund.status === "approved"
+                          ? "bg-green-100 text-green-800"
+                          : refund.status === "pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }">
+                        ${
+                          refund.status.charAt(0).toUpperCase() +
+                          refund.status.slice(1)
+                        }
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                      ${
+                        refund.status === "pending"
+                          ? `
+                        <div class="flex items-center gap-2">
+                          <button class="text-green-600 hover:text-green-800 transition-colors" title="Approve">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                          </button>
+                          <button class="text-red-600 hover:text-red-800 transition-colors" title="Reject">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                          </button>
+                        </div>
+                      `
+                          : "-"
+                      }
+                    </td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     `;
@@ -554,13 +948,175 @@ class RefundManagement {
 }
 
 class FinancialReports {
+  constructor() {
+    this.reportData = {
+      daily: { sales: 15280, expenses: 4200, profit: 11080 },
+      weekly: { sales: 98500, expenses: 25600, profit: 72900 },
+      monthly: { sales: 425000, expenses: 112000, profit: 313000 },
+    };
+  }
+
   render() {
     return `
       <div class="space-y-6">
-        <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm text-center">
-          <svg class="w-16 h-16 text-cyan-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          <h3 class="text-2xl font-bold text-gray-900 mb-2">Financial Reports</h3>
-          <p class="text-gray-600">View and generate financial reports</p>
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900">Financial Reports</h3>
+          <p class="text-gray-600 mt-1">View and generate financial reports and analytics</p>
+        </div>
+
+        <!-- Report Period Tabs -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="flex gap-2 mb-6">
+            <button class="px-4 py-2 bg-cyan-600 text-white rounded-lg font-medium">Daily</button>
+            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Weekly</button>
+            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Monthly</button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+              <p class="text-gray-700 text-sm font-medium">Total Sales</p>
+              <p class="text-3xl font-bold text-blue-600 mt-2">Rs. ${this.reportData.daily.sales.toFixed(
+                2
+              )}</p>
+              <p class="text-xs text-gray-600 mt-2">Today</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-6 border border-red-200">
+              <p class="text-gray-700 text-sm font-medium">Total Expenses</p>
+              <p class="text-3xl font-bold text-red-600 mt-2">Rs. ${this.reportData.daily.expenses.toFixed(
+                2
+              )}</p>
+              <p class="text-xs text-gray-600 mt-2">Today</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+              <p class="text-gray-700 text-sm font-medium">Net Profit</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${this.reportData.daily.profit.toFixed(
+                2
+              )}</p>
+              <p class="text-xs text-gray-600 mt-2">Today</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Placeholder -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Sales vs Expenses</h4>
+          <div class="h-80 flex items-center justify-center bg-gray-50 rounded-lg">
+            <div class="text-center">
+              <svg class="w-16 h-16 mx-auto mb-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+              </svg>
+              <p class="text-gray-600 font-medium">Financial Chart Visualization</p>
+              <p class="text-sm text-gray-500 mt-2">Sales and expense trends over time</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h4 class="text-lg font-semibold text-gray-900">Recent Transactions</h4>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Time</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${[
+                  {
+                    time: "2:45 PM",
+                    type: "Sale",
+                    desc: "Transaction TXN005",
+                    amount: 2500,
+                    isIncome: true,
+                  },
+                  {
+                    time: "2:30 PM",
+                    type: "Expense",
+                    desc: "Supplies Purchase",
+                    amount: 850,
+                    isIncome: false,
+                  },
+                  {
+                    time: "1:15 PM",
+                    type: "Sale",
+                    desc: "Transaction TXN004",
+                    amount: 3200,
+                    isIncome: true,
+                  },
+                  {
+                    time: "12:00 PM",
+                    type: "Sale",
+                    desc: "Transaction TXN003",
+                    amount: 1800,
+                    isIncome: true,
+                  },
+                  {
+                    time: "11:30 AM",
+                    type: "Expense",
+                    desc: "Utility Bill",
+                    amount: 450,
+                    isIncome: false,
+                  },
+                ]
+                  .map(
+                    (txn) => `
+                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 text-sm text-gray-600">${txn.time}</td>
+                    <td class="px-6 py-4 text-sm">
+                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                        txn.isIncome
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }">
+                        ${txn.type}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${txn.desc}</td>
+                    <td class="px-6 py-4 text-sm font-semibold ${
+                      txn.isIncome ? "text-green-600" : "text-red-600"
+                    }">
+                      ${txn.isIncome ? "+" : "-"}Rs. ${txn.amount.toFixed(2)}
+                    </td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Export Reports</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              Export to PDF
+            </button>
+            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              Export to Excel
+            </button>
+            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+              </svg>
+              Print Report
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -568,13 +1124,179 @@ class FinancialReports {
 }
 
 class BuyerTracking {
+  constructor() {
+    this.buyers = [
+      {
+        id: 1,
+        name: "John Doe",
+        phone: "+94 77 123 4567",
+        email: "john@example.com",
+        totalPurchases: 15,
+        totalSpent: 45600,
+        lastVisit: "2024-10-19",
+        status: "active",
+      },
+      {
+        id: 2,
+        name: "Jane Smith",
+        phone: "+94 71 987 6543",
+        email: "jane@example.com",
+        totalPurchases: 8,
+        totalSpent: 28900,
+        lastVisit: "2024-10-18",
+        status: "active",
+      },
+      {
+        id: 3,
+        name: "Mike Johnson",
+        phone: "+94 76 555 1234",
+        email: "mike@example.com",
+        totalPurchases: 23,
+        totalSpent: 67200,
+        lastVisit: "2024-10-19",
+        status: "vip",
+      },
+    ];
+  }
+
   render() {
+    const totalBuyers = this.buyers.length;
+    const activeBuyers = this.buyers.filter(
+      (b) => b.status === "active"
+    ).length;
+    const vipBuyers = this.buyers.filter((b) => b.status === "vip").length;
+    const totalRevenue = this.buyers.reduce((sum, b) => sum + b.totalSpent, 0);
+
     return `
       <div class="space-y-6">
-        <div class="bg-white p-8 rounded-lg border border-gray-200 shadow-sm text-center">
-          <svg class="w-16 h-16 text-cyan-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-          <h3 class="text-2xl font-bold text-gray-900 mb-2">Buyer Tracking</h3>
-          <p class="text-gray-600">Track customer purchases and history</p>
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900">Buyer Tracking</h3>
+          <p class="text-gray-600 mt-1">Track customer purchases and history</p>
+        </div>
+
+        <!-- Buyer Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-cyan-600">
+            <p class="text-gray-600 text-sm">Total Buyers</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">${totalBuyers}</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
+            <p class="text-gray-600 text-sm">Active Buyers</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">${activeBuyers}</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-600">
+            <p class="text-gray-600 text-sm">VIP Buyers</p>
+            <p class="text-3xl font-bold text-purple-600 mt-2">${vipBuyers}</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
+            <p class="text-gray-600 text-sm">Total Revenue</p>
+            <p class="text-3xl font-bold text-blue-600 mt-2">Rs. ${totalRevenue.toFixed(
+              2
+            )}</p>
+          </div>
+        </div>
+
+        <!-- Buyers Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-gray-900">Customer Directory</h3>
+            <button class="bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition-colors flex items-center gap-2 text-sm font-medium">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              Add Buyer
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Contact</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Total Purchases</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Total Spent</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Last Visit</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${this.buyers
+                  .map(
+                    (buyer) => `
+                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4">
+                      <div>
+                        <p class="text-sm font-semibold text-gray-900">${
+                          buyer.name
+                        }</p>
+                        <p class="text-xs text-gray-600">${buyer.email}</p>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      buyer.phone
+                    }</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${
+                      buyer.totalPurchases
+                    }</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">Rs. ${buyer.totalSpent.toFixed(
+                      2
+                    )}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      buyer.lastVisit
+                    }</td>
+                    <td class="px-6 py-4 text-sm">
+                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                        buyer.status === "vip"
+                          ? "bg-purple-100 text-purple-800"
+                          : "bg-green-100 text-green-800"
+                      }">
+                        ${buyer.status.toUpperCase()}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm">
+                      <button class="text-cyan-600 hover:text-cyan-800 font-medium">View History</button>
+                    </td>
+                  </tr>
+                `
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top Buyers -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Top Buyers (By Revenue)</h4>
+          <div class="space-y-3">
+            ${this.buyers
+              .sort((a, b) => b.totalSpent - a.totalSpent)
+              .map(
+                (buyer, index) => `
+              <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center font-bold">
+                    ${index + 1}
+                  </div>
+                  <div>
+                    <p class="font-semibold text-gray-900">${buyer.name}</p>
+                    <p class="text-xs text-gray-600">${
+                      buyer.totalPurchases
+                    } purchases</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="font-bold text-cyan-600">Rs. ${buyer.totalSpent.toFixed(
+                    2
+                  )}</p>
+                  <p class="text-xs text-gray-600">Total Spent</p>
+                </div>
+              </div>
+            `
+              )
+              .join("")}
+          </div>
         </div>
       </div>
     `;
