@@ -16,6 +16,7 @@ import editIcon from "../../assets/icons/edit.svg";
 import trashIcon from "../../assets/icons/trash.svg";
 import checkCircleIcon from "../../assets/icons/check-circle.svg";
 import activityIcon from "../../assets/icons/activity.svg";
+import logo from "../../assets/logo-tr.png";
 
 class ManagerDashboard {
   constructor(container) {
@@ -64,14 +65,8 @@ class ManagerDashboard {
         this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-emerald-700 to-emerald-900 text-white transition-transform duration-300 z-30 overflow-y-auto">
         <div class="p-6">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-              <img src="${activityIcon}" class="w-6 h-6" alt="logo" />
-            </div>
-            <div>
-              <h2 class="text-lg font-bold">DBMS</h2>
-              <p class="text-xs text-emerald-100">Manager Portal</p>
-            </div>
+          <div class="flex items-center gap-3 invert">
+            <img src="${logo}" alt="Logo" class="" />
           </div>
         </div>
 
@@ -84,7 +79,7 @@ class ManagerDashboard {
             }" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                 this.currentSection === item.id
                   ? "bg-white text-emerald-700 font-semibold shadow-lg"
-                  : "text-emerald-100 hover:bg-emerald-600"
+                  : "text-emerald-100  hover:bg-emerald-600"
               }">
               ${this.getIcon(item.icon)}
               <span>${item.label}</span>
@@ -289,7 +284,7 @@ class EmployeeOversight {
             <p class="text-gray-600 mt-1">Monitor team performance, attendance, and schedules</p>
           </div>
           <button class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
-            <img src="${plusIcon}" class="w-5 h-5" alt="add" />
+            <img src="${plusIcon}" class="w-5 h-5 invert" alt="add" />
             Add Employee
           </button>
         </div>
