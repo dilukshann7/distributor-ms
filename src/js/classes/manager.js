@@ -1,3 +1,22 @@
+import chartBarIcon from "../../assets/icons/chart-bar.svg";
+import usersIcon from "../../assets/icons/users.svg";
+import checkSquareIcon from "../../assets/icons/check-square.svg";
+import packageIcon from "../../assets/icons/package.svg";
+import messageSquareIcon from "../../assets/icons/message-square.svg";
+import truckIcon from "../../assets/icons/truck.svg";
+import bellIcon from "../../assets/icons/bell.svg";
+import settingsIcon from "../../assets/icons/settings.svg";
+import logOutIcon from "../../assets/icons/log-out.svg";
+import menuIcon from "../../assets/icons/menu.svg";
+import xIcon from "../../assets/icons/x.svg";
+import clockIcon from "../../assets/icons/clock.svg";
+import alertCircleIcon from "../../assets/icons/alert-circle.svg";
+import plusIcon from "../../assets/icons/plus.svg";
+import editIcon from "../../assets/icons/edit.svg";
+import trashIcon from "../../assets/icons/trash.svg";
+import checkCircleIcon from "../../assets/icons/check-circle.svg";
+import activityIcon from "../../assets/icons/activity.svg";
+
 class ManagerDashboard {
   constructor(container) {
     this.container = container;
@@ -6,6 +25,7 @@ class ManagerDashboard {
   }
 
   render() {
+    /*html*/
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -31,8 +51,9 @@ class ManagerDashboard {
       { id: "feedback", label: "Customer Feedback", icon: "message-square" },
       { id: "delivery", label: "Delivery Tracking", icon: "truck" },
     ];
-
+    /*html*/
     return `
+    
       <!-- Mobile Toggle -->
       <button id="mobileToggle" class="lg:hidden fixed top-4 left-4 z-40 p-2 bg-emerald-600 text-white rounded-lg">
         ${this.isSidebarOpen ? this.getIcon("x") : this.getIcon("menu")}
@@ -45,9 +66,7 @@ class ManagerDashboard {
         <div class="p-6">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
+              <img src="${activityIcon}" class="w-6 h-6" alt="logo" />
             </div>
             <div>
               <h2 class="text-lg font-bold">DBMS</h2>
@@ -91,6 +110,7 @@ class ManagerDashboard {
   }
 
   renderHeader() {
+    /*html*/
     return `
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div>
@@ -185,37 +205,30 @@ class ManagerDashboard {
 
   getIcon(name) {
     const icons = {
-      users:
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>',
-      "check-square":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>',
-      "bar-chart":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>',
-      package:
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>',
-      "message-square":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>',
-      truck:
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>',
-      bell: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>',
-      settings:
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
-      "log-out":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>',
-      menu: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>',
-      x: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
-      clock:
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-      "alert-circle":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-      plus: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>',
-      edit: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>',
-      trash:
-        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>',
-      "check-circle":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+      users: usersIcon,
+      "check-square": checkSquareIcon,
+      "bar-chart": chartBarIcon,
+      package: packageIcon,
+      "message-square": messageSquareIcon,
+      truck: truckIcon,
+      bell: bellIcon,
+      settings: settingsIcon,
+      "log-out": logOutIcon,
+      menu: menuIcon,
+      x: xIcon,
+      clock: clockIcon,
+      "alert-circle": alertCircleIcon,
+      plus: plusIcon,
+      edit: editIcon,
+      trash: trashIcon,
+      "check-circle": checkCircleIcon,
     };
-    return icons[name] || "";
+    const src = icons[name];
+    if (!src) return "";
+    const sizeMap = { menu: "w-6 h-6", x: "w-6 h-6" };
+    const cls = sizeMap[name] || "w-5 h-5";
+
+    return `<img src="${src}" class="${cls}" alt="${name}" />`;
   }
 }
 
@@ -266,6 +279,7 @@ class EmployeeOversight {
   }
 
   render() {
+    /*html*/
     return `
       <div class="space-y-6">
         <!-- Header -->
@@ -275,7 +289,7 @@ class EmployeeOversight {
             <p class="text-gray-600 mt-1">Monitor team performance, attendance, and schedules</p>
           </div>
           <button class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <img src="${plusIcon}" class="w-5 h-5" alt="add" />
             Add Employee
           </button>
         </div>
@@ -288,7 +302,7 @@ class EmployeeOversight {
                 <p class="text-gray-600 text-sm">Total Staff</p>
                 <p class="text-3xl font-bold text-gray-900 mt-2">15</p>
               </div>
-              <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+              <img src="${usersIcon}" class="w-10 h-10" alt="users" />
             </div>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
@@ -297,7 +311,7 @@ class EmployeeOversight {
                 <p class="text-gray-600 text-sm">Present Today</p>
                 <p class="text-3xl font-bold text-gray-900 mt-2">14</p>
               </div>
-              <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <img src="${clockIcon}" class="w-10 h-10" alt="clock" />
             </div>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
@@ -306,7 +320,7 @@ class EmployeeOversight {
                 <p class="text-gray-600 text-sm">Absent/Late</p>
                 <p class="text-3xl font-bold text-gray-900 mt-2">1</p>
               </div>
-              <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <img src="${alertCircleIcon}" class="w-10 h-10" alt="alert" />
             </div>
           </div>
         </div>
@@ -360,10 +374,10 @@ class EmployeeOversight {
                     </td>
                     <td class="px-6 py-4 text-sm flex gap-2">
                       <button class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <img src="${editIcon}" class="w-4 h-4" alt="edit" />
                       </button>
                       <button class="p-2 text-red-600 hover:bg-red-50 rounded transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <img src="${trashIcon}" class="w-4 h-4" alt="delete" />
                       </button>
                     </td>
                   </tr>
@@ -427,6 +441,7 @@ class TaskAssignment {
   }
 
   render() {
+    /*html*/
     return `
       <div class="space-y-6">
         <!-- Header -->
@@ -436,7 +451,7 @@ class TaskAssignment {
             <p class="text-gray-600 mt-1">Assign and track staff tasks and responsibilities</p>
           </div>
           <button id="assignTaskBtn" class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <img src="${plusIcon}" class="w-5 h-5" alt="add" />
             Assign Task
           </button>
         </div>
@@ -444,7 +459,8 @@ class TaskAssignment {
         <!-- Task Form -->
         ${
           this.showForm
-            ? `
+            ? /*html*/
+              `
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-emerald-600">
             <h4 class="text-lg font-semibold text-gray-900 mb-4">Create New Task</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -477,6 +493,7 @@ class TaskAssignment {
         <div class="space-y-3">
           ${this.tasks
             .map(
+              /*html*/
               (task) => `
             <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
               <div class="flex items-start justify-between">
@@ -503,10 +520,10 @@ class TaskAssignment {
                 </div>
                 <div class="flex gap-2">
                   <button class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    <img src="${editIcon}" class="w-4 h-4" alt="edit" />
                   </button>
                   <button class="p-2 text-red-600 hover:bg-red-50 rounded transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <img src="${trashIcon}" class="w-4 h-4" alt="delete" />
                   </button>
                 </div>
               </div>
@@ -563,6 +580,7 @@ class OperationalReports {
   }
 
   render() {
+    /*html*/
     return `
       <div class="space-y-6">
         <div>
@@ -642,6 +660,7 @@ class StockManagement {
   }
 
   render() {
+    /*html*/
     return `
       <div class="space-y-6">
         <div class="flex items-center justify-between">
@@ -671,6 +690,7 @@ class StockManagement {
               <tbody class="divide-y divide-gray-200">
                 ${this.inventory
                   .map(
+                    /*html*/
                     (item) => `
                   <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 text-sm font-medium text-gray-900">${
@@ -750,6 +770,7 @@ class CustomerFeedback {
   }
 
   render() {
+    /*html*/
     return `
       <div class="space-y-6">
         <div>
@@ -788,6 +809,7 @@ class CustomerFeedback {
         <div class="space-y-4">
           ${this.feedback
             .map(
+              /*html*/
               (item) => `
             <div class="bg-white rounded-lg shadow-md p-6">
               <div class="flex items-start justify-between">
@@ -871,6 +893,7 @@ class DeliveryTracking {
   }
 
   render() {
+    /*html*/
     return `
       <div class="space-y-6">
         <div>

@@ -1,3 +1,23 @@
+import logo from "../../assets/logo.png";
+import chartBarIcon from "../../assets/icons/chart-bar.svg";
+import usersIcon from "../../assets/icons/users.svg";
+import packageIcon from "../../assets/icons/package.svg";
+import activityIcon from "../../assets/icons/activity.svg";
+import fileTextIcon from "../../assets/icons/file-text.svg";
+import settingsIcon from "../../assets/icons/settings.svg";
+import logOutIcon from "../../assets/icons/log-out.svg";
+import searchIcon from "../../assets/icons/search.svg";
+import bellIcon from "../../assets/icons/bell.svg";
+import userCircleIcon from "../../assets/icons/user-circle.svg";
+import trendUpIcon from "../../assets/icons/trend-up.svg";
+import plusIcon from "../../assets/icons/plus.svg";
+import eyeIcon from "../../assets/icons/eye.svg";
+import editIcon from "../../assets/icons/edit.svg";
+import trashIcon from "../../assets/icons/trash.svg";
+import clockIcon from "../../assets/icons/clock.svg";
+import downloadIcon from "../../assets/icons/download.svg";
+import filterIcon from "../../assets/icons/filter.svg";
+
 class OwnerDashboard {
   constructor(container) {
     this.container = container;
@@ -34,7 +54,7 @@ class OwnerDashboard {
         <div class="p-6 border-b border-gray-200">
           <div class="flex items-center gap-3">
             <div>
-              <img src="./assets/logo.png" alt="Logo" class="h-8 w-auto"/>
+              <img src="${logo}" alt="Logo" />
             </div>
           </div>
         </div>
@@ -78,18 +98,14 @@ class OwnerDashboard {
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div class="flex-1 max-w-md">
           <div class="relative">
-            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
+            <img src="${searchIcon}" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" alt="search" />
             <input type="text" placeholder="Search..." class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
           </div>
         </div>
 
         <div class="flex items-center gap-4 ml-8">
           <button class="relative p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-            </svg>
+            <img src="${bellIcon}" class="w-5 h-5" alt="notifications" />
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
@@ -99,9 +115,7 @@ class OwnerDashboard {
               <p class="text-xs text-gray-500">Admin Account</p>
             </div>
             <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
+              <img src="${userCircleIcon}" class="w-5 h-5 text-white" alt="user" />
             </div>
           </div>
         </div>
@@ -158,22 +172,16 @@ class OwnerDashboard {
 
   getIcon(name) {
     const icons = {
-      "chart-bar":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>',
-      users:
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>',
-      package:
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>',
-      activity:
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>',
-      "file-text":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
-      settings:
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
-      "log-out":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>',
+      "chart-bar": chartBarIcon,
+      users: usersIcon,
+      package: packageIcon,
+      activity: activityIcon,
+      "file-text": fileTextIcon,
+      settings: settingsIcon,
+      "log-out": logOutIcon,
     };
-    return icons[name] || "";
+    const src = icons[name];
+    return src ? `<img src="${src}" class="w-5 h-5" alt="${name}" />` : "";
   }
 }
 
@@ -224,12 +232,7 @@ class FinancialOverview {
           )}
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-900 mb-6">Financial Trends</h3>
-          <div class="h-80 flex items-center justify-center bg-gray-50 rounded-lg">
-            ${this.renderChart()}
-          </div>
-        </div>
+        
 
         <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900 mb-6">Monthly Comparison</h3>
@@ -284,9 +287,7 @@ class FinancialOverview {
             <p class="text-xs ${
               color === "red" ? "text-red-600" : "text-green-600"
             } mt-2 flex items-center gap-1">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-              </svg>
+              <img src="${trendUpIcon}" class="w-4 h-4" alt="trend" />
               ${change}
             </p>
           </div>
@@ -296,49 +297,6 @@ class FinancialOverview {
             <span class="text-lg font-bold">${
               icon === "percent" ? "%" : "$"
             }</span>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  renderChart() {
-    return `
-      <div class="w-full space-y-4">
-        ${this.data
-          .map(
-            (item) => `
-          <div class="flex items-center gap-4">
-            <span class="text-sm font-medium text-gray-600 w-12">${
-              item.month
-            }</span>
-            <div class="flex-1 flex gap-2">
-              <div class="bg-blue-500 rounded" style="width: ${
-                (item.income / 670) * 100
-              }%; height: 24px;"></div>
-              <div class="bg-red-500 rounded" style="width: ${
-                (item.expenses / 670) * 100
-              }%; height: 24px;"></div>
-              <div class="bg-green-500 rounded" style="width: ${
-                (item.profit / 670) * 100
-              }%; height: 24px;"></div>
-            </div>
-          </div>
-        `
-          )
-          .join("")}
-        <div class="flex gap-4 justify-center pt-4">
-          <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-blue-500 rounded"></div>
-            <span class="text-sm text-gray-600">Income</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-red-500 rounded"></div>
-            <span class="text-sm text-gray-600">Expenses</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="w-4 h-4 bg-green-500 rounded"></div>
-            <span class="text-sm text-gray-600">Profit</span>
           </div>
         </div>
       </div>
@@ -407,9 +365,7 @@ class EmployeeManagement {
             <p class="text-gray-500 mt-1">Manage staff, salaries, and performance</p>
           </div>
           <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
+            <img src="${plusIcon}" class="w-4 h-4" alt="add" />
             Add Employee
           </button>
         </div>
@@ -463,20 +419,13 @@ class EmployeeManagement {
                     </td>
                     <td class="px-6 py-4 text-sm flex items-center gap-2">
                       <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-700">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                        </svg>
+                        <img src="${eyeIcon}" class="w-4 h-4" alt="view" />
                       </button>
                       <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-700">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                        </svg>
+                        <img src="${editIcon}" class="w-4 h-4" alt="edit" />
                       </button>
                       <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-red-600">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
+                        <img src="${trashIcon}" class="w-4 h-4" alt="delete" />
                       </button>
                     </td>
                   </tr>
@@ -553,9 +502,7 @@ class InventoryControl {
             <p class="text-gray-500 mt-1">Manage stock levels and product details</p>
           </div>
           <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
+            <img src="${plusIcon}" class="w-4 h-4" alt="add" />
             Add Product
           </button>
         </div>
@@ -765,9 +712,7 @@ class OperationsMonitor {
             <p class="text-xs text-${color} mt-2">${subtitle}</p>
           </div>
           <div class="w-12 h-12 rounded-lg ${colors[color]} flex items-center justify-center">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
+            <img src="${clockIcon}" class="w-6 h-6" alt="icon" />
           </div>
         </div>
       </div>
@@ -816,15 +761,11 @@ class ReportsSection {
           </div>
           <div class="flex gap-3">
             <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-              </svg>
+              <img src="${filterIcon}" class="w-4 h-4" alt="filter" />
               Filter
             </button>
             <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-              </svg>
+              <img src="${downloadIcon}" class="w-4 h-4" alt="export" />
               Export All
             </button>
           </div>
