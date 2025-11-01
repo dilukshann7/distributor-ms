@@ -92,32 +92,31 @@ export function renderLogin(container) {
   const errorDiv = container.querySelector("#error");
   const loginBtn = container.querySelector("#loginBtn");
 
-  // form.addEventListener("submit", (e) => {
-  //   e.preventDefault();
-  //   errorDiv.classList.add("hidden");
-  //   loginBtn.disabled = true;
-  //   loginBtn.textContent = "Logging in...";
-  //
-  //   setTimeout(() => {
-  //     const email = emailInput.value.trim();
-  //     const password = passwordInput.value.trim();
-  //
-  //     const user = Object.values(credentials).find(
-  //       (cred) => cred.email === email && cred.password === password
-  //     );
-  //
-  //     if (user) {
-  //       renderDashboard(container, user.role);
-  //     } else {
-  //       errorDiv.textContent = "Invalid email or password";
-  //       errorDiv.classList.remove("hidden");
-  //     }
-  //
-  //     loginBtn.disabled = false;
-  //     loginBtn.textContent = "Login";
-  //   }, 600);
-  // });
-  renderDashboard(container, "driver");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    errorDiv.classList.add("hidden");
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Logging in...";
+
+    setTimeout(() => {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      const user = Object.values(credentials).find(
+        (cred) => cred.email === email && cred.password === password
+      );
+
+      if (user) {
+        renderDashboard(container, user.role);
+      } else {
+        errorDiv.textContent = "Invalid email or password";
+        errorDiv.classList.remove("hidden");
+      }
+
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Login";
+    }, 600);
+  });
 }
 
 export function renderDashboard(container, role) {
