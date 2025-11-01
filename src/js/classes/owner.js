@@ -4,6 +4,7 @@ class OwnerDashboard {
     this.currentSection = "overview";
   }
 
+  /*html*/
   render() {
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
@@ -18,7 +19,7 @@ class OwnerDashboard {
     `;
     this.attachEventListeners();
   }
-
+  /*html*/
   renderSidebar() {
     const menuItems = [
       { id: "overview", label: "Financial Overview", icon: "chart-bar" },
@@ -27,19 +28,13 @@ class OwnerDashboard {
       { id: "operations", label: "Operations Monitor", icon: "activity" },
       { id: "reports", label: "Reports & Analytics", icon: "file-text" },
     ];
-
+    /*html*/
     return `
       <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div class="p-6 border-b border-gray-200">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-            </div>
             <div>
-              <h2 class="text-lg font-bold text-gray-900">DBMS</h2>
-              <p class="text-xs text-gray-500">Owner Portal</p>
+              <img src="./assets/logo.png" alt="Logo" class="h-8 w-auto"/>
             </div>
           </div>
         </div>
@@ -78,6 +73,7 @@ class OwnerDashboard {
   }
 
   renderHeader() {
+    /*html*/
     return `
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div class="flex-1 max-w-md">
@@ -194,6 +190,7 @@ class FinancialOverview {
   }
 
   render() {
+    /*html*/
     return `
       <div class="p-8 space-y-8">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -276,8 +273,9 @@ class FinancialOverview {
       blue: "bg-blue-100 text-blue-600",
       purple: "bg-purple-100 text-purple-600",
     };
-
+    /*html*/
     return `
+    
       <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
         <div class="flex items-center justify-between">
           <div>
@@ -400,6 +398,7 @@ class EmployeeManagement {
   }
 
   render() {
+    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div class="flex items-center justify-between">
@@ -432,6 +431,7 @@ class EmployeeManagement {
               <tbody class="divide-y divide-gray-200">
                 ${this.employees
                   .map(
+                    /*html*/
                     (emp) => `
                   <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 text-sm text-gray-900 font-medium">${
@@ -544,6 +544,7 @@ class InventoryControl {
   }
 
   render() {
+    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div class="flex items-center justify-between">
@@ -672,6 +673,7 @@ class OperationsMonitor {
   }
 
   render() {
+    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div>
@@ -753,6 +755,7 @@ class OperationsMonitor {
       purple: "bg-purple-100 text-purple-600",
     };
 
+    /*html*/
     return `
       <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
         <div class="flex items-center justify-between">
@@ -803,6 +806,7 @@ class ReportsSection {
   }
 
   render() {
+    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div class="flex items-center justify-between">
@@ -894,6 +898,7 @@ class ReportsSection {
   }
 
   renderReportCard(title, description, lastGenerated) {
+    /*html*/
     return `
       <div class="bg-white rounded-lg shadow p-5 border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow">
         <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
