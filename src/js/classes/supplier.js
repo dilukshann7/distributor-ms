@@ -52,7 +52,9 @@ class SupplierDashboard {
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${item.id}" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+            <button data-section="${
+              item.id
+            }" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                 this.currentSection === item.id
                   ? "bg-white text-indigo-700 font-semibold shadow-lg"
                   : "text-indigo-100 hover:bg-indigo-600"
@@ -175,24 +177,36 @@ class SupplierDashboard {
 
   getIcon(name) {
     const icons = {
-      "shopping-bag": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>',
-      package: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>',
-      archive: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>',
-      truck: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>',
-      "file-text": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
-      clipboard: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>',
-      "trending-up": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>',
+      "shopping-bag":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>',
+      package:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>',
+      archive:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>',
+      truck:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>',
+      "file-text":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
+      clipboard:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>',
+      "trending-up":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>',
       bell: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>',
-      settings: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
-      "log-out": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>',
+      settings:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
+      "log-out":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>',
       menu: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>',
       x: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
       edit: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>',
       eye: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>',
-      download: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>',
+      download:
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>',
       plus: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>',
-      "check-circle": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-      clock: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+      "check-circle":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+      clock:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
     };
     return icons[name] || "";
   }
@@ -201,10 +215,42 @@ class SupplierDashboard {
 class PurchaseOrders {
   constructor() {
     this.orders = [
-      { id: "PO-2024-001", distributor: "DBMS Central", date: "2024-01-15", items: 15, total: 45000, status: "pending", dueDate: "2024-01-20" },
-      { id: "PO-2024-002", distributor: "DBMS South", date: "2024-01-14", items: 8, total: 28000, status: "confirmed", dueDate: "2024-01-19" },
-      { id: "PO-2024-003", distributor: "DBMS North", date: "2024-01-13", items: 12, total: 36000, status: "shipped", dueDate: "2024-01-18" },
-      { id: "PO-2024-004", distributor: "DBMS East", date: "2024-01-12", items: 20, total: 52000, status: "delivered", dueDate: "2024-01-17" },
+      {
+        id: "PO-2024-001",
+        distributor: "DBMS Central",
+        date: "2024-01-15",
+        items: 15,
+        total: 45000,
+        status: "pending",
+        dueDate: "2024-01-20",
+      },
+      {
+        id: "PO-2024-002",
+        distributor: "DBMS South",
+        date: "2024-01-14",
+        items: 8,
+        total: 28000,
+        status: "confirmed",
+        dueDate: "2024-01-19",
+      },
+      {
+        id: "PO-2024-003",
+        distributor: "DBMS North",
+        date: "2024-01-13",
+        items: 12,
+        total: 36000,
+        status: "shipped",
+        dueDate: "2024-01-18",
+      },
+      {
+        id: "PO-2024-004",
+        distributor: "DBMS East",
+        date: "2024-01-12",
+        items: 20,
+        total: 52000,
+        status: "delivered",
+        dueDate: "2024-01-17",
+      },
     ];
   }
 
@@ -274,17 +320,34 @@ class PurchaseOrders {
                 </tr>
               </thead>
               <tbody>
-                ${this.orders.map((order) => `
+                ${this.orders
+                  .map(
+                    (order) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${order.id}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${order.distributor}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${order.date}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${order.items} items</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${
+                      order.id
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      order.distributor
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      order.date
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      order.items
+                    } items</td>
                     <td class="px-6 py-4 text-sm font-semibold text-gray-900">Rs. ${order.total.toLocaleString()}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${order.dueDate}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      order.dueDate
+                    }</td>
                     <td class="px-6 py-4 text-sm">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getStatusColor(order.status)}">
-                        ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getStatusColor(
+                        order.status
+                      )}">
+                        ${
+                          order.status.charAt(0).toUpperCase() +
+                          order.status.slice(1)
+                        }
                       </span>
                     </td>
                     <td class="px-6 py-4 text-sm flex gap-2">
@@ -296,7 +359,9 @@ class PurchaseOrders {
                       </button>
                     </td>
                   </tr>
-                `).join("")}
+                `
+                  )
+                  .join("")}
               </tbody>
             </table>
           </div>
@@ -324,11 +389,51 @@ class PurchaseOrders {
 class ProductCatalog {
   constructor() {
     this.products = [
-      { id: 1, name: "Britol Air Freshener", sku: "BAF-001", category: "Air Care", price: 250, stock: 5000, status: "In Stock" },
-      { id: 2, name: "Handwash Liquid 500ml", sku: "HW-002", category: "Personal Care", price: 180, stock: 3200, status: "In Stock" },
-      { id: 3, name: "Car Interior Spray", sku: "CIS-003", category: "Automotive", price: 320, stock: 1500, status: "Low Stock" },
-      { id: 4, name: "Dish Liquid 1L", sku: "DL-004", category: "Kitchen", price: 150, stock: 4500, status: "In Stock" },
-      { id: 5, name: "Floor Cleaner 2L", sku: "FC-005", category: "Cleaning", price: 280, stock: 800, status: "Low Stock" },
+      {
+        id: 1,
+        name: "Britol Air Freshener",
+        sku: "BAF-001",
+        category: "Air Care",
+        price: 250,
+        stock: 5000,
+        status: "In Stock",
+      },
+      {
+        id: 2,
+        name: "Handwash Liquid 500ml",
+        sku: "HW-002",
+        category: "Personal Care",
+        price: 180,
+        stock: 3200,
+        status: "In Stock",
+      },
+      {
+        id: 3,
+        name: "Car Interior Spray",
+        sku: "CIS-003",
+        category: "Automotive",
+        price: 320,
+        stock: 1500,
+        status: "Low Stock",
+      },
+      {
+        id: 4,
+        name: "Dish Liquid 1L",
+        sku: "DL-004",
+        category: "Kitchen",
+        price: 150,
+        stock: 4500,
+        status: "In Stock",
+      },
+      {
+        id: 5,
+        name: "Floor Cleaner 2L",
+        sku: "FC-005",
+        category: "Cleaning",
+        price: 280,
+        stock: 800,
+        status: "Low Stock",
+      },
     ];
   }
 
@@ -361,16 +466,30 @@ class ProductCatalog {
                 </tr>
               </thead>
               <tbody>
-                ${this.products.map((product) => `
+                ${this.products
+                  .map(
+                    (product) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${product.name}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${product.sku}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${product.category}</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">Rs. ${product.price}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${product.stock} units</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${
+                      product.name
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      product.sku
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      product.category
+                    }</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">Rs. ${
+                      product.price
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      product.stock
+                    } units</td>
                     <td class="px-6 py-4 text-sm">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        product.status === "In Stock" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                        product.status === "In Stock"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
                       }">
                         ${product.status}
                       </span>
@@ -381,7 +500,9 @@ class ProductCatalog {
                       </button>
                     </td>
                   </tr>
-                `).join("")}
+                `
+                  )
+                  .join("")}
               </tbody>
             </table>
           </div>
@@ -438,9 +559,16 @@ class InventoryStatus {
   }
 
   render() {
-    const totalItems = this.inventory.reduce((sum, item) => sum + item.quantity, 0);
-    const lowStockItems = this.inventory.filter((item) => item.status === "low-stock").length;
-    const criticalItems = this.inventory.filter((item) => item.status === "critical").length;
+    const totalItems = this.inventory.reduce(
+      (sum, item) => sum + item.quantity,
+      0
+    );
+    const lowStockItems = this.inventory.filter(
+      (item) => item.status === "low-stock"
+    ).length;
+    const criticalItems = this.inventory.filter(
+      (item) => item.status === "critical"
+    ).length;
 
     return `
       <div class="space-y-6">
@@ -453,7 +581,9 @@ class InventoryStatus {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-600">
             <p class="text-gray-600 text-sm">Total Products</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${this.inventory.length}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">${
+              this.inventory.length
+            }</p>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
             <p class="text-gray-600 text-sm">Total Units</p>
@@ -499,11 +629,19 @@ class InventoryStatus {
                   .map(
                     (item) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${item.productName}</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${
+                      item.productName
+                    }</td>
                     <td class="px-6 py-4 text-sm text-gray-600">${item.sku}</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${item.quantity}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${item.reorderLevel}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${item.warehouse}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
+                      item.quantity
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      item.reorderLevel
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      item.warehouse
+                    }</td>
                     <td class="px-6 py-4 text-sm">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
                         item.status === "in-stock"
@@ -512,10 +650,18 @@ class InventoryStatus {
                           ? "bg-yellow-100 text-yellow-800"
                           : "bg-red-100 text-red-800"
                       }">
-                        ${item.status === "in-stock" ? "In Stock" : item.status === "low-stock" ? "Low Stock" : "Critical"}
+                        ${
+                          item.status === "in-stock"
+                            ? "In Stock"
+                            : item.status === "low-stock"
+                            ? "Low Stock"
+                            : "Critical"
+                        }
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${item.lastUpdated}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      item.lastUpdated
+                    }</td>
                     <td class="px-6 py-4 text-sm">
                       <button class="text-indigo-600 hover:text-indigo-800 font-medium">Update</button>
                     </td>
@@ -540,8 +686,16 @@ class InventoryStatus {
             <div>
               <h5 class="font-semibold text-yellow-900 mb-1">Stock Alerts</h5>
               <p class="text-sm text-yellow-800">
-                ${criticalItems > 0 ? `${criticalItems} item(s) at critical level. ` : ""}
-                ${lowStockItems > 0 ? `${lowStockItems} item(s) running low on stock.` : ""}
+                ${
+                  criticalItems > 0
+                    ? `${criticalItems} item(s) at critical level. `
+                    : ""
+                }
+                ${
+                  lowStockItems > 0
+                    ? `${lowStockItems} item(s) running low on stock.`
+                    : ""
+                }
                 Please reorder soon.
               </p>
             </div>
@@ -602,9 +756,15 @@ class ShipmentTracking {
   }
 
   render() {
-    const preparingCount = this.shipments.filter((s) => s.status === "preparing").length;
-    const inTransitCount = this.shipments.filter((s) => s.status === "in-transit").length;
-    const deliveredCount = this.shipments.filter((s) => s.status === "delivered").length;
+    const preparingCount = this.shipments.filter(
+      (s) => s.status === "preparing"
+    ).length;
+    const inTransitCount = this.shipments.filter(
+      (s) => s.status === "in-transit"
+    ).length;
+    const deliveredCount = this.shipments.filter(
+      (s) => s.status === "delivered"
+    ).length;
 
     return `
       <div class="space-y-6">
@@ -617,7 +777,9 @@ class ShipmentTracking {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-600">
             <p class="text-gray-600 text-sm">Total Shipments</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${this.shipments.length}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">${
+              this.shipments.length
+            }</p>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
             <p class="text-gray-600 text-sm">Preparing</p>
@@ -657,12 +819,24 @@ class ShipmentTracking {
                   .map(
                     (shipment) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${shipment.id}</td>
-                    <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${shipment.orderId}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${shipment.destination}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${shipment.items} items</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${shipment.carrier}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${shipment.estimatedDelivery}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
+                      shipment.id
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${
+                      shipment.orderId
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${
+                      shipment.destination
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      shipment.items
+                    } items</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      shipment.carrier
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      shipment.estimatedDelivery
+                    }</td>
                     <td class="px-6 py-4 text-sm">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
                         shipment.status === "delivered"
@@ -699,13 +873,35 @@ class ShipmentTracking {
 
         <!-- Shipment Timeline (Example for first shipment) -->
         <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Recent Shipment Timeline (${this.shipments[0].id})</h4>
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Recent Shipment Timeline (${
+            this.shipments[0].id
+          })</h4>
           <div class="space-y-4">
             ${[
-              { time: "10:30 AM", status: "Package picked up", location: "Supplier Warehouse", completed: true },
-              { time: "2:15 PM", status: "In transit", location: "Distribution Center", completed: true },
-              { time: "Tomorrow", status: "Out for delivery", location: this.shipments[0].destination, completed: false },
-              { time: "Pending", status: "Delivered", location: this.shipments[0].destination, completed: false },
+              {
+                time: "10:30 AM",
+                status: "Package picked up",
+                location: "Supplier Warehouse",
+                completed: true,
+              },
+              {
+                time: "2:15 PM",
+                status: "In transit",
+                location: "Distribution Center",
+                completed: true,
+              },
+              {
+                time: "Tomorrow",
+                status: "Out for delivery",
+                location: this.shipments[0].destination,
+                completed: false,
+              },
+              {
+                time: "Pending",
+                status: "Delivered",
+                location: this.shipments[0].destination,
+                completed: false,
+              },
             ]
               .map(
                 (event) => `
@@ -780,8 +976,13 @@ class InvoicesPayments {
   }
 
   render() {
-    const totalInvoices = this.invoices.reduce((sum, inv) => sum + inv.amount, 0);
-    const paidAmount = this.invoices.filter((inv) => inv.status === "paid").reduce((sum, inv) => sum + inv.amount, 0);
+    const totalInvoices = this.invoices.reduce(
+      (sum, inv) => sum + inv.amount,
+      0
+    );
+    const paidAmount = this.invoices
+      .filter((inv) => inv.status === "paid")
+      .reduce((sum, inv) => sum + inv.amount, 0);
     const pendingAmount = this.invoices
       .filter((inv) => inv.status === "pending")
       .reduce((sum, inv) => sum + inv.amount, 0);
@@ -800,19 +1001,27 @@ class InvoicesPayments {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-600">
             <p class="text-gray-600 text-sm">Total Invoiced</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">Rs. ${totalInvoices.toFixed(2)}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">Rs. ${totalInvoices.toFixed(
+              2
+            )}</p>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
             <p class="text-gray-600 text-sm">Paid</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${paidAmount.toFixed(2)}</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${paidAmount.toFixed(
+              2
+            )}</p>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
             <p class="text-gray-600 text-sm">Pending</p>
-            <p class="text-3xl font-bold text-yellow-600 mt-2">Rs. ${pendingAmount.toFixed(2)}</p>
+            <p class="text-3xl font-bold text-yellow-600 mt-2">Rs. ${pendingAmount.toFixed(
+              2
+            )}</p>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
             <p class="text-gray-600 text-sm">Overdue</p>
-            <p class="text-3xl font-bold text-red-600 mt-2">Rs. ${overdueAmount.toFixed(2)}</p>
+            <p class="text-3xl font-bold text-red-600 mt-2">Rs. ${overdueAmount.toFixed(
+              2
+            )}</p>
           </div>
         </div>
 
@@ -845,11 +1054,21 @@ class InvoicesPayments {
                   .map(
                     (invoice) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${invoice.id}</td>
-                    <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${invoice.orderId}</td>
-                    <td class="px-6 py-4 text-sm font-bold text-gray-900">Rs. ${invoice.amount.toFixed(2)}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${invoice.issueDate}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${invoice.dueDate}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
+                      invoice.id
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${
+                      invoice.orderId
+                    }</td>
+                    <td class="px-6 py-4 text-sm font-bold text-gray-900">Rs. ${invoice.amount.toFixed(
+                      2
+                    )}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      invoice.issueDate
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      invoice.dueDate
+                    }</td>
                     <td class="px-6 py-4 text-sm">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
                         invoice.status === "paid"
@@ -858,7 +1077,10 @@ class InvoicesPayments {
                           ? "bg-yellow-100 text-yellow-800"
                           : "bg-red-100 text-red-800"
                       }">
-                        ${invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                        ${
+                          invoice.status.charAt(0).toUpperCase() +
+                          invoice.status.slice(1)
+                        }
                       </span>
                     </td>
                     <td class="px-6 py-4 text-sm">
@@ -969,8 +1191,12 @@ class ContractsTerms {
   }
 
   render() {
-    const activeContracts = this.contracts.filter((c) => c.status === "active").length;
-    const expiringContracts = this.contracts.filter((c) => c.status === "expiring").length;
+    const activeContracts = this.contracts.filter(
+      (c) => c.status === "active"
+    ).length;
+    const expiringContracts = this.contracts.filter(
+      (c) => c.status === "expiring"
+    ).length;
     const totalValue = this.contracts
       .filter((c) => c.status === "active" || c.status === "expiring")
       .reduce((sum, c) => sum + c.value, 0);
@@ -986,7 +1212,9 @@ class ContractsTerms {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-600">
             <p class="text-gray-600 text-sm">Total Contracts</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${this.contracts.length}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">${
+              this.contracts.length
+            }</p>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
             <p class="text-gray-600 text-sm">Active</p>
@@ -998,7 +1226,9 @@ class ContractsTerms {
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
             <p class="text-gray-600 text-sm">Total Value</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">Rs. ${(totalValue / 1000000).toFixed(1)}M</p>
+            <p class="text-3xl font-bold text-blue-600 mt-2">Rs. ${(
+              totalValue / 1000000
+            ).toFixed(1)}M</p>
           </div>
         </div>
 
@@ -1012,7 +1242,9 @@ class ContractsTerms {
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
-                      <h4 class="text-lg font-semibold text-gray-900">${contract.title}</h4>
+                      <h4 class="text-lg font-semibold text-gray-900">${
+                        contract.title
+                      }</h4>
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
                         contract.status === "active"
                           ? "bg-green-100 text-green-800"
@@ -1020,7 +1252,10 @@ class ContractsTerms {
                           ? "bg-yellow-100 text-yellow-800"
                           : "bg-gray-100 text-gray-800"
                       }">
-                        ${contract.status.charAt(0).toUpperCase() + contract.status.slice(1)}
+                        ${
+                          contract.status.charAt(0).toUpperCase() +
+                          contract.status.slice(1)
+                        }
                       </span>
                     </div>
                     <p class="text-sm text-gray-600 mb-4">${contract.terms}</p>
@@ -1028,15 +1263,21 @@ class ContractsTerms {
                     <div class="grid grid-cols-3 gap-4">
                       <div>
                         <p class="text-xs text-gray-500">Contract ID</p>
-                        <p class="text-sm font-semibold text-gray-900">${contract.id}</p>
+                        <p class="text-sm font-semibold text-gray-900">${
+                          contract.id
+                        }</p>
                       </div>
                       <div>
                         <p class="text-xs text-gray-500">Duration</p>
-                        <p class="text-sm font-semibold text-gray-900">${contract.startDate} to ${contract.endDate}</p>
+                        <p class="text-sm font-semibold text-gray-900">${
+                          contract.startDate
+                        } to ${contract.endDate}</p>
                       </div>
                       <div>
                         <p class="text-xs text-gray-500">Contract Value</p>
-                        <p class="text-sm font-semibold text-indigo-600">Rs. ${contract.value.toFixed(2)}</p>
+                        <p class="text-sm font-semibold text-indigo-600">Rs. ${contract.value.toFixed(
+                          2
+                        )}</p>
                       </div>
                     </div>
                   </div>
@@ -1159,37 +1400,31 @@ class SalesAnalytics {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
               <p class="text-gray-700 text-sm font-medium">Total Orders</p>
-              <p class="text-3xl font-bold text-blue-600 mt-2">${this.salesData.daily.orders}</p>
+              <p class="text-3xl font-bold text-blue-600 mt-2">${
+                this.salesData.daily.orders
+              }</p>
               <p class="text-xs text-gray-600 mt-2">Today</p>
             </div>
 
             <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
               <p class="text-gray-700 text-sm font-medium">Revenue</p>
-              <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${(this.salesData.daily.revenue / 1000).toFixed(0)}K</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${(
+                this.salesData.daily.revenue / 1000
+              ).toFixed(0)}K</p>
               <p class="text-xs text-gray-600 mt-2">Today</p>
             </div>
 
             <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-6 border border-indigo-200">
               <p class="text-gray-700 text-sm font-medium">Items Sold</p>
-              <p class="text-3xl font-bold text-indigo-600 mt-2">${this.salesData.daily.items}</p>
+              <p class="text-3xl font-bold text-indigo-600 mt-2">${
+                this.salesData.daily.items
+              }</p>
               <p class="text-xs text-gray-600 mt-2">Today</p>
             </div>
           </div>
         </div>
 
-        <!-- Sales Chart -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Sales Trend</h4>
-          <div class="h-80 flex items-center justify-center bg-gray-50 rounded-lg">
-            <div class="text-center">
-              <svg class="w-16 h-16 mx-auto mb-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-              </svg>
-              <p class="text-gray-600 font-medium">Sales Performance Chart</p>
-              <p class="text-sm text-gray-500 mt-2">Revenue and order trends over time</p>
-            </div>
-          </div>
-        </div>
+      
 
         <!-- Top Products -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -1208,11 +1443,15 @@ class SalesAnalytics {
                     </div>
                     <div>
                       <p class="font-semibold text-gray-900">${product.name}</p>
-                      <p class="text-sm text-gray-600">${product.sold} units sold</p>
+                      <p class="text-sm text-gray-600">${
+                        product.sold
+                      } units sold</p>
                     </div>
                   </div>
                   <div class="text-right">
-                    <p class="font-bold text-indigo-600">Rs. ${product.revenue.toFixed(2)}</p>
+                    <p class="font-bold text-indigo-600">Rs. ${product.revenue.toFixed(
+                      2
+                    )}</p>
                     <p class="text-xs text-gray-600">Revenue</p>
                   </div>
                 </div>
@@ -1230,7 +1469,11 @@ class SalesAnalytics {
             <h4 class="text-lg font-semibold text-gray-900 mb-4">Sales by Category</h4>
             <div class="space-y-3">
               ${[
-                { category: "Cleaning Products", percentage: 40, revenue: 1400000 },
+                {
+                  category: "Cleaning Products",
+                  percentage: 40,
+                  revenue: 1400000,
+                },
                 { category: "Personal Care", percentage: 30, revenue: 1050000 },
                 { category: "Home Care", percentage: 20, revenue: 700000 },
                 { category: "Food Items", percentage: 10, revenue: 350000 },
@@ -1239,13 +1482,21 @@ class SalesAnalytics {
                   (cat) => `
                 <div>
                   <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-700">${cat.category}</span>
-                    <span class="text-sm font-semibold text-indigo-600">${cat.percentage}%</span>
+                    <span class="text-sm font-medium text-gray-700">${
+                      cat.category
+                    }</span>
+                    <span class="text-sm font-semibold text-indigo-600">${
+                      cat.percentage
+                    }%</span>
                   </div>
                   <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-indigo-600 h-2 rounded-full" style="width: ${cat.percentage}%"></div>
+                    <div class="bg-indigo-600 h-2 rounded-full" style="width: ${
+                      cat.percentage
+                    }%"></div>
                   </div>
-                  <p class="text-xs text-gray-600 mt-1">Rs. ${(cat.revenue / 1000).toFixed(0)}K</p>
+                  <p class="text-xs text-gray-600 mt-1">Rs. ${(
+                    cat.revenue / 1000
+                  ).toFixed(0)}K</p>
                 </div>
               `
                 )
@@ -1260,7 +1511,9 @@ class SalesAnalytics {
               <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div>
                   <p class="text-sm text-gray-600">Total Orders</p>
-                  <p class="text-2xl font-bold text-blue-600">${this.salesData.monthly.orders}</p>
+                  <p class="text-2xl font-bold text-blue-600">${
+                    this.salesData.monthly.orders
+                  }</p>
                 </div>
                 <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
@@ -1269,7 +1522,9 @@ class SalesAnalytics {
               <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                 <div>
                   <p class="text-sm text-gray-600">Total Revenue</p>
-                  <p class="text-2xl font-bold text-green-600">Rs. ${(this.salesData.monthly.revenue / 1000000).toFixed(1)}M</p>
+                  <p class="text-2xl font-bold text-green-600">Rs. ${(
+                    this.salesData.monthly.revenue / 1000000
+                  ).toFixed(1)}M</p>
                 </div>
                 <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -1278,7 +1533,9 @@ class SalesAnalytics {
               <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
                 <div>
                   <p class="text-sm text-gray-600">Items Sold</p>
-                  <p class="text-2xl font-bold text-indigo-600">${this.salesData.monthly.items}</p>
+                  <p class="text-2xl font-bold text-indigo-600">${
+                    this.salesData.monthly.items
+                  }</p>
                 </div>
                 <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>

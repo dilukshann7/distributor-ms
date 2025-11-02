@@ -705,52 +705,6 @@ class StockReports {
             .join("")}
         </div>
 
-        <!-- Daily Stock Movement Chart -->
-        <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <h4 class="font-bold text-gray-900 mb-4">Daily Stock Movement</h4>
-          <div class="h-80 flex items-center justify-center bg-gray-50 rounded-lg">
-            <div class="text-center">
-              <svg class="w-16 h-16 mx-auto mb-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
-              </svg>
-              <p class="text-gray-600 font-medium">Daily Stock Movement Chart</p>
-              <p class="text-sm text-gray-500 mt-2">
-                Inbound: <span class="text-green-600 font-semibold">${this.dailyData.reduce(
-                  (acc, d) => acc + d.inbound,
-                  0
-                )}</span> | 
-                Outbound: <span class="text-red-600 font-semibold">${this.dailyData.reduce(
-                  (acc, d) => acc + d.outbound,
-                  0
-                )}</span>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Weekly Stock Summary Chart -->
-        <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <h4 class="font-bold text-gray-900 mb-4">Weekly Stock Summary</h4>
-          <div class="h-80 flex items-center justify-center bg-gray-50 rounded-lg">
-            <div class="text-center">
-              <svg class="w-16 h-16 mx-auto mb-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-              </svg>
-              <p class="text-gray-600 font-medium">Weekly Stock Summary Chart</p>
-              <p class="text-sm text-gray-500 mt-2">
-                Total Items: <span class="text-purple-600 font-semibold">${this.weeklyData.reduce(
-                  (acc, w) => acc + w.items,
-                  0
-                )}</span> | 
-                Value: <span class="text-indigo-600 font-semibold">$${this.weeklyData.reduce(
-                  (acc, w) => acc + w.value,
-                  0
-                )}</span>
-              </p>
-            </div>
-          </div>
-        </div>
-
         <!-- Report Actions -->
         <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
           <h4 class="font-bold text-gray-900 mb-4">Generate Reports</h4>
@@ -1028,7 +982,9 @@ class StockAuditing {
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm text-gray-600 font-medium">${stat.label}</p>
-                  <p class="text-2xl font-bold text-gray-900 mt-2">${stat.value}</p>
+                  <p class="text-2xl font-bold text-gray-900 mt-2">${
+                    stat.value
+                  }</p>
                 </div>
                 ${this.getStatIcon(stat.icon, stat.color)}
               </div>
@@ -1062,7 +1018,9 @@ class StockAuditing {
                     <td class="py-3 px-4 text-gray-600">${audit.date}</td>
                     <td class="py-3 px-4">
                       <div>
-                        <p class="font-medium text-gray-900">${audit.itemName}</p>
+                        <p class="font-medium text-gray-900">${
+                          audit.itemName
+                        }</p>
                         <p class="text-xs text-gray-600">${audit.sku}</p>
                       </div>
                     </td>
@@ -1074,7 +1032,9 @@ class StockAuditing {
                     }</td>
                     <td class="py-3 px-4">
                       <span class="font-bold ${
-                        audit.discrepancy < 0 ? "text-red-600" : "text-green-600"
+                        audit.discrepancy < 0
+                          ? "text-red-600"
+                          : "text-green-600"
                       }">
                         ${audit.discrepancy > 0 ? "+" : ""}${audit.discrepancy}
                       </span>
