@@ -1,3 +1,5 @@
+import logo from "../../assets/logo-tr.png";
+
 class SalesmanDashboard {
   constructor(container) {
     this.container = container;
@@ -42,10 +44,7 @@ class SalesmanDashboard {
       <div class="${
         this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-sky-700 to-sky-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
-        <div class="p-6 border-b border-sky-600">
-          <h1 class="text-2xl font-bold">Salesman</h1>
-          <p class="text-sky-200 text-sm mt-1">Sales Management System</p>
-        </div>
+        <img src="${logo}" alt="Logo" class="w-32 h-32 mx-auto my-6"/>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
           ${menuItems

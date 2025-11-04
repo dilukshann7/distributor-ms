@@ -1,3 +1,4 @@
+import logo from "../../assets/logo-tr.png";
 class SupplierDashboard {
   constructor(container) {
     this.container = container;
@@ -43,10 +44,7 @@ class SupplierDashboard {
       <aside class="${
         this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-indigo-700 to-indigo-900 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
-        <div class="p-6 border-b border-indigo-600">
-          <h1 class="text-2xl font-bold">Supplier Portal</h1>
-          <p class="text-indigo-200 text-sm mt-1">Order & Inventory Management</p>
-        </div>
+        <img src="${logo}" alt="Logo" class="w-32 h-32 mx-auto my-6"/>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
           ${menuItems

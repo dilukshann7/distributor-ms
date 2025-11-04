@@ -1,3 +1,5 @@
+import logo from "../../assets/logo-tr.png";
+
 class DistributorDashboard {
   constructor(container) {
     this.container = container;
@@ -42,16 +44,15 @@ class DistributorDashboard {
       <div class="${
         this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-orange-700 to-orange-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
-        <div class="p-6 border-b border-orange-600">
-          <h1 class="text-2xl font-bold">Distributor</h1>
-          <p class="text-orange-200 text-sm mt-1">Distribution Management</p>
-        </div>
+       <img src="${logo}" alt="Logo" class="w-32 h-32 mx-auto my-6"/>
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${item.id}" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+            <button data-section="${
+              item.id
+            }" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                 this.currentSection === item.id
                   ? "bg-orange-600 text-white shadow-lg"
                   : "text-orange-100 hover:bg-orange-600/50"
@@ -176,22 +177,31 @@ class DistributorDashboard {
 
   getIcon(name) {
     const icons = {
-      package: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>',
-      users: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>',
-      "map-pin": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
-      truck: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>',
-      "check-circle": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+      package:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>',
+      users:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>',
+      "map-pin":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
+      truck:
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>',
+      "check-circle":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
       lock: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>',
       bell: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>',
-      "log-out": '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>',
+      "log-out":
+        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>',
       menu: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>',
       x: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
       plus: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>',
       eye: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>',
       edit: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>',
-      trash: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>',
-      phone: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>',
-      "alert-triangle": '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>',
+      trash:
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>',
+      phone:
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>',
+      "alert-triangle":
+        '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>',
     };
     return icons[name] || "";
   }
@@ -200,10 +210,42 @@ class DistributorDashboard {
 class OrderManagement {
   constructor() {
     this.orders = [
-      { id: "ORD-001", buyer: "ABC Retail Store", items: 5, total: "$2,500", status: "pending", date: "2024-10-19", authorized: false },
-      { id: "ORD-002", buyer: "XYZ Supermarket", items: 8, total: "$4,200", status: "authorized", date: "2024-10-18", authorized: true },
-      { id: "ORD-003", buyer: "Quick Shop", items: 3, total: "$1,800", status: "in-transit", date: "2024-10-17", authorized: true },
-      { id: "ORD-004", buyer: "Metro Mart", items: 12, total: "$6,500", status: "delivered", date: "2024-10-16", authorized: true },
+      {
+        id: "ORD-001",
+        buyer: "ABC Retail Store",
+        items: 5,
+        total: "$2,500",
+        status: "pending",
+        date: "2024-10-19",
+        authorized: false,
+      },
+      {
+        id: "ORD-002",
+        buyer: "XYZ Supermarket",
+        items: 8,
+        total: "$4,200",
+        status: "authorized",
+        date: "2024-10-18",
+        authorized: true,
+      },
+      {
+        id: "ORD-003",
+        buyer: "Quick Shop",
+        items: 3,
+        total: "$1,800",
+        status: "in-transit",
+        date: "2024-10-17",
+        authorized: true,
+      },
+      {
+        id: "ORD-004",
+        buyer: "Metro Mart",
+        items: 12,
+        total: "$6,500",
+        status: "delivered",
+        date: "2024-10-16",
+        authorized: true,
+      },
     ];
   }
 
@@ -236,20 +278,33 @@ class OrderManagement {
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-              ${this.orders.map((order) => `
+              ${this.orders
+                .map(
+                  (order) => `
                 <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 font-semibold text-gray-800">${order.id}</td>
+                  <td class="px-6 py-4 font-semibold text-gray-800">${
+                    order.id
+                  }</td>
                   <td class="px-6 py-4 text-gray-700">${order.buyer}</td>
                   <td class="px-6 py-4 text-gray-700">${order.items}</td>
-                  <td class="px-6 py-4 font-semibold text-gray-800">${order.total}</td>
+                  <td class="px-6 py-4 font-semibold text-gray-800">${
+                    order.total
+                  }</td>
                   <td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getStatusColor(order.status)}">
-                      ${order.status.charAt(0).toUpperCase() + order.status.slice(1).replace("-", " ")}
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getStatusColor(
+                      order.status
+                    )}">
+                      ${
+                        order.status.charAt(0).toUpperCase() +
+                        order.status.slice(1).replace("-", " ")
+                      }
                     </span>
                   </td>
                   <td class="px-6 py-4">
                     <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                      order.authorized ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                      order.authorized
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
                     }">
                       ${order.authorized ? "Yes" : "No"}
                     </span>
@@ -269,7 +324,9 @@ class OrderManagement {
                     </div>
                   </td>
                 </tr>
-              `).join("")}
+              `
+                )
+                .join("")}
             </tbody>
           </table>
         </div>
@@ -296,10 +353,42 @@ class OrderManagement {
 class DriverManagement {
   constructor() {
     this.drivers = [
-      { id: 1, name: "Ravi Kumar", phone: "+94 71 234 5678", vehicle: "Van - VH-2024", status: "active", currentRoute: "Route A - 5 stops", lastUpdate: "2 mins ago" },
-      { id: 2, name: "Ahmed Hassan", phone: "+94 77 345 6789", vehicle: "Truck - VH-2025", status: "active", currentRoute: "Route B - 8 stops", lastUpdate: "5 mins ago" },
-      { id: 3, name: "Carlos Rodriguez", phone: "+94 76 456 7890", vehicle: "Van - VH-2023", status: "inactive", currentRoute: "Completed", lastUpdate: "30 mins ago" },
-      { id: 4, name: "Maria Santos", phone: "+94 70 567 8901", vehicle: "Truck - VH-2026", status: "active", currentRoute: "Route C - 6 stops", lastUpdate: "1 min ago" },
+      {
+        id: 1,
+        name: "Ravi Kumar",
+        phone: "+94 71 234 5678",
+        vehicle: "Van - VH-2024",
+        status: "active",
+        currentRoute: "Route A - 5 stops",
+        lastUpdate: "2 mins ago",
+      },
+      {
+        id: 2,
+        name: "Ahmed Hassan",
+        phone: "+94 77 345 6789",
+        vehicle: "Truck - VH-2025",
+        status: "active",
+        currentRoute: "Route B - 8 stops",
+        lastUpdate: "5 mins ago",
+      },
+      {
+        id: 3,
+        name: "Carlos Rodriguez",
+        phone: "+94 76 456 7890",
+        vehicle: "Van - VH-2023",
+        status: "inactive",
+        currentRoute: "Completed",
+        lastUpdate: "30 mins ago",
+      },
+      {
+        id: 4,
+        name: "Maria Santos",
+        phone: "+94 70 567 8901",
+        vehicle: "Truck - VH-2026",
+        status: "active",
+        currentRoute: "Route C - 6 stops",
+        lastUpdate: "1 min ago",
+      },
     ];
   }
 
@@ -368,31 +457,46 @@ class DriverManagement {
                 </tr>
               </thead>
               <tbody>
-                ${this.drivers.map((driver) => `
+                ${this.drivers
+                  .map(
+                    (driver) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-800">${driver.name}</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-800">${
+                      driver.name
+                    }</td>
                     <td class="px-6 py-4 text-sm text-gray-600 flex items-center gap-2">
                       <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                       ${driver.phone}
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${driver.vehicle}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      driver.vehicle
+                    }</td>
                     <td class="px-6 py-4 text-sm text-gray-600 flex items-center gap-2">
                       <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                       ${driver.currentRoute}
                     </td>
                     <td class="px-6 py-4">
                       <span class="px-3 py-1 rounded-full text-xs font-medium ${
-                        driver.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                        driver.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
                       }">
-                        ${driver.status.charAt(0).toUpperCase() + driver.status.slice(1)}
+                        ${
+                          driver.status.charAt(0).toUpperCase() +
+                          driver.status.slice(1)
+                        }
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${driver.lastUpdate}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      driver.lastUpdate
+                    }</td>
                     <td class="px-6 py-4">
                       <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">Message</button>
                     </td>
                   </tr>
-                `).join("")}
+                `
+                  )
+                  .join("")}
               </tbody>
             </table>
           </div>
@@ -405,10 +509,42 @@ class DriverManagement {
 class StockTracking {
   constructor() {
     this.stockLocations = [
-      { id: 1, orderId: "ORD-001", product: "Air Freshener", quantity: 100, location: "Warehouse A - Shelf 5", status: "ready", lastUpdated: "2024-10-19 10:30 AM" },
-      { id: 2, orderId: "ORD-002", product: "Handwash", quantity: 250, location: "Warehouse B - Shelf 12", status: "ready", lastUpdated: "2024-10-19 09:15 AM" },
-      { id: 3, orderId: "ORD-003", product: "Dish Liquid", quantity: 75, location: "Warehouse A - Shelf 8", status: "in-transit", lastUpdated: "2024-10-19 11:00 AM" },
-      { id: 4, orderId: "ORD-004", product: "Car Interior Spray", quantity: 150, location: "Warehouse C - Shelf 3", status: "ready", lastUpdated: "2024-10-19 08:45 AM" },
+      {
+        id: 1,
+        orderId: "ORD-001",
+        product: "Air Freshener",
+        quantity: 100,
+        location: "Warehouse A - Shelf 5",
+        status: "ready",
+        lastUpdated: "2024-10-19 10:30 AM",
+      },
+      {
+        id: 2,
+        orderId: "ORD-002",
+        product: "Handwash",
+        quantity: 250,
+        location: "Warehouse B - Shelf 12",
+        status: "ready",
+        lastUpdated: "2024-10-19 09:15 AM",
+      },
+      {
+        id: 3,
+        orderId: "ORD-003",
+        product: "Dish Liquid",
+        quantity: 75,
+        location: "Warehouse A - Shelf 8",
+        status: "in-transit",
+        lastUpdated: "2024-10-19 11:00 AM",
+      },
+      {
+        id: 4,
+        orderId: "ORD-004",
+        product: "Car Interior Spray",
+        quantity: 150,
+        location: "Warehouse C - Shelf 3",
+        status: "ready",
+        lastUpdated: "2024-10-19 08:45 AM",
+      },
     ];
   }
 
@@ -470,23 +606,38 @@ class StockTracking {
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                ${this.stockLocations.map((item) => `
+                ${this.stockLocations
+                  .map(
+                    (item) => `
                   <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 font-semibold text-gray-800">${item.orderId}</td>
+                    <td class="px-6 py-4 font-semibold text-gray-800">${
+                      item.orderId
+                    }</td>
                     <td class="px-6 py-4 text-gray-700">${item.product}</td>
-                    <td class="px-6 py-4 text-gray-700">${item.quantity} units</td>
+                    <td class="px-6 py-4 text-gray-700">${
+                      item.quantity
+                    } units</td>
                     <td class="px-6 py-4 text-gray-700 flex items-center gap-2">
                       <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                       ${item.location}
                     </td>
                     <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getStatusColor(item.status)}">
-                        ${item.status.charAt(0).toUpperCase() + item.status.slice(1).replace("-", " ")}
+                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getStatusColor(
+                        item.status
+                      )}">
+                        ${
+                          item.status.charAt(0).toUpperCase() +
+                          item.status.slice(1).replace("-", " ")
+                        }
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-gray-600 text-sm">${item.lastUpdated}</td>
+                    <td class="px-6 py-4 text-gray-600 text-sm">${
+                      item.lastUpdated
+                    }</td>
                   </tr>
-                `).join("")}
+                `
+                  )
+                  .join("")}
               </tbody>
             </table>
           </div>
@@ -522,7 +673,16 @@ class DeliveryRoutes {
         estimatedTime: "3h 30m",
         status: "active",
         completedStops: 5,
-        orders: ["ORD-001", "ORD-002", "ORD-003", "ORD-004", "ORD-005", "ORD-006", "ORD-007", "ORD-008"],
+        orders: [
+          "ORD-001",
+          "ORD-002",
+          "ORD-003",
+          "ORD-004",
+          "ORD-005",
+          "ORD-006",
+          "ORD-007",
+          "ORD-008",
+        ],
       },
       {
         id: "RT-002",
@@ -534,7 +694,14 @@ class DeliveryRoutes {
         estimatedTime: "2h 45m",
         status: "active",
         completedStops: 6,
-        orders: ["ORD-009", "ORD-010", "ORD-011", "ORD-012", "ORD-013", "ORD-014"],
+        orders: [
+          "ORD-009",
+          "ORD-010",
+          "ORD-011",
+          "ORD-012",
+          "ORD-013",
+          "ORD-014",
+        ],
       },
       {
         id: "RT-003",
@@ -546,15 +713,31 @@ class DeliveryRoutes {
         estimatedTime: "4h 15m",
         status: "planned",
         completedStops: 0,
-        orders: ["ORD-015", "ORD-016", "ORD-017", "ORD-018", "ORD-019", "ORD-020", "ORD-021", "ORD-022", "ORD-023", "ORD-024"],
+        orders: [
+          "ORD-015",
+          "ORD-016",
+          "ORD-017",
+          "ORD-018",
+          "ORD-019",
+          "ORD-020",
+          "ORD-021",
+          "ORD-022",
+          "ORD-023",
+          "ORD-024",
+        ],
       },
     ];
   }
 
   render() {
-    const activeRoutes = this.routes.filter((r) => r.status === "active").length;
+    const activeRoutes = this.routes.filter(
+      (r) => r.status === "active"
+    ).length;
     const totalStops = this.routes.reduce((sum, r) => sum + r.stops, 0);
-    const completedStops = this.routes.reduce((sum, r) => sum + r.completedStops, 0);
+    const completedStops = this.routes.reduce(
+      (sum, r) => sum + r.completedStops,
+      0
+    );
 
     return `
       <div class="space-y-6">
@@ -567,7 +750,9 @@ class DeliveryRoutes {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-600">
             <p class="text-gray-600 text-sm">Total Routes</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${this.routes.length}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">${
+              this.routes.length
+            }</p>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
             <p class="text-gray-600 text-sm">Active Routes</p>
@@ -579,7 +764,10 @@ class DeliveryRoutes {
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-600">
             <p class="text-gray-600 text-sm">Completion Rate</p>
-            <p class="text-3xl font-bold text-purple-600 mt-2">${((completedStops / totalStops) * 100).toFixed(0)}%</p>
+            <p class="text-3xl font-bold text-purple-600 mt-2">${(
+              (completedStops / totalStops) *
+              100
+            ).toFixed(0)}%</p>
           </div>
         </div>
 
@@ -599,7 +787,9 @@ class DeliveryRoutes {
                 <div class="flex items-start justify-between mb-4">
                   <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
-                      <h4 class="text-lg font-semibold text-gray-900">${route.name}</h4>
+                      <h4 class="text-lg font-semibold text-gray-900">${
+                        route.name
+                      }</h4>
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
                         route.status === "active"
                           ? "bg-blue-100 text-blue-800"
@@ -607,7 +797,10 @@ class DeliveryRoutes {
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
                       }">
-                        ${route.status.charAt(0).toUpperCase() + route.status.slice(1)}
+                        ${
+                          route.status.charAt(0).toUpperCase() +
+                          route.status.slice(1)
+                        }
                       </span>
                     </div>
                     <p class="text-sm text-gray-600">Route ID: ${route.id}</p>
@@ -631,19 +824,27 @@ class DeliveryRoutes {
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   <div>
                     <p class="text-xs text-gray-500">Driver</p>
-                    <p class="text-sm font-semibold text-gray-900">${route.driver}</p>
+                    <p class="text-sm font-semibold text-gray-900">${
+                      route.driver
+                    }</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Vehicle</p>
-                    <p class="text-sm font-semibold text-gray-900">${route.vehicle}</p>
+                    <p class="text-sm font-semibold text-gray-900">${
+                      route.vehicle
+                    }</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Distance</p>
-                    <p class="text-sm font-semibold text-gray-900">${route.distance}</p>
+                    <p class="text-sm font-semibold text-gray-900">${
+                      route.distance
+                    }</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Est. Time</p>
-                    <p class="text-sm font-semibold text-gray-900">${route.estimatedTime}</p>
+                    <p class="text-sm font-semibold text-gray-900">${
+                      route.estimatedTime
+                    }</p>
                   </div>
                 </div>
 
@@ -651,16 +852,22 @@ class DeliveryRoutes {
                 <div class="mb-4">
                   <div class="flex items-center justify-between mb-2">
                     <span class="text-sm font-medium text-gray-700">Progress</span>
-                    <span class="text-sm font-semibold text-orange-600">${route.completedStops}/${route.stops} stops</span>
+                    <span class="text-sm font-semibold text-orange-600">${
+                      route.completedStops
+                    }/${route.stops} stops</span>
                   </div>
                   <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-orange-600 h-2 rounded-full transition-all" style="width: ${(route.completedStops / route.stops) * 100}%"></div>
+                    <div class="bg-orange-600 h-2 rounded-full transition-all" style="width: ${
+                      (route.completedStops / route.stops) * 100
+                    }%"></div>
                   </div>
                 </div>
 
                 <!-- Orders List -->
                 <div>
-                  <p class="text-sm font-medium text-gray-700 mb-2">Orders (${route.orders.length})</p>
+                  <p class="text-sm font-medium text-gray-700 mb-2">Orders (${
+                    route.orders.length
+                  })</p>
                   <div class="flex flex-wrap gap-2">
                     ${route.orders
                       .map(
@@ -768,8 +975,12 @@ class ProofOfDelivery {
   }
 
   render() {
-    const signedCount = this.deliveries.filter((d) => d.status === "signed").length;
-    const pendingCount = this.deliveries.filter((d) => d.status === "pending").length;
+    const signedCount = this.deliveries.filter(
+      (d) => d.status === "signed"
+    ).length;
+    const pendingCount = this.deliveries.filter(
+      (d) => d.status === "pending"
+    ).length;
     const withPhotos = this.deliveries.filter((d) => d.photo).length;
 
     return `
@@ -783,7 +994,9 @@ class ProofOfDelivery {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-600">
             <p class="text-gray-600 text-sm">Total Deliveries</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${this.deliveries.length}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">${
+              this.deliveries.length
+            }</p>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
             <p class="text-gray-600 text-sm">Signed</p>
@@ -823,16 +1036,26 @@ class ProofOfDelivery {
                   .map(
                     (delivery) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${delivery.id}</td>
-                    <td class="px-6 py-4 text-sm text-orange-600 font-medium">${delivery.orderId}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
+                      delivery.id
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-orange-600 font-medium">${
+                      delivery.orderId
+                    }</td>
                     <td class="px-6 py-4">
                       <div>
-                        <p class="text-sm font-medium text-gray-900">${delivery.customer}</p>
+                        <p class="text-sm font-medium text-gray-900">${
+                          delivery.customer
+                        }</p>
                         <p class="text-xs text-gray-600">${delivery.address}</p>
                       </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${delivery.deliveredBy}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${delivery.deliveryDate}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${
+                      delivery.deliveredBy
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      delivery.deliveryDate
+                    }</td>
                     <td class="px-6 py-4">
                       <div class="flex items-center gap-2">
                         ${
@@ -853,7 +1076,10 @@ class ProofOfDelivery {
                           ? "bg-green-100 text-green-800"
                           : "bg-yellow-100 text-yellow-800"
                       }">
-                        ${delivery.status.charAt(0).toUpperCase() + delivery.status.slice(1)}
+                        ${
+                          delivery.status.charAt(0).toUpperCase() +
+                          delivery.status.slice(1)
+                        }
                       </span>
                     </td>
                     <td class="px-6 py-4">
@@ -987,7 +1213,9 @@ class OrderAuthorization {
   }
 
   render() {
-    const highPriority = this.pendingOrders.filter((o) => o.priority === "high").length;
+    const highPriority = this.pendingOrders.filter(
+      (o) => o.priority === "high"
+    ).length;
     const totalValue = this.pendingOrders.reduce((sum, o) => sum + o.value, 0);
     const totalItems = this.pendingOrders.reduce((sum, o) => sum + o.items, 0);
 
@@ -1002,7 +1230,9 @@ class OrderAuthorization {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-600">
             <p class="text-gray-600 text-sm">Pending Orders</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${this.pendingOrders.length}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">${
+              this.pendingOrders.length
+            }</p>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
             <p class="text-gray-600 text-sm">High Priority</p>
@@ -1014,7 +1244,9 @@ class OrderAuthorization {
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
             <p class="text-gray-600 text-sm">Total Value</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${(totalValue / 1000).toFixed(0)}K</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${(
+              totalValue / 1000
+            ).toFixed(0)}K</p>
           </div>
         </div>
 
@@ -1031,16 +1263,22 @@ class OrderAuthorization {
                 <div class="flex items-start justify-between mb-4">
                   <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
-                      <h4 class="text-lg font-semibold text-gray-900">${order.id}</h4>
+                      <h4 class="text-lg font-semibold text-gray-900">${
+                        order.id
+                      }</h4>
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
                         order.priority === "high"
                           ? "bg-red-100 text-red-800"
                           : "bg-blue-100 text-blue-800"
                       }">
-                        ${order.priority === "high" ? "High Priority" : "Normal"}
+                        ${
+                          order.priority === "high" ? "High Priority" : "Normal"
+                        }
                       </span>
                     </div>
-                    <p class="text-sm font-medium text-gray-700">${order.customer}</p>
+                    <p class="text-sm font-medium text-gray-700">${
+                      order.customer
+                    }</p>
                     <p class="text-xs text-gray-600 mt-1">${order.notes}</p>
                   </div>
                 </div>
@@ -1048,19 +1286,27 @@ class OrderAuthorization {
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   <div>
                     <p class="text-xs text-gray-500">Items</p>
-                    <p class="text-sm font-semibold text-gray-900">${order.items} items</p>
+                    <p class="text-sm font-semibold text-gray-900">${
+                      order.items
+                    } items</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Order Value</p>
-                    <p class="text-sm font-semibold text-green-600">Rs. ${order.value.toFixed(2)}</p>
+                    <p class="text-sm font-semibold text-green-600">Rs. ${order.value.toFixed(
+                      2
+                    )}</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Requested By</p>
-                    <p class="text-sm font-semibold text-gray-900">${order.requestedBy}</p>
+                    <p class="text-sm font-semibold text-gray-900">${
+                      order.requestedBy
+                    }</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Request Date</p>
-                    <p class="text-sm font-semibold text-gray-900">${order.requestDate}</p>
+                    <p class="text-sm font-semibold text-gray-900">${
+                      order.requestDate
+                    }</p>
                   </div>
                 </div>
 
@@ -1111,12 +1357,24 @@ class OrderAuthorization {
                   .map(
                     (order) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-semibold text-orange-600">${order.id}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${order.customer}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${order.items} items</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">Rs. ${order.value.toFixed(2)}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${order.authorizedBy}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${order.authorizedDate}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-orange-600">${
+                      order.id
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${
+                      order.customer
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      order.items
+                    } items</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">Rs. ${order.value.toFixed(
+                      2
+                    )}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      order.authorizedBy
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      order.authorizedDate
+                    }</td>
                     <td class="px-6 py-4">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
                         Approved
