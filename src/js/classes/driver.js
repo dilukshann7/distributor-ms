@@ -44,7 +44,7 @@ class DriverDashboard {
       <div class="${
         this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-green-700 to-green-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
-        <img src="${logo}" alt="Logo" class="w-32 h-32 mx-auto my-6"/>
+                <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
           ${menuItems
