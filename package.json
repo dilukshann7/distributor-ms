@@ -7,7 +7,6 @@
     "build": "webpack",
     "dev": "webpack serve"
   },
-  "type": "module",
   "author": "Dilukshan Niranjan",
   "license": "MIT",
   "devDependencies": {
