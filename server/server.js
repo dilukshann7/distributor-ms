@@ -2,11 +2,18 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import "dotenv/config";
 const app = express();
+import cors from "cors";
 
 const prisma = new PrismaClient();
 
 app.use(express.static("dist"));
 app.use(express.json());
+app.use(
+  cors({
+    origin: ["http://localhost:8080", "http://localhost:3000"],
+    credentials: true,
+  })
+);
 const PORT = process.env.PORT || 3000;
 
 app.get("/api/users", async (req, res) => {
