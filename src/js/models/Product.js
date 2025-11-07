@@ -23,21 +23,7 @@ export class Product {
   static async create(productData) {}
   static async findById(id) {}
   static async findBySku(sku) {}
-<<<<<<< Updated upstream
   static async getAll(filters) {}
-=======
-  static async getAll(params) {
-    try {
-      const products = await prisma.product.findMany();
-      return products; // returns plain JSON
-    } catch (e) {
-      console.error("Error fetching products:", e);
-      throw e;
-    } finally {
-      await prisma.$disconnect();
-    }
-  }
->>>>>>> Stashed changes
   static async search(searchTerm) {}
   static async getLowStockItems() {}
   static async getCriticalStockItems() {}
