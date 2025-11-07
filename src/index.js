@@ -1,5 +1,5 @@
 import "./css/style.css";
-import { renderLogin } from "./js/login.js";
+import { router } from "../src/js/middleware/router.js";
 
-const app = document.getElementById("app");
-renderLogin(app);
+// Initialize the router
+window.addEventListener("DOMContentLoaded", router);
