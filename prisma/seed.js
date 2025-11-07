@@ -5,8 +5,6 @@ const prisma = new PrismaClient();
 
 async function main(params) {
   //Prisma Queries can be added here if needed
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   // const user = await prisma.user.create({
   //   data: {
   //     name: "John Doe",
@@ -15,21 +13,6 @@ async function main(params) {
   //     role: "manager",
   //   },
   // });
-=======
-=======
->>>>>>> Stashed changes
-  const user = await prisma.user.create({
-    data: {
-      name: "John Doe",
-      email: "john@email.com",
-      password: "password",
-      role: "manager",
-    },
-  });
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
   const users = await prisma.user.findMany();
   console.log(users);
