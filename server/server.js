@@ -17,8 +17,13 @@ app.use(
 const PORT = process.env.PORT || 3000;
 
 app.get("/api/users", async (req, res) => {
-  const posts = await prisma.user.findMany();
-  res.json(posts);
+  try {
+    const posts = await prisma.user.findMany();
+    res.json(posts);
+  } catch (e) {
+    console.error("Error fetching users:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 app.get("/api/products", async (req, res) => {
