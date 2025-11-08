@@ -138,7 +138,7 @@ class OwnerDashboard {
     const sectionInstance = sections[section];
 
     if (section === "inventory") {
-      await sectionInstance.getProducts();
+      await sectionInstance.getInventory();
     } else if (section === "employees") {
       await sectionInstance.getEmployees();
     } else if (section === "operations") {
@@ -318,53 +318,17 @@ class FinancialOverview {
 
 class EmployeeManagement {
   constructor() {
-    this.employees = [
-      {
-        id: 1,
-        name: "Rajesh Kumar",
-        role: "Manager",
-        salary: 45000,
-        bonus: 5000,
-        attendance: 95,
-        status: "Active",
-      },
-      {
-        id: 2,
-        name: "Priya Singh",
-        role: "Salesman",
-        salary: 30000,
-        bonus: 3000,
-        attendance: 92,
-        status: "Active",
-      },
-      {
-        id: 3,
-        name: "Amit Patel",
-        role: "Driver",
-        salary: 25000,
-        bonus: 2000,
-        attendance: 88,
-        status: "Active",
-      },
-      {
-        id: 4,
-        name: "Neha Sharma",
-        role: "Stock Keeper",
-        salary: 28000,
-        bonus: 2500,
-        attendance: 96,
-        status: "Active",
-      },
-      {
-        id: 5,
-        name: "Vikram Desai",
-        role: "Cashier",
-        salary: 26000,
-        bonus: 2200,
-        attendance: 90,
-        status: "Inactive",
-      },
-    ];
+    this.employees = [];
+  }
+
+  async getEmployees() {
+    try {
+      const response = await User.getAll();
+      this.employees = response.data;
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      this.employees = [];
+    }
   }
 
   render() {
@@ -455,53 +419,17 @@ class EmployeeManagement {
 
 class InventoryControl {
   constructor() {
-    this.inventory = [
-      {
-        id: 1,
-        name: "Air Freshener",
-        sku: "AF-001",
-        quantity: 450,
-        minStock: 100,
-        price: 150,
-        status: "In Stock",
-      },
-      {
-        id: 2,
-        name: "Hand Wash",
-        sku: "HW-002",
-        quantity: 280,
-        minStock: 150,
-        price: 200,
-        status: "In Stock",
-      },
-      {
-        id: 3,
-        name: "Car Interior Spray",
-        sku: "CIS-003",
-        quantity: 85,
-        minStock: 100,
-        price: 250,
-        status: "Low Stock",
-      },
-      {
-        id: 4,
-        name: "Dish Liquid",
-        sku: "DL-004",
-        quantity: 320,
-        minStock: 200,
-        price: 180,
-        status: "In Stock",
-      },
-      {
-        id: 5,
-        name: "Alli Food Products",
-        sku: "AFP-005",
-        quantity: 45,
-        minStock: 100,
-        price: 500,
-        status: "Critical",
-      },
-    ];
+    this.inventory = [];
+  }
+
+  async getInventory() {
+    try {
+      const response = await Product.getAll();
+      this.inventory = response.data;
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+      this.inventory = [];
+    }
   }
 
   render() {
