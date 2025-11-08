@@ -3,6 +3,7 @@ import { Supply } from "../models/Supply.js";
 import { Order } from "../models/Order.js";
 import { Shipment } from "../models/Shipment.js";
 import { Invoice } from "../models/Invoice.js";
+import axios from "axios";
 
 class SupplierDashboard {
   constructor(container) {
@@ -73,7 +74,7 @@ class SupplierDashboard {
         <div class="p-4 border-t border-indigo-600">
           <div class="bg-indigo-600 rounded-lg p-4">
             <p class="text-sm text-indigo-100">Supplier Account</p>
-            <p class="font-semibold text-white mt-1">Britol Products Ltd</p>
+            <p class="font-semibold text-white mt-1"></p>
           </div>
         </div>
       </aside>
@@ -170,6 +171,9 @@ class SupplierDashboard {
         this.render();
       });
     }
+
+    const periodSelectors = this.container.querySelectorAll(".period-selector");
+    // Period selector logic has been moved into SalesAnalytics.attachListeners()
   }
 
   async navigateToSection(section) {
@@ -177,6 +181,13 @@ class SupplierDashboard {
     const content = this.container.querySelector("#dashboardContent");
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+
+    this.attachEventListeners();
+
+    if (section === "analytics") {
+      const analytics = new SalesAnalytics();
+      analytics.attachListeners(this.container);
+    }
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -640,18 +651,18 @@ class InvoicesPayments {
 
   render() {
     const totalInvoices = this.invoices.reduce(
-      (sum, inv) => sum + inv.amount,
+      (sum, inv) => sum + inv.totalAmount,
       0
     );
     const paidAmount = this.invoices
       .filter((inv) => inv.status === "paid")
-      .reduce((sum, inv) => sum + inv.amount, 0);
+      .reduce((sum, inv) => sum + inv.totalAmount, 0);
     const pendingAmount = this.invoices
       .filter((inv) => inv.status === "pending")
-      .reduce((sum, inv) => sum + inv.amount, 0);
+      .reduce((sum, inv) => sum + inv.totalAmount, 0);
     const overdueAmount = this.invoices
       .filter((inv) => inv.status === "overdue")
-      .reduce((sum, inv) => sum + inv.amount, 0);
+      .reduce((sum, inv) => sum + inv.totalAmount, 0);
 
     return `
       <div class="space-y-6">
@@ -721,17 +732,21 @@ class InvoicesPayments {
                       invoice.id
                     }</td>
                     <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${
-                      invoice.orderId
+                      invoice.purchaseOrderId
                     }</td>
-                    <td class="px-6 py-4 text-sm font-bold text-gray-900">Rs. ${invoice.amount.toFixed(
-                      2
-                    )}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      invoice.issueDate
+                    <td class="px-6 py-4 text-sm font-bold text-gray-900">Rs. ${
+                      invoice.totalAmount
                     }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      invoice.dueDate
-                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                      ${
+                        new Date(invoice.invoiceDate)
+                          .toISOString()
+                          .split("T")[0]
+                      }
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                      ${new Date(invoice.dueDate).toISOString().split("T")[0]}
+                    </td>
                     <td class="px-6 py-4 text-sm">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
                         invoice.status === "paid"
@@ -778,6 +793,7 @@ class SalesAnalytics {
   constructor() {
     this.topProducts = [];
     this.salesData = [];
+    this.summary = [];
   }
 
   async getTopProducts() {
@@ -826,157 +842,14 @@ class SalesAnalytics {
         <!-- Period Selector -->
         <div class="bg-white rounded-lg shadow-md p-6">
           <div class="flex gap-2 mb-6">
-            <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium">Daily</button>
-            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Weekly</button>
-            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Monthly</button>
+            <button class="period-selector px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium">Daily</button>
+            <button class="period-selector px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium">Weekly</button>
+            <button class="period-selector px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium">Monthly</button>
           </div>
 
           <!-- Sales Stats -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
-              <p class="text-gray-700 text-sm font-medium">Total Orders</p>
-              <p class="text-3xl font-bold text-blue-600 mt-2">${
-                this.salesData.daily.orders
-              }</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
-              <p class="text-gray-700 text-sm font-medium">Revenue</p>
-              <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${(
-                this.salesData.daily.revenue / 1000
-              ).toFixed(0)}K</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-6 border border-indigo-200">
-              <p class="text-gray-700 text-sm font-medium">Items Sold</p>
-              <p class="text-3xl font-bold text-indigo-600 mt-2">${
-                this.salesData.daily.items
-              }</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-          </div>
-        </div>
-
-      
-
-        <!-- Top Products -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h4 class="text-lg font-semibold text-gray-900">Top Selling Products</h4>
-          </div>
-          <div class="p-6">
-            <div class="space-y-4">
-              ${this.topProducts
-                .map(
-                  (product, index) => `
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg">
-                      ${index + 1}
-                    </div>
-                    <div>
-                      <p class="font-semibold text-gray-900">${product.name}</p>
-                      <p class="text-sm text-gray-600">${
-                        product.sold
-                      } units sold</p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="font-bold text-indigo-600">Rs. ${product.revenue.toFixed(
-                      2
-                    )}</p>
-                    <p class="text-xs text-gray-600">Revenue</p>
-                  </div>
-                </div>
-              `
-                )
-                .join("")}
-            </div>
-          </div>
-        </div>
-
-        <!-- Performance Metrics -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Sales by Category -->
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Sales by Category</h4>
-            <div class="space-y-3">
-              ${[
-                {
-                  category: "Cleaning Products",
-                  percentage: 40,
-                  revenue: 1400000,
-                },
-                { category: "Personal Care", percentage: 30, revenue: 1050000 },
-                { category: "Home Care", percentage: 20, revenue: 700000 },
-                { category: "Food Items", percentage: 10, revenue: 350000 },
-              ]
-                .map(
-                  (cat) => `
-                <div>
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-700">${
-                      cat.category
-                    }</span>
-                    <span class="text-sm font-semibold text-indigo-600">${
-                      cat.percentage
-                    }%</span>
-                  </div>
-                  <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-indigo-600 h-2 rounded-full" style="width: ${
-                      cat.percentage
-                    }%"></div>
-                  </div>
-                  <p class="text-xs text-gray-600 mt-1">Rs. ${(
-                    cat.revenue / 1000
-                  ).toFixed(0)}K</p>
-                </div>
-              `
-                )
-                .join("")}
-            </div>
-          </div>
-
-          <!-- Monthly Summary -->
-          <div class="bg-white rounded-lg shadow-md p-6">
-            <h4 class="text-lg font-semibold text-gray-900 mb-4">Monthly Summary</h4>
-            <div class="space-y-4">
-              <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <div>
-                  <p class="text-sm text-gray-600">Total Orders</p>
-                  <p class="text-2xl font-bold text-blue-600">${
-                    this.salesData.monthly.orders
-                  }</p>
-                </div>
-                <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                </svg>
-              </div>
-              <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                <div>
-                  <p class="text-sm text-gray-600">Total Revenue</p>
-                  <p class="text-2xl font-bold text-green-600">Rs. ${(
-                    this.salesData.monthly.revenue / 1000000
-                  ).toFixed(1)}M</p>
-                </div>
-                <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-              </div>
-              <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
-                <div>
-                  <p class="text-sm text-gray-600">Items Sold</p>
-                  <p class="text-2xl font-bold text-indigo-600">${
-                    this.salesData.monthly.items
-                  }</p>
-                </div>
-                <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-              </div>
-            </div>
+          <div class="stats">
+            Please Wait...
           </div>
         </div>
 
@@ -1005,7 +878,123 @@ class SalesAnalytics {
           </div>
         </div>
       </div>
+      
     `;
+  }
+
+  attachListeners(container) {
+    const periodSelectors = container.querySelectorAll(".period-selector");
+    // initialize default
+    if (periodSelectors.length > 0) {
+      // mark Daily as active by default
+      periodSelectors.forEach((btn) => {
+        if (btn.textContent.trim() === "Daily") {
+          btn.classList.add("bg-indigo-600", "text-white");
+          btn.classList.remove("bg-gray-200", "text-gray-700");
+        } else {
+          btn.classList.remove("bg-indigo-600", "text-white");
+          btn.classList.add("bg-gray-200", "text-gray-700");
+        }
+      });
+
+      // initialize stats
+      this.handlePeriodChange("daily", container).catch((e) =>
+        console.error("Error initializing analytics:", e)
+      );
+
+      periodSelectors.forEach((button) => {
+        button.addEventListener("click", async (e) => {
+          const periodText = button.textContent.trim(); // "Daily", "Weekly", "Monthly"
+
+          periodSelectors.forEach((btn) => {
+            btn.classList.remove("bg-indigo-600", "text-white");
+            btn.classList.add("bg-gray-200", "text-gray-700");
+          });
+
+          button.classList.add("bg-indigo-600", "text-white");
+          button.classList.remove("bg-gray-200", "text-gray-700");
+
+          if (periodText === "Daily") {
+            await this.handlePeriodChange("daily", container);
+          } else if (periodText === "Weekly") {
+            await this.handlePeriodChange("weekly", container);
+          } else if (periodText === "Monthly") {
+            await this.handlePeriodChange("monthly", container);
+          }
+        });
+      });
+    }
+  }
+
+  async handlePeriodChange(period, container) {
+    const statSelector = container.querySelector(".stats");
+
+    const apiURL = "http://localhost:3000/api/supplier/overall-summary";
+
+    const summary = await axios.get(apiURL);
+
+    this.period = period;
+    if (this.period === "daily") {
+      statSelector.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+              <p class="text-gray-700 text-sm font-medium">Total Orders</p>
+              <p class="text-3xl font-bold text-blue-600 mt-2">${summary.data.daily.orders}</p>
+              <p class="text-xs text-gray-600 mt-2">Today</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+              <p class="text-gray-700 text-sm font-medium">Revenue</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">${summary.data.daily.revenue}</p>
+              <p class="text-xs text-gray-600 mt-2">Today</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-6 border border-indigo-200">
+              <p class="text-gray-700 text-sm font-medium">Items Sold</p>
+              <p class="text-3xl font-bold text-indigo-600 mt-2">${summary.data.daily.items}</p>
+              <p class="text-xs text-gray-600 mt-2">Today</p>
+            </div>
+          </div>`;
+    } else if (this.period === "weekly") {
+      statSelector.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+              <p class="text-gray-700 text-sm font-medium">Total Orders</p>
+              <p class="text-3xl font-bold text-blue-600 mt-2">${summary.data.weekly.orders}</p>
+              <p class="text-xs text-gray-600 mt-2">This Week</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+              <p class="text-gray-700 text-sm font-medium">Revenue</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">${summary.data.weekly.revenue}</p>
+              <p class="text-xs text-gray-600 mt-2">This Week</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-6 border border-indigo-200">
+              <p class="text-gray-700 text-sm font-medium">Items Sold</p>
+              <p class="text-3xl font-bold text-indigo-600 mt-2">${summary.data.weekly.items}</p>
+              <p class="text-xs text-gray-600 mt-2">This Week</p>
+            </div>
+          </div>`;
+    } else if (this.period === "monthly") {
+      statSelector.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+              <p class="text-gray-700 text-sm font-medium">Total Orders</p>
+              <p class="text-3xl font-bold text-blue-600 mt-2">${summary.data.monthly.orders}</p>
+              <p class="text-xs text-gray-600 mt-2">This Month</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+              <p class="text-gray-700 text-sm font medium">Revenue</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">${summary.data.monthly.revenue}</p>
+              <p class="text-xs text-gray-600 mt-2">This Month</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-6 border border-indigo-200">
+              <p class="text-gray-700 text-sm font-medium">Items Sold</p>
+              <p class="text-3xl font-bold text-indigo-600 mt-2">${summary.data.monthly.items}</p>
+              <p class="text-xs text-gray-600 mt-2">This Month</p>
+            </div>
+          </div>`;
+    }
   }
 }
 

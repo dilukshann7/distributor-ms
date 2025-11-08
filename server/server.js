@@ -240,6 +240,118 @@ app.get("/api/orders/summary", async (req, res) => {
   }
 });
 
+app.get("/api/shipments/summary", async (req, res) => {
+  try {
+    const totalShipments = await prisma.shipment.count();
+    const pendingShipments = await prisma.shipment.count({
+      where: { status: "pending" },
+    });
+    const inTransitShipments = await prisma.shipment.count({
+      where: { status: "in_transit" },
+    });
+    const deliveredShipments = await prisma.shipment.count({
+      where: { status: "delivered" },
+    });
+    res.json({
+      total: totalShipments,
+      pending: pendingShipments,
+      inTransit: inTransitShipments,
+      delivered: deliveredShipments,
+    });
+  } catch (e) {
+    console.error("Error fetching shipment summary:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/api/supplier/overall-summary", async (req, res) => {
+  try {
+    // Daily Summary
+    const today = new Date();
+    const startOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const endOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1
+    );
+    const dailyOrders = await prisma.order.findMany({
+      where: {
+        orderDate: {
+          gte: startOfDay,
+          lt: endOfDay,
+        },
+      },
+    });
+    const dailySummary = {
+      orders: dailyOrders.length,
+      revenue: dailyOrders.reduce((sum, o) => sum + o.totalAmount, 0),
+      items: dailyOrders.reduce((sum, o) => {
+        const items = JSON.parse(o.items);
+        return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
+      }, 0),
+    };
+
+    // Weekly Summary
+    const firstDayOfWeek = new Date(today);
+    firstDayOfWeek.setDate(today.getDate() - today.getDay());
+    const lastDayOfWeek = new Date(firstDayOfWeek);
+    lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 7);
+
+    const weeklyOrders = await prisma.order.findMany({
+      where: {
+        orderDate: {
+          gte: firstDayOfWeek,
+          lt: lastDayOfWeek,
+        },
+      },
+    });
+    const weeklySummary = {
+      orders: weeklyOrders.length,
+      revenue: weeklyOrders.reduce((sum, o) => sum + o.totalAmount, 0),
+      items: weeklyOrders.reduce((sum, o) => {
+        const items = JSON.parse(o.items);
+        return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
+      }, 0),
+    };
+
+    // Monthly Summary
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      1
+    );
+    const monthlyOrders = await prisma.order.findMany({
+      where: {
+        orderDate: {
+          gte: firstDayOfMonth,
+          lt: lastDayOfMonth,
+        },
+      },
+    });
+    const monthlySummary = {
+      orders: monthlyOrders.length,
+      revenue: monthlyOrders.reduce((sum, o) => sum + o.totalAmount, 0),
+      items: monthlyOrders.reduce((sum, o) => {
+        const items = JSON.parse(o.items);
+        return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
+      }, 0),
+    };
+    res.json({
+      daily: dailySummary,
+      weekly: weeklySummary,
+      monthly: monthlySummary,
+    });
+  } catch (e) {
+    console.error("Error fetching overall summary:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
