@@ -1,4 +1,6 @@
 // Product/Inventory Class
+import axios from "axios";
+
 export class Product {
   constructor(data) {
     this.id = data.id;
@@ -23,7 +25,11 @@ export class Product {
   static async create(productData) {}
   static async findById(id) {}
   static async findBySku(sku) {}
-  static async getAll(filters) {}
+  static async getAll(filters) {
+    const apiURL = "http://localhost:3000/api/products";
+
+    return axios.get(apiURL);
+  }
   static async search(searchTerm) {}
   static async getLowStockItems() {}
   static async getCriticalStockItems() {}

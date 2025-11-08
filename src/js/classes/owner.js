@@ -17,6 +17,8 @@ import trashIcon from "../../assets/icons/trash.svg";
 import clockIcon from "../../assets/icons/clock.svg";
 import downloadIcon from "../../assets/icons/download.svg";
 import filterIcon from "../../assets/icons/filter.svg";
+import { Product } from "../models/Product.js";
+import { User } from "../models/User.js";
 
 class OwnerDashboard {
   constructor(container) {
@@ -25,21 +27,26 @@ class OwnerDashboard {
   }
 
   /*html*/
-  render() {
+  async render() {
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
           <main id="dashboardContent" class="flex-1 overflow-auto bg-gray-50">
-            ${this.renderSection(this.currentSection)}
+            <div class="p-8 text-center text-gray-500">Loading...</div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
+
+    // Load initial section content
+    const content = this.container.querySelector("#dashboardContent");
+    const html = await this.renderSection(this.currentSection);
+    content.innerHTML = html;
   }
-  /*html*/
+
   renderSidebar() {
     const menuItems = [
       { id: "overview", label: "Financial Overview", icon: "chart-bar" },
@@ -48,7 +55,7 @@ class OwnerDashboard {
       { id: "operations", label: "Operations Monitor", icon: "activity" },
       { id: "reports", label: "Reports & Analytics", icon: "file-text" },
     ];
-    /*html*/
+
     return `
       <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div class="p-6 border-b border-gray-200">
@@ -93,7 +100,6 @@ class OwnerDashboard {
   }
 
   renderHeader() {
-    /*html*/
     return `
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div class="flex-1 max-w-md">
@@ -123,7 +129,7 @@ class OwnerDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
       overview: new FinancialOverview(),
       employees: new EmployeeManagement(),
@@ -131,7 +137,17 @@ class OwnerDashboard {
       operations: new OperationsMonitor(),
       reports: new ReportsSection(),
     };
-    return sections[section].render();
+
+    const sectionInstance = sections[section];
+
+    // For inventory section, load data first
+    if (section === "inventory") {
+      await sectionInstance.getProducts();
+    } else if (section === "employees") {
+      await sectionInstance.getEmployees();
+    }
+
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -153,10 +169,17 @@ class OwnerDashboard {
     }
   }
 
-  navigateToSection(section) {
+  async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = this.renderSection(section);
+
+    // Show loading state
+    content.innerHTML =
+      '<div class="p-8 text-center text-gray-500">Loading...</div>';
+
+    // Load and render section
+    const html = await this.renderSection(section);
+    content.innerHTML = html;
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -306,57 +329,20 @@ class FinancialOverview {
 
 class EmployeeManagement {
   constructor() {
-    this.employees = [
-      {
-        id: 1,
-        name: "Rajesh Kumar",
-        role: "Manager",
-        salary: 45000,
-        bonus: 5000,
-        attendance: 95,
-        status: "Active",
-      },
-      {
-        id: 2,
-        name: "Priya Singh",
-        role: "Salesman",
-        salary: 30000,
-        bonus: 3000,
-        attendance: 92,
-        status: "Active",
-      },
-      {
-        id: 3,
-        name: "Amit Patel",
-        role: "Driver",
-        salary: 25000,
-        bonus: 2000,
-        attendance: 88,
-        status: "Active",
-      },
-      {
-        id: 4,
-        name: "Neha Sharma",
-        role: "Stock Keeper",
-        salary: 28000,
-        bonus: 2500,
-        attendance: 96,
-        status: "Active",
-      },
-      {
-        id: 5,
-        name: "Vikram Desai",
-        role: "Cashier",
-        salary: 26000,
-        bonus: 2200,
-        attendance: 90,
-        status: "Inactive",
-      },
-    ];
+    this.employees = [];
+  }
+
+  async getEmployees() {
+    try {
+      const response = await User.getAll();
+      this.employees = response.data;
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      this.employees = [];
+    }
   }
 
   render() {
-    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div class="flex items-center justify-between">
@@ -443,57 +429,19 @@ class EmployeeManagement {
 
 class InventoryControl {
   constructor() {
-    this.inventory = [
-      {
-        id: 1,
-        name: "Air Freshener",
-        sku: "AF-001",
-        quantity: 450,
-        minStock: 100,
-        price: 150,
-        status: "In Stock",
-      },
-      {
-        id: 2,
-        name: "Hand Wash",
-        sku: "HW-002",
-        quantity: 280,
-        minStock: 150,
-        price: 200,
-        status: "In Stock",
-      },
-      {
-        id: 3,
-        name: "Car Interior Spray",
-        sku: "CIS-003",
-        quantity: 85,
-        minStock: 100,
-        price: 250,
-        status: "Low Stock",
-      },
-      {
-        id: 4,
-        name: "Dish Liquid",
-        sku: "DL-004",
-        quantity: 320,
-        minStock: 200,
-        price: 180,
-        status: "In Stock",
-      },
-      {
-        id: 5,
-        name: "Alli Food Products",
-        sku: "AFP-005",
-        quantity: 45,
-        minStock: 100,
-        price: 500,
-        status: "Critical",
-      },
-    ];
+    this.inventory = [];
   }
 
+  async getProducts() {
+    try {
+      const response = await Product.getAll();
+      this.inventory = response.data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      this.inventory = [];
+    }
+  }
   render() {
-    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div class="flex items-center justify-between">
@@ -852,7 +800,7 @@ class ReportsSection {
   }
 }
 
-export function renderOwnerDashboard(container) {
+export async function renderOwnerDashboard(container) {
   const dashboard = new OwnerDashboard(container);
-  dashboard.render();
+  await dashboard.render();
 }
