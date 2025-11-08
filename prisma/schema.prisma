@@ -15,9 +15,9 @@ datasource db {
 }
 
 model User {
-  id                Int       @id @default(autoincrement())
+  id                Int      @id @default(autoincrement())
   name              String
-  email             String    @unique
+  email             String   @unique
   password          String
   role              String
   phone             String?
@@ -26,7 +26,74 @@ model User {
   bonus             Float?
   attendance        Int?
   performanceRating Int?
-  status            String    @default("active")
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  status            String   @default("active")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  sku         String    @unique
+  description String?
+  category    String?
+  price       Float
+  quantity    Int
+  minStock    Int?
+  maxStock    Int?
+  location    String?
+  supplierId  Int?
+  batchNumber String?
+  expiryDate  DateTime?
+  status      String    @default("active")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Task {
+  id            Int       @id @default(autoincrement())
+  title         String
+  description   String?
+  assigneeId    Int
+  assignerId    Int
+  dueDate       DateTime?
+  priority      String?
+  status        String    @default("pending")
+  completedDate DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model CustomerFeedback {
+  id          Int       @id @default(autoincrement())
+  customerId  Int
+  orderId     Int
+  rating      Int
+  comment     String?
+  category    String?
+  status      String    @default("new")
+  response    String?
+  respondedBy Int?
+  respondedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Delivery {
+  id              Int      @id @default(autoincrement())
+  deliveryNumber  String
+  orderId         Int
+  driverId        Int
+  vehicleId       Int
+  deliveryAddress String
+  scheduledDate   DateTime
+  deliveredDate   DateTime
+  estimatedTime   Int
+  status          String
+  signature       String
+  proofOfDelivery String
+  notes           String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

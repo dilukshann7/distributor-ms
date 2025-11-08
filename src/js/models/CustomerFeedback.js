@@ -18,7 +18,11 @@ export class CustomerFeedback {
   // Static methods
   static async create(feedbackData) {}
   static async findById(id) {}
-  static async getAll(filters) {}
+  static async getAll(filters) {
+    const apiURL = "http://localhost:3000/api/customer-feedbacks";
+
+    return axios.get(apiURL);
+  }
   static async getByCustomer(customerId) {}
   static async getByOrder(orderId) {}
   static async getByRating(rating) {}

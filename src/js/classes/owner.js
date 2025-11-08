@@ -17,6 +17,9 @@ import trashIcon from "../../assets/icons/trash.svg";
 import clockIcon from "../../assets/icons/clock.svg";
 import downloadIcon from "../../assets/icons/download.svg";
 import filterIcon from "../../assets/icons/filter.svg";
+import { Product } from "../models/Product.js";
+import { User } from "../models/User.js";
+import { Task } from "../models/Task.js";
 
 class OwnerDashboard {
   constructor(container) {
@@ -123,7 +126,7 @@ class OwnerDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
       overview: new FinancialOverview(),
       employees: new EmployeeManagement(),
@@ -131,7 +134,18 @@ class OwnerDashboard {
       operations: new OperationsMonitor(),
       reports: new ReportsSection(),
     };
-    return sections[section].render();
+
+    const sectionInstance = sections[section];
+
+    if (section === "inventory") {
+      await sectionInstance.getProducts();
+    } else if (section === "employees") {
+      await sectionInstance.getEmployees();
+    } else if (section === "operations") {
+      await sectionInstance.getTasks();
+    }
+
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -198,7 +212,6 @@ class FinancialOverview {
   }
 
   render() {
-    /*html*/
     return `
       <div class="p-8 space-y-8">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -276,7 +289,6 @@ class FinancialOverview {
       blue: "bg-blue-100 text-blue-600",
       purple: "bg-purple-100 text-purple-600",
     };
-    /*html*/
     return `
     
       <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
@@ -587,40 +599,20 @@ class InventoryControl {
 
 class OperationsMonitor {
   constructor() {
-    this.tasks = [
-      {
-        id: 1,
-        title: "Process supplier order",
-        status: "Completed",
-        assignee: "Rajesh Kumar",
-        dueTime: "10:30 AM",
-      },
-      {
-        id: 2,
-        title: "Verify stock count",
-        status: "In Progress",
-        assignee: "Neha Sharma",
-        dueTime: "02:00 PM",
-      },
-      {
-        id: 3,
-        title: "Prepare delivery routes",
-        status: "Pending",
-        assignee: "Amit Patel",
-        dueTime: "03:30 PM",
-      },
-      {
-        id: 4,
-        title: "Process customer payments",
-        status: "Completed",
-        assignee: "Vikram Desai",
-        dueTime: "11:45 AM",
-      },
-    ];
+    this.tasks = [];
+  }
+
+  async getTasks() {
+    try {
+      const response = await Task.getAll();
+      this.tasks = response.data;
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      this.tasks = [];
+    }
   }
 
   render() {
-    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div>
@@ -702,7 +694,6 @@ class OperationsMonitor {
       purple: "bg-purple-100 text-purple-600",
     };
 
-    /*html*/
     return `
       <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
         <div class="flex items-center justify-between">
@@ -751,7 +742,6 @@ class ReportsSection {
   }
 
   render() {
-    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div class="flex items-center justify-between">
@@ -839,7 +829,6 @@ class ReportsSection {
   }
 
   renderReportCard(title, description, lastGenerated) {
-    /*html*/
     return `
       <div class="bg-white rounded-lg shadow p-5 border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow">
         <h3 class="text-lg font-semibold text-gray-900">${title}</h3>

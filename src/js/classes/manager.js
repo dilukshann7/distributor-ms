@@ -17,6 +17,11 @@ import trashIcon from "../../assets/icons/trash.svg";
 import checkCircleIcon from "../../assets/icons/check-circle.svg";
 import activityIcon from "../../assets/icons/activity.svg";
 import logo from "../../assets/logo-tr.png";
+import { User } from "../models/User.js";
+import { Task } from "../models/Task.js";
+import { Product } from "../models/Product.js";
+import { CustomerFeedback } from "../models/CustomerFeedback.js";
+import { Delivery } from "../models/Delivery.js";
 
 class ManagerDashboard {
   constructor(container) {
@@ -105,7 +110,6 @@ class ManagerDashboard {
   }
 
   renderHeader() {
-    /*html*/
     return `
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div>
@@ -134,7 +138,7 @@ class ManagerDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
       overview: new EmployeeOversight(),
       tasks: new TaskAssignment(),
@@ -143,7 +147,21 @@ class ManagerDashboard {
       feedback: new CustomerFeedback(),
       delivery: new DeliveryTracking(),
     };
-    return sections[section].render();
+    const sectionInstance = sections[section];
+    if (section === "delivery") {
+      await sectionInstance.getDeliveries();
+    } else if (section === "stock") {
+      await sectionInstance.getStockItems();
+    } else if (section === "reports") {
+      await sectionInstance.getReports();
+    } else if (section === "tasks") {
+      await sectionInstance.getTasks();
+    } else if (section === "overview") {
+      await sectionInstance.getEmployees();
+    } else if (section === "feedback") {
+      await sectionInstance.getFeedback();
+    }
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -229,48 +247,17 @@ class ManagerDashboard {
 
 class EmployeeOversight {
   constructor() {
-    this.employees = [
-      {
-        id: 1,
-        name: "Ahmed Hassan",
-        role: "Salesman",
-        status: "Active",
-        attendance: "95%",
-        performance: "Excellent",
-      },
-      {
-        id: 2,
-        name: "Fatima Khan",
-        role: "Driver",
-        status: "Active",
-        attendance: "92%",
-        performance: "Good",
-      },
-      {
-        id: 3,
-        name: "Rajesh Kumar",
-        role: "Stock Keeper",
-        status: "Active",
-        attendance: "88%",
-        performance: "Good",
-      },
-      {
-        id: 4,
-        name: "Maria Santos",
-        role: "Cashier",
-        status: "On Leave",
-        attendance: "85%",
-        performance: "Excellent",
-      },
-      {
-        id: 5,
-        name: "Hassan Ali",
-        role: "Distributor",
-        status: "Active",
-        attendance: "98%",
-        performance: "Excellent",
-      },
-    ];
+    this.employees = [];
+  }
+
+  async getEmployees() {
+    try {
+      const response = await User.getAll();
+      this.employees = response.data;
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      this.employees = [];
+    }
   }
 
   render() {
@@ -364,7 +351,7 @@ class EmployeeOversight {
                           ? "bg-blue-100 text-blue-800"
                           : "bg-gray-100 text-gray-800"
                       }">
-                        ${emp.performance}
+                        ${emp.performanceRating || "N/A"}
                       </span>
                     </td>
                     <td class="px-6 py-4 text-sm flex gap-2">
@@ -390,49 +377,17 @@ class EmployeeOversight {
 
 class TaskAssignment {
   constructor() {
-    this.tasks = [
-      {
-        id: 1,
-        title: "Deliver to Colombo Central",
-        assignee: "Ahmed Hassan",
-        dueDate: "Today",
-        priority: "High",
-        status: "In Progress",
-      },
-      {
-        id: 2,
-        title: "Stock Inventory Check",
-        assignee: "Rajesh Kumar",
-        dueDate: "Today",
-        priority: "Medium",
-        status: "Pending",
-      },
-      {
-        id: 3,
-        title: "Customer Follow-up Calls",
-        assignee: "Fatima Khan",
-        dueDate: "Tomorrow",
-        priority: "Medium",
-        status: "Pending",
-      },
-      {
-        id: 4,
-        title: "Process Supplier Orders",
-        assignee: "Maria Santos",
-        dueDate: "Today",
-        priority: "High",
-        status: "Completed",
-      },
-      {
-        id: 5,
-        title: "Vehicle Maintenance Check",
-        assignee: "Hassan Ali",
-        dueDate: "Tomorrow",
-        priority: "Low",
-        status: "Pending",
-      },
-    ];
-    this.showForm = false;
+    this.tasks = [];
+  }
+
+  async getTasks() {
+    try {
+      const response = await Task.getAll();
+      this.tasks = response.data;
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      this.tasks = [];
+    }
   }
 
   render() {
@@ -575,7 +530,6 @@ class OperationalReports {
   }
 
   render() {
-    /*html*/
     return `
       <div class="space-y-6">
         <div>
@@ -610,52 +564,20 @@ class OperationalReports {
 
 class StockManagement {
   constructor() {
-    this.inventory = [
-      {
-        id: 1,
-        name: "Air Freshener",
-        sku: "AF-001",
-        quantity: 450,
-        minStock: 100,
-        status: "In Stock",
-      },
-      {
-        id: 2,
-        name: "Hand Wash",
-        sku: "HW-002",
-        quantity: 280,
-        minStock: 150,
-        status: "In Stock",
-      },
-      {
-        id: 3,
-        name: "Car Interior Spray",
-        sku: "CIS-003",
-        quantity: 85,
-        minStock: 100,
-        status: "Low Stock",
-      },
-      {
-        id: 4,
-        name: "Dish Liquid",
-        sku: "DL-004",
-        quantity: 320,
-        minStock: 200,
-        status: "In Stock",
-      },
-      {
-        id: 5,
-        name: "Alli Food Products",
-        sku: "AFP-005",
-        quantity: 45,
-        minStock: 100,
-        status: "Critical",
-      },
-    ];
+    this.inventory = [];
+  }
+
+  async getProducts() {
+    try {
+      const response = await Product.getAll();
+      this.inventory = response.data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      this.inventory = [];
+    }
   }
 
   render() {
-    /*html*/
     return `
       <div class="space-y-6">
         <div class="flex items-center justify-between">
@@ -728,40 +650,17 @@ class StockManagement {
 
 class CustomerFeedback {
   constructor() {
-    this.feedback = [
-      {
-        id: 1,
-        customer: "John Doe",
-        rating: 5,
-        comment: "Excellent service and fast delivery!",
-        date: "2024-01-15",
-        status: "Resolved",
-      },
-      {
-        id: 2,
-        customer: "Jane Smith",
-        rating: 4,
-        comment: "Good products, slight delay in delivery.",
-        date: "2024-01-14",
-        status: "Pending",
-      },
-      {
-        id: 3,
-        customer: "Mike Johnson",
-        rating: 5,
-        comment: "Very satisfied with the quality!",
-        date: "2024-01-13",
-        status: "Resolved",
-      },
-      {
-        id: 4,
-        customer: "Sarah Williams",
-        rating: 3,
-        comment: "Product quality could be better.",
-        date: "2024-01-12",
-        status: "In Review",
-      },
-    ];
+    this.feedback = [];
+  }
+
+  async getFeedback() {
+    try {
+      const response = await CustomerFeedback.getAll();
+      this.feedback = response.data;
+    } catch (error) {
+      console.error("Error fetching feedback:", error);
+      this.feedback = [];
+    }
   }
 
   render() {
@@ -851,40 +750,17 @@ class CustomerFeedback {
 
 class DeliveryTracking {
   constructor() {
-    this.deliveries = [
-      {
-        id: 1,
-        orderId: "ORD-001",
-        driver: "Ahmed Hassan",
-        destination: "Colombo",
-        status: "In Transit",
-        eta: "2:30 PM",
-      },
-      {
-        id: 2,
-        orderId: "ORD-002",
-        driver: "Fatima Khan",
-        destination: "Kandy",
-        status: "Delivered",
-        eta: "Completed",
-      },
-      {
-        id: 3,
-        orderId: "ORD-003",
-        driver: "Hassan Ali",
-        destination: "Galle",
-        status: "Pending",
-        eta: "4:00 PM",
-      },
-      {
-        id: 4,
-        orderId: "ORD-004",
-        driver: "Ahmed Hassan",
-        destination: "Jaffna",
-        status: "In Transit",
-        eta: "5:15 PM",
-      },
-    ];
+    this.deliveries = [];
+  }
+
+  async getDeliveries() {
+    try {
+      const response = await Delivery.getAll();
+      this.deliveries = response.data;
+    } catch (error) {
+      console.error("Error fetching deliveries:", error);
+      this.deliveries = [];
+    }
   }
 
   render() {
