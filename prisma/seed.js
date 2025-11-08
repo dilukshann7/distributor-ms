@@ -3,38 +3,22 @@ import "dotenv/config";
 
 const prisma = new PrismaClient();
 
-async function main(params) {
-  const user1 = await prisma.user.create({
+async function main() {
+  // --- 1. User ---
+
+  // --- 7. Supply ---
+  const supply = await prisma.supply.create({
     data: {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      password: "hashedpassword123", // ideally, use bcrypt to hash this
-      role: "manager",
-      phone: "0711234567",
-      address: "123 Main Street, Colombo",
-      salary: 75000.0,
-      bonus: 5000.0,
-      attendance: 95,
-      performanceRating: 4,
-      status: "active",
+      name: "Packaging Tape2",
+      sku: "SUP-002",
+      category: "Office Supplies2",
+      stock: 2020,
+      price: 250.0,
+      status: "available",
     },
   });
 
-  const user2 = await prisma.user.create({
-    data: {
-      name: "Jane Smith",
-      email: "jane.smith@example.com",
-      password: "hashedpassword456",
-      role: "employee",
-      phone: "0729876543",
-      address: "45 Flower Road, Kandy",
-      salary: 55000.0,
-      bonus: 3000.0,
-      attendance: 88,
-      performanceRating: 3,
-      status: "active",
-    },
-  });
+  console.log("✅ Seed data created successfully!");
 }
 
 main()
@@ -42,7 +26,7 @@ main()
     await prisma.$disconnect();
   })
   .catch(async (e) => {
-    console.error(e);
+    console.error("❌ Error seeding database:", e);
     await prisma.$disconnect();
     process.exit(1);
   });

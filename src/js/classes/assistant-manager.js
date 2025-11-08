@@ -8,7 +8,6 @@ class AssistantManagerDashboard {
   }
 
   render() {
-    /*html*/
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -113,7 +112,7 @@ class AssistantManagerDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
       overview: new DataVerification(),
       payments: new PaymentVerification(),
@@ -123,7 +122,11 @@ class AssistantManagerDashboard {
       distribution: new DistributionRecords(),
       emergency: new EmergencyDataRetrieval(),
     };
-    return sections[section].render();
+    const sectionInstance = sections[section];
+    if (section === "emergency") {
+      await sectionInstance.getEmergencyData();
+    }
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -251,7 +254,6 @@ class DataVerification {
   }
 
   render() {
-    /*html*/
     return `
       <div class="space-y-6">
         <div class="grid grid-cols-4 gap-4">

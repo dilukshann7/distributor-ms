@@ -1,4 +1,9 @@
 import logo from "../../assets/logo-tr.png";
+import { Supply } from "../models/Supply.js";
+import { Order } from "../models/Order.js";
+import { Shipment } from "../models/Shipment.js";
+import { Invoice } from "../models/Invoice.js";
+
 class SupplierDashboard {
   constructor(container) {
     this.container = container;
@@ -6,7 +11,8 @@ class SupplierDashboard {
     this.isSidebarOpen = true;
   }
 
-  render() {
+  async render() {
+    const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -14,7 +20,7 @@ class SupplierDashboard {
           ${this.renderHeader()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
-              ${this.renderSection(this.currentSection)}
+              ${sectionContent}
             </div>
           </main>
         </div>
@@ -27,10 +33,8 @@ class SupplierDashboard {
     const menuItems = [
       { id: "orders", label: "Purchase Orders", icon: "shopping-bag" },
       { id: "products", label: "Product Catalog", icon: "package" },
-      { id: "inventory", label: "Inventory Status", icon: "archive" },
       { id: "shipments", label: "Shipment Tracking", icon: "truck" },
       { id: "invoices", label: "Invoices & Payments", icon: "file-text" },
-      { id: "contracts", label: "Contracts & Terms", icon: "clipboard" },
       { id: "analytics", label: "Sales Analytics", icon: "trending-up" },
     ];
 
@@ -109,17 +113,28 @@ class SupplierDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
       orders: new PurchaseOrders(),
       products: new ProductCatalog(),
-      inventory: new InventoryStatus(),
       shipments: new ShipmentTracking(),
       invoices: new InvoicesPayments(),
-      contracts: new ContractsTerms(),
       analytics: new SalesAnalytics(),
     };
-    return sections[section].render();
+    const sectionInstance = sections[section];
+    if (section === "analytics") {
+      await sectionInstance.getSalesData();
+    } else if (section === "orders") {
+      await sectionInstance.getOrders();
+      await sectionInstance.getSummary();
+    } else if (section === "products") {
+      await sectionInstance.getSupply();
+    } else if (section === "shipments") {
+      await sectionInstance.getShipments();
+    } else if (section === "invoices") {
+      await sectionInstance.getInvoices();
+    }
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -157,10 +172,11 @@ class SupplierDashboard {
     }
   }
 
-  navigateToSection(section) {
+  async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = `<div class="p-8">${this.renderSection(section)}</div>`;
+    const sectionContent = await this.renderSection(section);
+    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -213,44 +229,28 @@ class SupplierDashboard {
 
 class PurchaseOrders {
   constructor() {
-    this.orders = [
-      {
-        id: "PO-2024-001",
-        distributor: "DBMS Central",
-        date: "2024-01-15",
-        items: 15,
-        total: 45000,
-        status: "pending",
-        dueDate: "2024-01-20",
-      },
-      {
-        id: "PO-2024-002",
-        distributor: "DBMS South",
-        date: "2024-01-14",
-        items: 8,
-        total: 28000,
-        status: "confirmed",
-        dueDate: "2024-01-19",
-      },
-      {
-        id: "PO-2024-003",
-        distributor: "DBMS North",
-        date: "2024-01-13",
-        items: 12,
-        total: 36000,
-        status: "shipped",
-        dueDate: "2024-01-18",
-      },
-      {
-        id: "PO-2024-004",
-        distributor: "DBMS East",
-        date: "2024-01-12",
-        items: 20,
-        total: 52000,
-        status: "delivered",
-        dueDate: "2024-01-17",
-      },
-    ];
+    this.orders = [];
+    this.summary = [];
+  }
+
+  async getOrders() {
+    try {
+      const response = await Order.getAll();
+      this.orders = response.data;
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      this.orders = [];
+    }
+  }
+
+  async getSummary() {
+    try {
+      const response = await Order.getSummary();
+      this.summary = response.data;
+    } catch (error) {
+      console.error("Error fetching order summary:", error);
+      this.summary = {};
+    }
   }
 
   render() {
@@ -262,7 +262,9 @@ class PurchaseOrders {
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-gray-600 text-sm">Total Orders</p>
-                <p class="text-3xl font-bold text-gray-900 mt-2">24</p>
+                <p class="text-3xl font-bold text-gray-900 mt-2">${
+                  this.summary.total || 0
+                }</p>
               </div>
               <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
             </div>
@@ -272,7 +274,9 @@ class PurchaseOrders {
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-gray-600 text-sm">Pending</p>
-                <p class="text-3xl font-bold text-yellow-600 mt-2">6</p>
+                <p class="text-3xl font-bold text-yellow-600 mt-2">${
+                  this.summary.pending || 0
+                }</p>
               </div>
               <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
@@ -282,7 +286,9 @@ class PurchaseOrders {
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-gray-600 text-sm">Shipped</p>
-                <p class="text-3xl font-bold text-blue-600 mt-2">10</p>
+                <p class="text-3xl font-bold text-blue-600 mt-2">${
+                  this.summary.shipped || 0
+                }</p>
               </div>
               <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
             </div>
@@ -292,7 +298,9 @@ class PurchaseOrders {
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-gray-600 text-sm">Completed</p>
-                <p class="text-3xl font-bold text-green-600 mt-2">8</p>
+                <p class="text-3xl font-bold text-green-600 mt-2">${
+                  this.summary.completed || 0
+                }</p>
               </div>
               <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
@@ -309,7 +317,6 @@ class PurchaseOrders {
               <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Distributor</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order Date</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Items</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Total</th>
@@ -326,22 +333,28 @@ class PurchaseOrders {
                     <td class="px-6 py-4 text-sm font-medium text-gray-900">${
                       order.id
                     }</td>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                      ${new Date(order.orderDate).toISOString().split("T")[0]}
+                    </td>
+                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">
+                      ${JSON.parse(order.items)
+                        .map((i) => `Product ${i.productId} (x${i.quantity})`)
+                        .join(", ")}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${order.totalAmount.toLocaleString(
+                      "en-US",
+                      {
+                        style: "currency",
+                        currency: "LKR",
+                      }
+                    )}</td>
                     <td class="px-6 py-4 text-sm text-gray-600">${
-                      order.distributor
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      order.date
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      order.items
-                    } items</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">Rs. ${order.total.toLocaleString()}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      order.dueDate
+                      new Date(order.dueDate).toISOString().split("T")[0]
                     }</td>
                     <td class="px-6 py-4 text-sm">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getStatusColor(
-                        order.status
+                        order.dueDate
                       )}">
                         ${
                           order.status.charAt(0).toUpperCase() +
@@ -387,53 +400,17 @@ class PurchaseOrders {
 
 class ProductCatalog {
   constructor() {
-    this.products = [
-      {
-        id: 1,
-        name: "Britol Air Freshener",
-        sku: "BAF-001",
-        category: "Air Care",
-        price: 250,
-        stock: 5000,
-        status: "In Stock",
-      },
-      {
-        id: 2,
-        name: "Handwash Liquid 500ml",
-        sku: "HW-002",
-        category: "Personal Care",
-        price: 180,
-        stock: 3200,
-        status: "In Stock",
-      },
-      {
-        id: 3,
-        name: "Car Interior Spray",
-        sku: "CIS-003",
-        category: "Automotive",
-        price: 320,
-        stock: 1500,
-        status: "Low Stock",
-      },
-      {
-        id: 4,
-        name: "Dish Liquid 1L",
-        sku: "DL-004",
-        category: "Kitchen",
-        price: 150,
-        stock: 4500,
-        status: "In Stock",
-      },
-      {
-        id: 5,
-        name: "Floor Cleaner 2L",
-        sku: "FC-005",
-        category: "Cleaning",
-        price: 280,
-        stock: 800,
-        status: "Low Stock",
-      },
-    ];
+    this.products = [];
+  }
+
+  async getSupply() {
+    try {
+      const response = await Supply.getAll();
+      this.products = response.data;
+    } catch (error) {
+      console.error("Error fetching supplies:", error);
+      this.products = [];
+    }
   }
 
   render() {
@@ -511,247 +488,19 @@ class ProductCatalog {
   }
 }
 
-class InventoryStatus {
-  constructor() {
-    this.inventory = [
-      {
-        id: 1,
-        productName: "Air Freshener",
-        sku: "AF-001",
-        quantity: 450,
-        reorderLevel: 100,
-        status: "in-stock",
-        warehouse: "Warehouse A",
-        lastUpdated: "2025-01-19",
-      },
-      {
-        id: 2,
-        productName: "Handwash",
-        sku: "HW-002",
-        quantity: 45,
-        reorderLevel: 50,
-        status: "low-stock",
-        warehouse: "Warehouse B",
-        lastUpdated: "2025-01-19",
-      },
-      {
-        id: 3,
-        productName: "Car Interior Spray",
-        sku: "CIS-003",
-        quantity: 320,
-        reorderLevel: 75,
-        status: "in-stock",
-        warehouse: "Warehouse A",
-        lastUpdated: "2025-01-18",
-      },
-      {
-        id: 4,
-        productName: "Dish Liquid",
-        sku: "DL-004",
-        quantity: 15,
-        reorderLevel: 80,
-        status: "critical",
-        warehouse: "Warehouse C",
-        lastUpdated: "2025-01-19",
-      },
-    ];
-  }
-
-  render() {
-    const totalItems = this.inventory.reduce(
-      (sum, item) => sum + item.quantity,
-      0
-    );
-    const lowStockItems = this.inventory.filter(
-      (item) => item.status === "low-stock"
-    ).length;
-    const criticalItems = this.inventory.filter(
-      (item) => item.status === "critical"
-    ).length;
-
-    return `
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-900">Inventory Status</h3>
-          <p class="text-gray-600 mt-1">Real-time inventory tracking and stock levels</p>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-600">
-            <p class="text-gray-600 text-sm">Total Products</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.inventory.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <p class="text-gray-600 text-sm">Total Units</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">${totalItems}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
-            <p class="text-gray-600 text-sm">Low Stock</p>
-            <p class="text-3xl font-bold text-yellow-600 mt-2">${lowStockItems}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
-            <p class="text-gray-600 text-sm">Critical</p>
-            <p class="text-3xl font-bold text-red-600 mt-2">${criticalItems}</p>
-          </div>
-        </div>
-
-        <!-- Inventory Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-            <h3 class="text-lg font-semibold text-gray-900">Inventory Overview</h3>
-            <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2 text-sm font-medium">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-              </svg>
-              Export Report
-            </button>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Product</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">SKU</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Quantity</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Reorder Level</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Warehouse</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Last Updated</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${this.inventory
-                  .map(
-                    (item) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${
-                      item.productName
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${item.sku}</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
-                      item.quantity
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      item.reorderLevel
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      item.warehouse
-                    }</td>
-                    <td class="px-6 py-4 text-sm">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        item.status === "in-stock"
-                          ? "bg-green-100 text-green-800"
-                          : item.status === "low-stock"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }">
-                        ${
-                          item.status === "in-stock"
-                            ? "In Stock"
-                            : item.status === "low-stock"
-                            ? "Low Stock"
-                            : "Critical"
-                        }
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      item.lastUpdated
-                    }</td>
-                    <td class="px-6 py-4 text-sm">
-                      <button class="text-indigo-600 hover:text-indigo-800 font-medium">Update</button>
-                    </td>
-                  </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Alerts -->
-        ${
-          criticalItems > 0 || lowStockItems > 0
-            ? `
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-yellow-900 mb-1">Stock Alerts</h5>
-              <p class="text-sm text-yellow-800">
-                ${
-                  criticalItems > 0
-                    ? `${criticalItems} item(s) at critical level. `
-                    : ""
-                }
-                ${
-                  lowStockItems > 0
-                    ? `${lowStockItems} item(s) running low on stock.`
-                    : ""
-                }
-                Please reorder soon.
-              </p>
-            </div>
-          </div>
-        </div>
-        `
-            : ""
-        }
-      </div>
-    `;
-  }
-}
-
 class ShipmentTracking {
   constructor() {
-    this.shipments = [
-      {
-        id: "SH-001",
-        orderId: "ORD-2024-001",
-        destination: "Colombo Main Store",
-        items: 150,
-        status: "in-transit",
-        estimatedDelivery: "2025-01-20",
-        trackingNumber: "TRK-8901234567",
-        carrier: "Express Logistics",
-      },
-      {
-        id: "SH-002",
-        orderId: "ORD-2024-002",
-        destination: "Kandy Branch",
-        items: 85,
-        status: "delivered",
-        estimatedDelivery: "2025-01-18",
-        trackingNumber: "TRK-8901234568",
-        carrier: "Fast Shipping",
-      },
-      {
-        id: "SH-003",
-        orderId: "ORD-2024-003",
-        destination: "Galle Warehouse",
-        items: 200,
-        status: "preparing",
-        estimatedDelivery: "2025-01-22",
-        trackingNumber: "TRK-8901234569",
-        carrier: "Express Logistics",
-      },
-      {
-        id: "SH-004",
-        orderId: "ORD-2024-004",
-        destination: "Negombo Store",
-        items: 120,
-        status: "in-transit",
-        estimatedDelivery: "2025-01-21",
-        trackingNumber: "TRK-8901234570",
-        carrier: "Quick Delivery",
-      },
-    ];
+    this.shipments = [];
+  }
+
+  async getShipments() {
+    try {
+      const response = await Shipment.getAll();
+      this.shipments = response.data;
+    } catch (error) {
+      console.error("Error fetching shipments:", error);
+      this.shipments = [];
+    }
   }
 
   render() {
@@ -869,64 +618,6 @@ class ShipmentTracking {
             </table>
           </div>
         </div>
-
-        <!-- Shipment Timeline (Example for first shipment) -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Recent Shipment Timeline (${
-            this.shipments[0].id
-          })</h4>
-          <div class="space-y-4">
-            ${[
-              {
-                time: "10:30 AM",
-                status: "Package picked up",
-                location: "Supplier Warehouse",
-                completed: true,
-              },
-              {
-                time: "2:15 PM",
-                status: "In transit",
-                location: "Distribution Center",
-                completed: true,
-              },
-              {
-                time: "Tomorrow",
-                status: "Out for delivery",
-                location: this.shipments[0].destination,
-                completed: false,
-              },
-              {
-                time: "Pending",
-                status: "Delivered",
-                location: this.shipments[0].destination,
-                completed: false,
-              },
-            ]
-              .map(
-                (event) => `
-              <div class="flex items-start gap-4">
-                <div class="flex-shrink-0">
-                  <div class="w-10 h-10 rounded-full ${
-                    event.completed ? "bg-indigo-600" : "bg-gray-300"
-                  } flex items-center justify-center">
-                    ${
-                      event.completed
-                        ? '<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
-                        : '<div class="w-3 h-3 bg-white rounded-full"></div>'
-                    }
-                  </div>
-                </div>
-                <div class="flex-1">
-                  <p class="font-semibold text-gray-900">${event.status}</p>
-                  <p class="text-sm text-gray-600">${event.location}</p>
-                  <p class="text-xs text-gray-500 mt-1">${event.time}</p>
-                </div>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
       </div>
     `;
   }
@@ -934,44 +625,17 @@ class ShipmentTracking {
 
 class InvoicesPayments {
   constructor() {
-    this.invoices = [
-      {
-        id: "INV-2025-001",
-        orderId: "ORD-2024-001",
-        amount: 125000,
-        issueDate: "2025-01-15",
-        dueDate: "2025-02-15",
-        status: "paid",
-        paymentDate: "2025-01-18",
-      },
-      {
-        id: "INV-2025-002",
-        orderId: "ORD-2024-002",
-        amount: 87500,
-        issueDate: "2025-01-18",
-        dueDate: "2025-02-18",
-        status: "pending",
-        paymentDate: null,
-      },
-      {
-        id: "INV-2025-003",
-        orderId: "ORD-2024-003",
-        amount: 156000,
-        issueDate: "2025-01-19",
-        dueDate: "2025-02-19",
-        status: "pending",
-        paymentDate: null,
-      },
-      {
-        id: "INV-2025-004",
-        orderId: "ORD-2024-004",
-        amount: 98000,
-        issueDate: "2025-01-10",
-        dueDate: "2025-01-25",
-        status: "overdue",
-        paymentDate: null,
-      },
-    ];
+    this.invoices = [];
+  }
+
+  async getInvoices() {
+    try {
+      const response = await Invoice.getAll();
+      this.invoices = response.data;
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      this.invoices = [];
+    }
   }
 
   render() {
@@ -1105,259 +769,6 @@ class InvoicesPayments {
             </table>
           </div>
         </div>
-
-        <!-- Payment Methods -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Payment Methods</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="border border-gray-200 rounded-lg p-4 hover:border-indigo-600 cursor-pointer transition-colors">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
-                  <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                  </svg>
-                </div>
-                <div>
-                  <p class="font-semibold text-gray-900">Bank Transfer</p>
-                  <p class="text-xs text-gray-600">Direct payment</p>
-                </div>
-              </div>
-            </div>
-            <div class="border border-gray-200 rounded-lg p-4 hover:border-indigo-600 cursor-pointer transition-colors">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
-                <div>
-                  <p class="font-semibold text-gray-900">Check</p>
-                  <p class="text-xs text-gray-600">Physical check</p>
-                </div>
-              </div>
-            </div>
-            <div class="border border-gray-200 rounded-lg p-4 hover:border-indigo-600 cursor-pointer transition-colors">
-              <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                </div>
-                <div>
-                  <p class="font-semibold text-gray-900">Cash</p>
-                  <p class="text-xs text-gray-600">Cash payment</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-class ContractsTerms {
-  constructor() {
-    this.contracts = [
-      {
-        id: "CNT-2025-001",
-        title: "Annual Supply Agreement",
-        startDate: "2025-01-01",
-        endDate: "2025-12-31",
-        value: 2500000,
-        status: "active",
-        terms: "12 months supply contract with monthly deliveries",
-      },
-      {
-        id: "CNT-2024-005",
-        title: "Bulk Purchase Contract",
-        startDate: "2024-06-01",
-        endDate: "2024-12-31",
-        value: 1800000,
-        status: "expiring",
-        terms: "6 months bulk purchase agreement",
-      },
-      {
-        id: "CNT-2024-003",
-        title: "Seasonal Supply Contract",
-        startDate: "2024-01-01",
-        endDate: "2024-12-31",
-        value: 3200000,
-        status: "completed",
-        terms: "Full year seasonal product supply",
-      },
-    ];
-  }
-
-  render() {
-    const activeContracts = this.contracts.filter(
-      (c) => c.status === "active"
-    ).length;
-    const expiringContracts = this.contracts.filter(
-      (c) => c.status === "expiring"
-    ).length;
-    const totalValue = this.contracts
-      .filter((c) => c.status === "active" || c.status === "expiring")
-      .reduce((sum, c) => sum + c.value, 0);
-
-    return `
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-900">Contracts & Terms</h3>
-          <p class="text-gray-600 mt-1">View and manage supplier agreements</p>
-        </div>
-
-        <!-- Contract Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-600">
-            <p class="text-gray-600 text-sm">Total Contracts</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.contracts.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">Active</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">${activeContracts}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
-            <p class="text-gray-600 text-sm">Expiring Soon</p>
-            <p class="text-3xl font-bold text-yellow-600 mt-2">${expiringContracts}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <p class="text-gray-600 text-sm">Total Value</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">Rs. ${(
-              totalValue / 1000000
-            ).toFixed(1)}M</p>
-          </div>
-        </div>
-
-        <!-- Contracts List -->
-        <div class="space-y-4">
-          ${this.contracts
-            .map(
-              (contract) => `
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-              <div class="p-6">
-                <div class="flex items-start justify-between">
-                  <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                      <h4 class="text-lg font-semibold text-gray-900">${
-                        contract.title
-                      }</h4>
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        contract.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : contract.status === "expiring"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-gray-100 text-gray-800"
-                      }">
-                        ${
-                          contract.status.charAt(0).toUpperCase() +
-                          contract.status.slice(1)
-                        }
-                      </span>
-                    </div>
-                    <p class="text-sm text-gray-600 mb-4">${contract.terms}</p>
-                    
-                    <div class="grid grid-cols-3 gap-4">
-                      <div>
-                        <p class="text-xs text-gray-500">Contract ID</p>
-                        <p class="text-sm font-semibold text-gray-900">${
-                          contract.id
-                        }</p>
-                      </div>
-                      <div>
-                        <p class="text-xs text-gray-500">Duration</p>
-                        <p class="text-sm font-semibold text-gray-900">${
-                          contract.startDate
-                        } to ${contract.endDate}</p>
-                      </div>
-                      <div>
-                        <p class="text-xs text-gray-500">Contract Value</p>
-                        <p class="text-sm font-semibold text-indigo-600">Rs. ${contract.value.toFixed(
-                          2
-                        )}</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div class="flex gap-2 ml-4">
-                    <button class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="View Details">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                      </svg>
-                    </button>
-                    <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Download">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `
-            )
-            .join("")}
-        </div>
-
-        <!-- Contract Terms Template -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Standard Contract Terms</h4>
-          <div class="space-y-3 text-sm text-gray-700">
-            <div class="flex items-start gap-2">
-              <svg class="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <p><strong>Payment Terms:</strong> Net 30 days from invoice date</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <svg class="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <p><strong>Delivery Schedule:</strong> Monthly deliveries on agreed dates</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <svg class="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <p><strong>Quality Standards:</strong> All products must meet ISO quality standards</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <svg class="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <p><strong>Returns Policy:</strong> Defective products can be returned within 14 days</p>
-            </div>
-            <div class="flex items-start gap-2">
-              <svg class="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              <p><strong>Renewal:</strong> Contract auto-renews unless terminated with 30 days notice</p>
-            </div>
-          </div>
-        </div>
-
-        ${
-          expiringContracts > 0
-            ? `
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-yellow-900 mb-1">Contract Expiration Alert</h5>
-              <p class="text-sm text-yellow-800">
-                ${expiringContracts} contract(s) expiring soon. Please review and renew to continue partnership.
-              </p>
-            </div>
-          </div>
-        </div>
-        `
-            : ""
-        }
       </div>
     `;
   }
@@ -1365,18 +776,43 @@ class ContractsTerms {
 
 class SalesAnalytics {
   constructor() {
-    this.salesData = {
-      daily: { orders: 12, revenue: 125000, items: 450 },
-      weekly: { orders: 85, revenue: 875000, items: 3200 },
-      monthly: { orders: 320, revenue: 3500000, items: 12500 },
-    };
+    this.topProducts = [];
+    this.salesData = [];
+  }
 
-    this.topProducts = [
-      { name: "Air Freshener", sold: 1250, revenue: 375000 },
-      { name: "Handwash", sold: 980, revenue: 294000 },
-      { name: "Dish Liquid", sold: 850, revenue: 255000 },
-      { name: "Car Interior Spray", sold: 720, revenue: 288000 },
-    ];
+  async getTopProducts() {
+    try {
+      const response = await Supply.getMostStocked(3);
+      this.topProducts = response.data;
+    } catch (error) {
+      console.error("Error fetching top products:", error);
+      this.topProducts = [];
+    }
+  }
+
+  async getSalesData() {
+    try {
+      const response = await Order.getDailyOrders();
+      const dailyOrders = response.data;
+
+      const weeklyResponse = await Order.getWeeklyOrders();
+      const weeklyOrders = weeklyResponse.data;
+
+      const monthlyResponse = await Order.getMonthlyOrders();
+      const monthlyOrders = monthlyResponse.data;
+      this.salesData = {
+        daily: dailyOrders,
+        weekly: weeklyOrders,
+        monthly: monthlyOrders,
+      };
+    } catch (error) {
+      console.error("Error fetching sales data:", error);
+      this.salesData = {
+        daily: { orders: 0, revenue: 0, items: 0 },
+        weekly: { orders: 0, revenue: 0, items: 0 },
+        monthly: { orders: 0, revenue: 0, items: 0 },
+      };
+    }
   }
 
   render() {
@@ -1573,7 +1009,7 @@ class SalesAnalytics {
   }
 }
 
-export function renderSupplierDashboard(container) {
+export async function renderSupplierDashboard(container) {
   const dashboard = new SupplierDashboard(container);
-  dashboard.render();
+  await dashboard.render();
 }

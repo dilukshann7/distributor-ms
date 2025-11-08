@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+  // Use default output so `@prisma/client` is generated under node_modules and available to the server
 }
 
 datasource db {
@@ -96,4 +96,62 @@ model Delivery {
   notes           String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  customerId  Int
+  orderDate   DateTime
+  status      String   @default("pending")
+  totalAmount Float
+  dueDate     DateTime
+  itemIDs     Int[]
+  items       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Supply {
+  id        Int      @id @default(autoincrement())
+  name      String
+  sku       String   @unique
+  category  String?
+  stock     Int
+  price     Float
+  status    String   @default("available")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invoice {
+  id              Int       @id @default(autoincrement())
+  invoiceNumber   String    @unique
+  purchaseOrderId Int
+  supplierId      Int
+  invoiceDate     DateTime
+  dueDate         DateTime
+  paidDate        DateTime?
+  totalAmount     Float
+  paidAmount      Float?
+  balance         Float?
+  status          String    @default("pending")
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Shipment {
+  id                   Int      @id @default(autoincrement())
+  shipmentNumber       String
+  purchaseOrderId      Int
+  supplierId           Int
+  shipmentDate         DateTime
+  expectedDeliveryDate DateTime
+  actualDeliveryDate   DateTime
+  trackingNumber       String
+  carrier              String
+  status               String   @default("pending")
+  notes                String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }

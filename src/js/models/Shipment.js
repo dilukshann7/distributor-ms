@@ -1,4 +1,5 @@
-// Shipment Class
+import axios from "axios";
+
 export class Shipment {
   constructor(data) {
     this.id = data.id;
@@ -20,7 +21,11 @@ export class Shipment {
   static async create(shipmentData) {}
   static async findById(id) {}
   static async findByShipmentNumber(number) {}
-  static async getAll(filters) {}
+  static async getAll(filters) {
+    const apiURL = "http://localhost:3000/api/shipments";
+
+    return axios.get(apiURL);
+  }
   static async getPending() {}
   static async getInTransit() {}
   static async getBySupplier(supplierId) {}
