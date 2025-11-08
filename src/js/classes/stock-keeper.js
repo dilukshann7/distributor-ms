@@ -1,4 +1,26 @@
 import logo from "../../assets/logo-tr.png";
+import { Product } from "../models/Product.js";
+
+// icons (moved from inline SVGs to asset files)
+import packageIcon from "../../assets/icons/package.svg";
+import messageSquareIcon from "../../assets/icons/message-square.svg";
+import alertCircleIcon from "../../assets/icons/alert-circle.svg";
+import chartBarIcon from "../../assets/icons/chart-bar.svg";
+import barcodeIcon from "../../assets/icons/barcode.svg";
+import checkSquareIcon from "../../assets/icons/check-square.svg";
+import bellIcon from "../../assets/icons/bell.svg";
+import userIcon from "../../assets/icons/user-circle.svg";
+import logoutIcon from "../../assets/icons/log-out.svg";
+import menuIcon from "../../assets/icons/menu.svg";
+import xIcon from "../../assets/icons/x.svg";
+import searchIcon from "../../assets/icons/search.svg";
+import plusIcon from "../../assets/icons/plus.svg";
+import editIcon from "../../assets/icons/edit.svg";
+import trashIcon from "../../assets/icons/trash.svg";
+import alertTriangleIcon from "../../assets/icons/alert-triangle.svg";
+import clockIcon from "../../assets/icons/clock.svg";
+import checkCircleIcon from "../../assets/icons/check-circle.svg";
+import trendUpIcon from "../../assets/icons/trend-up.svg";
 
 class StockKeeperDashboard {
   constructor(container) {
@@ -7,7 +29,8 @@ class StockKeeperDashboard {
     this.isSidebarOpen = true;
   }
 
-  render() {
+  async render() {
+    const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -15,7 +38,7 @@ class StockKeeperDashboard {
           ${this.renderHeader()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
-              ${this.renderSection(this.currentSection)}
+              ${sectionContent}
             </div>
           </main>
         </div>
@@ -116,7 +139,7 @@ class StockKeeperDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
       inventory: new InventoryManagement(),
       receiving: new ReceivingShipment(),
@@ -125,7 +148,11 @@ class StockKeeperDashboard {
       barcode: new BarcodeScanning(),
       auditing: new StockAuditing(),
     };
-    return sections[section].render();
+    const sectionInstance = sections[section];
+    if (section === "inventory") {
+      await sectionInstance.getInventoryItems();
+    }
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -163,10 +190,11 @@ class StockKeeperDashboard {
     }
   }
 
-  navigateToSection(section) {
+  async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = `<div class="p-8">${this.renderSection(section)}</div>`;
+    const sectionContent = await this.renderSection(section);
+    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -219,57 +247,17 @@ class StockKeeperDashboard {
 
 class InventoryManagement {
   constructor() {
-    this.searchTerm = "";
-    this.inventoryItems = [
-      {
-        id: 1,
-        name: "Air Freshener",
-        sku: "AF-001",
-        quantity: 450,
-        minStock: 100,
-        maxStock: 500,
-        expiryDate: "2025-12-31",
-        batchNumber: "BATCH-2024-001",
-        location: "A1-01",
-        unit: "Boxes",
-      },
-      {
-        id: 2,
-        name: "Handwash",
-        sku: "HW-002",
-        quantity: 45,
-        minStock: 100,
-        maxStock: 300,
-        expiryDate: "2025-06-15",
-        batchNumber: "BATCH-2024-002",
-        location: "B2-03",
-        unit: "Cartons",
-      },
-      {
-        id: 3,
-        name: "Car Interior Spray",
-        sku: "CIS-003",
-        quantity: 320,
-        minStock: 150,
-        maxStock: 400,
-        expiryDate: "2026-03-20",
-        batchNumber: "BATCH-2024-003",
-        location: "C1-05",
-        unit: "Boxes",
-      },
-      {
-        id: 4,
-        name: "Dish Liquid",
-        sku: "DL-004",
-        quantity: 78,
-        minStock: 200,
-        maxStock: 500,
-        expiryDate: "2025-09-10",
-        batchNumber: "BATCH-2024-004",
-        location: "A3-02",
-        unit: "Bottles",
-      },
-    ];
+    this.inventoryItems = [];
+  }
+
+  async getInventoryItems() {
+    try {
+      const response = await Product.getAll();
+      this.inventoryItems = response.data;
+    } catch (error) {
+      console.error("Error fetching inventory items:", error);
+      this.inventoryItems = [];
+    }
   }
 
   render() {
@@ -323,7 +311,7 @@ class InventoryManagement {
                           ? "bg-yellow-100 text-yellow-700"
                           : "bg-green-100 text-green-700"
                       }">
-                        ${item.quantity} ${item.unit}
+                        ${item.quantity}
                       </span>
                     </td>
                     <td class="py-3 px-4 text-gray-600 text-sm">${
@@ -1115,7 +1103,7 @@ class StockAuditing {
   }
 }
 
-export function renderStockKeeperDashboard(container) {
+export async function renderStockKeeperDashboard(container) {
   const dashboard = new StockKeeperDashboard(container);
-  dashboard.render();
+  await dashboard.render();
 }
