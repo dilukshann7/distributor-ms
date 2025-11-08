@@ -1,5 +1,5 @@
-// CustomerFeedback Class
-export class CustomerFeedback {
+// Feedback Class
+export class Feedback {
   constructor(data) {
     this.id = data.id;
     this.customerId = data.customerId;

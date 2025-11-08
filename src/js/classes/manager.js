@@ -20,7 +20,7 @@ import logo from "../../assets/logo-tr.png";
 import { User } from "../models/User.js";
 import { Task } from "../models/Task.js";
 import { Product } from "../models/Product.js";
-import { CustomerFeedback } from "../models/CustomerFeedback.js";
+import { Feedback } from "../models/Feedback.js";
 import { Delivery } from "../models/Delivery.js";
 
 class ManagerDashboard {
@@ -655,7 +655,7 @@ class CustomerFeedback {
 
   async getFeedback() {
     try {
-      const response = await CustomerFeedback.getAll();
+      const response = await Feedback.getAll();
       this.feedback = response.data;
     } catch (error) {
       console.error("Error fetching feedback:", error);
