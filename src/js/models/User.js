@@ -1,3 +1,5 @@
+import axios from "axios";
+
 // User/Employee Class
 export class User {
   constructor(data) {
@@ -34,7 +36,11 @@ export class User {
   static async findById(id) {}
   static async findByEmail(email) {}
   static async findByRole(role) {}
-  static async getAll(filters) {}
+  static async getAll(filters) {
+    const apiURL = "http://localhost:3000/api/users";
+
+    return axios.get(apiURL);
+  }
   static async search(searchTerm) {}
 
   // Instance methods - Employee Management

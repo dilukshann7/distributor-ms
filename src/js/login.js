@@ -119,11 +119,10 @@ export function renderLogin(container) {
   });
 }
 
-export function renderDashboard(container, role) {
+export async function renderDashboard(container, role) {
   if (role === "owner") {
-    import("./classes/owner.js").then((module) => {
-      module.renderOwnerDashboard(container);
-    });
+    const module = await import("./classes/owner.js");
+    await module.renderOwnerDashboard(container);
   } else if (role === "manager") {
     import("./classes/manager.js").then((module) => {
       module.renderManagerDashboard(container);

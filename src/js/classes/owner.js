@@ -28,21 +28,26 @@ class OwnerDashboard {
   }
 
   /*html*/
-  render() {
+  async render() {
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
           <main id="dashboardContent" class="flex-1 overflow-auto bg-gray-50">
-            ${this.renderSection(this.currentSection)}
+            <div class="p-8 text-center text-gray-500">Loading...</div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
+
+    // Load initial section content
+    const content = this.container.querySelector("#dashboardContent");
+    const html = await this.renderSection(this.currentSection);
+    content.innerHTML = html;
   }
-  /*html*/
+
   renderSidebar() {
     const menuItems = [
       { id: "overview", label: "Financial Overview", icon: "chart-bar" },
@@ -51,7 +56,7 @@ class OwnerDashboard {
       { id: "operations", label: "Operations Monitor", icon: "activity" },
       { id: "reports", label: "Reports & Analytics", icon: "file-text" },
     ];
-    /*html*/
+
     return `
       <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div class="p-6 border-b border-gray-200">
@@ -96,7 +101,6 @@ class OwnerDashboard {
   }
 
   renderHeader() {
-    /*html*/
     return `
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div class="flex-1 max-w-md">
@@ -167,10 +171,17 @@ class OwnerDashboard {
     }
   }
 
-  navigateToSection(section) {
+  async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = this.renderSection(section);
+
+    // Show loading state
+    content.innerHTML =
+      '<div class="p-8 text-center text-gray-500">Loading...</div>';
+
+    // Load and render section
+    const html = await this.renderSection(section);
+    content.innerHTML = html;
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -332,7 +343,6 @@ class EmployeeManagement {
   }
 
   render() {
-    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div class="flex items-center justify-between">
@@ -432,8 +442,16 @@ class InventoryControl {
     }
   }
 
+  async getProducts() {
+    try {
+      const response = await Product.getAll();
+      this.inventory = response.data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      this.inventory = [];
+    }
+  }
   render() {
-    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div class="flex items-center justify-between">
@@ -769,7 +787,7 @@ class ReportsSection {
   }
 }
 
-export function renderOwnerDashboard(container) {
+export async function renderOwnerDashboard(container) {
   const dashboard = new OwnerDashboard(container);
-  dashboard.render();
+  await dashboard.render();
 }
