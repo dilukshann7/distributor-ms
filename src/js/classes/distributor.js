@@ -134,6 +134,10 @@ class DistributorDashboard {
       await sectionInstance.getInventoryItems();
     } else if (section === "routes") {
       await sectionInstance.getDeliveryRoutes();
+    } else if (section === "delivery") {
+      await sectionInstance.getDeliveries();
+    } else if (section === "authorization") {
+      await sectionInstance.getPendingOrders();
     }
 
     return sectionInstance.render();
@@ -608,6 +612,11 @@ class DeliveryRoutes {
   }
 
   render() {
+    // ✅ Only show scheduled and in_transit routes
+    const activeRoutes = this.routes.filter(
+      (r) => r.status === "scheduled" || r.status === "in_transit"
+    );
+
     return `
       <div class="space-y-6">
         <div>
@@ -617,14 +626,12 @@ class DeliveryRoutes {
 
         <!-- Routes List -->
         <div class="space-y-4">
-          ${this.routes
+          ${activeRoutes
             .map(
               (route) => `
             <div class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 ${
-              route.status === "active"
+              route.status === "in_transit"
                 ? "border-blue-600"
-                : route.status === "completed"
-                ? "border-green-600"
                 : "border-gray-400"
             }">
               <div class="p-6">
@@ -635,11 +642,9 @@ class DeliveryRoutes {
                         route.deliveryAddress
                       }</h4>
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        route.status === "active"
+                        route.status === "in_transit"
                           ? "bg-blue-100 text-blue-800"
-                          : route.status === "completed"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
+                          : "bg-yellow-100 text-yellow-800"
                       }">
                         ${
                           route.status.charAt(0).toUpperCase() +
@@ -721,7 +726,6 @@ class DeliveryRoutes {
             )
             .join("")}
         </div>
-        
       </div>
     `;
   }
@@ -729,234 +733,113 @@ class DeliveryRoutes {
 
 class ProofOfDelivery {
   constructor() {
-    this.deliveries = [
-      {
-        id: "POD-001",
-        orderId: "ORD-001",
-        customer: "ABC Store",
-        address: "123 Main St, Colombo",
-        deliveredBy: "John Driver",
-        deliveryDate: "2025-01-19 14:30",
-        status: "signed",
-        signature: true,
-        photo: true,
-        notes: "Delivered to reception",
-      },
-      {
-        id: "POD-002",
-        orderId: "ORD-002",
-        customer: "XYZ Market",
-        address: "456 Park Ave, Kandy",
-        deliveredBy: "Sarah Driver",
-        deliveryDate: "2025-01-19 15:15",
-        status: "signed",
-        signature: true,
-        photo: true,
-        notes: "Left with security guard",
-      },
-      {
-        id: "POD-003",
-        orderId: "ORD-003",
-        customer: "Quick Mart",
-        address: "789 Lake Rd, Galle",
-        deliveredBy: "John Driver",
-        deliveryDate: "2025-01-19 16:00",
-        status: "pending",
-        signature: false,
-        photo: false,
-        notes: "",
-      },
-      {
-        id: "POD-004",
-        orderId: "ORD-004",
-        customer: "City Center",
-        address: "321 Beach Rd, Negombo",
-        deliveredBy: "Mike Driver",
-        deliveryDate: "2025-01-19 16:45",
-        status: "signed",
-        signature: true,
-        photo: false,
-        notes: "Delivered to manager",
-      },
-    ];
+    this.deliveries = [];
+  }
+
+  async getDeliveries() {
+    try {
+      const response = await Delivery.getAll();
+      this.deliveries = response.data;
+    } catch (error) {
+      console.error("Error fetching deliveries:", error);
+      this.deliveries = [];
+    }
   }
 
   render() {
-    const signedCount = this.deliveries.filter(
+    // Filter only delivered deliveries
+    const deliveredDeliveries = this.deliveries.filter(
+      (d) => d.status === "delivered"
+    );
+
+    const signedCount = deliveredDeliveries.filter(
       (d) => d.status === "signed"
     ).length;
-    const pendingCount = this.deliveries.filter(
+    const pendingCount = deliveredDeliveries.filter(
       (d) => d.status === "pending"
     ).length;
-    const withPhotos = this.deliveries.filter((d) => d.photo).length;
+    const withPhotos = deliveredDeliveries.filter((d) => d.photo).length;
 
     return `
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-900">Proof of Delivery</h3>
-          <p class="text-gray-600 mt-1">Manage delivery confirmations and signatures</p>
-        </div>
+    <div class="space-y-6">
+      <div>
+        <h3 class="text-2xl font-bold text-gray-900">Proof of Delivery</h3>
+        <p class="text-gray-600 mt-1">Manage delivery confirmations</p>
+      </div>
 
-        <!-- Deliveries Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Delivery Records</h3>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">POD ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Delivered By</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date & Time</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Proof</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+      <!-- Deliveries Table -->
+      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Delivered Records</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">POD ID</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Delivered By</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date & Time</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${deliveredDeliveries
+                .map(
+                  (delivery) => `
+                <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 text-sm font-semibold text-gray-900">${delivery.deliveryNumber}</td>
+                  <td class="px-6 py-4 text-sm text-orange-600 font-medium">${delivery.id}</td>
+                  <td class="px-6 py-4">
+                    <div>
+                      <p class="text-sm font-medium text-gray-900">${delivery.deliveryAddress}</p>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-900">${delivery.driver.name}</td>
+                  <td class="px-6 py-4 text-sm text-gray-600">${delivery.deliveredDate}</td>
+                  
+                  <td class="px-6 py-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                      Delivered
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <button class="text-orange-600 hover:text-orange-800 font-medium text-sm">View Details</button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                ${this.deliveries
-                  .map(
-                    (delivery) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
-                      delivery.id
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-orange-600 font-medium">${
-                      delivery.orderId
-                    }</td>
-                    <td class="px-6 py-4">
-                      <div>
-                        <p class="text-sm font-medium text-gray-900">${
-                          delivery.customer
-                        }</p>
-                        <p class="text-xs text-gray-600">${delivery.address}</p>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${
-                      delivery.deliveredBy
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      delivery.deliveryDate
-                    }</td>
-                    <td class="px-6 py-4">
-                      <div class="flex items-center gap-2">
-                        ${
-                          delivery.signature
-                            ? '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
-                            : '<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>'
-                        }
-                        ${
-                          delivery.photo
-                            ? '<svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>'
-                            : '<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>'
-                        }
-                      </div>
-                    </td>
-                    <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        delivery.status === "signed"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }">
-                        ${
-                          delivery.status.charAt(0).toUpperCase() +
-                          delivery.status.slice(1)
-                        }
-                      </span>
-                    </td>
-                    <td class="px-6 py-4">
-                      <button class="text-orange-600 hover:text-orange-800 font-medium text-sm">View Details</button>
-                    </td>
-                  </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
         </div>
       </div>
-    `;
+    </div>
+  `;
   }
 }
 
 class OrderAuthorization {
   constructor() {
-    this.pendingOrders = [
-      {
-        id: "ORD-025",
-        customer: "Metro Supermarket",
-        items: 15,
-        value: 125000,
-        requestedBy: "Sales Team",
-        requestDate: "2025-01-19 09:30",
-        priority: "high",
-        notes: "Urgent request - store opening",
-      },
-      {
-        id: "ORD-026",
-        customer: "Corner Shop",
-        items: 8,
-        value: 45000,
-        requestedBy: "Sales Team",
-        requestDate: "2025-01-19 10:15",
-        priority: "normal",
-        notes: "Regular monthly order",
-      },
-      {
-        id: "ORD-027",
-        customer: "City Mall",
-        items: 25,
-        value: 280000,
-        requestedBy: "Sales Team",
-        requestDate: "2025-01-19 11:00",
-        priority: "high",
-        notes: "New store - first order",
-      },
-      {
-        id: "ORD-028",
-        customer: "Beach Store",
-        items: 12,
-        value: 87000,
-        requestedBy: "Sales Team",
-        requestDate: "2025-01-19 12:30",
-        priority: "normal",
-        notes: "Standard delivery",
-      },
-    ];
+    this.pendingOrders = [];
+  }
 
-    this.authorizedOrders = [
-      {
-        id: "ORD-024",
-        customer: "Quick Mart",
-        items: 10,
-        value: 68000,
-        authorizedBy: "John Distributor",
-        authorizedDate: "2025-01-19 08:45",
-        status: "approved",
-      },
-      {
-        id: "ORD-023",
-        customer: "Food Palace",
-        items: 18,
-        value: 145000,
-        authorizedBy: "John Distributor",
-        authorizedDate: "2025-01-19 08:30",
-        status: "approved",
-      },
-    ];
+  async getPendingOrders() {
+    try {
+      const response = await SalesOrder.getAll();
+      this.pendingOrders = response.data.filter(
+        (order) => order.status === "pending"
+      );
+      console.log("Pending Orders:", this.pendingOrders);
+    } catch (error) {
+      console.error("Error fetching sales orders:", error);
+      this.pendingOrders = [];
+    }
   }
 
   render() {
-    const highPriority = this.pendingOrders.filter(
-      (o) => o.priority === "high"
-    ).length;
-    const totalValue = this.pendingOrders.reduce((sum, o) => sum + o.value, 0);
-    const totalItems = this.pendingOrders.reduce((sum, o) => sum + o.items, 0);
-
     return `
       <div class="space-y-6">
         <div>
@@ -964,35 +847,9 @@ class OrderAuthorization {
           <p class="text-gray-600 mt-1">Authorize and approve pending orders</p>
         </div>
 
-        <!-- Authorization Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-600">
-            <p class="text-gray-600 text-sm">Pending Orders</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.pendingOrders.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
-            <p class="text-gray-600 text-sm">High Priority</p>
-            <p class="text-3xl font-bold text-red-600 mt-2">${highPriority}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <p class="text-gray-600 text-sm">Total Items</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">${totalItems}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">Total Value</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${(
-              totalValue / 1000
-            ).toFixed(0)}K</p>
-          </div>
-        </div>
-
         <!-- Pending Orders -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Pending Authorization</h3>
-          </div>
+          
           <div class="divide-y divide-gray-200">
             ${this.pendingOrders
               .map(
@@ -1002,20 +859,13 @@ class OrderAuthorization {
                   <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
                       <h4 class="text-lg font-semibold text-gray-900">${
-                        order.id
+                        order.orderNumber
                       }</h4>
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        order.priority === "high"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-blue-100 text-blue-800"
-                      }">
-                        ${
-                          order.priority === "high" ? "High Priority" : "Normal"
-                        }
+                      
                       </span>
                     </div>
                     <p class="text-sm font-medium text-gray-700">${
-                      order.customer
+                      order.customerName
                     }</p>
                     <p class="text-xs text-gray-600 mt-1">${order.notes}</p>
                   </div>
@@ -1024,26 +874,28 @@ class OrderAuthorization {
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   <div>
                     <p class="text-xs text-gray-500">Items</p>
-                    <p class="text-sm font-semibold text-gray-900">${
-                      order.items
-                    } items</p>
+                    <p class="text-sm font-semibold text-gray-900">
+                      ${order.items
+                        .map((item) => `${item.name} (${item.quantity})`)
+                        .join(", ")}
+                    </p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Order Value</p>
-                    <p class="text-sm font-semibold text-green-600">Rs. ${order.value.toFixed(
+                    <p class="text-sm font-semibold text-green-600">Rs. ${order.totalAmount.toFixed(
                       2
                     )}</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Requested By</p>
                     <p class="text-sm font-semibold text-gray-900">${
-                      order.requestedBy
+                      order.customerName
                     }</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Request Date</p>
                     <p class="text-sm font-semibold text-gray-900">${
-                      order.requestDate
+                      order.orderDate
                     }</p>
                   </div>
                 </div>
@@ -1072,84 +924,10 @@ class OrderAuthorization {
           </div>
         </div>
 
-        <!-- Recently Authorized -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Recently Authorized Orders</h3>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Items</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Value</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Authorized By</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${this.authorizedOrders
-                  .map(
-                    (order) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-semibold text-orange-600">${
-                      order.id
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${
-                      order.customer
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      order.items
-                    } items</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">Rs. ${order.value.toFixed(
-                      2
-                    )}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      order.authorizedBy
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      order.authorizedDate
-                    }</td>
-                    <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                        Approved
-                      </span>
-                    </td>
-                  </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Authorization Guidelines -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-blue-900 mb-1">Authorization Guidelines</h5>
-              <ul class="text-sm text-blue-800 space-y-1">
-                <li>• Review order details carefully before authorization</li>
-                <li>• Prioritize high-priority and time-sensitive orders</li>
-                <li>• Verify customer credit status for large orders</li>
-                <li>• Ensure stock availability before approving orders</li>
-                <li>• Document reasons for rejected orders</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
         <!-- Bulk Actions -->
         <div class="bg-white rounded-lg shadow-md p-6">
           <h4 class="text-lg font-semibold text-gray-900 mb-4">Bulk Actions</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -1162,12 +940,7 @@ class OrderAuthorization {
               </svg>
               Export Report
             </button>
-            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-              </svg>
-              Filter Orders
-            </button>
+            
           </div>
         </div>
       </div>
