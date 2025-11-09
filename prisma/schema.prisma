@@ -252,3 +252,26 @@ model SalesInvoice {
   salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
   delivery   Delivery?   @relation(fields: [deliveryId], references: [id])
 }
+
+model Cart {
+  id          Int      @id @default(autoincrement())
+  items       Json
+  totalAmount Float
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  smallOrder SmallOrder?
+}
+
+model SmallOrder {
+  id            Int      @id @default(autoincrement())
+  orderNumber   String   @unique
+  cartId        Int      @unique // Added @unique for one-to-one relation
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  paymentMethod String?
+
+  cart Cart @relation(fields: [cartId], references: [id]) // Fixed: use cartId, not id
+}

@@ -635,6 +635,30 @@ app.get("/api/sales-invoices/driver/:driverId", async (req, res) => {
   }
 });
 
+app.get("/api/carts", async (req, res) => {
+  try {
+    const carts = await prisma.cart.findMany();
+    res.json(carts);
+  } catch (error) {
+    console.error("Error fetching carts:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/api/small-orders", async (req, res) => {
+  try {
+    const smallOrders = await prisma.smallOrder.findMany({
+      include: {
+        cart: true,
+      },
+    });
+    res.json(smallOrders);
+  } catch (error) {
+    console.error("Error fetching small orders:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
