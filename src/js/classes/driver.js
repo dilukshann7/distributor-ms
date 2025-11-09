@@ -1,5 +1,6 @@
 import logo from "../../assets/logo-tr.png";
 import { Driver } from "../models/Drivers.js";
+import { SalesInvoice } from "../models/SalesInvoice.js";
 
 class DriverDashboard {
   constructor(container) {
@@ -124,6 +125,8 @@ class DriverDashboard {
       await sectionInstance.getDeliveries();
     } else if (section === "proof") {
       await sectionInstance.getProofDeliveries();
+    } else if (section === "payment") {
+      await sectionInstance.getPayments();
     }
     return sectionInstance.render();
   }
@@ -491,35 +494,18 @@ class ProofOfDelivery {
 
 class PaymentCollection {
   constructor() {
-    this.payments = [
-      {
-        id: "PAY-001",
-        orderId: "ORD-2024-105",
-        customer: "ABC Retail Store",
-        amount: 45000,
-        paymentMethod: "cash",
-        status: "collected",
-        collectedAt: "09:35 AM",
-      },
-      {
-        id: "PAY-002",
-        orderId: "ORD-2024-106",
-        customer: "XYZ Supermarket",
-        amount: 67500,
-        paymentMethod: "pending",
-        status: "pending",
-        dueAmount: 67500,
-      },
-      {
-        id: "PAY-003",
-        orderId: "ORD-2024-107",
-        customer: "Quick Shop",
-        amount: 32000,
-        paymentMethod: "card",
-        status: "collected",
-        collectedAt: "12:15 PM",
-      },
-    ];
+    this.payments = [];
+  }
+
+  async getPayments() {
+    try {
+      const id = window.location.search.split("id=")[1];
+      const response = await SalesInvoice.findById(id);
+      this.payments = response.data;
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      this.payments = [];
+    }
   }
 
   render() {
@@ -539,34 +525,6 @@ class PaymentCollection {
         <div>
           <h3 class="text-2xl font-bold text-gray-900">Payment Collection</h3>
           <p class="text-gray-600 mt-1">Record and manage cash-on-delivery payments</p>
-        </div>
-
-        <!-- Payment Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">Total Amount</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">Rs. ${(
-              totalAmount / 1000
-            ).toFixed(0)}K</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <p class="text-gray-600 text-sm">Collected</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">Rs. ${(
-              collected / 1000
-            ).toFixed(0)}K</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-600">
-            <p class="text-gray-600 text-sm">Pending</p>
-            <p class="text-3xl font-bold text-orange-600 mt-2">Rs. ${(
-              pending / 1000
-            ).toFixed(0)}K</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-600">
-            <p class="text-gray-600 text-sm">Transactions</p>
-            <p class="text-3xl font-bold text-purple-600 mt-2">${collectedCount}/${
-      this.payments.length
-    }</p>
-          </div>
         </div>
 
         <!-- Payment Collection Form -->
@@ -627,36 +585,38 @@ class PaymentCollection {
                       payment.id
                     }</td>
                     <td class="px-6 py-4 text-sm text-green-600 font-medium">${
-                      payment.orderId
+                      payment.salesOrder.orderNumber
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-900">${
-                      payment.customer
+                      payment.salesOrder.customerName
                     }</td>
-                    <td class="px-6 py-4 text-sm font-bold text-gray-900">Rs. ${payment.amount.toFixed(
+                    <td class="px-6 py-4 text-sm font-bold text-gray-900">Rs. ${payment.salesOrder.totalAmount.toFixed(
                       2
                     )}</td>
                     <td class="px-6 py-4 text-sm text-gray-600 capitalize">${
                       payment.paymentMethod
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-600">${
-                      payment.collectedAt || "-"
+                      payment.collectedAt
                     }</td>
                     <td class="px-6 py-4">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        payment.status === "collected"
+                        payment.salesOrder.status === "confirmed"
                           ? "bg-green-100 text-green-800"
                           : "bg-orange-100 text-orange-800"
                       }">
-                        ${
-                          payment.status === "collected"
-                            ? "Collected"
-                            : "Pending"
-                        }
+                       ${
+                         (console.log(payment.salesOrder.status),
+                         payment.salesOrder.status?.toLowerCase() ===
+                         "confirmed"
+                           ? "Confirmed"
+                           : "Pending")
+                       }
                       </span>
                     </td>
                     <td class="px-6 py-4">
                       ${
-                        payment.status === "pending"
+                        payment.delivery.status === "pending"
                           ? `
                         <button class="text-green-600 hover:text-green-800 font-medium text-sm">Collect</button>
                       `
@@ -671,41 +631,6 @@ class PaymentCollection {
                   .join("")}
               </tbody>
             </table>
-          </div>
-        </div>
-
-        <!-- Payment Summary -->
-        <div class="bg-gradient-to-r from-green-600 to-green-700 rounded-lg shadow-lg p-6 text-white">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-green-100 text-sm mb-1">Total Collected Today</p>
-              <p class="text-4xl font-bold">Rs. ${collected.toFixed(2)}</p>
-            </div>
-            <div class="text-right">
-              <p class="text-green-100 text-sm mb-1">Collection Rate</p>
-              <p class="text-4xl font-bold">${(
-                (collected / totalAmount) *
-                100
-              ).toFixed(0)}%</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Payment Guidelines -->
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-yellow-900 mb-1">Payment Collection Guidelines</h5>
-              <ul class="text-sm text-yellow-800 space-y-1">
-                <li>• Count cash carefully before accepting payment</li>
-                <li>• Provide receipt for all collected payments</li>
-                <li>• Record payment immediately after collection</li>
-                <li>• Report any payment discrepancies immediately</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>

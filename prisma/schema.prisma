@@ -100,7 +100,10 @@ model Delivery {
   driver Driver @relation(fields: [driverId], references: [id])
 
   // Relation: One Delivery has many SalesOrders
-  salesOrders SalesOrder[] // 👈 one-to-many link
+  salesOrders SalesOrder[]
+
+  // New back-relation: One Delivery can have many SalesInvoices
+  invoices SalesInvoice[]
 }
 
 model SalesOrder {
@@ -124,6 +127,9 @@ model SalesOrder {
   // Foreign key to Delivery
   deliveryId Int?
   delivery   Delivery? @relation(fields: [deliveryId], references: [id])
+
+  // New back-relation: One SalesOrder can have many SalesInvoices
+  invoices SalesInvoice[]
 }
 
 model Order {
@@ -224,4 +230,25 @@ model Driver {
 
   // Relation: One Driver has many Deliveries
   deliveries Delivery[] // 👈 back-relation
+}
+
+model SalesInvoice {
+  id              Int       @id @default(autoincrement())
+  invoiceNumber   String    @unique
+  customerId      Int
+  salesOrderId    Int? // link to SalesOrder
+  deliveryId      Int? // link to Delivery
+  date            DateTime
+  paymentMethod   String
+  items           Json
+  subtotal        Float
+  collectedAmount Float
+  collectedAt     DateTime?
+  status          String    @default("pending")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
+  delivery   Delivery?   @relation(fields: [deliveryId], references: [id])
 }

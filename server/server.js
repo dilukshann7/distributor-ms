@@ -594,6 +594,47 @@ app.get("/api/customers", async (req, res) => {
   }
 });
 
+app.get("/api/sales-invoices", async (req, res) => {
+  try {
+    const salesInvoices = await prisma.salesInvoice.findMany({
+      include: {
+        salesOrder: true, // include linked SalesOrder
+        delivery: true, // include linked Delivery
+      },
+    });
+
+    res.json(salesInvoices);
+  } catch (error) {
+    console.error("Error fetching sales invoices:", error);
+    res.status(500).json({ error: "Failed to fetch sales invoices" });
+  }
+});
+
+app.get("/api/sales-invoices/driver/:driverId", async (req, res) => {
+  const driverId = parseInt(req.params.driverId);
+
+  try {
+    const salesInvoices = await prisma.salesInvoice.findMany({
+      where: {
+        delivery: {
+          driverId: driverId, // filter invoices where the linked delivery has this driver
+        },
+      },
+      include: {
+        salesOrder: true, // include linked sales order
+        delivery: true, // include linked delivery
+      },
+    });
+
+    res.json(salesInvoices);
+  } catch (error) {
+    console.error("Error fetching sales invoices by driver:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to fetch sales invoices for this driver" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
