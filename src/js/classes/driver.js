@@ -1,4 +1,5 @@
 import logo from "../../assets/logo-tr.png";
+import { Driver } from "../models/Drivers.js";
 
 class DriverDashboard {
   constructor(container) {
@@ -7,7 +8,8 @@ class DriverDashboard {
     this.isSidebarOpen = true;
   }
 
-  render() {
+  async render() {
+    const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -15,7 +17,7 @@ class DriverDashboard {
           ${this.renderHeader()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
-              ${this.renderSection(this.currentSection)}
+              ${sectionContent}
             </div>
           </main>
         </div>
@@ -27,7 +29,6 @@ class DriverDashboard {
   renderSidebar() {
     const menuItems = [
       { id: "deliveries", label: "Delivery Details", icon: "package" },
-      { id: "route", label: "Delivery Route", icon: "map-pin" },
       { id: "proof", label: "Proof of Delivery", icon: "file-check" },
       { id: "payment", label: "Payment Collection", icon: "credit-card" },
       { id: "vehicle", label: "Vehicle Tracking", icon: "truck" },
@@ -114,16 +115,21 @@ class DriverDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
       deliveries: new DeliveryDetails(),
-      route: new DeliveryRoute(),
       proof: new ProofOfDelivery(),
       payment: new PaymentCollection(),
       vehicle: new VehicleTracking(),
       status: new DeliveryStatus(),
     };
-    return sections[section].render();
+    const sectionInstance = sections[section];
+    if (section === "deliveries") {
+      await sectionInstance.getDeliveries();
+    } else if (section === "proof") {
+      await sectionInstance.getProofDeliveries();
+    }
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -171,10 +177,11 @@ class DriverDashboard {
     }
   }
 
-  navigateToSection(section) {
+  async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = `<div class="p-8">${this.renderSection(section)}</div>`;
+    const sectionContent = await this.renderSection(section);
+    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -220,258 +227,132 @@ class DriverDashboard {
 
 class DeliveryDetails {
   constructor() {
-    this.deliveries = [
-      {
-        id: "DEL-001",
-        buyer: "ABC Retail Store",
-        address: "123 Main Street, Colombo",
-        phone: "+94 11 234 5678",
-        items: 5,
-        date: "2024-10-20",
-        time: "09:00 AM",
-        status: "pending",
-      },
-      {
-        id: "DEL-002",
-        buyer: "XYZ Supermarket",
-        address: "456 Market Road, Colombo",
-        phone: "+94 11 345 6789",
-        items: 8,
-        date: "2024-10-20",
-        time: "10:30 AM",
-        status: "in-transit",
-      },
-      {
-        id: "DEL-003",
-        buyer: "Quick Shop",
-        address: "789 Commercial Ave, Colombo",
-        phone: "+94 11 456 7890",
-        items: 3,
-        date: "2024-10-20",
-        time: "12:00 PM",
-        status: "pending",
-      },
-    ];
+    this.deliveries = [];
+  }
+
+  async getDeliveries() {
+    try {
+      const id = window.location.search.split("id=")[1];
+      const response = await Driver.findById(id);
+      console.log(response.data);
+      this.deliveries = response.data;
+    } catch (error) {
+      console.error("Error fetching deliveries:", error);
+      this.deliveries = [];
+    }
   }
 
   render() {
+    if (!this.deliveries || !this.deliveries.deliveries) {
+      return `<p class="text-gray-600">No deliveries found for this driver.</p>`;
+    }
+
     return `
-      <div class="space-y-6">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">Today's Deliveries</h2>
-          <p class="text-gray-600">View and manage all delivery details for today</p>
-        </div>
-
-        <div class="grid gap-4">
-          ${this.deliveries
-            .map(
-              (delivery) => `
-            <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-              <div class="flex items-start justify-between mb-4">
-                <div>
-                  <h3 class="text-lg font-bold text-gray-900">${
-                    delivery.buyer
-                  }</h3>
-                  <p class="text-sm text-gray-500">${delivery.id}</p>
-                </div>
-                <span class="px-3 py-1 rounded-full text-sm font-medium ${
-                  delivery.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : "bg-blue-100 text-blue-800"
-                }">
-                  ${delivery.status === "pending" ? "Pending" : "In Transit"}
-                </span>
-              </div>
-
-              <div class="grid grid-cols-2 gap-4 mb-4">
-                <div class="flex items-start gap-3">
-                  <svg class="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                  <div>
-                    <p class="text-xs text-gray-500 font-medium">Address</p>
-                    <p class="text-sm text-gray-900">${delivery.address}</p>
-                  </div>
-                </div>
-                <div class="flex items-start gap-3">
-                  <svg class="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                  <div>
-                    <p class="text-xs text-gray-500 font-medium">Contact</p>
-                    <p class="text-sm text-gray-900">${delivery.phone}</p>
-                  </div>
-                </div>
-                <div class="flex items-start gap-3">
-                  <svg class="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                  <div>
-                    <p class="text-xs text-gray-500 font-medium">Items</p>
-                    <p class="text-sm text-gray-900">${
-                      delivery.items
-                    } products</p>
-                  </div>
-                </div>
-                <div class="flex items-start gap-3">
-                  <svg class="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  <div>
-                    <p class="text-xs text-gray-500 font-medium">Scheduled Time</p>
-                    <p class="text-sm text-gray-900">${delivery.time}</p>
-                  </div>
-                </div>
-              </div>
-
-              <button class="w-full bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
-                View Details
-              </button>
-            </div>
-          `
-            )
-            .join("")}
-        </div>
+    <div class="space-y-6">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Today's Deliveries</h2>
+        <p class="text-gray-600">View and manage all delivery details for today</p>
       </div>
-    `;
-  }
-}
 
-class DeliveryRoute {
-  render() {
-    return `
-      <div class="space-y-6">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">Delivery Route</h2>
-          <p class="text-gray-600">Optimized route for today's deliveries</p>
-        </div>
+      <div class="grid gap-4">
+        ${this.deliveries.deliveries
+          .map((delivery) => {
+            // Concatenate all sales order items
+            const items =
+              delivery.salesOrders
+                .flatMap((so) => so.items || [])
+                .map((item) => `${item.name} (x${item.quantity})`)
+                .join(", ") || "No items";
 
-        <div class="grid grid-cols-3 gap-4 mb-6">
-          <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <p class="text-sm text-gray-600 mb-1">Total Distance</p>
-            <p class="text-2xl font-bold text-gray-900">24.5 km</p>
-          </div>
-          <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <p class="text-sm text-gray-600 mb-1">Estimated Time</p>
-            <p class="text-2xl font-bold text-gray-900">2h 15m</p>
-          </div>
-          <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <p class="text-sm text-gray-600 mb-1">Stops Remaining</p>
-            <p class="text-2xl font-bold text-gray-900">3</p>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 class="font-bold text-gray-900 mb-4">Route Stops</h3>
-          <div class="space-y-4">
-            ${[
-              {
-                stop: 1,
-                name: "ABC Retail Store",
-                address: "123 Main Street",
-                time: "09:00 AM",
-                status: "pending",
-              },
-              {
-                stop: 2,
-                name: "XYZ Supermarket",
-                address: "456 Market Road",
-                time: "10:30 AM",
-                status: "current",
-              },
-              {
-                stop: 3,
-                name: "Quick Shop",
-                address: "789 Commercial Ave",
-                time: "12:00 PM",
-                status: "pending",
-              },
-            ]
-              .map(
-                (stop) => `
-              <div class="flex items-start gap-4 p-4 rounded-lg border-2 ${
-                stop.status === "current"
-                  ? "border-green-500 bg-green-50"
-                  : "border-gray-200 bg-gray-50"
-              }">
-                <div class="flex-shrink-0">
-                  <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                    stop.status === "current" ? "bg-green-600" : "bg-gray-400"
+            return `
+              <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                <div class="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 class="text-lg font-bold text-gray-900">Delivery #${
+                      delivery.deliveryNumber
+                    }</h3>
+                    <p class="text-sm text-gray-500">ID: ${delivery.id}</p>
+                  </div>
+                  <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                    delivery.status === "pending"
+                      ? "bg-yellow-100 text-yellow-800"
+                      : "bg-blue-100 text-blue-800"
                   }">
-                    ${stop.stop}
+                    ${delivery.status === "pending" ? "Pending" : "In Transit"}
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                  <div class="flex items-start gap-3">
+                    <svg class="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <div>
+                      <p class="text-xs text-gray-500 font-medium">Address</p>
+                      <p class="text-sm text-gray-900">${
+                        delivery.deliveryAddress
+                      }</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <svg class="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                    <div>
+                      <p class="text-xs text-gray-500 font-medium">Contact</p>
+                      <p class="text-sm text-gray-900">${
+                        this.deliveries.phone || "N/A"
+                      }</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <svg class="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                    <div>
+                      <p class="text-xs text-gray-500 font-medium">Items</p>
+                      <p class="text-sm text-gray-900">${items}</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-start gap-3">
+                    <svg class="w-4 h-4 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                      <p class="text-xs text-gray-500 font-medium">Scheduled Time</p>
+                      <p class="text-sm text-gray-900">${new Date(
+                        delivery.scheduledDate
+                      ).toLocaleString()}</p>
+                    </div>
                   </div>
                 </div>
-                <div class="flex-1">
-                  <p class="font-medium text-gray-900">${stop.name}</p>
-                  <p class="text-sm text-gray-600">${stop.address}</p>
-                </div>
-                <div class="text-right">
-                  <p class="text-sm font-medium text-gray-900">${stop.time}</p>
-                  <p class="text-xs text-gray-500 capitalize">${stop.status}</p>
-                </div>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
 
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-          <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <div>
-            <p class="font-medium text-blue-900">Route Optimization</p>
-            <p class="text-sm text-blue-800">This route has been optimized for shortest travel time and fuel efficiency.</p>
-          </div>
-        </div>
+                <button class="w-full bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
+                  View Details
+                </button>
+              </div>
+            `;
+          })
+          .join("")}
       </div>
-    `;
+    </div>
+  `;
   }
 }
 
 class ProofOfDelivery {
   constructor() {
-    this.deliveries = [
-      {
-        id: "DEL-001",
-        orderId: "ORD-2024-105",
-        customer: "ABC Retail Store",
-        address: "123 Main Street, Downtown",
-        items: 15,
-        deliveryTime: "09:30 AM",
-        status: "pending",
-        hasSignature: false,
-        hasPhoto: false,
-      },
-      {
-        id: "DEL-002",
-        orderId: "ORD-2024-106",
-        customer: "XYZ Supermarket",
-        address: "456 Market Road",
-        items: 20,
-        deliveryTime: "10:45 AM",
-        status: "completed",
-        hasSignature: true,
-        hasPhoto: true,
-        signature: "John Doe",
-        notes: "Delivered in good condition",
-      },
-      {
-        id: "DEL-003",
-        orderId: "ORD-2024-107",
-        customer: "Quick Shop",
-        address: "789 Commercial Ave",
-        items: 10,
-        deliveryTime: "12:00 PM",
-        status: "in-transit",
-        hasSignature: false,
-        hasPhoto: false,
-      },
-    ];
+    this.deliveries = [];
+  }
+
+  async getProofDeliveries() {
+    try {
+      const id = window.location.search.split("id=")[1];
+      const response = await Driver.findById(id);
+      console.log(response.data);
+      this.deliveries = response.data;
+    } catch (error) {
+      console.error("Error fetching deliveries:", error);
+      this.deliveries = [];
+    }
   }
 
   render() {
-    const completed = this.deliveries.filter(
-      (d) => d.status === "completed"
-    ).length;
-    const pending = this.deliveries.filter(
-      (d) => d.status === "pending"
-    ).length;
-    const inTransit = this.deliveries.filter(
-      (d) => d.status === "in-transit"
-    ).length;
-
     return `
       <div class="space-y-6">
         <div>
@@ -479,31 +360,9 @@ class ProofOfDelivery {
           <p class="text-gray-600 mt-1">Capture signatures and delivery confirmations</p>
         </div>
 
-        <!-- POD Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">Total Deliveries</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.deliveries.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <p class="text-gray-600 text-sm">Completed</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">${completed}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-600">
-            <p class="text-gray-600 text-sm">In Transit</p>
-            <p class="text-3xl font-bold text-orange-600 mt-2">${inTransit}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
-            <p class="text-gray-600 text-sm">Pending</p>
-            <p class="text-3xl font-bold text-yellow-600 mt-2">${pending}</p>
-          </div>
-        </div>
-
         <!-- Delivery Cards -->
         <div class="space-y-4">
-          ${this.deliveries
+          ${this.deliveries.deliveries
             .map(
               (delivery) => `
             <div class="bg-white rounded-lg shadow-md overflow-hidden border ${
@@ -516,9 +375,11 @@ class ProofOfDelivery {
               <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
                 <div>
                   <h4 class="text-lg font-bold text-gray-900">${
-                    delivery.customer
+                    delivery.deliveryNumber
                   }</h4>
-                  <p class="text-sm text-gray-600">${delivery.address}</p>
+                  <p class="text-sm text-gray-600">${
+                    delivery.deliveryAddress
+                  }</p>
                 </div>
                 <span class="px-4 py-2 rounded-full text-sm font-semibold ${
                   delivery.status === "completed"
@@ -530,7 +391,7 @@ class ProofOfDelivery {
                   ${
                     delivery.status === "completed"
                       ? "Completed"
-                      : delivery.status === "in-transit"
+                      : delivery.status === "in_transit"
                       ? "In Transit"
                       : "Pending"
                   }
@@ -542,25 +403,29 @@ class ProofOfDelivery {
                   <div>
                     <p class="text-xs text-gray-500">Delivery ID</p>
                     <p class="text-sm font-semibold text-gray-900">${
-                      delivery.id
+                      delivery.deliveryNumber
                     }</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Order ID</p>
                     <p class="text-sm font-semibold text-green-600">${
-                      delivery.orderId
+                      delivery.id
                     }</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Items</p>
-                    <p class="text-sm font-semibold text-gray-900">${
-                      delivery.items
-                    } items</p>
+                    <p class="text-sm font-semibold text-gray-900">
+                      ${delivery.salesOrders
+                        .flatMap((order) => order.items || [])
+                        .map((item) => `${item.name} (x${item.quantity})`)
+                        .join(", ")}
+                    </p>
                   </div>
+
                   <div>
                     <p class="text-xs text-gray-500">Delivery Time</p>
                     <p class="text-sm font-semibold text-gray-900">${
-                      delivery.deliveryTime
+                      delivery.scheduledDate
                     }</p>
                   </div>
                 </div>
@@ -599,45 +464,7 @@ class ProofOfDelivery {
                     : `
                   <!-- Upload Forms -->
                   <div class="space-y-4">
-                    <!-- Signature Upload -->
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-green-400 transition-colors">
-                      <div class="text-center">
-                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                        </svg>
-                        <h5 class="font-semibold text-gray-900 mb-1">Customer Signature</h5>
-                        <p class="text-sm text-gray-600 mb-3">Capture signature for delivery confirmation</p>
-                        <div class="flex gap-2 justify-center">
-                          <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm">
-                            Capture Signature
-                          </button>
-                          <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm">
-                            Upload File
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Photo Upload -->
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-green-400 transition-colors">
-                      <div class="text-center">
-                        <svg class="w-12 h-12 mx-auto mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        <h5 class="font-semibold text-gray-900 mb-1">Delivery Photo</h5>
-                        <p class="text-sm text-gray-600 mb-3">Upload photo proof of delivery</p>
-                        <div class="flex gap-2 justify-center">
-                          <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm">
-                            Take Photo
-                          </button>
-                          <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium text-sm">
-                            Upload Image
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
+            
                     <!-- Delivery Notes -->
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">Delivery Notes</label>
@@ -661,23 +488,7 @@ class ProofOfDelivery {
             .join("")}
         </div>
 
-        <!-- POD Guidelines -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-blue-900 mb-1">Proof of Delivery Guidelines</h5>
-              <ul class="text-sm text-blue-800 space-y-1">
-                <li>• Always capture customer signature before leaving</li>
-                <li>• Take clear photos showing delivered items</li>
-                <li>• Note any damaged packaging or discrepancies</li>
-                <li>• Ensure delivery address matches order details</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        
       </div>
     `;
   }
@@ -1520,7 +1331,7 @@ class DeliveryStatus {
   }
 }
 
-export function renderDriverDashboard(container) {
+export async function renderDriverDashboard(container) {
   const dashboard = new DriverDashboard(container);
-  dashboard.render();
+  await dashboard.render();
 }

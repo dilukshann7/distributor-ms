@@ -518,23 +518,59 @@ app.get("/api/salesman/overall-summary", async (req, res) => {
 
 app.get("/api/drivers", async (req, res) => {
   try {
-    const drivers = await prisma.driver.findMany();
+    const drivers = await prisma.driver.findMany({
+      include: {
+        deliveries: {
+          include: {
+            salesOrders: true,
+          },
+        },
+      },
+    });
+
     res.json(drivers);
   } catch (e) {
-    console.error("Error fetching drivers:", e);
+    console.error("Error fetching drivers with deliveries:", e);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// In your backend API (e.g., routes/delivery.js or controllers/deliveryController.js)
+app.get("/api/drivers/:id", async (req, res) => {
+  const driverId = parseInt(req.params.id, 10);
 
-// GET all deliveries with driver relation
+  if (isNaN(driverId)) {
+    return res.status(400).json({ error: "Invalid driver ID" });
+  }
+
+  try {
+    const driver = await prisma.driver.findUnique({
+      where: { id: driverId },
+      include: {
+        deliveries: {
+          include: {
+            salesOrders: true,
+          },
+        },
+      },
+    });
+
+    if (!driver) {
+      return res.status(404).json({ error: "Driver not found" });
+    }
+
+    res.json(driver);
+  } catch (e) {
+    console.error("Error fetching driver with deliveries:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.get("/api/deliveries", async (req, res) => {
   try {
     const deliveries = await prisma.delivery.findMany({
       include: {
-        driver: true, // 👈 Include driver data
-        salesOrders: true, // 👈 Include sales orders
+        driver: true,
+        salesOrders: true,
       },
       orderBy: {
         scheduledDate: "desc",
