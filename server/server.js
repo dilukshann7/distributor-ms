@@ -659,6 +659,48 @@ app.get("/api/small-orders", async (req, res) => {
   }
 });
 
+// Monthly Income (SalesOrder) Expenses (Orders) And Profit
+app.get("/api/financial-overview", async (req, res) => {
+  try {
+    const currentYear = new Date().getFullYear();
+    const monthlyData = [];
+    for (let month = 1; month < 13; month++) {
+      const startDate = new Date(currentYear, month - 1, 1);
+      const endDate = new Date(currentYear, month, 1);
+      const salesOrders = await prisma.salesOrder.findMany({
+        where: {
+          orderDate: {
+            gte: startDate,
+            lt: endDate,
+          },
+        },
+      });
+      const orders = await prisma.order.findMany({
+        where: {
+          orderDate: {
+            gte: startDate,
+            lt: endDate,
+          },
+        },
+      });
+      const income = salesOrders.reduce(
+        (sum, order) => sum + order.totalAmount,
+        0
+      );
+      const expenses = orders.reduce(
+        (sum, order) => sum + order.totalAmount,
+        0
+      );
+      const profit = income - expenses;
+      monthlyData.push({ month, income, expenses, profit });
+    }
+    res.json(monthlyData);
+  } catch (error) {
+    console.error("Error fetching financial overview:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

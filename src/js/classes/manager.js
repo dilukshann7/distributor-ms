@@ -22,6 +22,8 @@ import { Task } from "../models/Task.js";
 import { Product } from "../models/Product.js";
 import { Feedback } from "../models/Feedback.js";
 import { Delivery } from "../models/Delivery.js";
+import filterIcon from "../../assets/icons/filter.svg";
+import downloadIcon from "../../assets/icons/download.svg";
 
 class ManagerDashboard {
   constructor(container) {
@@ -152,9 +154,7 @@ class ManagerDashboard {
     if (section === "delivery") {
       await sectionInstance.getDeliveries();
     } else if (section === "stock") {
-      await sectionInstance.getStockItems();
-    } else if (section === "reports") {
-      await sectionInstance.getReports();
+      await sectionInstance.getProducts();
     } else if (section === "tasks") {
       await sectionInstance.getTasks();
     } else if (section === "overview") {
@@ -276,37 +276,6 @@ class EmployeeOversight {
             <img src="${plusIcon}" class="w-5 h-5 invert" alt="add" />
             Add Employee
           </button>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-emerald-600">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Total Staff</p>
-                <p class="text-3xl font-bold text-gray-900 mt-2">15</p>
-              </div>
-              <img src="${usersIcon}" class="w-10 h-10" alt="users" />
-            </div>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Present Today</p>
-                <p class="text-3xl font-bold text-gray-900 mt-2">14</p>
-              </div>
-              <img src="${clockIcon}" class="w-10 h-10" alt="clock" />
-            </div>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Absent/Late</p>
-                <p class="text-3xl font-bold text-gray-900 mt-2">1</p>
-              </div>
-              <img src="${alertCircleIcon}" class="w-10 h-10" alt="alert" />
-            </div>
-          </div>
         </div>
 
         <!-- Employee List -->
@@ -513,54 +482,90 @@ class TaskAssignment {
 
 class OperationalReports {
   constructor() {
-    this.metrics = [
-      { label: "Total Orders", value: "248", change: "+12%", color: "blue" },
+    this.salesData = [
       {
-        label: "Completed Deliveries",
-        value: "235",
-        change: "+8%",
-        color: "green",
+        salesman: "Priya Singh",
+        sales: 125000,
+        target: 100000,
+        commission: 12500,
       },
-      { label: "Pending Tasks", value: "13", change: "-5%", color: "yellow" },
       {
-        label: "Customer Satisfaction",
-        value: "94%",
-        change: "+2%",
-        color: "purple",
+        salesman: "Rajesh Kumar",
+        sales: 98000,
+        target: 100000,
+        commission: 9800,
+      },
+      {
+        salesman: "Amit Patel",
+        sales: 145000,
+        target: 100000,
+        commission: 14500,
+      },
+      {
+        salesman: "Neha Sharma",
+        sales: 112000,
+        target: 100000,
+        commission: 11200,
       },
     ];
   }
 
   render() {
     return `
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-900">Operational Reports</h3>
-          <p class="text-gray-600 mt-1">Analytics and performance metrics</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          ${this.metrics
-            .map(
-              (metric) => `
-            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-${metric.color}-600">
-              <p class="text-gray-600 text-sm">${metric.label}</p>
-              <p class="text-3xl font-bold text-gray-900 mt-2">${metric.value}</p>
-              <p class="text-xs text-${metric.color}-600 mt-2">${metric.change} from last month</p>
+        <div class=" space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
+              <p class="text-gray-500 mt-1">Generate and view business reports</p>
             </div>
-          `
-            )
-            .join("")}
-        </div>
-
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Monthly Performance</h4>
-          <div class="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-            <p class="text-gray-500">Chart visualization would be here</p>
+            <div class="flex gap-3">
+              <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors">
+                <img src="${filterIcon}" class="w-4 h-4" alt="filter" />
+                Filter
+              </button>
+              <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
+                <img src="${downloadIcon}" class="w-4 h-4" alt="export" />
+                Export All
+              </button>
+            </div>
+          </div>
+  
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            ${this.renderReportCard(
+              "Financial Report",
+              "Income, expenses, and profit analysis",
+              "Today"
+            )}
+            ${this.renderReportCard(
+              "Sales Report",
+              "Salesman performance and targets",
+              "Today"
+            )}
+            ${this.renderReportCard(
+              "Inventory Report",
+              "Stock levels and movements",
+              "Yesterday"
+            )}
+            ${this.renderReportCard(
+              "Employee Report",
+              "Attendance and performance metrics",
+              "2 days ago"
+            )}
           </div>
         </div>
-      </div>
-    `;
+      `;
+  }
+
+  renderReportCard(title, description, lastGenerated) {
+    return `
+        <div class="bg-white rounded-lg shadow p-5 border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow">
+          <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
+          <p class="text-sm text-gray-500 mt-1">${description}</p>
+          <div class="flex items-center justify-between mt-3">
+            <span class="text-sm text-gray-500">Last generated: ${lastGenerated}</span>
+          </div>
+        </div>
+      `;
   }
 }
 
@@ -659,6 +664,7 @@ class CustomerFeedback {
     try {
       const response = await Feedback.getAll();
       this.feedback = response.data;
+      console.log("Fetched feedback:", this.feedback);
     } catch (error) {
       console.error("Error fetching feedback:", error);
       this.feedback = [];
@@ -677,7 +683,12 @@ class CustomerFeedback {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="bg-white rounded-lg shadow-md p-6">
             <p class="text-gray-600 text-sm">Average Rating</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">4.25</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">
+            ${(
+              this.feedback.reduce((sum, item) => sum + item.rating, 0) /
+                this.feedback.length || 0
+            ).toFixed(1)}
+            </p>
             <div class="flex gap-1 mt-2">
               ${[1, 2, 3, 4, 5]
                 .map(
@@ -705,14 +716,13 @@ class CustomerFeedback {
         <div class="space-y-4">
           ${this.feedback
             .map(
-              /*html*/
               (item) => `
             <div class="bg-white rounded-lg shadow-md p-6">
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center gap-3">
                     <h4 class="font-semibold text-gray-900">${
-                      item.customer
+                      item.customerId
                     }</h4>
                     <div class="flex gap-1">
                       ${Array(item.rating)
@@ -726,7 +736,7 @@ class CustomerFeedback {
                         )
                         .join("")}
                     </div>
-                    <span class="text-xs text-gray-500">${item.date}</span>
+                    <span class="text-xs text-gray-500">${item.createdAt}</span>
                   </div>
                   <p class="text-gray-600 mt-2">${item.comment}</p>
                   <span class="inline-block mt-3 px-3 py-1 rounded-full text-xs font-semibold ${
@@ -759,6 +769,7 @@ class DeliveryTracking {
     try {
       const response = await Delivery.getAll();
       this.deliveries = response.data;
+      console.log("Fetched deliveries:", this.deliveries);
     } catch (error) {
       console.error("Error fetching deliveries:", error);
       this.deliveries = [];
@@ -777,19 +788,24 @@ class DeliveryTracking {
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
             <p class="text-gray-600 text-sm">Active Deliveries</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">2</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">
+            ${this.deliveries.filter((d) => d.status === "in_transit").length}
+            </p>
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
             <p class="text-gray-600 text-sm">Completed Today</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">1</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">
+            ${this.deliveries.filter((d) => d.status === "delivered").length}
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
             <p class="text-gray-600 text-sm">Pending</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">1</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">
+            ${this.deliveries.filter((d) => d.status === "scheduled").length}
           </div>
           <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-600">
             <p class="text-gray-600 text-sm">Total Orders</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">4</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">
+            ${this.deliveries.length}</p>
           </div>
         </div>
 
@@ -812,13 +828,13 @@ class DeliveryTracking {
                     (delivery) => `
                   <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 text-sm font-medium text-gray-900">${
-                      delivery.orderId
+                      delivery.deliveryNumber
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-600">${
-                      delivery.driver
+                      delivery.driver.name
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-900">${
-                      delivery.destination
+                      delivery.deliveryAddress
                     }</td>
                     <td class="px-6 py-4 text-sm">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
@@ -832,8 +848,8 @@ class DeliveryTracking {
                       </span>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-900">${
-                      delivery.eta
-                    }</td>
+                      delivery.estimatedTime
+                    } Minutes</td>
                     <td class="px-6 py-4 text-sm">
                       <button class="px-3 py-1 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium">Track</button>
                     </td>

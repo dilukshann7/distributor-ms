@@ -42,7 +42,6 @@ class CashierDashboard {
   renderSidebar() {
     const menuItems = [
       { id: "sales", label: "Sales Transaction", icon: "dollar" },
-      { id: "refund", label: "Refund Management", icon: "rotate-ccw" },
       { id: "reports", label: "Financial Reports", icon: "bar-chart" },
     ];
 
@@ -133,7 +132,6 @@ class CashierDashboard {
   async renderSection(section) {
     const sections = {
       sales: new SalesTransaction(),
-      refund: new RefundManagement(),
       reports: new FinancialReports(),
     };
     const sectionInstance = sections[section];
@@ -293,7 +291,6 @@ class SalesTransaction {
           <!-- Add Product Form -->
           <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
             <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              ${this.getIcon("shopping-cart")}
               Add Product to Sale
             </h3>
             <div class="space-y-4">
@@ -453,167 +450,6 @@ class SalesTransaction {
   }
 }
 
-class RefundManagement {
-  constructor() {
-    this.refunds = [
-      {
-        id: "1",
-        transactionId: "TXN001",
-        amount: 500,
-        reason: "Damaged product",
-        date: "2024-10-19 10:45 AM",
-        status: "approved",
-      },
-      {
-        id: "2",
-        transactionId: "TXN002",
-        amount: 1200,
-        reason: "Wrong item delivered",
-        date: "2024-10-19 11:30 AM",
-        status: "pending",
-      },
-      {
-        id: "3",
-        transactionId: "TXN003",
-        amount: 300,
-        reason: "Customer request",
-        date: "2024-10-19 12:15 PM",
-        status: "rejected",
-      },
-    ];
-  }
-
-  render() {
-    const totalRefunded = this.refunds
-      .filter((r) => r.status === "approved")
-      .reduce((sum, r) => sum + r.amount, 0);
-    const approvedCount = this.refunds.filter(
-      (r) => r.status === "approved"
-    ).length;
-    const pendingCount = this.refunds.filter(
-      (r) => r.status === "pending"
-    ).length;
-
-    return `
-      <div class="space-y-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-2xl font-bold text-gray-900">Refund Management</h3>
-            <p class="text-gray-600 mt-1">Process customer refunds and returns</p>
-          </div>
-          <button class="bg-cyan-600 text-white px-6 py-2 rounded-lg hover:bg-cyan-700 transition-colors flex items-center gap-2 font-medium">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
-            </svg>
-            New Refund Request
-          </button>
-        </div>
-
-        <!-- Refund Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-cyan-600">
-            <p class="text-gray-600 text-sm">Total Refunds</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.refunds.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">Approved</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">${approvedCount}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
-            <p class="text-gray-600 text-sm">Pending</p>
-            <p class="text-3xl font-bold text-yellow-600 mt-2">${pendingCount}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
-            <p class="text-gray-600 text-sm">Total Refunded</p>
-            <p class="text-3xl font-bold text-red-600 mt-2">Rs. ${totalRefunded.toFixed(
-              2
-            )}</p>
-          </div>
-        </div>
-
-        <!-- Refunds Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Refund Requests</h3>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Transaction ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Reason</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${this.refunds
-                  .map(
-                    (refund) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
-                      refund.transactionId
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">Rs. ${refund.amount.toFixed(
-                      2
-                    )}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      refund.reason
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      refund.date
-                    }</td>
-                    <td class="px-6 py-4 text-sm">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        refund.status === "approved"
-                          ? "bg-green-100 text-green-800"
-                          : refund.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }">
-                        ${
-                          refund.status.charAt(0).toUpperCase() +
-                          refund.status.slice(1)
-                        }
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm">
-                      ${
-                        refund.status === "pending"
-                          ? `
-                        <div class="flex items-center gap-2">
-                          <button class="text-green-600 hover:text-green-800 transition-colors" title="Approve">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                          </button>
-                          <button class="text-red-600 hover:text-red-800 transition-colors" title="Reject">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                          </button>
-                        </div>
-                      `
-                          : "-"
-                      }
-                    </td>
-                  </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
 class FinancialReports {
   constructor() {
     this.reportData = {
@@ -629,124 +465,6 @@ class FinancialReports {
         <div>
           <h3 class="text-2xl font-bold text-gray-900">Financial Reports</h3>
           <p class="text-gray-600 mt-1">View and generate financial reports and analytics</p>
-        </div>
-
-        <!-- Report Period Tabs -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <div class="flex gap-2 mb-6">
-            <button class="px-4 py-2 bg-cyan-600 text-white rounded-lg font-medium">Daily</button>
-            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Weekly</button>
-            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Monthly</button>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
-              <p class="text-gray-700 text-sm font-medium">Total Sales</p>
-              <p class="text-3xl font-bold text-blue-600 mt-2">Rs. ${this.reportData.daily.sales.toFixed(
-                2
-              )}</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-6 border border-red-200">
-              <p class="text-gray-700 text-sm font-medium">Total Expenses</p>
-              <p class="text-3xl font-bold text-red-600 mt-2">Rs. ${this.reportData.daily.expenses.toFixed(
-                2
-              )}</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
-              <p class="text-gray-700 text-sm font-medium">Net Profit</p>
-              <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${this.reportData.daily.profit.toFixed(
-                2
-              )}</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-          </div>
-        </div>
-
-      
-
-        <!-- Recent Transactions -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h4 class="text-lg font-semibold text-gray-900">Recent Transactions</h4>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Time</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${[
-                  {
-                    time: "2:45 PM",
-                    type: "Sale",
-                    desc: "Transaction TXN005",
-                    amount: 2500,
-                    isIncome: true,
-                  },
-                  {
-                    time: "2:30 PM",
-                    type: "Expense",
-                    desc: "Supplies Purchase",
-                    amount: 850,
-                    isIncome: false,
-                  },
-                  {
-                    time: "1:15 PM",
-                    type: "Sale",
-                    desc: "Transaction TXN004",
-                    amount: 3200,
-                    isIncome: true,
-                  },
-                  {
-                    time: "12:00 PM",
-                    type: "Sale",
-                    desc: "Transaction TXN003",
-                    amount: 1800,
-                    isIncome: true,
-                  },
-                  {
-                    time: "11:30 AM",
-                    type: "Expense",
-                    desc: "Utility Bill",
-                    amount: 450,
-                    isIncome: false,
-                  },
-                ]
-                  .map(
-                    (txn) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm text-gray-600">${txn.time}</td>
-                    <td class="px-6 py-4 text-sm">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        txn.isIncome
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }">
-                        ${txn.type}
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${txn.desc}</td>
-                    <td class="px-6 py-4 text-sm font-semibold ${
-                      txn.isIncome ? "text-green-600" : "text-red-600"
-                    }">
-                      ${txn.isIncome ? "+" : "-"}Rs. ${txn.amount.toFixed(2)}
-                    </td>
-                  </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
         </div>
 
         <!-- Export Options -->

@@ -1,4 +1,5 @@
-// FinancialReport Class
+import axios from "axios";
+
 export class FinancialReport {
   constructor(data) {
     this.id = data.id;
@@ -16,33 +17,8 @@ export class FinancialReport {
     this.updatedAt = data.updatedAt;
   }
 
-  // Static methods
-  static async create(reportData) {}
-  static async findById(id) {}
-  static async getAll(filters) {}
-  static async getByType(reportType) {}
-  static async getByPeriod(period) {}
-  static async getDailyReport(date) {}
-  static async getWeeklyReport(year, week) {}
-  static async getMonthlyReport(year, month) {}
-  static async getAnnualReport(year) {}
-
-  // Instance methods
-  async update(updateData) {}
-  async delete() {}
-  async generateReport() {}
-  async calculateTotalSales() {}
-  async calculateTotalExpenses() {}
-  async calculateNetProfit() {}
-  async calculateProfitMargin() {}
-  async getGenerator() {}
-  async exportToPDF() {}
-  async exportToExcel() {}
-  async exportToCSV() {}
-  async sendToEmail(email) {}
-  async compareWithPrevious() {}
-  async getTrends() {}
-  async getTopProducts() {}
-  async getTopCustomers() {}
-  async getCategoryBreakdown() {}
+  static async getMonthlyOverview() {
+    const apiURL = "http://localhost:3000/api/financial-overview";
+    return axios.get(apiURL);
+  }
 }
