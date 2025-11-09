@@ -81,21 +81,49 @@ model CustomerFeedback {
 }
 
 model Delivery {
-  id              Int      @id @default(autoincrement())
+  id              Int       @id @default(autoincrement())
   deliveryNumber  String
-  orderId         Int
   driverId        Int
   vehicleId       Int
   deliveryAddress String
   scheduledDate   DateTime
-  deliveredDate   DateTime
+  deliveredDate   DateTime?
   estimatedTime   Int
   status          String
-  signature       String
-  proofOfDelivery String
-  notes           String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  signature       String?
+  proofOfDelivery String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relation: One Delivery belongs to one Driver
+  driver Driver @relation(fields: [driverId], references: [id])
+
+  // Relation: One Delivery has many SalesOrders
+  salesOrders SalesOrder[] // 👈 one-to-many link
+}
+
+model SalesOrder {
+  id            Int      @id @default(autoincrement())
+  orderNumber   String   @unique
+  customerId    Int
+  customerName  String
+  salesmanId    Int
+  orderDate     DateTime
+  subtotal      Float
+  tax           Float
+  discount      Float
+  totalAmount   Float
+  status        String   @default("pending")
+  paymentStatus String   @default("unpaid")
+  items         Json
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Foreign key to Delivery
+  deliveryId Int?
+  delivery   Delivery? @relation(fields: [deliveryId], references: [id])
 }
 
 model Order {
@@ -163,25 +191,6 @@ model Shipment {
   order Order @relation(fields: [purchaseOrderId], references: [id])
 }
 
-model SalesOrder {
-  id            Int      @id @default(autoincrement())
-  orderNumber   String   @unique
-  customerId    Int
-  customerName  String
-  salesmanId    Int
-  orderDate     DateTime
-  subtotal      Float
-  tax           Float
-  discount      Float
-  totalAmount   Float
-  status        String   @default("pending")
-  paymentStatus String   @default("unpaid")
-  items         Json
-  notes         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-}
-
 model Customer {
   id             Int       @id @default(autoincrement())
   name           String
@@ -198,4 +207,21 @@ model Customer {
   status         String    @default("active")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+}
+
+model Driver {
+  id              Int      @id @default(autoincrement())
+  name            String
+  vehicleId       String
+  vehicleType     String
+  licenseNumber   String   @unique
+  phone           String
+  email           String   @unique
+  currentLocation String?
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relation: One Driver has many Deliveries
+  deliveries Delivery[] // 👈 back-relation
 }

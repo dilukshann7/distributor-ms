@@ -1,4 +1,8 @@
 import logo from "../../assets/logo-tr.png";
+import { SalesOrder } from "../models/SalesOrder.js";
+import { Driver } from "../models/Drivers.js";
+import { Product } from "../models/Product.js";
+import { Delivery } from "../models/Delivery.js";
 
 class DistributorDashboard {
   constructor(container) {
@@ -7,7 +11,8 @@ class DistributorDashboard {
     this.isSidebarOpen = true;
   }
 
-  render() {
+  async render() {
+    const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -15,7 +20,7 @@ class DistributorDashboard {
           ${this.renderHeader()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
-              ${this.renderSection(this.currentSection)}
+              ${sectionContent}
             </div>
           </main>
         </div>
@@ -111,7 +116,7 @@ class DistributorDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
       orders: new OrderManagement(),
       drivers: new DriverManagement(),
@@ -120,7 +125,18 @@ class DistributorDashboard {
       delivery: new ProofOfDelivery(),
       authorization: new OrderAuthorization(),
     };
-    return sections[section].render();
+    const sectionInstance = sections[section];
+    if (section === "orders") {
+      await sectionInstance.getOrders();
+    } else if (section === "drivers") {
+      await sectionInstance.getDrivers();
+    } else if (section === "stock") {
+      await sectionInstance.getInventoryItems();
+    } else if (section === "routes") {
+      await sectionInstance.getDeliveryRoutes();
+    }
+
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -158,10 +174,11 @@ class DistributorDashboard {
     }
   }
 
-  navigateToSection(section) {
+  async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = `<div class="p-8">${this.renderSection(section)}</div>`;
+    const sectionContent = await this.renderSection(section);
+    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -209,44 +226,17 @@ class DistributorDashboard {
 
 class OrderManagement {
   constructor() {
-    this.orders = [
-      {
-        id: "ORD-001",
-        buyer: "ABC Retail Store",
-        items: 5,
-        total: "$2,500",
-        status: "pending",
-        date: "2024-10-19",
-        authorized: false,
-      },
-      {
-        id: "ORD-002",
-        buyer: "XYZ Supermarket",
-        items: 8,
-        total: "$4,200",
-        status: "authorized",
-        date: "2024-10-18",
-        authorized: true,
-      },
-      {
-        id: "ORD-003",
-        buyer: "Quick Shop",
-        items: 3,
-        total: "$1,800",
-        status: "in-transit",
-        date: "2024-10-17",
-        authorized: true,
-      },
-      {
-        id: "ORD-004",
-        buyer: "Metro Mart",
-        items: 12,
-        total: "$6,500",
-        status: "delivered",
-        date: "2024-10-16",
-        authorized: true,
-      },
-    ];
+    this.orders = [];
+  }
+
+  async getOrders() {
+    try {
+      const response = await SalesOrder.getAll();
+      this.orders = response.data;
+    } catch (error) {
+      console.error("Error fetching sales orders:", error);
+      this.orders = [];
+    }
   }
 
   render() {
@@ -283,12 +273,22 @@ class OrderManagement {
                   (order) => `
                 <tr class="hover:bg-gray-50 transition-colors">
                   <td class="px-6 py-4 font-semibold text-gray-800">${
-                    order.id
+                    order.orderNumber
                   }</td>
-                  <td class="px-6 py-4 text-gray-700">${order.buyer}</td>
-                  <td class="px-6 py-4 text-gray-700">${order.items}</td>
+                  <td class="px-6 py-4 text-gray-700">${order.customerName}</td>
+                  <td class="px-6 py-4 text-gray-700">${
+                    order.items
+                      ?.filter((item) => item && item.name)
+                      .map(
+                        (item) =>
+                          `${item.name}${
+                            item.quantity ? ` (x${item.quantity})` : ""
+                          }`
+                      )
+                      .join(", ") || "No items"
+                  }</td>                  
                   <td class="px-6 py-4 font-semibold text-gray-800">${
-                    order.total
+                    order.totalAmount
                   }</td>
                   <td class="px-6 py-4">
                     <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getStatusColor(
@@ -352,90 +352,81 @@ class OrderManagement {
 
 class DriverManagement {
   constructor() {
-    this.drivers = [
-      {
-        id: 1,
-        name: "Ravi Kumar",
-        phone: "+94 71 234 5678",
-        vehicle: "Van - VH-2024",
-        status: "active",
-        currentRoute: "Route A - 5 stops",
-        lastUpdate: "2 mins ago",
-      },
-      {
-        id: 2,
-        name: "Ahmed Hassan",
-        phone: "+94 77 345 6789",
-        vehicle: "Truck - VH-2025",
-        status: "active",
-        currentRoute: "Route B - 8 stops",
-        lastUpdate: "5 mins ago",
-      },
-      {
-        id: 3,
-        name: "Carlos Rodriguez",
-        phone: "+94 76 456 7890",
-        vehicle: "Van - VH-2023",
-        status: "inactive",
-        currentRoute: "Completed",
-        lastUpdate: "30 mins ago",
-      },
-      {
-        id: 4,
-        name: "Maria Santos",
-        phone: "+94 70 567 8901",
-        vehicle: "Truck - VH-2026",
-        status: "active",
-        currentRoute: "Route C - 6 stops",
-        lastUpdate: "1 min ago",
-      },
-    ];
+    this.drivers = [];
+  }
+
+  async getDrivers() {
+    try {
+      const response = await Driver.getAll();
+      this.drivers = response.data;
+    } catch (error) {
+      console.error("Error fetching drivers:", error);
+      this.drivers = [];
+    }
   }
 
   render() {
+    const totalDrivers = this.drivers.length;
+    const activeDrivers = this.drivers.filter(
+      (d) => d.status === "active"
+    ).length;
+    const inactiveDrivers = this.drivers.filter(
+      (d) => d.status !== "active"
+    ).length;
+    const activeRoutes = this.drivers.filter((d) => d.currentLocation).length; // assuming currentLocation means assigned route
+
     return `
-      <div class="space-y-6">
-        <div class="grid grid-cols-4 gap-4">
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Total Drivers</p>
-                <p class="text-3xl font-bold text-gray-800 mt-2">4</p>
-              </div>
-              <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+    <div class="space-y-6">
+      <div class="grid grid-cols-4 gap-4">
+        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 text-sm">Total Drivers</p>
+              <p class="text-3xl font-bold text-gray-800 mt-2">${totalDrivers}</p>
             </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Active</p>
-                <p class="text-3xl font-bold text-green-600 mt-2">3</p>
-              </div>
-              <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Inactive</p>
-                <p class="text-3xl font-bold text-gray-600 mt-2">1</p>
-              </div>
-              <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Routes Active</p>
-                <p class="text-3xl font-bold text-amber-600 mt-2">3</p>
-              </div>
-              <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
+            <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/>
+            </svg>
           </div>
         </div>
+
+        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 text-sm">Active</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">${activeDrivers}</p>
+            </div>
+            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 text-sm">Inactive</p>
+              <p class="text-3xl font-bold text-gray-600 mt-2">${inactiveDrivers}</p>
+            </div>
+            <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-600 text-sm">Routes Active</p>
+              <p class="text-3xl font-bold text-amber-600 mt-2">${activeRoutes}</p>
+            </div>
+            <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
 
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div class="p-6 border-b border-gray-200">
@@ -469,11 +460,11 @@ class DriverManagement {
                       ${driver.phone}
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600">${
-                      driver.vehicle
+                      driver.licenseNumber
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-600 flex items-center gap-2">
                       <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                      ${driver.currentRoute}
+                      ${driver.currentLocation}
                     </td>
                     <td class="px-6 py-4">
                       <span class="px-3 py-1 rounded-full text-xs font-medium ${
@@ -488,7 +479,7 @@ class DriverManagement {
                       </span>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600">${
-                      driver.lastUpdate
+                      driver.updatedAt
                     }</td>
                     <td class="px-6 py-4">
                       <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">Message</button>
@@ -508,84 +499,25 @@ class DriverManagement {
 
 class StockTracking {
   constructor() {
-    this.stockLocations = [
-      {
-        id: 1,
-        orderId: "ORD-001",
-        product: "Air Freshener",
-        quantity: 100,
-        location: "Warehouse A - Shelf 5",
-        status: "ready",
-        lastUpdated: "2024-10-19 10:30 AM",
-      },
-      {
-        id: 2,
-        orderId: "ORD-002",
-        product: "Handwash",
-        quantity: 250,
-        location: "Warehouse B - Shelf 12",
-        status: "ready",
-        lastUpdated: "2024-10-19 09:15 AM",
-      },
-      {
-        id: 3,
-        orderId: "ORD-003",
-        product: "Dish Liquid",
-        quantity: 75,
-        location: "Warehouse A - Shelf 8",
-        status: "in-transit",
-        lastUpdated: "2024-10-19 11:00 AM",
-      },
-      {
-        id: 4,
-        orderId: "ORD-004",
-        product: "Car Interior Spray",
-        quantity: 150,
-        location: "Warehouse C - Shelf 3",
-        status: "ready",
-        lastUpdated: "2024-10-19 08:45 AM",
-      },
-    ];
+    this.stockLocations = [];
+  }
+
+  async getInventoryItems() {
+    try {
+      const response = await Product.getAll();
+      this.stockLocations = response.data;
+    } catch (error) {
+      console.error("Error fetching inventory items:", error);
+      this.stockLocations = [];
+    }
   }
 
   render() {
     return `
       <div class="space-y-6">
         <div>
-          <h3 class="text-2xl font-bold text-gray-800">Stock Location Tracking</h3>
+          <h3 class="text-xl font-bold text-gray-800">Stock Location Tracking</h3>
           <p class="text-gray-600 mt-1">Track specific stock locations for received orders</p>
-        </div>
-
-        <div class="grid grid-cols-3 gap-4">
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Total Items Tracked</p>
-                <p class="text-3xl font-bold text-gray-800 mt-2">575</p>
-              </div>
-              <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Ready for Delivery</p>
-                <p class="text-3xl font-bold text-green-600 mt-2">3</p>
-              </div>
-              <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">In Transit</p>
-                <p class="text-3xl font-bold text-blue-600 mt-2">1</p>
-              </div>
-              <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            </div>
-          </div>
         </div>
 
         <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
@@ -611,9 +543,9 @@ class StockTracking {
                     (item) => `
                   <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 font-semibold text-gray-800">${
-                      item.orderId
+                      item.id
                     }</td>
-                    <td class="px-6 py-4 text-gray-700">${item.product}</td>
+                    <td class="px-6 py-4 text-gray-700">${item.name}</td>
                     <td class="px-6 py-4 text-gray-700">${
                       item.quantity
                     } units</td>
@@ -632,7 +564,7 @@ class StockTracking {
                       </span>
                     </td>
                     <td class="px-6 py-4 text-gray-600 text-sm">${
-                      item.lastUpdated
+                      item.updatedAt
                     }</td>
                   </tr>
                 `
@@ -662,113 +594,25 @@ class StockTracking {
 
 class DeliveryRoutes {
   constructor() {
-    this.routes = [
-      {
-        id: "RT-001",
-        name: "Route A - Central District",
-        driver: "John Driver",
-        vehicle: "VAN-123",
-        stops: 8,
-        distance: "45 km",
-        estimatedTime: "3h 30m",
-        status: "active",
-        completedStops: 5,
-        orders: [
-          "ORD-001",
-          "ORD-002",
-          "ORD-003",
-          "ORD-004",
-          "ORD-005",
-          "ORD-006",
-          "ORD-007",
-          "ORD-008",
-        ],
-      },
-      {
-        id: "RT-002",
-        name: "Route B - South Zone",
-        driver: "Sarah Driver",
-        vehicle: "VAN-456",
-        stops: 6,
-        distance: "32 km",
-        estimatedTime: "2h 45m",
-        status: "active",
-        completedStops: 6,
-        orders: [
-          "ORD-009",
-          "ORD-010",
-          "ORD-011",
-          "ORD-012",
-          "ORD-013",
-          "ORD-014",
-        ],
-      },
-      {
-        id: "RT-003",
-        name: "Route C - North Area",
-        driver: "Mike Driver",
-        vehicle: "VAN-789",
-        stops: 10,
-        distance: "58 km",
-        estimatedTime: "4h 15m",
-        status: "planned",
-        completedStops: 0,
-        orders: [
-          "ORD-015",
-          "ORD-016",
-          "ORD-017",
-          "ORD-018",
-          "ORD-019",
-          "ORD-020",
-          "ORD-021",
-          "ORD-022",
-          "ORD-023",
-          "ORD-024",
-        ],
-      },
-    ];
+    this.routes = [];
+  }
+
+  async getDeliveryRoutes() {
+    try {
+      const response = await Delivery.getAll();
+      this.routes = response.data;
+    } catch (error) {
+      console.error("Error fetching delivery routes:", error);
+      this.routes = [];
+    }
   }
 
   render() {
-    const activeRoutes = this.routes.filter(
-      (r) => r.status === "active"
-    ).length;
-    const totalStops = this.routes.reduce((sum, r) => sum + r.stops, 0);
-    const completedStops = this.routes.reduce(
-      (sum, r) => sum + r.completedStops,
-      0
-    );
-
     return `
       <div class="space-y-6">
         <div>
           <h3 class="text-2xl font-bold text-gray-900">Delivery Routes</h3>
           <p class="text-gray-600 mt-1">Optimize and manage delivery routes</p>
-        </div>
-
-        <!-- Route Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-600">
-            <p class="text-gray-600 text-sm">Total Routes</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.routes.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <p class="text-gray-600 text-sm">Active Routes</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">${activeRoutes}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">Completed Stops</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">${completedStops}/${totalStops}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-600">
-            <p class="text-gray-600 text-sm">Completion Rate</p>
-            <p class="text-3xl font-bold text-purple-600 mt-2">${(
-              (completedStops / totalStops) *
-              100
-            ).toFixed(0)}%</p>
-          </div>
         </div>
 
         <!-- Routes List -->
@@ -788,7 +632,7 @@ class DeliveryRoutes {
                   <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
                       <h4 class="text-lg font-semibold text-gray-900">${
-                        route.name
+                        route.deliveryAddress
                       }</h4>
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
                         route.status === "active"
@@ -803,7 +647,9 @@ class DeliveryRoutes {
                         }
                       </span>
                     </div>
-                    <p class="text-sm text-gray-600">Route ID: ${route.id}</p>
+                    <p class="text-sm text-gray-600">Route ID: ${
+                      route.deliveryNumber
+                    }</p>
                   </div>
                   
                   <div class="flex gap-2">
@@ -825,19 +671,19 @@ class DeliveryRoutes {
                   <div>
                     <p class="text-xs text-gray-500">Driver</p>
                     <p class="text-sm font-semibold text-gray-900">${
-                      route.driver
+                      route.driver.name
                     }</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Vehicle</p>
                     <p class="text-sm font-semibold text-gray-900">${
-                      route.vehicle
+                      route.driver.vehicleId
                     }</p>
                   </div>
                   <div>
                     <p class="text-xs text-gray-500">Distance</p>
                     <p class="text-sm font-semibold text-gray-900">${
-                      route.distance
+                      route.driver.currentLocation
                     }</p>
                   </div>
                   <div>
@@ -848,28 +694,13 @@ class DeliveryRoutes {
                   </div>
                 </div>
 
-                <!-- Progress Bar -->
-                <div class="mb-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-medium text-gray-700">Progress</span>
-                    <span class="text-sm font-semibold text-orange-600">${
-                      route.completedStops
-                    }/${route.stops} stops</span>
-                  </div>
-                  <div class="w-full bg-gray-200 rounded-full h-2">
-                    <div class="bg-orange-600 h-2 rounded-full transition-all" style="width: ${
-                      (route.completedStops / route.stops) * 100
-                    }%"></div>
-                  </div>
-                </div>
-
                 <!-- Orders List -->
                 <div>
                   <p class="text-sm font-medium text-gray-700 mb-2">Orders (${
-                    route.orders.length
+                    route.salesOrders.length
                   })</p>
                   <div class="flex flex-wrap gap-2">
-                    ${route.orders
+                    ${route.salesOrders
                       .map(
                         (order, index) => `
                       <span class="px-2 py-1 rounded text-xs font-medium ${
@@ -877,7 +708,7 @@ class DeliveryRoutes {
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
                       }">
-                        ${order}
+                        ${order.orderNumber}
                       </span>
                     `
                       )
@@ -890,31 +721,7 @@ class DeliveryRoutes {
             )
             .join("")}
         </div>
-
-        <!-- Route Optimization -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Route Optimization</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-              Optimize Routes
-            </button>
-            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-              </svg>
-              Create New Route
-            </button>
-            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-              </svg>
-              View Analytics
-            </button>
-          </div>
-        </div>
+        
       </div>
     `;
   }
@@ -988,28 +795,6 @@ class ProofOfDelivery {
         <div>
           <h3 class="text-2xl font-bold text-gray-900">Proof of Delivery</h3>
           <p class="text-gray-600 mt-1">Manage delivery confirmations and signatures</p>
-        </div>
-
-        <!-- POD Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-600">
-            <p class="text-gray-600 text-sm">Total Deliveries</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.deliveries.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">Signed</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">${signedCount}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
-            <p class="text-gray-600 text-sm">Pending</p>
-            <p class="text-3xl font-bold text-yellow-600 mt-2">${pendingCount}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <p class="text-gray-600 text-sm">With Photos</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">${withPhotos}</p>
-          </div>
         </div>
 
         <!-- Deliveries Table -->
@@ -1091,53 +876,6 @@ class ProofOfDelivery {
                   .join("")}
               </tbody>
             </table>
-          </div>
-        </div>
-
-        <!-- Upload POD -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Upload Proof of Delivery</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="border-2 border-dashed border-orange-300 rounded-lg p-8 text-center bg-orange-50 cursor-pointer hover:bg-orange-100 transition-colors">
-              <input type="file" id="signatureUpload" accept="image/*" class="hidden">
-              <label for="signatureUpload" class="cursor-pointer">
-                <svg class="w-12 h-12 mx-auto text-orange-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                </svg>
-                <p class="text-gray-700 font-medium">Upload Signature</p>
-                <p class="text-sm text-gray-600 mt-1">Click to upload customer signature</p>
-              </label>
-            </div>
-
-            <div class="border-2 border-dashed border-blue-300 rounded-lg p-8 text-center bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors">
-              <input type="file" id="photoUpload" accept="image/*" capture="camera" class="hidden">
-              <label for="photoUpload" class="cursor-pointer">
-                <svg class="w-12 h-12 mx-auto text-blue-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-                <p class="text-gray-700 font-medium">Upload Photo</p>
-                <p class="text-sm text-gray-600 mt-1">Click to upload delivery photo</p>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- POD Guidelines -->
-        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-orange-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-orange-900 mb-1">Proof of Delivery Guidelines</h5>
-              <ul class="text-sm text-orange-800 space-y-1">
-                <li>• Always obtain customer signature for all deliveries</li>
-                <li>• Take clear photos showing delivered goods and location</li>
-                <li>• Note any special instructions or delivery issues</li>
-                <li>• Upload proof within 1 hour of delivery completion</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>
@@ -1439,5 +1177,5 @@ class OrderAuthorization {
 
 export function renderDistributorDashboard(container) {
   const dashboard = new DistributorDashboard(container);
-  dashboard.render();
+  return dashboard.render();
 }

@@ -516,6 +516,48 @@ app.get("/api/salesman/overall-summary", async (req, res) => {
   }
 });
 
+app.get("/api/drivers", async (req, res) => {
+  try {
+    const drivers = await prisma.driver.findMany();
+    res.json(drivers);
+  } catch (e) {
+    console.error("Error fetching drivers:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// In your backend API (e.g., routes/delivery.js or controllers/deliveryController.js)
+
+// GET all deliveries with driver relation
+app.get("/api/deliveries", async (req, res) => {
+  try {
+    const deliveries = await prisma.delivery.findMany({
+      include: {
+        driver: true, // 👈 Include driver data
+        salesOrders: true, // 👈 Include sales orders
+      },
+      orderBy: {
+        scheduledDate: "desc",
+      },
+    });
+
+    res.json(deliveries);
+  } catch (error) {
+    console.error("Error fetching deliveries:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+app.get("/api/customers", async (req, res) => {
+  try {
+    const customers = await prisma.customer.findMany();
+    res.json(customers);
+  } catch (e) {
+    console.error("Error fetching customers:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -25,7 +25,10 @@ export class Customer {
   static async findById(id) {}
   static async findByEmail(email) {}
   static async findByPhone(phone) {}
-  static async getAll(filters) {}
+  static async getAll(filters) {
+    const apiURL = "http://localhost:3000/api/customers";
+    return axios.get(apiURL);
+  }
   static async getVIPCustomers() {}
   static async getTopCustomers(limit) {}
   static async search(searchTerm) {}

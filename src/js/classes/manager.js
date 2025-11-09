@@ -30,8 +30,9 @@ class ManagerDashboard {
     this.isSidebarOpen = true;
   }
 
-  render() {
+  async render() {
     /*html*/
+    const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -39,7 +40,7 @@ class ManagerDashboard {
           ${this.renderHeader()}
           <main id="dashboardContent" class="flex-1 overflow-auto w-full">
             <div class="p-8">
-              ${this.renderSection(this.currentSection)}
+              ${sectionContent}
             </div>
           </main>
         </div>
@@ -199,10 +200,11 @@ class ManagerDashboard {
     }
   }
 
-  navigateToSection(section) {
+  async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = `<div class="p-8">${this.renderSection(section)}</div>`;
+    const sectionContent = await this.renderSection(section);
+    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -850,5 +852,5 @@ class DeliveryTracking {
 
 export function renderManagerDashboard(container) {
   const dashboard = new ManagerDashboard(container);
-  dashboard.render();
+  return dashboard.render();
 }
