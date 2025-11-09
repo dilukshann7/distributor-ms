@@ -1,9 +1,12 @@
+import axios from "axios";
+
 // SalesOrder Class
 export class SalesOrder {
   constructor(data) {
     this.id = data.id;
     this.orderNumber = data.orderNumber;
     this.customerId = data.customerId;
+    this.customerName = data.customerName;
     this.salesmanId = data.salesmanId;
     this.orderDate = data.orderDate;
     this.subtotal = data.subtotal;
@@ -12,6 +15,7 @@ export class SalesOrder {
     this.totalAmount = data.totalAmount;
     this.status = data.status;
     this.paymentStatus = data.paymentStatus;
+    this.items = data.items || [];
     this.notes = data.notes;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
@@ -21,7 +25,11 @@ export class SalesOrder {
   static async create(orderData) {}
   static async findById(id) {}
   static async findByOrderNumber(orderNumber) {}
-  static async getAll(filters) {}
+  static async getAll(filters) {
+    const apiURL = "http://localhost:3000/api/sales-orders";
+
+    return axios.get(apiURL);
+  }
   static async getByCustomer(customerId) {}
   static async getBySalesman(salesmanId) {}
   static async getByStatus(status) {}

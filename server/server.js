@@ -292,8 +292,19 @@ app.get("/api/supplier/overall-summary", async (req, res) => {
       orders: dailyOrders.length,
       revenue: dailyOrders.reduce((sum, o) => sum + o.totalAmount, 0),
       items: dailyOrders.reduce((sum, o) => {
-        const items = JSON.parse(o.items);
-        return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
+        try {
+          const items =
+            typeof o.items === "string" ? JSON.parse(o.items) : o.items || [];
+          return (
+            sum +
+            (Array.isArray(items)
+              ? items.reduce((n, i) => n + (i.quantity || 0), 0)
+              : 0)
+          );
+        } catch (err) {
+          console.error("Error parsing order items for daily summary:", err);
+          return sum;
+        }
       }, 0),
     };
 
@@ -315,8 +326,19 @@ app.get("/api/supplier/overall-summary", async (req, res) => {
       orders: weeklyOrders.length,
       revenue: weeklyOrders.reduce((sum, o) => sum + o.totalAmount, 0),
       items: weeklyOrders.reduce((sum, o) => {
-        const items = JSON.parse(o.items);
-        return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
+        try {
+          const items =
+            typeof o.items === "string" ? JSON.parse(o.items) : o.items || [];
+          return (
+            sum +
+            (Array.isArray(items)
+              ? items.reduce((n, i) => n + (i.quantity || 0), 0)
+              : 0)
+          );
+        } catch (err) {
+          console.error("Error parsing order items for weekly summary:", err);
+          return sum;
+        }
       }, 0),
     };
 
@@ -341,6 +363,146 @@ app.get("/api/supplier/overall-summary", async (req, res) => {
       items: monthlyOrders.reduce((sum, o) => {
         const items = o.items;
         return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
+      }, 0),
+    };
+    res.json({
+      daily: dailySummary,
+      weekly: weeklySummary,
+      monthly: monthlySummary,
+    });
+  } catch (e) {
+    console.error("Error fetching overall summary:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/api/sales-orders", async (req, res) => {
+  try {
+    const salesOrders = await prisma.salesOrder.findMany();
+    res.json(salesOrders);
+  } catch (e) {
+    console.error("Error fetching sales orders:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/api/salesman/overall-summary", async (req, res) => {
+  try {
+    // Daily Summary
+    const today = new Date();
+    const startOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const endOfDay = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1
+    );
+    const dailySales = await prisma.salesOrder.findMany({
+      where: {
+        orderDate: {
+          gte: startOfDay,
+          lt: endOfDay,
+        },
+      },
+    });
+    const dailySummary = {
+      orders: dailySales.length,
+      revenue: dailySales.reduce((sum, o) => sum + o.totalAmount, 0),
+      items: dailySales.reduce((sum, o) => {
+        try {
+          const items =
+            typeof o.items === "string" ? JSON.parse(o.items) : o.items || [];
+          return (
+            sum +
+            (Array.isArray(items)
+              ? items.reduce((n, i) => n + (i.quantity || 0), 0)
+              : 0)
+          );
+        } catch (err) {
+          console.error(
+            "Error parsing salesOrder items for daily summary:",
+            err
+          );
+          return sum;
+        }
+      }, 0),
+    };
+
+    // Monthly Summary
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      1
+    );
+    const monthlySales = await prisma.salesOrder.findMany({
+      where: {
+        orderDate: {
+          gte: firstDayOfMonth,
+          lt: lastDayOfMonth,
+        },
+      },
+    });
+
+    const monthlySummary = {
+      orders: monthlySales.length,
+      revenue: monthlySales.reduce((sum, o) => sum + o.totalAmount, 0),
+      items: monthlySales.reduce((sum, o) => {
+        try {
+          const items =
+            typeof o.items === "string" ? JSON.parse(o.items) : o.items || [];
+          return (
+            sum +
+            (Array.isArray(items)
+              ? items.reduce((n, i) => n + (i.quantity || 0), 0)
+              : 0)
+          );
+        } catch (err) {
+          console.error(
+            "Error parsing salesOrder items for monthly summary:",
+            err
+          );
+          return sum;
+        }
+      }, 0),
+    };
+
+    // Weekly Summary
+    const firstDayOfWeek = new Date(today);
+    firstDayOfWeek.setDate(today.getDate() - today.getDay());
+    const lastDayOfWeek = new Date(firstDayOfWeek);
+    lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 7);
+    const weeklySales = await prisma.salesOrder.findMany({
+      where: {
+        orderDate: {
+          gte: firstDayOfWeek,
+          lt: lastDayOfWeek,
+        },
+      },
+    });
+    const weeklySummary = {
+      orders: weeklySales.length,
+      revenue: weeklySales.reduce((sum, o) => sum + o.totalAmount, 0),
+      items: weeklySales.reduce((sum, o) => {
+        try {
+          const items =
+            typeof o.items === "string" ? JSON.parse(o.items) : o.items || [];
+          return (
+            sum +
+            (Array.isArray(items)
+              ? items.reduce((n, i) => n + (i.quantity || 0), 0)
+              : 0)
+          );
+        } catch (err) {
+          console.error(
+            "Error parsing salesOrder items for weekly summary:",
+            err
+          );
+          return sum;
+        }
       }, 0),
     };
     res.json({

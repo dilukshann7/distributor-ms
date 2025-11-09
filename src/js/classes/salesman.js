@@ -1,4 +1,8 @@
 import logo from "../../assets/logo-tr.png";
+import { SalesOrder } from "../models/SalesOrder.js";
+import { Product } from "../models/Product.js";
+import { Customer } from "../models/Customer.js";
+import axios from "axios";
 
 class SalesmanDashboard {
   constructor(container) {
@@ -7,7 +11,8 @@ class SalesmanDashboard {
     this.isSidebarOpen = true;
   }
 
-  render() {
+  async render() {
+    const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -15,7 +20,7 @@ class SalesmanDashboard {
           ${this.renderHeader()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
-              ${this.renderSection(this.currentSection)}
+              ${sectionContent}
             </div>
           </main>
         </div>
@@ -30,8 +35,7 @@ class SalesmanDashboard {
       { id: "stock", label: "Stock Availability", icon: "package" },
       { id: "customers", label: "Customer Accounts", icon: "users" },
       { id: "reports", label: "Sales Reports", icon: "bar-chart" },
-      { id: "returns", label: "Returns & Cancellations", icon: "rotate-ccw" },
-      { id: "promotions", label: "Promotions & Pricing", icon: "tag" },
+      { id: "returns", label: "Returns Cancellations", icon: "rotate-ccw" },
     ];
 
     return `
@@ -114,16 +118,23 @@ class SalesmanDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
       orders: new SalesOrders(),
       stock: new StockAvailability(),
       customers: new CustomerAccounts(),
       reports: new SalesReports(),
       returns: new ReturnsAndCancellations(),
-      promotions: new PromotionsAndPricing(),
     };
-    return sections[section].render();
+    const sectionInstance = sections[section];
+    if (section === "orders") {
+      await sectionInstance.getOrders();
+    } else if (section === "stock") {
+      await sectionInstance.getInventoryItems();
+    } else if (section === "customers") {
+      await sectionInstance.getCustomers();
+    }
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -171,10 +182,17 @@ class SalesmanDashboard {
     }
   }
 
-  navigateToSection(section) {
+  async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = `<div class="p-8">${this.renderSection(section)}</div>`;
+    const sectionContent = await this.renderSection(section);
+
+    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+
+    if (section === "reports") {
+      const reports = new SalesReports();
+      reports.attachListeners(this.container);
+    }
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -221,33 +239,17 @@ class SalesmanDashboard {
 
 class SalesOrders {
   constructor() {
-    this.orders = [
-      {
-        id: "ORD-001",
-        customer: "ABC Retail Store",
-        date: "2024-10-19",
-        items: 5,
-        total: 15000,
-        status: "pending",
-      },
-      {
-        id: "ORD-002",
-        customer: "XYZ Supermarket",
-        date: "2024-10-18",
-        items: 8,
-        total: 24500,
-        status: "confirmed",
-      },
-      {
-        id: "ORD-003",
-        customer: "Quick Shop",
-        date: "2024-10-17",
-        items: 3,
-        total: 8900,
-        status: "delivered",
-      },
-    ];
-    this.showForm = false;
+    this.orders = [];
+  }
+
+  async getOrders() {
+    try {
+      const response = await SalesOrder.getAll();
+      this.orders = response.data;
+    } catch (error) {
+      console.error("Error fetching sales orders:", error);
+      this.orders = [];
+    }
   }
 
   render() {
@@ -313,10 +315,20 @@ class SalesOrders {
                   <td class="px-6 py-4 font-medium text-gray-900">${
                     order.id
                   }</td>
-                  <td class="px-6 py-4 text-gray-700">${order.customer}</td>
-                  <td class="px-6 py-4 text-gray-700">${order.date}</td>
-                  <td class="px-6 py-4 text-gray-700">${order.items}</td>
-                  <td class="px-6 py-4 font-semibold text-gray-900">Rs. ${order.total.toLocaleString()}</td>
+                  <td class="px-6 py-4 text-gray-700">${order.customerName}</td>
+                  <td class="px-6 py-4 text-gray-700">${order.orderDate}</td>
+                  <td class="px-6 py-4 text-gray-700">${
+                    order.items
+                      ?.filter((item) => item && item.name)
+                      .map(
+                        (item) =>
+                          `${item.name}${
+                            item.quantity ? ` (x${item.quantity})` : ""
+                          }`
+                      )
+                      .join(", ") || "No items"
+                  }</td>
+                  <td class="px-6 py-4 font-semibold text-gray-900">Rs. ${order.totalAmount.toLocaleString()}</td>
                   <td class="px-6 py-4">
                     <span class="px-3 py-1 rounded-full text-sm font-medium ${this.getStatusColor(
                       order.status
@@ -383,68 +395,17 @@ class SalesOrders {
 
 class StockAvailability {
   constructor() {
-    this.products = [
-      {
-        id: 1,
-        name: "Air Freshener",
-        sku: "AF-001",
-        category: "Home Care",
-        available: 450,
-        reserved: 50,
-        price: 250,
-        status: "in-stock",
-      },
-      {
-        id: 2,
-        name: "Handwash",
-        sku: "HW-002",
-        category: "Personal Care",
-        available: 45,
-        reserved: 15,
-        price: 180,
-        status: "low-stock",
-      },
-      {
-        id: 3,
-        name: "Dish Liquid",
-        sku: "DL-003",
-        category: "Kitchen",
-        available: 8,
-        reserved: 5,
-        price: 320,
-        status: "critical",
-      },
-      {
-        id: 4,
-        name: "Floor Cleaner",
-        sku: "FC-004",
-        category: "Home Care",
-        available: 280,
-        reserved: 30,
-        price: 420,
-        status: "in-stock",
-      },
-      {
-        id: 5,
-        name: "Laundry Detergent",
-        sku: "LD-005",
-        category: "Laundry",
-        available: 150,
-        reserved: 20,
-        price: 550,
-        status: "in-stock",
-      },
-      {
-        id: 6,
-        name: "Glass Cleaner",
-        sku: "GC-006",
-        category: "Home Care",
-        available: 35,
-        reserved: 10,
-        price: 280,
-        status: "low-stock",
-      },
-    ];
+    this.products = [];
+  }
+
+  async getInventoryItems() {
+    try {
+      const response = await Product.getAll();
+      this.products = response.data;
+    } catch (error) {
+      console.error("Error fetching inventory items:", error);
+      this.products = [];
+    }
   }
 
   render() {
@@ -460,29 +421,11 @@ class StockAvailability {
     return `
       <div class="space-y-6">
         <div>
-          <h3 class="text-2xl font-bold text-gray-900">Stock Availability</h3>
+          <h3 class="text-3xl font-bold text-gray-900">Stock Availability</h3>
           <p class="text-gray-600 mt-1">Check real-time product inventory</p>
         </div>
 
-        <!-- Stock Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sky-600">
-            <p class="text-gray-600 text-sm">Total Products</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${totalProducts}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">In Stock</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">${inStock}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
-            <p class="text-gray-600 text-sm">Low Stock</p>
-            <p class="text-3xl font-bold text-yellow-600 mt-2">${lowStock}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
-            <p class="text-gray-600 text-sm">Critical</p>
-            <p class="text-3xl font-bold text-red-600 mt-2">${critical}</p>
-          </div>
-        </div>
+        
 
         <!-- Search Bar -->
         <div class="bg-white rounded-lg shadow-md p-4">
@@ -505,9 +448,7 @@ class StockAvailability {
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">SKU</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Available</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Reserved</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
               </thead>
@@ -526,31 +467,13 @@ class StockAvailability {
                       product.category
                     }</td>
                     <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
-                      product.available
+                      product.quantity
                     }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      product.reserved
-                    }</td>
+                    </td>
                     <td class="px-6 py-4 text-sm font-semibold text-sky-600">Rs. ${product.price.toFixed(
                       2
                     )}</td>
-                    <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        product.status === "in-stock"
-                          ? "bg-green-100 text-green-800"
-                          : product.status === "low-stock"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }">
-                        ${
-                          product.status === "in-stock"
-                            ? "In Stock"
-                            : product.status === "low-stock"
-                            ? "Low Stock"
-                            : "Critical"
-                        }
-                      </span>
-                    </td>
+                    
                     <td class="px-6 py-4">
                       <button class="text-sky-600 hover:text-sky-800 font-medium text-sm">View Details</button>
                     </td>
@@ -562,33 +485,6 @@ class StockAvailability {
             </table>
           </div>
         </div>
-
-        <!-- Stock Alerts -->
-        ${
-          lowStock + critical > 0
-            ? `
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-yellow-900 mb-1">Stock Alerts</h5>
-              <p class="text-sm text-yellow-800">
-                ${
-                  critical > 0
-                    ? `${critical} product(s) at critical level. `
-                    : ""
-                }
-                ${lowStock > 0 ? `${lowStock} product(s) running low.` : ""} 
-                Consider informing customers about potential delays.
-              </p>
-            </div>
-          </div>
-        </div>
-        `
-            : ""
-        }
       </div>
     `;
   }
@@ -596,38 +492,17 @@ class StockAvailability {
 
 class CustomerAccounts {
   constructor() {
-    this.customers = [
-      {
-        id: "C001",
-        name: "ABC Retail Store",
-        contact: "Mr. Rajesh",
-        phone: "0771234567",
-        email: "rajesh@abcretail.com",
-        totalOrders: 15,
-        totalSpent: 125000,
-        status: "active",
-      },
-      {
-        id: "C002",
-        name: "XYZ Supermarket",
-        contact: "Ms. Priya",
-        phone: "0772345678",
-        email: "priya@xyzsupermarket.com",
-        totalOrders: 22,
-        totalSpent: 185000,
-        status: "active",
-      },
-      {
-        id: "C003",
-        name: "Quick Shop",
-        contact: "Mr. Kumar",
-        phone: "0773456789",
-        email: "kumar@quickshop.com",
-        totalOrders: 8,
-        totalSpent: 65000,
-        status: "inactive",
-      },
-    ];
+    this.customers = [];
+  }
+
+  async getCustomers() {
+    try {
+      const response = await Customer.getAll();
+      this.customers = response.data;
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      this.customers = [];
+    }
   }
 
   render() {
@@ -642,21 +517,6 @@ class CustomerAccounts {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Add Customer
           </button>
-        </div>
-
-        <div class="grid grid-cols-3 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sky-500">
-            <p class="text-gray-600 text-sm font-medium">Total Customers</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">3</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-            <p class="text-gray-600 text-sm font-medium">Active Customers</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">2</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-            <p class="text-gray-600 text-sm font-medium">Total Revenue</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">Rs. 375K</p>
-          </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -698,7 +558,7 @@ class CustomerAccounts {
                     </div>
                   </td>
                   <td class="px-6 py-4 text-gray-700 font-semibold">${
-                    customer.totalOrders
+                    customer.totalPurchases
                   }</td>
                   <td class="px-6 py-4 text-gray-700 font-semibold">Rs. ${customer.totalSpent.toLocaleString()}</td>
                   <td class="px-6 py-4">
@@ -735,97 +595,46 @@ class CustomerAccounts {
 
 class SalesReports {
   constructor() {
-    this.dailySales = { orders: 12, revenue: 125000, items: 450 };
-    this.weeklySales = { orders: 85, revenue: 875000, items: 3200 };
-    this.monthlySales = { orders: 320, revenue: 3500000, items: 12500 };
+    this.salesData = {
+      daily: { orders: 0, revenue: 0, items: 0 },
+      weekly: { orders: 0, revenue: 0, items: 0 },
+      monthly: { orders: 0, revenue: 0, items: 0 },
+    };
+  }
 
-    this.topProducts = [
-      { name: "Floor Cleaner", sold: 350, revenue: 147000 },
-      { name: "Laundry Detergent", sold: 280, revenue: 154000 },
-      { name: "Air Freshener", sold: 245, revenue: 61250 },
-      { name: "Handwash", sold: 220, revenue: 39600 },
-    ];
+  async getSalesData() {
+    try {
+      const response = await axios.get("http://localhost:3000/api/salesman/overall-summary");
+      this.salesData = response.data;
+    } catch (error) {
+      console.error("Error fetching sales data:", error);
+      this.salesData = {
+        daily: { orders: 0, revenue: 0, items: 0 },
+        weekly: { orders: 0, revenue: 0, items: 0 },
+        monthly: { orders: 0, revenue: 0, items: 0 },
+      };
+    }
   }
 
   render() {
     return `
       <div class="space-y-6">
         <div>
-          <h3 class="text-2xl font-bold text-gray-900">Sales Reports</h3>
+          <h3 class="text-3xl font-bold text-gray-900">Sales Reports</h3>
           <p class="text-gray-600 mt-1">View detailed sales analytics and performance</p>
         </div>
 
         <!-- Period Selector -->
         <div class="bg-white rounded-lg shadow-md p-6">
           <div class="flex gap-2 mb-6">
-            <button class="px-4 py-2 bg-sky-600 text-white rounded-lg font-medium">Daily</button>
-            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Weekly</button>
-            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Monthly</button>
+            <button class="period-selector px-4 py-2 bg-sky-600 text-white rounded-lg font-medium">Daily</button>
+            <button class="period-selector px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium">Weekly</button>
+            <button class="period-selector px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium">Monthly</button>
           </div>
 
           <!-- Sales Stats -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
-              <p class="text-gray-700 text-sm font-medium">Total Orders</p>
-              <p class="text-3xl font-bold text-blue-600 mt-2">${
-                this.dailySales.orders
-              }</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
-              <p class="text-gray-700 text-sm font-medium">Revenue</p>
-              <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${(
-                this.dailySales.revenue / 1000
-              ).toFixed(0)}K</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-sky-50 to-sky-100 rounded-lg p-6 border border-sky-200">
-              <p class="text-gray-700 text-sm font-medium">Items Sold</p>
-              <p class="text-3xl font-bold text-sky-600 mt-2">${
-                this.dailySales.items
-              }</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-          </div>
-        </div>
-
-        
-
-        <!-- Top Products -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h4 class="text-lg font-semibold text-gray-900">Top Selling Products</h4>
-          </div>
-          <div class="p-6">
-            <div class="space-y-4">
-              ${this.topProducts
-                .map(
-                  (product, index) => `
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-lg">
-                      ${index + 1}
-                    </div>
-                    <div>
-                      <p class="font-semibold text-gray-900">${product.name}</p>
-                      <p class="text-sm text-gray-600">${
-                        product.sold
-                      } units sold</p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="font-bold text-sky-600">Rs. ${product.revenue.toFixed(
-                      2
-                    )}</p>
-                    <p class="text-xs text-gray-600">Revenue</p>
-                  </div>
-                </div>
-              `
-                )
-                .join("")}
-            </div>
+          <div class="stats">
+            Please Wait...
           </div>
         </div>
 
@@ -855,6 +664,119 @@ class SalesReports {
         </div>
       </div>
     `;
+  }
+
+  attachListeners(container) {
+    const periodSelectors = container.querySelectorAll(".period-selector");
+    
+    if (periodSelectors.length > 0) {
+      periodSelectors.forEach((btn) => {
+        if (btn.textContent.trim() === "Daily") {
+          btn.classList.add("bg-sky-600", "text-white");
+          btn.classList.remove("bg-gray-200", "text-gray-700");
+        } else {
+          btn.classList.remove("bg-sky-600", "text-white");
+          btn.classList.add("bg-gray-200", "text-gray-700");
+        }
+      });
+
+      this.handlePeriodChange("daily", container).catch((e) =>
+        console.error("Error initializing analytics:", e)
+      );
+
+      periodSelectors.forEach((button) => {
+        button.addEventListener("click", async (e) => {
+          const periodText = button.textContent.trim();
+
+          periodSelectors.forEach((btn) => {
+            btn.classList.remove("bg-sky-600", "text-white");
+            btn.classList.add("bg-gray-200", "text-gray-700");
+          });
+
+          button.classList.add("bg-sky-600", "text-white");
+          button.classList.remove("bg-gray-200", "text-gray-700");
+
+          if (periodText === "Daily") {
+            await this.handlePeriodChange("daily", container);
+          } else if (periodText === "Weekly") {
+            await this.handlePeriodChange("weekly", container);
+          } else if (periodText === "Monthly") {
+            await this.handlePeriodChange("monthly", container);
+          }
+        });
+      });
+    }
+  }
+
+  async handlePeriodChange(period, container) {
+    const statSelector = container.querySelector(".stats");
+
+    const apiURL = "http://localhost:3000/api/salesman/overall-summary";
+
+    const summary = await axios.get(apiURL);
+
+    this.period = period;
+    if (this.period === "daily") {
+      statSelector.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+              <p class="text-gray-700 text-sm font-medium">Total Orders</p>
+              <p class="text-3xl font-bold text-blue-600 mt-2">${summary.data.daily.orders}</p>
+              <p class="text-xs text-gray-600 mt-2">Today</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+              <p class="text-gray-700 text-sm font-medium">Revenue</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">${summary.data.daily.revenue}</p>
+              <p class="text-xs text-gray-600 mt-2">Today</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-sky-50 to-sky-100 rounded-lg p-6 border border-sky-200">
+              <p class="text-gray-700 text-sm font-medium">Items Sold</p>
+              <p class="text-3xl font-bold text-sky-600 mt-2">${summary.data.daily.items}</p>
+              <p class="text-xs text-gray-600 mt-2">Today</p>
+            </div>
+          </div>`;
+    } else if (this.period === "weekly") {
+      statSelector.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+              <p class="text-gray-700 text-sm font-medium">Total Orders</p>
+              <p class="text-3xl font-bold text-blue-600 mt-2">${summary.data.weekly.orders}</p>
+              <p class="text-xs text-gray-600 mt-2">This Week</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+              <p class="text-gray-700 text-sm font-medium">Revenue</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">${summary.data.weekly.revenue}</p>
+              <p class="text-xs text-gray-600 mt-2">This Week</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-sky-50 to-sky-100 rounded-lg p-6 border border-sky-200">
+              <p class="text-gray-700 text-sm font-medium">Items Sold</p>
+              <p class="text-3xl font-bold text-sky-600 mt-2">${summary.data.weekly.items}</p>
+              <p class="text-xs text-gray-600 mt-2">This Week</p>
+            </div>
+          </div>`;
+    } else if (this.period === "monthly") {
+      statSelector.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+              <p class="text-gray-700 text-sm font-medium">Total Orders</p>
+              <p class="text-3xl font-bold text-blue-600 mt-2">${summary.data.monthly.orders}</p>
+              <p class="text-xs text-gray-600 mt-2">This Month</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+              <p class="text-gray-700 text-sm font-medium">Revenue</p>
+              <p class="text-3xl font-bold text-green-600 mt-2">${summary.data.monthly.revenue}</p>
+              <p class="text-xs text-gray-600 mt-2">This Month</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-sky-50 to-sky-100 rounded-lg p-6 border border-sky-200">
+              <p class="text-gray-700 text-sm font-medium">Items Sold</p>
+              <p class="text-3xl font-bold text-sky-600 mt-2">${summary.data.monthly.items}</p>
+              <p class="text-xs text-gray-600 mt-2">This Month</p>
+            </div>
+          </div>`;
+    }
   }
 }
 
@@ -1140,257 +1062,9 @@ class ReturnsAndCancellations {
   }
 }
 
-class PromotionsAndPricing {
-  constructor() {
-    this.activePromotions = [
-      {
-        id: "PROMO-001",
-        name: "New Year Sale",
-        discount: "20%",
-        products: ["Floor Cleaner", "Laundry Detergent"],
-        validFrom: "2025-01-01",
-        validTo: "2025-01-31",
-        status: "active",
-      },
-      {
-        id: "PROMO-002",
-        name: "Bulk Purchase Discount",
-        discount: "15%",
-        products: ["All Products"],
-        validFrom: "2025-01-15",
-        validTo: "2025-02-15",
-        status: "active",
-      },
-      {
-        id: "PROMO-003",
-        name: "Weekend Special",
-        discount: "10%",
-        products: ["Air Freshener", "Handwash"],
-        validFrom: "2025-01-20",
-        validTo: "2025-01-21",
-        status: "upcoming",
-      },
-    ];
-
-    this.pricingTiers = [
-      { tier: "Regular", minQty: 1, maxQty: 10, discount: "0%" },
-      { tier: "Wholesale", minQty: 11, maxQty: 50, discount: "10%" },
-      { tier: "Bulk", minQty: 51, maxQty: null, discount: "20%" },
-    ];
-  }
-
-  render() {
-    const activeCount = this.activePromotions.filter(
-      (p) => p.status === "active"
-    ).length;
-    const upcomingCount = this.activePromotions.filter(
-      (p) => p.status === "upcoming"
-    ).length;
-
-    return `
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-900">Promotions & Pricing</h3>
-          <p class="text-gray-600 mt-1">Manage promotional offers and pricing strategies</p>
-        </div>
-
-        <!-- Promo Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sky-600">
-            <p class="text-gray-600 text-sm">Total Promotions</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.activePromotions.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">Active</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">${activeCount}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <p class="text-gray-600 text-sm">Upcoming</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">${upcomingCount}</p>
-          </div>
-        </div>
-
-        <!-- Active Promotions -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Active Promotions</h3>
-          </div>
-          <div class="divide-y divide-gray-200">
-            ${this.activePromotions
-              .map(
-                (promo) => `
-              <div class="p-6 hover:bg-gray-50 transition-colors">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                      <h4 class="text-lg font-semibold text-gray-900">${
-                        promo.name
-                      }</h4>
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        promo.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : promo.status === "upcoming"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-gray-100 text-gray-800"
-                      }">
-                        ${
-                          promo.status.charAt(0).toUpperCase() +
-                          promo.status.slice(1)
-                        }
-                      </span>
-                    </div>
-                    <p class="text-sm text-gray-600">Promo ID: ${promo.id}</p>
-                  </div>
-                  <div class="text-right">
-                    <div class="text-3xl font-bold text-sky-600">${
-                      promo.discount
-                    }</div>
-                    <p class="text-xs text-gray-600">Discount</p>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p class="text-xs text-gray-500">Applicable Products</p>
-                    <p class="text-sm font-semibold text-gray-900">${promo.products.join(
-                      ", "
-                    )}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs text-gray-500">Valid From</p>
-                    <p class="text-sm font-semibold text-gray-900">${
-                      promo.validFrom
-                    }</p>
-                  </div>
-                  <div>
-                    <p class="text-xs text-gray-500">Valid To</p>
-                    <p class="text-sm font-semibold text-gray-900">${
-                      promo.validTo
-                    }</p>
-                  </div>
-                </div>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
-
-        <!-- Pricing Tiers -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Pricing Tiers</h3>
-          </div>
-          <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              ${this.pricingTiers
-                .map(
-                  (tier, index) => `
-                <div class="border-2 ${
-                  index === 0
-                    ? "border-gray-300"
-                    : index === 1
-                    ? "border-blue-400"
-                    : "border-green-400"
-                } rounded-lg p-6 hover:shadow-lg transition-shadow">
-                  <div class="text-center mb-4">
-                    <h4 class="text-xl font-bold text-gray-900 mb-2">${
-                      tier.tier
-                    }</h4>
-                    <div class="text-4xl font-bold ${
-                      index === 0
-                        ? "text-gray-600"
-                        : index === 1
-                        ? "text-blue-600"
-                        : "text-green-600"
-                    }">${tier.discount}</div>
-                    <p class="text-sm text-gray-600 mt-1">Discount</p>
-                  </div>
-                  <div class="border-t pt-4">
-                    <p class="text-sm text-gray-700 mb-2">
-                      <span class="font-semibold">Minimum:</span> ${
-                        tier.minQty
-                      } units
-                    </p>
-                    <p class="text-sm text-gray-700">
-                      <span class="font-semibold">Maximum:</span> ${
-                        tier.maxQty ? tier.maxQty + " units" : "Unlimited"
-                      }
-                    </p>
-                  </div>
-                </div>
-              `
-                )
-                .join("")}
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Price Calculator -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Price Calculator</h4>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Product</label>
-              <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
-                <option>Select product...</option>
-                <option>Air Freshener</option>
-                <option>Handwash</option>
-                <option>Floor Cleaner</option>
-                <option>Laundry Detergent</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-              <input type="number" placeholder="Enter quantity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Apply Promo</label>
-              <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
-                <option>No promotion</option>
-                ${this.activePromotions
-                  .filter((p) => p.status === "active")
-                  .map(
-                    (promo) => `
-                  <option>${promo.name} (${promo.discount})</option>
-                `
-                  )
-                  .join("")}
-              </select>
-            </div>
-            <div class="flex items-end">
-              <button class="w-full bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700 transition-colors font-medium">Calculate</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pricing Tips -->
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-green-900 mb-1">Pricing Tips</h5>
-              <ul class="text-sm text-green-800 space-y-1">
-                <li>• Offer bulk discounts to encourage larger orders</li>
-                <li>• Promote seasonal items with special pricing</li>
-                <li>• Inform customers about active promotions</li>
-                <li>• Check competitor pricing regularly</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-export function renderSalesmanDashboard(container) {
+export async function renderSalesmanDashboard(container) {
   const dashboard = new SalesmanDashboard(container);
-  dashboard.render();
+  await dashboard.render();
 
   const content = container.querySelector("#dashboardContent");
   const ordersSection = new SalesOrders();

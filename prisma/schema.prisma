@@ -162,3 +162,40 @@ model Shipment {
 
   order Order @relation(fields: [purchaseOrderId], references: [id])
 }
+
+model SalesOrder {
+  id            Int      @id @default(autoincrement())
+  orderNumber   String   @unique
+  customerId    Int
+  customerName  String
+  salesmanId    Int
+  orderDate     DateTime
+  subtotal      Float
+  tax           Float
+  discount      Float
+  totalAmount   Float
+  status        String   @default("pending")
+  paymentStatus String   @default("unpaid")
+  items         Json
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Customer {
+  id             Int       @id @default(autoincrement())
+  name           String
+  email          String    @unique
+  phone          String?
+  address        String?
+  businessName   String?
+  customerType   String?
+  isVIP          Boolean   @default(false)
+  totalPurchases Int       @default(0)
+  totalSpent     Float     @default(0.0)
+  lastVisit      DateTime?
+  loyaltyPoints  Int       @default(0)
+  status         String    @default("active")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
