@@ -1,26 +1,6 @@
 import logo from "../../assets/logo-tr.png";
 import { Product } from "../models/Product.js";
-
-// icons (moved from inline SVGs to asset files)
-import packageIcon from "../../assets/icons/package.svg";
-import messageSquareIcon from "../../assets/icons/message-square.svg";
-import alertCircleIcon from "../../assets/icons/alert-circle.svg";
-import chartBarIcon from "../../assets/icons/chart-bar.svg";
-import barcodeIcon from "../../assets/icons/barcode.svg";
-import checkSquareIcon from "../../assets/icons/check-square.svg";
-import bellIcon from "../../assets/icons/bell.svg";
-import userIcon from "../../assets/icons/user-circle.svg";
-import logoutIcon from "../../assets/icons/log-out.svg";
-import menuIcon from "../../assets/icons/menu.svg";
-import xIcon from "../../assets/icons/x.svg";
-import searchIcon from "../../assets/icons/search.svg";
-import plusIcon from "../../assets/icons/plus.svg";
-import editIcon from "../../assets/icons/edit.svg";
-import trashIcon from "../../assets/icons/trash.svg";
-import alertTriangleIcon from "../../assets/icons/alert-triangle.svg";
-import clockIcon from "../../assets/icons/clock.svg";
-import checkCircleIcon from "../../assets/icons/check-circle.svg";
-import trendUpIcon from "../../assets/icons/trend-up.svg";
+import { Shipment } from "../models/Shipment.js";
 
 class StockKeeperDashboard {
   constructor(container) {
@@ -49,11 +29,9 @@ class StockKeeperDashboard {
 
   renderSidebar() {
     const menuItems = [
-      { id: "inventory", label: "Inventory Management", icon: "package" },
-      { id: "receiving", label: "Receiving & Shipment", icon: "inbox" },
-      { id: "alerts", label: "Low Stock Alerts", icon: "alert-circle" },
+      { id: "inventory", label: "Inventory", icon: "package" },
+      { id: "receiving", label: "Shipment", icon: "inbox" },
       { id: "reports", label: "Stock Reports", icon: "bar-chart" },
-      { id: "barcode", label: "Barcode Scanning", icon: "barcode" },
       { id: "auditing", label: "Stock Auditing", icon: "check-square" },
     ];
     /*html*/
@@ -87,16 +65,7 @@ class StockKeeperDashboard {
             .join("")}
         </nav>
 
-        <div class="p-4 border-t border-gray-200 bg-purple-50">
-          <div class="text-sm text-gray-600">
-            <p class="font-medium text-purple-700">Quick Stats</p>
-            <div class="mt-2 space-y-1 text-xs">
-              <p>Total Items: <span class="font-bold text-purple-600">1,245</span></p>
-              <p>Low Stock: <span class="font-bold text-red-600">23</span></p>
-              <p>Last Audit: <span class="font-bold">Today</span></p>
-            </div>
-          </div>
-        </div>
+        
       </aside>
 
       <!-- Overlay for mobile -->
@@ -143,14 +112,14 @@ class StockKeeperDashboard {
     const sections = {
       inventory: new InventoryManagement(),
       receiving: new ReceivingShipment(),
-      alerts: new LowStockAlerts(),
       reports: new StockReports(),
-      barcode: new BarcodeScanning(),
       auditing: new StockAuditing(),
     };
     const sectionInstance = sections[section];
     if (section === "inventory") {
       await sectionInstance.getInventoryItems();
+    } else if (section === "receiving") {
+      await sectionInstance.getShipments();
     }
     return sectionInstance.render();
   }
@@ -195,6 +164,12 @@ class StockKeeperDashboard {
     const content = this.container.querySelector("#dashboardContent");
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+
+    if (section === "receiving") {
+      const receivingShipment = new ReceivingShipment();
+      // Use renderAndAttach so the same instance fetches data, renders and wires listeners
+      await receivingShipment.renderAndAttach(content);
+    }
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -287,7 +262,6 @@ class InventoryManagement {
                   <th class="text-left py-3 px-4 font-semibold text-gray-700">Item Name</th>
                   <th class="text-left py-3 px-4 font-semibold text-gray-700">SKU</th>
                   <th class="text-left py-3 px-4 font-semibold text-gray-700">Quantity</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Min/Max</th>
                   <th class="text-left py-3 px-4 font-semibold text-gray-700">Expiry Date</th>
                   <th class="text-left py-3 px-4 font-semibold text-gray-700">Batch #</th>
                   <th class="text-left py-3 px-4 font-semibold text-gray-700">Location</th>
@@ -314,12 +288,12 @@ class InventoryManagement {
                         ${item.quantity}
                       </span>
                     </td>
+                    
+                    <td class="py-3 px-4 text-gray-600">${
+                      item.expiryDate ? item.expiryDate : "N/A"
+                    }</td>
                     <td class="py-3 px-4 text-gray-600 text-sm">${
-                      item.minStock
-                    } / ${item.maxStock}</td>
-                    <td class="py-3 px-4 text-gray-600">${item.expiryDate}</td>
-                    <td class="py-3 px-4 text-gray-600 text-sm">${
-                      item.batchNumber
+                      item.batchNumber ? item.batchNumber : "N/A"
                     }</td>
                     <td class="py-3 px-4 text-gray-600 font-medium">${
                       item.location
@@ -349,67 +323,36 @@ class InventoryManagement {
 
 class ReceivingShipment {
   constructor() {
-    this.activeTab = "pending";
-    this.shipments = {
-      pending: [
-        {
-          id: 1,
-          supplier: "Britol Products Ltd",
-          poNumber: "PO-2024-001",
-          expectedDate: "2024-10-20",
-          items: 5,
-          status: "pending",
-        },
-        {
-          id: 2,
-          supplier: "Alli Food Products",
-          poNumber: "PO-2024-002",
-          expectedDate: "2024-10-21",
-          items: 3,
-          status: "pending",
-        },
-      ],
-      received: [
-        {
-          id: 3,
-          supplier: "Britol Products Ltd",
-          poNumber: "PO-2024-003",
-          receivedDate: "2024-10-18",
-          items: 8,
-          status: "received",
-        },
-        {
-          id: 4,
-          supplier: "Alli Food Products",
-          poNumber: "PO-2024-004",
-          receivedDate: "2024-10-17",
-          items: 6,
-          status: "received",
-        },
-      ],
-      issues: [
-        {
-          id: 5,
-          supplier: "Britol Products Ltd",
-          poNumber: "PO-2024-005",
-          issue: "Damaged items found",
-          items: 2,
-          status: "issue",
-        },
-      ],
-    };
+    this.shipments = { in_transit: [], received: [], pending: [] };
+    this.activeTab = "in_transit";
+  }
+
+  async getShipments() {
+    try {
+      const response = await Shipment.getAll();
+      this.shipments = {
+        in_transit: response.data.filter((s) => s.status === "in_transit"),
+        received: response.data.filter((s) => s.status === "received"),
+        pending: response.data.filter((s) => s.status === "pending"),
+      };
+    } catch (error) {
+      console.error("Error fetching shipments:", error);
+      this.shipments = { in_transit: [], received: [], pending: [] };
+    }
   }
 
   render() {
     return `
-      <div class="space-y-6">
+      <div class="space-y-6 p-8">
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-2xl font-bold text-gray-800">Receiving & Shipment</h3>
             <p class="text-gray-600 mt-1">Track incoming and outgoing shipments</p>
           </div>
           <button class="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
             New Shipment
           </button>
         </div>
@@ -419,7 +362,7 @@ class ReceivingShipment {
             ${[
               { id: "pending", label: "Pending", icon: "clock" },
               { id: "received", label: "Received", icon: "check-circle" },
-              { id: "issues", label: "Issues", icon: "alert-circle" },
+              { id: "in_transit", label: "In Transit", icon: "alert-circle" },
             ]
               .map(
                 (tab) => `
@@ -439,52 +382,76 @@ class ReceivingShipment {
           </div>
 
           <div class="p-6 space-y-4" id="shipmentsContainer">
-            ${this.renderShipments()}
+            ${this.renderShipments("in_transit")}
           </div>
         </div>
       </div>
     `;
   }
 
-  renderShipments() {
-    return this.shipments[this.activeTab]
+  renderShipments(period) {
+    const list = this.shipments[period] || [];
+    if (list.length === 0) {
+      return `<div class="text-sm text-gray-600">No shipments found for ${period.replace(
+        "_",
+        " "
+      )}</div>`;
+    }
+
+    return list
       .map(
         (shipment) => `
-      <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-        <div class="flex items-start justify-between">
-          <div class="flex-1">
-            <h4 class="font-semibold text-gray-800">${shipment.supplier}</h4>
-            <p class="text-sm text-gray-600 mt-1">PO: ${shipment.poNumber}</p>
-            <p class="text-sm text-gray-600">Items: ${shipment.items}</p>
+        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <h4 class="font-semibold text-gray-800">${
+                shipment.shipmentNumber
+              }</h4>
+              <p class="text-sm text-gray-600 mt-1">PO: ${
+                shipment.purchaseOrderId
+              }</p>
+              <p class="text-sm text-gray-600">
+                Items: ${
+                  shipment.order?.items
+                    ?.filter((item) => item && item.name)
+                    .map(
+                      (item) =>
+                        `${item.name}${
+                          item.quantity ? ` (x${item.quantity})` : ""
+                        }`
+                    )
+                    .join(", ") || "No items"
+                }
+              </p>
+            </div>
+            <div class="text-right">
+              ${
+                period === "pending"
+                  ? `<p class="text-sm text-gray-600">Expected: ${shipment.expectedDeliveryDate}</p>`
+                  : ""
+              }
+              ${
+                period === "received"
+                  ? `<p class="text-sm text-green-600 font-medium">Received: ${shipment.actualDeliveryDate}</p>`
+                  : ""
+              }
+              ${
+                period === "in_transit"
+                  ? `<p class="text-sm text-indigo-600 font-medium">Status: In Transit</p>`
+                  : ""
+              }
+            </div>
           </div>
-          <div class="text-right">
+          <div class="mt-4 flex gap-2">
             ${
-              this.activeTab === "pending"
-                ? `<p class="text-sm text-gray-600">Expected: ${shipment.expectedDate}</p>`
+              period === "pending"
+                ? '<button class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">Mark Received</button>'
                 : ""
             }
-            ${
-              this.activeTab === "received"
-                ? `<p class="text-sm text-green-600 font-medium">Received: ${shipment.receivedDate}</p>`
-                : ""
-            }
-            ${
-              this.activeTab === "issues"
-                ? `<p class="text-sm text-red-600 font-medium">${shipment.issue}</p>`
-                : ""
-            }
+            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">View Details</button>
           </div>
         </div>
-        <div class="mt-4 flex gap-2">
-          ${
-            this.activeTab === "pending"
-              ? '<button class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">Mark Received</button>'
-              : ""
-          }
-          <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">View Details</button>
-        </div>
-      </div>
-    `
+      `
       )
       .join("");
   }
@@ -500,148 +467,34 @@ class ReceivingShipment {
     };
     return icons[name] || "";
   }
-}
 
-class LowStockAlerts {
-  constructor() {
-    this.alerts = [
-      {
-        id: 1,
-        itemName: "Handwash",
-        sku: "HW-002",
-        currentStock: 45,
-        minStock: 100,
-        reorderQuantity: 200,
-        daysUntilStockout: 3,
-        severity: "critical",
-      },
-      {
-        id: 2,
-        itemName: "Dish Liquid",
-        sku: "DL-004",
-        currentStock: 78,
-        minStock: 200,
-        reorderQuantity: 300,
-        daysUntilStockout: 5,
-        severity: "high",
-      },
-      {
-        id: 3,
-        itemName: "Car Interior Spray",
-        sku: "CIS-003",
-        currentStock: 320,
-        minStock: 150,
-        reorderQuantity: 150,
-        daysUntilStockout: 12,
-        severity: "medium",
-      },
-    ];
+  // Attach click listeners to tab buttons within a root element
+  attachTabListeners(root) {
+    const buttons = root.querySelectorAll(".tab-btn");
+    const container = root.querySelector("#shipmentsContainer");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.activeTab = btn.dataset.tab;
+
+        // render shipments into the local container
+        container.innerHTML = this.renderShipments(this.activeTab);
+
+        buttons.forEach((b) =>
+          b.classList.remove(
+            "text-purple-600",
+            "border-b-2",
+            "border-purple-600"
+          )
+        );
+        btn.classList.add("text-purple-600", "border-b-2", "border-purple-600");
+      });
+    });
   }
 
-  render() {
-    return `
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-800">Low Stock Alerts</h3>
-          <p class="text-gray-600 mt-1">Items running below minimum stock levels</p>
-        </div>
-
-        <div class="grid gap-4">
-          ${this.alerts
-            .map(
-              (alert) => `
-            <div class="border rounded-lg p-6 ${this.getSeverityColor(
-              alert.severity
-            )}">
-              <div class="flex items-start justify-between">
-                <div class="flex items-start gap-4 flex-1">
-                  <div class="p-3 bg-white rounded-lg">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                  </div>
-                  <div class="flex-1">
-                    <div class="flex items-center gap-3">
-                      <h4 class="font-bold text-gray-800 text-lg">${
-                        alert.itemName
-                      }</h4>
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getSeverityBadgeColor(
-                        alert.severity
-                      )}">
-                        ${alert.severity.toUpperCase()}
-                      </span>
-                    </div>
-                    <p class="text-sm text-gray-600 mt-1">SKU: ${alert.sku}</p>
-
-                    <div class="grid grid-cols-2 gap-4 mt-4">
-                      <div>
-                        <p class="text-xs text-gray-600 font-medium">Current Stock</p>
-                        <p class="text-lg font-bold text-gray-800">${
-                          alert.currentStock
-                        } units</p>
-                      </div>
-                      <div>
-                        <p class="text-xs text-gray-600 font-medium">Minimum Required</p>
-                        <p class="text-lg font-bold text-gray-800">${
-                          alert.minStock
-                        } units</p>
-                      </div>
-                      <div>
-                        <p class="text-xs text-gray-600 font-medium">Reorder Quantity</p>
-                        <p class="text-lg font-bold text-gray-800">${
-                          alert.reorderQuantity
-                        } units</p>
-                      </div>
-                      <div>
-                        <p class="text-xs text-gray-600 font-medium">Days Until Stockout</p>
-                        <p class="text-lg font-bold text-red-600">${
-                          alert.daysUntilStockout
-                        } days</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="flex gap-2">
-                  <button class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">
-                    Reorder Now
-                  </button>
-                  <button class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
-                    Dismiss
-                  </button>
-                </div>
-              </div>
-            </div>
-          `
-            )
-            .join("")}
-        </div>
-      </div>
-    `;
-  }
-
-  getSeverityColor(severity) {
-    switch (severity) {
-      case "critical":
-        return "bg-red-50 border-red-200";
-      case "high":
-        return "bg-orange-50 border-orange-200";
-      case "medium":
-        return "bg-yellow-50 border-yellow-200";
-      default:
-        return "bg-gray-50 border-gray-200";
-    }
-  }
-
-  getSeverityBadgeColor(severity) {
-    switch (severity) {
-      case "critical":
-        return "bg-red-100 text-red-700";
-      case "high":
-        return "bg-orange-100 text-orange-700";
-      case "medium":
-        return "bg-yellow-100 text-yellow-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
+  async renderAndAttach(container) {
+    await this.getShipments();
+    container.innerHTML = this.render();
+    this.attachTabListeners(container);
   }
 }
 
@@ -670,7 +523,7 @@ class StockReports {
       <div class="space-y-6">
         <div>
           <h3 class="text-2xl font-bold text-gray-900">Stock Reports</h3>
-          <p class="text-gray-600 mt-1">Daily, weekly, and monthly stock movements</p>
+          <p class="text-gray-600 mt-1">Daily stock movements</p>
         </div>
 
         <!-- Stats Cards -->
@@ -715,153 +568,6 @@ class StockReports {
               </svg>
               Print Report
             </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-class BarcodeScanning {
-  constructor() {
-    this.scannedItems = [
-      {
-        id: 1,
-        barcode: "8901234567890",
-        itemName: "Air Freshener",
-        quantity: 5,
-        timestamp: "10:30 AM",
-      },
-      {
-        id: 2,
-        barcode: "8901234567891",
-        itemName: "Handwash",
-        quantity: 3,
-        timestamp: "10:35 AM",
-      },
-    ];
-  }
-
-  render() {
-    return `
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-900">Barcode Scanning</h3>
-          <p class="text-gray-600 mt-1">Quick item entry using barcode scanning</p>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Scan Item Section -->
-          <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-            <h4 class="font-bold text-gray-900 mb-4">Scan Item</h4>
-            <div class="space-y-4">
-              <!-- Camera Upload Area -->
-              <div class="border-2 border-dashed border-purple-300 rounded-lg p-8 text-center bg-purple-50 cursor-pointer hover:bg-purple-100 transition-colors">
-                <input type="file" id="barcodeImageUpload" accept="image/*" capture="camera" class="hidden">
-                <label for="barcodeImageUpload" class="cursor-pointer">
-                  <svg class="w-12 h-12 mx-auto text-purple-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                  <p class="text-gray-700 font-medium">Click to upload barcode photo</p>
-                  <p class="text-sm text-gray-600 mt-1">or scan with camera</p>
-                </label>
-              </div>
-
-              <!-- Preview area for uploaded image -->
-              <div id="imagePreview" class="hidden">
-                <img id="uploadedImage" class="w-full h-48 object-contain border border-gray-200 rounded-lg" alt="Barcode preview">
-                <p class="text-sm text-gray-600 mt-2 text-center">Detected barcode will appear below</p>
-              </div>
-
-              <!-- Manual Entry -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Barcode</label>
-                <input
-                  type="text"
-                  id="barcodeInput"
-                  placeholder="Enter or scan barcode..."
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                <input
-                  type="number"
-                  id="quantityInput"
-                  placeholder="Enter quantity"
-                  value="1"
-                  min="1"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-              </div>
-
-              <button id="addItemBtn" class="w-full bg-purple-600 text-white py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Add Item
-              </button>
-            </div>
-          </div>
-
-          <!-- Recently Scanned Items Section -->
-          <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-            <h4 class="font-bold text-gray-900 mb-4">Recently Scanned Items</h4>
-            <div class="space-y-3 max-h-96 overflow-y-auto">
-              ${this.scannedItems
-                .map(
-                  (item) => `
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
-                    </svg>
-                    <div>
-                      <p class="font-medium text-gray-900">${item.itemName}</p>
-                      <p class="text-xs text-gray-600">${item.barcode}</p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="font-bold text-gray-900">${item.quantity}</p>
-                    <p class="text-xs text-gray-600">${item.timestamp}</p>
-                  </div>
-                </div>
-              `
-                )
-                .join("")}
-            </div>
-
-            <!-- Batch Actions -->
-            <div class="mt-4 pt-4 border-t border-gray-200">
-              <div class="flex gap-2">
-                <button class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors">
-                  Process Batch
-                </button>
-                <button class="flex-1 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-                  Clear All
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Barcode Scanner Tips -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-blue-900 mb-1">Scanning Tips</h5>
-              <ul class="text-sm text-blue-800 space-y-1">
-                <li>• Ensure good lighting when capturing barcode photos</li>
-                <li>• Hold camera steady and keep barcode within frame</li>
-                <li>• Clean barcode labels before scanning for best results</li>
-                <li>• You can also manually enter barcodes if scanning fails</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>

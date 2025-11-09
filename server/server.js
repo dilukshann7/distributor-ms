@@ -68,7 +68,9 @@ app.get("/api/orders", async (req, res) => {
 
 app.get("/api/shipments", async (req, res) => {
   try {
-    const shipments = await prisma.shipment.findMany();
+    const shipments = await prisma.shipment.findMany({
+      include: { order: true },
+    });
     res.json(shipments);
   } catch (e) {
     console.error("Error fetching shipments:", e);
@@ -78,7 +80,7 @@ app.get("/api/shipments", async (req, res) => {
 
 app.get("/api/invoices", async (req, res) => {
   try {
-    const invoices = await prisma.invoice.findMany();
+    const invoices = await prisma.invoice.findMany({});
     res.json(invoices);
   } catch (e) {
     console.error("Error fetching invoices:", e);
@@ -130,7 +132,7 @@ app.get("/api/orders/daily", async (req, res) => {
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
     const totalItems = orders.reduce((sum, o) => {
-      const items = JSON.parse(o.items);
+      const items = o.items;
       return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
     }, 0);
 
@@ -163,7 +165,7 @@ app.get("/api/orders/weekly", async (req, res) => {
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
     const totalItems = orders.reduce((sum, o) => {
-      const items = JSON.parse(o.items);
+      const items = o.items; // already JS array
       return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
     }, 0);
 
@@ -179,8 +181,8 @@ app.get("/api/orders/weekly", async (req, res) => {
 app.get("/api/orders/monthly", async (req, res) => {
   try {
     const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDayOfMonth = new Date(
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); // start of month
+    const firstDayOfNextMonth = new Date(
       today.getFullYear(),
       today.getMonth() + 1,
       1
@@ -190,7 +192,7 @@ app.get("/api/orders/monthly", async (req, res) => {
       where: {
         orderDate: {
           gte: firstDayOfMonth,
-          lt: lastDayOfMonth,
+          lt: firstDayOfNextMonth,
         },
       },
     });
@@ -198,7 +200,7 @@ app.get("/api/orders/monthly", async (req, res) => {
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
     const totalItems = orders.reduce((sum, o) => {
-      const items = JSON.parse(o.items);
+      const items = o.items;
       return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
     }, 0);
 
@@ -337,7 +339,7 @@ app.get("/api/supplier/overall-summary", async (req, res) => {
       orders: monthlyOrders.length,
       revenue: monthlyOrders.reduce((sum, o) => sum + o.totalAmount, 0),
       items: monthlyOrders.reduce((sum, o) => {
-        const items = JSON.parse(o.items);
+        const items = o.items;
         return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
       }, 0),
     };

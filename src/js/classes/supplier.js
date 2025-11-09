@@ -349,9 +349,10 @@ class PurchaseOrders {
                       ${new Date(order.orderDate).toISOString().split("T")[0]}
                     </td>
                     <td class="px-6 py-4 text-sm font-semibold text-gray-900">
-                      ${JSON.parse(order.items)
-                        .map((i) => `Product ${i.productId} (x${i.quantity})`)
+                      ${order.items
+                        .map((i) => `${i.name} (${i.quantity})`)
                         .join(", ")}
+                      
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600">${order.totalAmount.toLocaleString(
                       "en-US",
@@ -516,7 +517,7 @@ class ShipmentTracking {
 
   render() {
     const preparingCount = this.shipments.filter(
-      (s) => s.status === "preparing"
+      (s) => s.status === "pending"
     ).length;
     const inTransitCount = this.shipments.filter(
       (s) => s.status === "in-transit"
@@ -565,7 +566,6 @@ class ShipmentTracking {
                 <tr>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Shipment ID</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Destination</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Items</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Carrier</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Est. Delivery</th>
@@ -582,19 +582,19 @@ class ShipmentTracking {
                       shipment.id
                     }</td>
                     <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${
-                      shipment.orderId
+                      shipment.purchaseOrderId
                     }</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${
-                      shipment.destination
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      shipment.items
-                    } items</td>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                      ${shipment.order.items
+                        .map((item) => `${item.name} (x${item.quantity})`)
+                        .join(", ")}
+                    </td>
                     <td class="px-6 py-4 text-sm text-gray-600">${
                       shipment.carrier
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-600">${
-                      shipment.estimatedDelivery
+                      shipment.expectedDeliveryDate
                     }</td>
                     <td class="px-6 py-4 text-sm">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${

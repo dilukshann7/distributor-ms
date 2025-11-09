@@ -106,9 +106,12 @@ model Order {
   totalAmount Float
   dueDate     DateTime
   itemIDs     Int[]
-  items       String
+  items       Json
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  shipments Shipment[] // existing
+  invoices  Invoice[] // <-- back-relation for invoices
 }
 
 model Supply {
@@ -138,6 +141,8 @@ model Invoice {
   notes           String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  order Order @relation(fields: [purchaseOrderId], references: [id])
 }
 
 model Shipment {
@@ -154,4 +159,6 @@ model Shipment {
   notes                String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+
+  order Order @relation(fields: [purchaseOrderId], references: [id])
 }
