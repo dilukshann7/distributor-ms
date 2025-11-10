@@ -1,6 +1,6 @@
 # Distribution Management System
 
-A comprehensive web-based distribution management system for ADP Namasinghe Distribution, built with modern JavaScript, Webpack, and Tailwind CSS. This application provides role-based access control for managing various aspects of distribution operations including inventory, sales, suppliers, and logistics
+A comprehensive web-based distribution management system for ADP Namasinghe Distribution, built with modern JavaScript, Webpack, and Tailwind CSS. This application provides role-based access control for managing various aspects of distribution operations including inventory, sales, suppliers, and logistics.
 
 ## 📋 Table of Contents
 
