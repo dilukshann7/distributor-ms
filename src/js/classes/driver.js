@@ -96,16 +96,6 @@ class DriverDashboard {
             <span class="absolute top-1 right-1 w-2 h-2 bg-green-600 rounded-full"></span>
           </button>
 
-          <div class="flex items-center gap-3 pl-6 border-l border-gray-200">
-            <div class="text-right">
-              <p class="font-medium text-gray-800">Michael Chen</p>
-              <p class="text-xs text-gray-600">Delivery Driver</p>
-            </div>
-            <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold">
-              MC
-            </div>
-          </div>
-
           <button id="logoutBtnHeader" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${this.getIcon("log-out")}
           </button>

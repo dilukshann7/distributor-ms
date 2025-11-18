@@ -117,15 +117,7 @@ class OwnerDashboard {
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
-            <div class="text-right">
-              <p class="text-sm font-medium text-gray-900">Owner</p>
-              <p class="text-xs text-gray-500">Admin Account</p>
-            </div>
-            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-              <img src="${userCircleIcon}" class="w-5 h-5 text-white" alt="user" />
-            </div>
-          </div>
+    
         </div>
       </header>
     `;

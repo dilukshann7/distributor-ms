@@ -98,16 +98,6 @@ class DistributorDashboard {
             <span class="absolute top-1 right-1 w-2 h-2 bg-orange-600 rounded-full"></span>
           </button>
 
-          <div class="flex items-center gap-3 pl-6 border-l border-gray-200">
-            <div class="text-right">
-              <p class="font-medium text-gray-800">John Distributor</p>
-              <p class="text-xs text-gray-600">Distributor</p>
-            </div>
-            <div class="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-bold">
-              JD
-            </div>
-          </div>
-
           <button id="logoutBtn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${this.getIcon("log-out")}
           </button>

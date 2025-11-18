@@ -100,16 +100,6 @@ class SalesmanDashboard {
             <span class="absolute top-1 right-1 w-2 h-2 bg-sky-600 rounded-full"></span>
           </button>
 
-          <div class="flex items-center gap-3 pl-6 border-l border-gray-200">
-            <div class="text-right">
-              <p class="font-medium text-gray-800">Sarah Johnson</p>
-              <p class="text-xs text-gray-600">Sales Executive</p>
-            </div>
-            <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-sky-600 rounded-full flex items-center justify-center text-white font-bold">
-              SJ
-            </div>
-          </div>
-
           <button id="logoutBtnHeader" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${this.getIcon("log-out")}
           </button>
@@ -604,7 +594,9 @@ class SalesReports {
 
   async getSalesData() {
     try {
-      const response = await axios.get("http://localhost:3000/api/salesman/overall-summary");
+      const response = await axios.get(
+        "http://localhost:3000/api/salesman/overall-summary"
+      );
       this.salesData = response.data;
     } catch (error) {
       console.error("Error fetching sales data:", error);
@@ -668,7 +660,7 @@ class SalesReports {
 
   attachListeners(container) {
     const periodSelectors = container.querySelectorAll(".period-selector");
-    
+
     if (periodSelectors.length > 0) {
       periodSelectors.forEach((btn) => {
         if (btn.textContent.trim() === "Daily") {

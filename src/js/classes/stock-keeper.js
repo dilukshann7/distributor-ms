@@ -92,10 +92,6 @@ class StockKeeperDashboard {
           </button>
 
           <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
-            <div class="text-right">
-              <p class="text-sm font-medium text-gray-800">John Doe</p>
-              <p class="text-xs text-gray-500">Stock Keeper</p>
-            </div>
             <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
               ${this.getIcon("user")}
             </button>

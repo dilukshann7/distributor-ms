@@ -96,11 +96,6 @@ class ManagerDashboard {
             )
             .join("")}
         </nav>
-
-        <div class="absolute bottom-6 left-6 right-6 p-4 bg-emerald-600 rounded-lg">
-          <p class="text-sm text-emerald-100">Manager Account</p>
-          <p class="font-semibold text-white mt-1">John Manager</p>
-        </div>
       </aside>
 
       <!-- Overlay for mobile -->

@@ -114,16 +114,6 @@ class CashierDashboard {
             ${this.getIcon("bell")}
             <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
           </div>
-
-          <div class="flex items-center gap-3 pl-6 border-l border-gray-200">
-            <div class="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center">
-              ${this.getIcon("user")}
-            </div>
-            <div>
-              <p class="text-sm font-semibold text-gray-800">John Doe</p>
-              <p class="text-xs text-gray-500">Cashier</p>
-            </div>
-          </div>
         </div>
       </div>
     `;
