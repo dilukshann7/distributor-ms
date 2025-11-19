@@ -20,7 +20,10 @@ export class Invoice {
   }
 
   // Static methods
-  static async create(invoiceData) {}
+  static async create(invoiceData) {
+    const apiURL = "http://localhost:3000/api/invoices";
+    return axios.post(apiURL, invoiceData);
+  }
   static async findById(id) {}
   static async findByInvoiceNumber(invoiceNumber) {}
   static async getAll(filters) {

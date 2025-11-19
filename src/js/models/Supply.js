@@ -23,4 +23,9 @@ export class Supply {
     const apiURL = `http://localhost:3000/api/supplies?top=${limit}`;
     return axios.get(apiURL);
   }
+
+  static async create(supplyData) {
+    const apiURL = "http://localhost:3000/api/supplies";
+    return axios.post(apiURL, supplyData);
+  }
 }

@@ -6,6 +6,7 @@ import { Invoice } from "../models/Invoice.js";
 import { getIconHTML } from "../../assets/icons/index.js";
 import "../../css/supplier-style.css";
 import axios from "axios";
+import { Product } from "../models/Product.js";
 
 class SupplierDashboard {
   constructor(container) {
@@ -376,13 +377,14 @@ class ProductCatalog {
       <div class="max-w-4xl mx-auto animate-fade-in">
         <div class="flex items-center justify-between mb-8">
           <div>
-            <h3 class="section-header">Add New Product</h3>
-            <p class="section-subtitle">Add a new item to your catalog</p>
+            <h3 class="section-header">Add New Supply</h3>
+            <p class="section-subtitle">Add a new item to your inventory</p>
           </div>
         </div>
 
-        <form id="addProductForm" class="card-container">
+        <form id="addSupplyForm" class="card-container">
           <div class="p-8 space-y-8">
+            
             <div>
               <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 ${getIconHTML("package").replace(
@@ -393,25 +395,22 @@ class ProductCatalog {
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Product Name</label>
-                  <input type="text" name="name" required class="input-field" placeholder="e.g. Premium Widget">
+                  <label class="text-sm font-medium text-gray-700">Supply Name</label>
+                  <input type="text" name="name" required class="input-field" placeholder="e.g. Office Paper A4">
                 </div>
+                
                 <div class="space-y-2">
                   <label class="text-sm font-medium text-gray-700">SKU</label>
-                  <input type="text" name="sku" required class="input-field" placeholder="e.g. WID-001">
+                  <input type="text" name="sku" required class="input-field" placeholder="e.g. SUP-001">
                 </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Category</label>
-                  <input type="text" name="category" required class="input-field" placeholder="e.g. Electronics">
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Brand</label>
-                  <input type="text" name="brand" class="input-field" placeholder="e.g. WidgetCorp">
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-sm font-medium text-gray-700">Category <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="text" name="category" class="input-field" placeholder="e.g. Stationery">
                 </div>
               </div>
             </div>
 
-            <!-- Pricing & Inventory -->
             <div class="border-t border-gray-100 pt-8">
               <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 ${getIconHTML("trending-up").replace(
@@ -421,47 +420,41 @@ class ProductCatalog {
                 Pricing & Inventory
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Unit Price (LKR)</label>
+                  <label class="text-sm font-medium text-gray-700">Price (LKR)</label>
                   <div class="relative">
                     <span class="absolute left-4 top-2.5 text-gray-500 font-medium">Rs.</span>
                     <input type="number" name="price" required min="0" step="0.01" class="input-field pl-12" placeholder="0.00">
                   </div>
                 </div>
+
                 <div class="space-y-2">
                   <label class="text-sm font-medium text-gray-700">Stock Quantity</label>
-                  <input type="number" name="stock" required min="0" class="input-field" placeholder="0">
+                  <input type="number" name="stock" required min="0" step="1" class="input-field" placeholder="0">
                 </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Low Stock Alert</label>
-                  <input type="number" name="lowStockThreshold" min="0" class="input-field" placeholder="10">
-                </div>
-              </div>
-            </div>
 
-            <!-- Description -->
-            <div class="border-t border-gray-100 pt-8">
-              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                ${getIconHTML("file-text").replace(
-                  'class="w-5 h-5"',
-                  'class="w-5 h-5 text-indigo-600"'
-                )}
-                Description
-              </h4>
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700">Product Description</label>
-                <textarea name="description" rows="4" class="input-field" placeholder="Enter detailed product description..."></textarea>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Status</label>
+                  <select name="status" class="input-field">
+                    <option value="available" selected>Available</option>
+                    <option value="unavailable">Unavailable</option>
+                    <option value="backorder">Backorder</option>
+                    <option value="discontinued">Discontinued</option>
+                  </select>
+                </div>
+
               </div>
             </div>
           </div>
 
           <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" id="cancelProductBtnFooter" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+            <button type="button" id="cancelSupplyBtn" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
               Cancel
             </button>
             <button type="submit" class="btn-primary flex items-center gap-2">
               ${getIconHTML("check-circle")}
-              Save Product
+              Save Supply
             </button>
           </div>
         </form>
@@ -471,9 +464,9 @@ class ProductCatalog {
 
   attachListeners(container) {
     const addBtn = container.querySelector("#addProductBtn");
-    const cancelBtn = container.querySelector("#cancelProductBtn");
-    const cancelBtnFooter = container.querySelector("#cancelProductBtnFooter");
-    const form = container.querySelector("#addProductForm");
+    const cancelBtn = container.querySelector("#cancelSupplyBtn");
+    const cancelBtnFooter = container.querySelector("#cancelSupplyBtn");
+    const form = container.querySelector("#addSupplyForm");
 
     const switchToAdd = () => {
       this.view = "add";
@@ -485,10 +478,32 @@ class ProductCatalog {
       this.refresh(container);
     };
 
+    const submitForm = (e) => {
+      e.preventDefault();
+      const form = e.target; // Get the form element from the event
+      const formData = new FormData(form);
+      const rawData = Object.fromEntries(formData.entries());
+
+      const productData = {
+        ...rawData,
+        stock: parseInt(rawData.stock, 10),
+        price: parseFloat(rawData.price),
+      };
+
+      Supply.create(productData)
+        .then(() => {
+          switchToList();
+        })
+        .catch((error) => {
+          console.error("Error creating supply:", error);
+        });
+    };
+
     if (addBtn) addBtn.addEventListener("click", switchToAdd);
     if (cancelBtn) cancelBtn.addEventListener("click", switchToList);
     if (cancelBtnFooter)
       cancelBtnFooter.addEventListener("click", switchToList);
+    if (form) form.addEventListener("submit", submitForm);
   }
 
   refresh(container) {
@@ -607,6 +622,7 @@ class ShipmentTracking {
 class InvoicesPayments {
   constructor() {
     this.invoices = [];
+    this.orders = [];
     this.view = "list";
   }
 
@@ -617,6 +633,16 @@ class InvoicesPayments {
     } catch (error) {
       console.error("Error fetching invoices:", error);
       this.invoices = [];
+    }
+  }
+
+  async getOrders() {
+    try {
+      const response = await Order.getAll();
+      this.orders = response.data;
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      this.orders = [];
     }
   }
 
@@ -732,29 +758,62 @@ class InvoicesPayments {
         <div class="flex items-center justify-between mb-8">
           <div>
             <h3 class="section-header">Generate Invoice</h3>
-            <p class="section-subtitle">Create a new invoice for a purchase order</p>
+            <p class="section-subtitle">Create a new invoice record</p>
           </div>
         </div>
 
-        <form id="generateInvoiceForm" class="card-container">
+        <form id="createInvoiceForm" class="card-container">
           <div class="p-8 space-y-8">
+            
             <div>
               <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                ${getIconHTML("file-text").replace(
+                ${getIconHTML("hash").replace(
                   'class="w-5 h-5"',
                   'class="w-5 h-5 text-indigo-600"'
                 )}
-                Invoice Details
+                References & IDs
               </h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Purchase Order ID</label>
-                  <input type="text" name="purchaseOrderId" required class="input-field" placeholder="e.g. PO-2023-001">
-                </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
                 <div class="space-y-2">
                   <label class="text-sm font-medium text-gray-700">Invoice Number</label>
                   <input type="text" name="invoiceNumber" required class="input-field" placeholder="e.g. INV-2023-001">
                 </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Purchase Order</label>
+                  <select name="purchaseOrderId" required class="input-field">
+                    <option value="">-- Select Purchase Order --</option>
+                    ${this.orders
+                      .map(
+                        (order) => `
+                      <option value="${order.id}">
+                        Order #${order.id} - Rs. ${order.totalAmount} (${order.status})
+                      </option>
+                    `
+                      )
+                      .join("")}
+                  </select>
+                  <p class="text-xs text-gray-500">Select from existing purchase orders</p>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Supplier ID</label>
+                  <input type="number" name="supplierId" required class="input-field" placeholder="e.g. 50">
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("calendar").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Dates & Financials
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
                 <div class="space-y-2">
                   <label class="text-sm font-medium text-gray-700">Invoice Date</label>
                   <input type="date" name="invoiceDate" required class="input-field">
@@ -763,6 +822,7 @@ class InvoicesPayments {
                   <label class="text-sm font-medium text-gray-700">Due Date</label>
                   <input type="date" name="dueDate" required class="input-field">
                 </div>
+
                 <div class="space-y-2">
                   <label class="text-sm font-medium text-gray-700">Total Amount (LKR)</label>
                   <div class="relative">
@@ -770,26 +830,47 @@ class InvoicesPayments {
                     <input type="number" name="totalAmount" required min="0" step="0.01" class="input-field pl-12" placeholder="0.00">
                   </div>
                 </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Paid Amount <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-2.5 text-gray-500 font-medium">Rs.</span>
+                    <input type="number" name="paidAmount" min="0" step="0.01" class="input-field pl-12" placeholder="0.00">
+                  </div>
+                </div>
               </div>
             </div>
 
             <div class="border-t border-gray-100 pt-8">
               <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                ${getIconHTML("edit").replace(
+                ${getIconHTML("file-text").replace(
                   'class="w-5 h-5"',
                   'class="w-5 h-5 text-indigo-600"'
                 )}
-                Additional Information
+                Details
               </h4>
-              <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700">Notes / Terms</label>
-                <textarea name="notes" rows="4" class="input-field" placeholder="Enter payment terms or additional notes..."></textarea>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Status</label>
+                  <select name="status" class="input-field">
+                    <option value="pending" selected>Pending</option>
+                    <option value="draft">Draft</option>
+                    <option value="paid">Paid</option>
+                    <option value="overdue">Overdue</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-sm font-medium text-gray-700">Notes / Terms</label>
+                  <textarea name="notes" rows="3" class="input-field" placeholder="Enter payment terms or additional notes..."></textarea>
+                </div>
               </div>
             </div>
           </div>
 
           <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" id="cancelInvoiceBtnFooter" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+            <button type="button" id="cancelInvoiceBtn" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
               Cancel
             </button>
             <button type="submit" class="btn-primary flex items-center gap-2">
@@ -805,10 +886,11 @@ class InvoicesPayments {
     const addBtn = container.querySelector("#generateInvoiceBtn");
     const cancelBtn = container.querySelector("#cancelInvoiceBtn");
     const cancelBtnFooter = container.querySelector("#cancelInvoiceBtnFooter");
-    const form = container.querySelector("#generateInvoiceForm");
+    const form = container.querySelector("#createInvoiceForm");
 
-    const switchToAdd = () => {
+    const switchToAdd = async () => {
       this.view = "create";
+      await this.getOrders();
       this.refresh(container);
     };
 
@@ -817,10 +899,41 @@ class InvoicesPayments {
       this.refresh(container);
     };
 
+    const submitForm = (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const rawData = Object.fromEntries(formData.entries());
+
+      const invoiceData = {
+        invoiceNumber: rawData.invoiceNumber,
+        status: rawData.status,
+        notes: rawData.notes || null, // Convert empty string to null
+
+        purchaseOrderId: parseInt(rawData.purchaseOrderId, 10),
+        supplierId: parseInt(rawData.supplierId, 10),
+
+        totalAmount: parseFloat(rawData.totalAmount),
+        paidAmount: rawData.paidAmount ? parseFloat(rawData.paidAmount) : null,
+
+        invoiceDate: new Date(rawData.invoiceDate),
+        dueDate: new Date(rawData.dueDate),
+      };
+
+      Invoice.create(invoiceData)
+        .then(() => {
+          switchToList();
+        })
+        .catch((error) => {
+          console.error("Error creating invoice:", error);
+        });
+    };
+
     if (addBtn) addBtn.addEventListener("click", switchToAdd);
     if (cancelBtn) cancelBtn.addEventListener("click", switchToList);
     if (cancelBtnFooter)
       cancelBtnFooter.addEventListener("click", switchToList);
+    if (form) form.addEventListener("submit", submitForm);
   }
 
   refresh(container) {

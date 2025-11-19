@@ -701,6 +701,32 @@ app.get("/api/financial-overview", async (req, res) => {
   }
 });
 
+app.post("/api/supplies", async (req, res) => {
+  try {
+    const supplyData = req.body;
+    const newSupply = await prisma.supply.create({
+      data: supplyData,
+    });
+    res.status(201).json(newSupply);
+  } catch (e) {
+    console.error("Error creating supply:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post("/api/invoices", async (req, res) => {
+  try {
+    const invoiceData = req.body;
+    const newInvoice = await prisma.invoice.create({
+      data: invoiceData,
+    });
+    res.status(201).json(newInvoice);
+  } catch (e) {
+    console.error("Error creating invoice:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
