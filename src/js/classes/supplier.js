@@ -6,7 +6,6 @@ import { Invoice } from "../models/Invoice.js";
 import { getIconHTML } from "../../assets/icons/index.js";
 import "../../css/supplier-style.css";
 import axios from "axios";
-import { Product } from "../models/Product.js";
 
 class SupplierDashboard {
   constructor(container) {
@@ -39,7 +38,17 @@ class SupplierDashboard {
 
     this.attachEventListeners();
 
-    if (this.currentSection === "orders") {
+    // Attach section-specific listeners on initial render
+    const sectionInstance = this.sections[this.currentSection];
+    if (
+      this.currentSection === "orders" ||
+      this.currentSection === "products" ||
+      this.currentSection === "invoices" ||
+      this.currentSection === "analytics"
+    ) {
+      if (typeof sectionInstance.attachListeners === "function") {
+        sectionInstance.attachListeners(this.container);
+      }
     }
   }
 
@@ -150,6 +159,7 @@ class SupplierDashboard {
     const sectionInstance = this.sections[section];
 
     if (
+      section === "orders" ||
       section === "products" ||
       section === "invoices" ||
       section === "analytics"
@@ -174,6 +184,8 @@ class PurchaseOrders {
   constructor() {
     this.orders = [];
     this.summary = [];
+    this.view = "list";
+    this.editingOrder = null;
   }
 
   async getOrders() {
@@ -197,6 +209,13 @@ class PurchaseOrders {
   }
 
   render() {
+    if (this.view === "edit") {
+      return this.renderEditForm();
+    }
+    return this.renderList();
+  }
+
+  renderList() {
     return `
       <div class="space-y-6">
         <div>
@@ -255,10 +274,10 @@ class PurchaseOrders {
                       </span>
                     </td>
                     <td class="table-cell gap-2">
-                      <button class="btn-action text-blue-600" title="View">
-                        ${getIconHTML("eye")}
-                      </button>
-                      <button class="btn-action text-green-600" title="Edit">
+                    
+                      <button class="btn-action text-green-600 edit-order-btn" data-order-id="${
+                        order.id
+                      }" title="Edit">
                         ${getIconHTML("edit")}
                       </button>
                     </td>
@@ -282,6 +301,183 @@ class PurchaseOrders {
       delivered: "status-green",
     };
     return statusMap[status] || "status-gray";
+  }
+
+  renderEditForm() {
+    const order = this.editingOrder;
+    if (!order) return this.renderList();
+
+    return `
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="section-header">Edit Purchase Order</h3>
+            <p class="section-subtitle">Update order information</p>
+          </div>
+        </div>
+
+        <form id="editOrderForm" class="card-container">
+          <div class="p-8 space-y-8">
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("shopping-bag").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Order Details
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Order ID</label>
+                  <input type="text" class="input-field bg-gray-100" value="${
+                    order.id
+                  }" disabled>
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Customer ID</label>
+                  <input type="number" name="customerId" required class="input-field" value="${
+                    order.customerId
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Order Date</label>
+                  <input type="date" name="orderDate" required class="input-field" value="${
+                    new Date(order.orderDate).toISOString().split("T")[0]
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Due Date</label>
+                  <input type="date" name="dueDate" required class="input-field" value="${
+                    new Date(order.dueDate).toISOString().split("T")[0]
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Total Amount (LKR)</label>
+                  <div class="relative">
+                    <input type="number" name="totalAmount" required min="0" step="0.01" class="input-field pl-12" value="${
+                      order.totalAmount
+                    }">
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Status</label>
+                  <select name="status" class="input-field">
+                    <option value="pending" ${
+                      order.status === "pending" ? "selected" : ""
+                    }>Pending</option>
+                    <option value="confirmed" ${
+                      order.status === "confirmed" ? "selected" : ""
+                    }>Confirmed</option>
+                    <option value="shipped" ${
+                      order.status === "shipped" ? "selected" : ""
+                    }>Shipped</option>
+                    <option value="delivered" ${
+                      order.status === "delivered" ? "selected" : ""
+                    }>Delivered</option>
+                    <option value="cancelled" ${
+                      order.status === "cancelled" ? "selected" : ""
+                    }>Cancelled</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("package").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Order Items
+              </h4>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <p class="text-sm text-gray-600 mb-2">Current Items:</p>
+                <ul class="list-disc list-inside text-sm text-gray-700">
+                  ${order.items
+                    .map(
+                      (item) =>
+                        `<li>${item.name} - Quantity: ${item.quantity}</li>`
+                    )
+                    .join("")}
+                </ul>
+                <p class="text-xs text-gray-500 mt-2">Note: Item editing not available. Cancel and create a new order if items need to be changed.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" id="cancelEditOrderBtn" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary flex items-center gap-2">
+              ${getIconHTML("check-circle")}
+              Update Order
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  attachListeners(container) {
+    const editBtns = container.querySelectorAll(".edit-order-btn");
+    const cancelEditBtn = container.querySelector("#cancelEditOrderBtn");
+    const editForm = container.querySelector("#editOrderForm");
+
+    const switchToEdit = (orderId) => {
+      this.editingOrder = this.orders.find((o) => o.id === parseInt(orderId));
+      this.view = "edit";
+      this.refresh(container);
+    };
+
+    const switchToList = () => {
+      this.view = "list";
+      this.editingOrder = null;
+      this.refresh(container);
+    };
+
+    const submitEditForm = (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const rawData = Object.fromEntries(formData.entries());
+
+      const orderData = {
+        customerId: parseInt(rawData.customerId, 10),
+        orderDate: new Date(rawData.orderDate).toISOString(),
+        dueDate: new Date(rawData.dueDate).toISOString(),
+        totalAmount: parseFloat(rawData.totalAmount),
+        status: rawData.status,
+      };
+
+      Order.update(this.editingOrder.id, orderData)
+        .then(() => {
+          this.getOrders().then(() =>
+            this.getSummary().then(() => switchToList())
+          );
+        })
+        .catch((error) => {
+          console.error("Error updating order:", error);
+        });
+    };
+
+    editBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const orderId = e.currentTarget.dataset.orderId;
+        switchToEdit(orderId);
+      });
+    });
+
+    if (cancelEditBtn) cancelEditBtn.addEventListener("click", switchToList);
+    if (editForm) editForm.addEventListener("submit", submitEditForm);
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+      this.attachListeners(container);
+    }
   }
 }
 
@@ -756,6 +952,7 @@ class InvoicesPayments {
     this.invoices = [];
     this.orders = [];
     this.view = "list";
+    this.viewingInvoice = null;
   }
 
   async getInvoices() {
@@ -781,6 +978,9 @@ class InvoicesPayments {
   render() {
     if (this.view === "create") {
       return this.renderCreateForm();
+    }
+    if (this.view === "view") {
+      return this.renderViewInvoice();
     }
     return this.renderList();
   }
@@ -864,12 +1064,12 @@ class InvoicesPayments {
                     </td>
                     <td class="table-cell">
                       <div class="flex items-center gap-2">
-                        <button class="text-indigo-600 hover:text-indigo-800 transition-colors" title="View">
+                        <button class="text-indigo-600 hover:text-indigo-800 transition-colors view-invoice-btn" data-invoice-id="${
+                          invoice.id
+                        }" title="View">
                           ${getIconHTML("eye")}
                         </button>
-                        <button class="text-blue-600 hover:text-blue-800 transition-colors" title="Download">
-                          ${getIconHTML("download")}
-                        </button>
+                      
                       </div>
                     </td>
                   </tr>
@@ -1014,20 +1214,201 @@ class InvoicesPayments {
       </div>
     `;
   }
+
+  renderViewInvoice() {
+    const invoice = this.viewingInvoice;
+    if (!invoice) return this.renderList();
+
+    return `
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="section-header">Invoice Details</h3>
+            <p class="section-subtitle">View invoice information</p>
+          </div>
+          <button id="closeViewInvoiceBtn" class="text-gray-600 hover:text-gray-900 font-medium transition-colors flex items-center gap-2">
+            ${getIconHTML("x")}
+            Close
+          </button>
+        </div>
+
+        <div class="card-container">
+          <div class="p-8 space-y-8">
+            <!-- Invoice Header -->
+            <div class="border-b border-gray-200 pb-6">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h2 class="text-2xl font-bold text-gray-900">Invoice ${
+                    invoice.invoiceNumber
+                  }</h2>
+                  <p class="text-sm text-gray-600 mt-1">Invoice ID: #${
+                    invoice.id
+                  }</p>
+                </div>
+                <div>
+                  <span class="status-badge ${
+                    invoice.status === "paid"
+                      ? "status-green"
+                      : invoice.status === "pending"
+                      ? "status-yellow"
+                      : "status-red"
+                  } text-base px-4 py-2">
+                    ${
+                      invoice.status.charAt(0).toUpperCase() +
+                      invoice.status.slice(1)
+                    }
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Invoice Details Grid -->
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("file-text").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Invoice Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                  <p class="text-sm font-medium text-gray-600 mb-1">Purchase Order ID</p>
+                  <p class="text-lg font-semibold text-gray-900">#${
+                    invoice.purchaseOrderId
+                  }</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                  <p class="text-sm font-medium text-gray-600 mb-1">Supplier ID</p>
+                  <p class="text-lg font-semibold text-gray-900">#${
+                    invoice.supplierId
+                  }</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                  <p class="text-sm font-medium text-gray-600 mb-1">Invoice Date</p>
+                  <p class="text-lg font-semibold text-gray-900">${new Date(
+                    invoice.invoiceDate
+                  ).toLocaleDateString()}</p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                  <p class="text-sm font-medium text-gray-600 mb-1">Due Date</p>
+                  <p class="text-lg font-semibold text-gray-900">${new Date(
+                    invoice.dueDate
+                  ).toLocaleDateString()}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Financial Details -->
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("trending-up").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Payment Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+                  <p class="text-sm font-medium text-indigo-600 mb-1">Total Amount</p>
+                  <p class="text-2xl font-bold text-indigo-900">Rs. ${invoice.totalAmount.toFixed(
+                    2
+                  )}</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <p class="text-sm font-medium text-green-600 mb-1">Paid Amount</p>
+                  <p class="text-2xl font-bold text-green-900">Rs. ${(
+                    invoice.paidAmount || 0
+                  ).toFixed(2)}</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <p class="text-sm font-medium text-yellow-600 mb-1">Balance</p>
+                  <p class="text-2xl font-bold text-yellow-900">Rs. ${(
+                    invoice.balance ||
+                    invoice.totalAmount - (invoice.paidAmount || 0)
+                  ).toFixed(2)}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notes Section -->
+            ${
+              invoice.notes
+                ? `
+              <div class="border-t border-gray-100 pt-8">
+                <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  ${getIconHTML("file-text").replace(
+                    'class="w-5 h-5"',
+                    'class="w-5 h-5 text-indigo-600"'
+                  )}
+                  Notes
+                </h4>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                  <p class="text-gray-700">${invoice.notes}</p>
+                </div>
+              </div>
+            `
+                : ""
+            }
+
+            <!-- Timestamps -->
+            <div class="border-t border-gray-100 pt-8">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                <div>
+                  <span class="font-medium">Created:</span> ${new Date(
+                    invoice.createdAt
+                  ).toLocaleString()}
+                </div>
+                <div>
+                  <span class="font-medium">Last Updated:</span> ${new Date(
+                    invoice.updatedAt
+                  ).toLocaleString()}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button id="closeViewInvoiceBtnFooter" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Close
+            </button>
+            
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   attachListeners(container) {
     const addBtn = container.querySelector("#generateInvoiceBtn");
+    const viewBtns = container.querySelectorAll(".view-invoice-btn");
     const cancelBtn = container.querySelector("#cancelInvoiceBtn");
     const cancelBtnFooter = container.querySelector("#cancelInvoiceBtnFooter");
+    const closeViewBtn = container.querySelector("#closeViewInvoiceBtn");
+    const closeViewBtnFooter = container.querySelector(
+      "#closeViewInvoiceBtnFooter"
+    );
     const form = container.querySelector("#createInvoiceForm");
 
     const switchToAdd = async () => {
       this.view = "create";
+      this.viewingInvoice = null;
       await this.getOrders();
+      this.refresh(container);
+    };
+
+    const switchToView = (invoiceId) => {
+      this.viewingInvoice = this.invoices.find(
+        (inv) => inv.id === parseInt(invoiceId)
+      );
+      this.view = "view";
       this.refresh(container);
     };
 
     const switchToList = () => {
       this.view = "list";
+      this.viewingInvoice = null;
       this.refresh(container);
     };
 
@@ -1062,9 +1443,18 @@ class InvoicesPayments {
     };
 
     if (addBtn) addBtn.addEventListener("click", switchToAdd);
+    viewBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const invoiceId = e.currentTarget.dataset.invoiceId;
+        switchToView(invoiceId);
+      });
+    });
     if (cancelBtn) cancelBtn.addEventListener("click", switchToList);
     if (cancelBtnFooter)
       cancelBtnFooter.addEventListener("click", switchToList);
+    if (closeViewBtn) closeViewBtn.addEventListener("click", switchToList);
+    if (closeViewBtnFooter)
+      closeViewBtnFooter.addEventListener("click", switchToList);
     if (form) form.addEventListener("submit", submitForm);
   }
 

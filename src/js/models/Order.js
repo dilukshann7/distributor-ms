@@ -43,4 +43,9 @@ export class Order {
 
     return axios.get(apiURL);
   }
+
+  static async update(id, orderData) {
+    const apiURL = `http://localhost:3000/api/orders/${id}`;
+    return axios.put(apiURL, orderData);
+  }
 }

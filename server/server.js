@@ -66,6 +66,21 @@ app.get("/api/orders", async (req, res) => {
   }
 });
 
+app.put("/api/orders/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const orderData = req.body;
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: orderData,
+    });
+    res.json(updatedOrder);
+  } catch (e) {
+    console.error("Error updating order:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.get("/api/shipments", async (req, res) => {
   try {
     const shipments = await prisma.shipment.findMany({
