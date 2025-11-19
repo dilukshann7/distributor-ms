@@ -714,6 +714,21 @@ app.post("/api/supplies", async (req, res) => {
   }
 });
 
+app.put("/api/supplies/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const supplyData = req.body;
+    const updatedSupply = await prisma.supply.update({
+      where: { id },
+      data: supplyData,
+    });
+    res.json(updatedSupply);
+  } catch (e) {
+    console.error("Error updating supply:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.post("/api/invoices", async (req, res) => {
   try {
     const invoiceData = req.body;

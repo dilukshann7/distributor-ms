@@ -289,6 +289,7 @@ class ProductCatalog {
   constructor() {
     this.products = [];
     this.view = "list";
+    this.editingProduct = null;
   }
 
   async getSupply() {
@@ -304,6 +305,9 @@ class ProductCatalog {
   render() {
     if (this.view === "add") {
       return this.renderAddForm();
+    }
+    if (this.view === "edit") {
+      return this.renderEditForm();
     }
     return this.renderList();
   }
@@ -356,7 +360,9 @@ class ProductCatalog {
                       </span>
                     </td>
                     <td class="table-cell gap-2">
-                      <button class="btn-action text-blue-600">
+                      <button class="btn-action text-blue-600 edit-product-btn" data-product-id="${
+                        product.id
+                      }" title="Edit">
                         ${getIconHTML("edit")}
                       </button>
                     </td>
@@ -424,7 +430,6 @@ class ProductCatalog {
                 <div class="space-y-2">
                   <label class="text-sm font-medium text-gray-700">Price (LKR)</label>
                   <div class="relative">
-                    <span class="absolute left-4 top-2.5 text-gray-500 font-medium">Rs.</span>
                     <input type="number" name="price" required min="0" step="0.01" class="input-field pl-12" placeholder="0.00">
                   </div>
                 </div>
@@ -462,25 +467,141 @@ class ProductCatalog {
     `;
   }
 
+  renderEditForm() {
+    const product = this.editingProduct;
+    if (!product) return this.renderList();
+
+    return `
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="section-header">Edit Product</h3>
+            <p class="section-subtitle">Update product information</p>
+          </div>
+        </div>
+
+        <form id="editSupplyForm" class="card-container">
+          <div class="p-8 space-y-8">
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("package").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Basic Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Supply Name</label>
+                  <input type="text" name="name" required class="input-field" placeholder="e.g. Office Paper A4" value="${
+                    product.name
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">SKU</label>
+                  <input type="text" name="sku" required class="input-field" placeholder="e.g. SUP-001" value="${
+                    product.sku
+                  }">
+                </div>
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-sm font-medium text-gray-700">Category <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="text" name="category" class="input-field" placeholder="e.g. Stationery" value="${
+                    product.category || ""
+                  }">
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("trending-up").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Pricing & Inventory
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Price (LKR)</label>
+                  <div class="relative">
+                    <input type="number" name="price" required min="0" step="0.01" class="input-field pl-12" placeholder="0.00" value="${
+                      product.price
+                    }">
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Stock Quantity</label>
+                  <input type="number" name="stock" required min="0" class="input-field" placeholder="0" value="${
+                    product.stock
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Status</label>
+                  <select name="status" class="input-field">
+                    <option value="available" ${
+                      product.status === "available" ? "selected" : ""
+                    }>Available</option>
+                    <option value="unavailable" ${
+                      product.status === "unavailable" ? "selected" : ""
+                    }>Unavailable</option>
+                    <option value="backorder" ${
+                      product.status === "backorder" ? "selected" : ""
+                    }>Backorder</option>
+                    <option value="discontinued" ${
+                      product.status === "discontinued" ? "selected" : ""
+                    }>Discontinued</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" id="cancelEditSupplyBtn" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary flex items-center gap-2">
+              ${getIconHTML("check-circle")}
+              Update Product
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
   attachListeners(container) {
     const addBtn = container.querySelector("#addProductBtn");
+    const editBtns = container.querySelectorAll(".edit-product-btn");
     const cancelBtn = container.querySelector("#cancelSupplyBtn");
     const cancelBtnFooter = container.querySelector("#cancelSupplyBtn");
-    const form = container.querySelector("#addSupplyForm");
+    const cancelEditBtn = container.querySelector("#cancelEditSupplyBtn");
+    const addForm = container.querySelector("#addSupplyForm");
+    const editForm = container.querySelector("#editSupplyForm");
 
     const switchToAdd = () => {
       this.view = "add";
+      this.editingProduct = null;
+      this.refresh(container);
+    };
+
+    const switchToEdit = (productId) => {
+      this.editingProduct = this.products.find(
+        (p) => p.id === parseInt(productId)
+      );
+      this.view = "edit";
       this.refresh(container);
     };
 
     const switchToList = () => {
       this.view = "list";
+      this.editingProduct = null;
       this.refresh(container);
     };
 
-    const submitForm = (e) => {
+    const submitAddForm = (e) => {
       e.preventDefault();
-      const form = e.target; // Get the form element from the event
+      const form = e.target;
       const formData = new FormData(form);
       const rawData = Object.fromEntries(formData.entries());
 
@@ -492,18 +613,47 @@ class ProductCatalog {
 
       Supply.create(productData)
         .then(() => {
-          switchToList();
+          this.getSupply().then(() => switchToList());
         })
         .catch((error) => {
           console.error("Error creating supply:", error);
         });
     };
 
+    const submitEditForm = (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const rawData = Object.fromEntries(formData.entries());
+
+      const productData = {
+        ...rawData,
+        stock: parseInt(rawData.stock, 10),
+        price: parseFloat(rawData.price),
+      };
+
+      Supply.update(this.editingProduct.id, productData)
+        .then(() => {
+          this.getSupply().then(() => switchToList());
+        })
+        .catch((error) => {
+          console.error("Error updating supply:", error);
+        });
+    };
+
     if (addBtn) addBtn.addEventListener("click", switchToAdd);
+    editBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const productId = e.currentTarget.dataset.productId;
+        switchToEdit(productId);
+      });
+    });
     if (cancelBtn) cancelBtn.addEventListener("click", switchToList);
     if (cancelBtnFooter)
       cancelBtnFooter.addEventListener("click", switchToList);
-    if (form) form.addEventListener("submit", submitForm);
+    if (cancelEditBtn) cancelEditBtn.addEventListener("click", switchToList);
+    if (addForm) addForm.addEventListener("submit", submitAddForm);
+    if (editForm) editForm.addEventListener("submit", submitEditForm);
   }
 
   refresh(container) {
@@ -531,16 +681,6 @@ class ShipmentTracking {
   }
 
   render() {
-    const preparingCount = this.shipments.filter(
-      (s) => s.status === "pending"
-    ).length;
-    const inTransitCount = this.shipments.filter(
-      (s) => s.status === "in-transit"
-    ).length;
-    const deliveredCount = this.shipments.filter(
-      (s) => s.status === "delivered"
-    ).length;
-
     return `
       <div class="space-y-6">
         <div>
@@ -562,7 +702,6 @@ class ShipmentTracking {
                   <th class="table-header">Carrier</th>
                   <th class="table-header">Est. Delivery</th>
                   <th class="table-header">Status</th>
-                  <th class="table-header">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -598,14 +737,7 @@ class ShipmentTracking {
                         }
                       </span>
                     </td>
-                    <td class="table-cell">
-                      <button class="text-indigo-600 hover:text-indigo-800 font-medium" title="Track">
-                        <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                      </button>
-                    </td>
+                    
                   </tr>
                 `
                   )
@@ -995,7 +1127,6 @@ class SalesAnalytics {
           <p class="section-subtitle">View sales performance and trends</p>
         </div>
 
-        <!-- Period Selector -->
         <div class="card-container">
           <div class="p-6">
             <div class="flex gap-2 mb-6">
@@ -1004,14 +1135,12 @@ class SalesAnalytics {
               <button class="period-selector period-selector-inactive">Monthly</button>
             </div>
 
-            <!-- Sales Stats -->
             <div class="stats">
               Please Wait...
             </div>
           </div>
         </div>
 
-        <!-- Export Options -->
         <div class="card-container">
           <div class="p-6">
             <h4 class="card-title mb-4">Export Analytics</h4>

@@ -28,4 +28,9 @@ export class Supply {
     const apiURL = "http://localhost:3000/api/supplies";
     return axios.post(apiURL, supplyData);
   }
+
+  static async update(id, supplyData) {
+    const apiURL = `http://localhost:3000/api/supplies/${id}`;
+    return axios.put(apiURL, supplyData);
+  }
 }
