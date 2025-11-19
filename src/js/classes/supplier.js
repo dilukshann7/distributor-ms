@@ -11,7 +11,13 @@ class SupplierDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "orders";
-    this.isSidebarOpen = true;
+    this.sections = {
+      orders: new PurchaseOrders(),
+      products: new ProductCatalog(),
+      shipments: new ShipmentTracking(),
+      invoices: new InvoicesPayments(),
+      analytics: new SalesAnalytics(),
+    };
   }
 
   async render() {
@@ -29,7 +35,30 @@ class SupplierDashboard {
         </div>
       </div>
     `;
+
     this.attachEventListeners();
+
+    if (this.currentSection === "orders") {
+    }
+  }
+
+  attachEventListeners() {
+    const navItems = this.container.querySelectorAll(".nav-item");
+    navItems.forEach((item) => {
+      item.addEventListener("click", (e) => {
+        const section = e.currentTarget.dataset.section;
+        this.navigateToSection(section);
+      });
+    });
+
+    const logoutBtn = this.container.querySelector("#logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        import("../login.js").then((module) => {
+          module.renderLogin(this.container);
+        });
+      });
+    }
   }
 
   renderSidebar() {
@@ -42,15 +71,7 @@ class SupplierDashboard {
     ];
 
     return `
-      <!-- Mobile Toggle -->
-      <button id="mobileToggle" class="lg:hidden fixed top-4 left-4 z-40 p-2 bg-indigo-700 text-white rounded-lg">
-        ${this.isSidebarOpen ? getIconHTML("x") : getIconHTML("menu")}
-      </button>
-
-      <!-- Sidebar -->
-      <aside class="${
-        this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-indigo-700 to-indigo-900 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
+      <aside class="fixed lg:relative w-64 h-screen bg-gradient-to-b from-indigo-700 to-indigo-900 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
         <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
@@ -77,13 +98,6 @@ class SupplierDashboard {
           </div>
         </div>
       </aside>
-
-      <!-- Overlay for mobile -->
-      ${
-        this.isSidebarOpen
-          ? '<div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>'
-          : ""
-      }
     `;
   }
 
@@ -101,10 +115,6 @@ class SupplierDashboard {
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          <button class="btn-icon">
-            ${getIconHTML("settings")}
-          </button>
-
           <button id="logoutBtn" class="btn-icon">
             ${getIconHTML("log-out")}
           </button>
@@ -114,14 +124,7 @@ class SupplierDashboard {
   }
 
   async renderSection(section) {
-    const sections = {
-      orders: new PurchaseOrders(),
-      products: new ProductCatalog(),
-      shipments: new ShipmentTracking(),
-      invoices: new InvoicesPayments(),
-      analytics: new SalesAnalytics(),
-    };
-    const sectionInstance = sections[section];
+    const sectionInstance = this.sections[section];
     if (section === "analytics") {
       await sectionInstance.getSalesData();
     } else if (section === "orders") {
@@ -137,52 +140,22 @@ class SupplierDashboard {
     return sectionInstance.render();
   }
 
-  attachEventListeners() {
-    const navItems = this.container.querySelectorAll(".nav-item");
-    navItems.forEach((item) => {
-      item.addEventListener("click", (e) => {
-        const section = e.currentTarget.dataset.section;
-        this.navigateToSection(section);
-      });
-    });
-
-    const logoutBtn = this.container.querySelector("#logoutBtn");
-    if (logoutBtn) {
-      logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
-      });
-    }
-
-    const mobileToggle = this.container.querySelector("#mobileToggle");
-    if (mobileToggle) {
-      mobileToggle.addEventListener("click", () => {
-        this.isSidebarOpen = !this.isSidebarOpen;
-        this.render();
-      });
-    }
-
-    const mobileOverlay = this.container.querySelector("#mobileOverlay");
-    if (mobileOverlay) {
-      mobileOverlay.addEventListener("click", () => {
-        this.isSidebarOpen = false;
-        this.render();
-      });
-    }
-  }
-
   async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
-    this.attachEventListeners();
+    const sectionInstance = this.sections[section];
 
-    if (section === "analytics") {
-      const analytics = new SalesAnalytics();
-      analytics.attachListeners(this.container);
+    if (
+      section === "products" ||
+      section === "invoices" ||
+      section === "analytics"
+    ) {
+      if (typeof sectionInstance.attachListeners === "function") {
+        sectionInstance.attachListeners(this.container);
+      }
     }
 
     const navItems = this.container.querySelectorAll(".nav-item");
@@ -225,50 +198,10 @@ class PurchaseOrders {
   render() {
     return `
       <div class="space-y-6">
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="stat-card stat-card-border-indigo">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="stat-label">Total Orders</p>
-                <p class="stat-value">${this.summary.total || 0}</p>
-              </div>
-              ${getIconHTML("shopping-bag").replace('class="w-5 h-5"', 'class="w-10 h-10 text-indigo-600"')}
-            </div>
-          </div>
-
-          <div class="stat-card stat-card-border-yellow">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="stat-label">Pending</p>
-                <p class="stat-value-colored text-yellow-600">${this.summary.pending || 0}</p>
-              </div>
-              ${getIconHTML("clock").replace('class="w-5 h-5"', 'class="w-10 h-10 text-yellow-600"')}
-            </div>
-          </div>
-
-          <div class="stat-card stat-card-border-blue">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="stat-label">Shipped</p>
-                <p class="stat-value-colored text-blue-600">${this.summary.shipped || 0}</p>
-              </div>
-              ${getIconHTML("truck").replace('class="w-5 h-5"', 'class="w-10 h-10 text-blue-600"')}
-            </div>
-          </div>
-
-          <div class="stat-card stat-card-border-green">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="stat-label">Completed</p>
-                <p class="stat-value-colored text-green-600">${this.summary.completed || 0}</p>
-              </div>
-              ${getIconHTML("check-circle").replace('class="w-5 h-5"', 'class="w-10 h-10 text-green-600"')}
-            </div>
-          </div>
+        <div>
+          <h3 class="section-header">Purchase Orders</h3>
+          <p class="section-subtitle">Manage purchase orders</p>
         </div>
-
-        <!-- Orders Table -->
         <div class="card-container">
           <div class="card-header">
             <h3 class="card-title">Recent Purchase Orders</h3>
@@ -296,19 +229,31 @@ class PurchaseOrders {
                       ${new Date(order.orderDate).toISOString().split("T")[0]}
                     </td>
                     <td class="table-cell-bold">
-                      ${order.items.map((i) => `${i.name} (${i.quantity})`).join(", ")}
+                      ${order.items
+                        .map((i) => `${i.name} (${i.quantity})`)
+                        .join(", ")}
                     </td>
-                    <td class="table-cell">${order.totalAmount.toLocaleString("en-US", {
-                      style: "currency",
-                      currency: "LKR",
-                    })}</td>
-                    <td class="table-cell">${new Date(order.dueDate).toISOString().split("T")[0]}</td>
+                    <td class="table-cell">${order.totalAmount.toLocaleString(
+                      "en-US",
+                      {
+                        style: "currency",
+                        currency: "LKR",
+                      }
+                    )}</td>
+                    <td class="table-cell">${
+                      new Date(order.dueDate).toISOString().split("T")[0]
+                    }</td>
                     <td class="table-cell">
-                      <span class="status-badge ${this.getStatusColor(order.dueDate)}">
-                        ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      <span class="status-badge ${this.getStatusColor(
+                        order.dueDate
+                      )}">
+                        ${
+                          order.status.charAt(0).toUpperCase() +
+                          order.status.slice(1)
+                        }
                       </span>
                     </td>
-                    <td class="table-cell flex gap-2">
+                    <td class="table-cell gap-2">
                       <button class="btn-action text-blue-600" title="View">
                         ${getIconHTML("eye")}
                       </button>
@@ -342,6 +287,7 @@ class PurchaseOrders {
 class ProductCatalog {
   constructor() {
     this.products = [];
+    this.view = "list";
   }
 
   async getSupply() {
@@ -355,6 +301,13 @@ class ProductCatalog {
   }
 
   render() {
+    if (this.view === "add") {
+      return this.renderAddForm();
+    }
+    return this.renderList();
+  }
+
+  renderList() {
     return `
       <div class="space-y-6">
         <div class="flex items-center justify-between">
@@ -362,7 +315,7 @@ class ProductCatalog {
             <h3 class="section-header">Product Catalog</h3>
             <p class="section-subtitle">Manage your product offerings</p>
           </div>
-          <button class="btn-primary flex items-center gap-2">
+          <button id="addProductBtn" class="btn-primary flex items-center gap-2">
             ${getIconHTML("plus")}
             Add Product
           </button>
@@ -394,12 +347,14 @@ class ProductCatalog {
                     <td class="table-cell">${product.stock} units</td>
                     <td class="table-cell">
                       <span class="status-badge ${
-                        product.status === "In Stock" ? "status-green" : "status-yellow"
+                        product.status === "In Stock"
+                          ? "status-green"
+                          : "status-yellow"
                       }">
                         ${product.status}
                       </span>
                     </td>
-                    <td class="table-cell flex gap-2">
+                    <td class="table-cell gap-2">
                       <button class="btn-action text-blue-600">
                         ${getIconHTML("edit")}
                       </button>
@@ -414,6 +369,134 @@ class ProductCatalog {
         </div>
       </div>
     `;
+  }
+
+  renderAddForm() {
+    return `
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="section-header">Add New Product</h3>
+            <p class="section-subtitle">Add a new item to your catalog</p>
+          </div>
+        </div>
+
+        <form id="addProductForm" class="card-container">
+          <div class="p-8 space-y-8">
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("package").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Basic Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Product Name</label>
+                  <input type="text" name="name" required class="input-field" placeholder="e.g. Premium Widget">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">SKU</label>
+                  <input type="text" name="sku" required class="input-field" placeholder="e.g. WID-001">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Category</label>
+                  <input type="text" name="category" required class="input-field" placeholder="e.g. Electronics">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Brand</label>
+                  <input type="text" name="brand" class="input-field" placeholder="e.g. WidgetCorp">
+                </div>
+              </div>
+            </div>
+
+            <!-- Pricing & Inventory -->
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("trending-up").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Pricing & Inventory
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Unit Price (LKR)</label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-2.5 text-gray-500 font-medium">Rs.</span>
+                    <input type="number" name="price" required min="0" step="0.01" class="input-field pl-12" placeholder="0.00">
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Stock Quantity</label>
+                  <input type="number" name="stock" required min="0" class="input-field" placeholder="0">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Low Stock Alert</label>
+                  <input type="number" name="lowStockThreshold" min="0" class="input-field" placeholder="10">
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("file-text").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Description
+              </h4>
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">Product Description</label>
+                <textarea name="description" rows="4" class="input-field" placeholder="Enter detailed product description..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" id="cancelProductBtnFooter" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary flex items-center gap-2">
+              ${getIconHTML("check-circle")}
+              Save Product
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  attachListeners(container) {
+    const addBtn = container.querySelector("#addProductBtn");
+    const cancelBtn = container.querySelector("#cancelProductBtn");
+    const cancelBtnFooter = container.querySelector("#cancelProductBtnFooter");
+    const form = container.querySelector("#addProductForm");
+
+    const switchToAdd = () => {
+      this.view = "add";
+      this.refresh(container);
+    };
+
+    const switchToList = () => {
+      this.view = "list";
+      this.refresh(container);
+    };
+
+    if (addBtn) addBtn.addEventListener("click", switchToAdd);
+    if (cancelBtn) cancelBtn.addEventListener("click", switchToList);
+    if (cancelBtnFooter)
+      cancelBtnFooter.addEventListener("click", switchToList);
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+      this.attachListeners(container);
+    }
   }
 }
 
@@ -433,9 +516,15 @@ class ShipmentTracking {
   }
 
   render() {
-    const preparingCount = this.shipments.filter((s) => s.status === "pending").length;
-    const inTransitCount = this.shipments.filter((s) => s.status === "in-transit").length;
-    const deliveredCount = this.shipments.filter((s) => s.status === "delivered").length;
+    const preparingCount = this.shipments.filter(
+      (s) => s.status === "pending"
+    ).length;
+    const inTransitCount = this.shipments.filter(
+      (s) => s.status === "in-transit"
+    ).length;
+    const deliveredCount = this.shipments.filter(
+      (s) => s.status === "delivered"
+    ).length;
 
     return `
       <div class="space-y-6">
@@ -444,27 +533,6 @@ class ShipmentTracking {
           <p class="section-subtitle">Track all shipments and delivery status</p>
         </div>
 
-        <!-- Shipment Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="stat-card stat-card-border-indigo">
-            <p class="stat-label">Total Shipments</p>
-            <p class="stat-value">${this.shipments.length}</p>
-          </div>
-          <div class="stat-card stat-card-border-yellow">
-            <p class="stat-label">Preparing</p>
-            <p class="stat-value-colored text-yellow-600">${preparingCount}</p>
-          </div>
-          <div class="stat-card stat-card-border-blue">
-            <p class="stat-label">In Transit</p>
-            <p class="stat-value-colored text-blue-600">${inTransitCount}</p>
-          </div>
-          <div class="stat-card stat-card-border-green">
-            <p class="stat-label">Delivered</p>
-            <p class="stat-value-colored text-green-600">${deliveredCount}</p>
-          </div>
-        </div>
-
-        <!-- Shipments Table -->
         <div class="card-container">
           <div class="card-header">
             <h3 class="card-title">Active Shipments</h3>
@@ -488,9 +556,13 @@ class ShipmentTracking {
                     (shipment) => `
                   <tr class="table-row">
                     <td class="table-cell-bold">${shipment.id}</td>
-                    <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${shipment.purchaseOrderId}</td>
+                    <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${
+                      shipment.purchaseOrderId
+                    }</td>
                     <td class="table-cell">
-                      ${shipment.order.items.map((item) => `${item.name} (x${item.quantity})`).join(", ")}
+                      ${shipment.order.items
+                        .map((item) => `${item.name} (x${item.quantity})`)
+                        .join(", ")}
                     </td>
                     <td class="table-cell">${shipment.carrier}</td>
                     <td class="table-cell">${shipment.expectedDeliveryDate}</td>
@@ -535,6 +607,7 @@ class ShipmentTracking {
 class InvoicesPayments {
   constructor() {
     this.invoices = [];
+    this.view = "list";
   }
 
   async getInvoices() {
@@ -548,7 +621,17 @@ class InvoicesPayments {
   }
 
   render() {
-    const totalInvoices = this.invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+    if (this.view === "create") {
+      return this.renderCreateForm();
+    }
+    return this.renderList();
+  }
+
+  renderList() {
+    const totalInvoices = this.invoices.reduce(
+      (sum, inv) => sum + inv.totalAmount,
+      0
+    );
     const paidAmount = this.invoices
       .filter((inv) => inv.status === "paid")
       .reduce((sum, inv) => sum + inv.totalAmount, 0);
@@ -566,31 +649,10 @@ class InvoicesPayments {
           <p class="section-subtitle">Manage invoices and payment records</p>
         </div>
 
-        <!-- Financial Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="stat-card stat-card-border-indigo">
-            <p class="stat-label">Total Invoiced</p>
-            <p class="stat-value">Rs. ${totalInvoices.toFixed(2)}</p>
-          </div>
-          <div class="stat-card stat-card-border-green">
-            <p class="stat-label">Paid</p>
-            <p class="stat-value-colored text-green-600">Rs. ${paidAmount.toFixed(2)}</p>
-          </div>
-          <div class="stat-card stat-card-border-yellow">
-            <p class="stat-label">Pending</p>
-            <p class="stat-value-colored text-yellow-600">Rs. ${pendingAmount.toFixed(2)}</p>
-          </div>
-          <div class="stat-card stat-card-border-red">
-            <p class="stat-label">Overdue</p>
-            <p class="stat-value-colored text-red-600">Rs. ${overdueAmount.toFixed(2)}</p>
-          </div>
-        </div>
-
-        <!-- Invoices Table -->
         <div class="card-container">
           <div class="card-header flex items-center justify-between">
             <h3 class="card-title">Invoice History</h3>
-            <button class="btn-primary flex items-center gap-2 text-sm font-medium">
+            <button id="generateInvoiceBtn" class="btn-primary flex items-center gap-2 text-sm font-medium">
               ${getIconHTML("plus")}
               Generate Invoice
             </button>
@@ -614,10 +676,16 @@ class InvoicesPayments {
                     (invoice) => `
                   <tr class="table-row">
                     <td class="table-cell-bold">${invoice.id}</td>
-                    <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${invoice.purchaseOrderId}</td>
+                    <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${
+                      invoice.purchaseOrderId
+                    }</td>
                     <td class="table-cell-bold">Rs. ${invoice.totalAmount}</td>
                     <td class="table-cell">
-                      ${new Date(invoice.invoiceDate).toISOString().split("T")[0]}
+                      ${
+                        new Date(invoice.invoiceDate)
+                          .toISOString()
+                          .split("T")[0]
+                      }
                     </td>
                     <td class="table-cell">
                       ${new Date(invoice.dueDate).toISOString().split("T")[0]}
@@ -630,7 +698,10 @@ class InvoicesPayments {
                           ? "status-yellow"
                           : "status-red"
                       }">
-                        ${invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                        ${
+                          invoice.status.charAt(0).toUpperCase() +
+                          invoice.status.slice(1)
+                        }
                       </span>
                     </td>
                     <td class="table-cell">
@@ -653,6 +724,111 @@ class InvoicesPayments {
         </div>
       </div>
     `;
+  }
+
+  renderCreateForm() {
+    return `
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="section-header">Generate Invoice</h3>
+            <p class="section-subtitle">Create a new invoice for a purchase order</p>
+          </div>
+        </div>
+
+        <form id="generateInvoiceForm" class="card-container">
+          <div class="p-8 space-y-8">
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("file-text").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Invoice Details
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Purchase Order ID</label>
+                  <input type="text" name="purchaseOrderId" required class="input-field" placeholder="e.g. PO-2023-001">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Invoice Number</label>
+                  <input type="text" name="invoiceNumber" required class="input-field" placeholder="e.g. INV-2023-001">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Invoice Date</label>
+                  <input type="date" name="invoiceDate" required class="input-field">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Due Date</label>
+                  <input type="date" name="dueDate" required class="input-field">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Total Amount (LKR)</label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-2.5 text-gray-500 font-medium">Rs.</span>
+                    <input type="number" name="totalAmount" required min="0" step="0.01" class="input-field pl-12" placeholder="0.00">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("edit").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Additional Information
+              </h4>
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">Notes / Terms</label>
+                <textarea name="notes" rows="4" class="input-field" placeholder="Enter payment terms or additional notes..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" id="cancelInvoiceBtnFooter" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary flex items-center gap-2">
+              ${getIconHTML("check-circle")}
+              Generate Invoice
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+  attachListeners(container) {
+    const addBtn = container.querySelector("#generateInvoiceBtn");
+    const cancelBtn = container.querySelector("#cancelInvoiceBtn");
+    const cancelBtnFooter = container.querySelector("#cancelInvoiceBtnFooter");
+    const form = container.querySelector("#generateInvoiceForm");
+
+    const switchToAdd = () => {
+      this.view = "create";
+      this.refresh(container);
+    };
+
+    const switchToList = () => {
+      this.view = "list";
+      this.refresh(container);
+    };
+
+    if (addBtn) addBtn.addEventListener("click", switchToAdd);
+    if (cancelBtn) cancelBtn.addEventListener("click", switchToList);
+    if (cancelBtnFooter)
+      cancelBtnFooter.addEventListener("click", switchToList);
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+      this.attachListeners(container);
+    }
   }
 }
 
@@ -795,7 +971,12 @@ class SalesAnalytics {
     const summary = await axios.get(apiURL);
 
     this.period = period;
-    const periodLabel = period === "daily" ? "Today" : period === "weekly" ? "This Week" : "This Month";
+    const periodLabel =
+      period === "daily"
+        ? "Today"
+        : period === "weekly"
+        ? "This Week"
+        : "This Month";
     const data = summary.data[period];
 
     statSelector.innerHTML = `
