@@ -1611,7 +1611,7 @@ class SalesAnalytics {
         const dateRange = getDateRange();
         if (dateRange) {
           const { startDate, endDate } = dateRange;
-          Report.exportToSupplierPDF(startDate, endDate);
+          Report.exportSupplierReport(startDate, endDate);
           alert("PDF exported successfully");
         }
       });
