@@ -232,7 +232,7 @@ class DeliveryDetails {
   }
 
   render() {
-    if (!this.deliveries || !this.deliveries.deliveries) {
+    if (!this.deliveries || !this.deliveries.deliveries || !Array.isArray(this.deliveries.deliveries)) {
       return `<p class="text-gray-600">No deliveries found for this driver.</p>`;
     }
 
@@ -342,6 +342,18 @@ class ProofOfDelivery {
   }
 
   render() {
+    if (!this.deliveries || !this.deliveries.deliveries || !Array.isArray(this.deliveries.deliveries)) {
+      return `
+        <div class="space-y-6">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">Proof of Delivery</h3>
+            <p class="text-gray-600 mt-1">Capture signatures and delivery confirmations</p>
+          </div>
+          <p class="text-gray-600">No deliveries found for this driver.</p>
+        </div>
+      `;
+    }
+
     return `
       <div class="space-y-6">
         <div>
@@ -499,6 +511,10 @@ class PaymentCollection {
   }
 
   render() {
+    if (!Array.isArray(this.payments)) {
+      this.payments = [];
+    }
+
     const totalAmount = this.payments.reduce((sum, p) => sum + p.amount, 0);
     const collected = this.payments
       .filter((p) => p.status === "collected")

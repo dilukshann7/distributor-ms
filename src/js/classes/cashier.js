@@ -391,37 +391,38 @@ class SalesTransaction {
                 </tr>
               </thead>
               <tbody>
-                ${this.smallOrder
-                  .map(
-                    (order) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm text-gray-800">${
-                      order.paymentMethod
-                    }</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">Rs. ${order.cart.totalAmount.toFixed(
-                      2
-                    )}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      order.createdAt
-                    }</td>
-                    <td class="px-6 py-4 text-sm">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        order.status === "completed"
-                          ? "bg-green-100 text-green-800"
-                          : order.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }">
-                        ${
-                          order.status.charAt(0).toUpperCase() +
-                          order.status.slice(1)
-                        }
-                      </span>
-                    </td>
-                  </tr>
-                `
-                  )
-                  .join("")}
+                ${this.smallOrder && this.smallOrder.length > 0
+                  ? this.smallOrder.map(
+                      (order) => `
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                      <td class="px-6 py-4 text-sm text-gray-800">${
+                        order.paymentMethod
+                      }</td>
+                      <td class="px-6 py-4 text-sm font-semibold text-gray-800">Rs. ${order.cart.totalAmount.toFixed(
+                        2
+                      )}</td>
+                      <td class="px-6 py-4 text-sm text-gray-600">${
+                        order.createdAt
+                      }</td>
+                      <td class="px-6 py-4 text-sm">
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                          order.status === "completed"
+                            ? "bg-green-100 text-green-800"
+                            : order.status === "pending"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-red-100 text-red-800"
+                        }">
+                          ${
+                            order.status.charAt(0).toUpperCase() +
+                            order.status.slice(1)
+                          }
+                        </span>
+                      </td>
+                    </tr>
+                  `
+                    )
+                    .join("")
+                  : '<tr><td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No payment history available</td></tr>'}
               </tbody>
             </table>
           </div>

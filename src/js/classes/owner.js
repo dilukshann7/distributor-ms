@@ -4,7 +4,6 @@ import usersIcon from "../../assets/icons/users.svg";
 import packageIcon from "../../assets/icons/package.svg";
 import activityIcon from "../../assets/icons/activity.svg";
 import fileTextIcon from "../../assets/icons/file-text.svg";
-import settingsIcon from "../../assets/icons/settings.svg";
 import logOutIcon from "../../assets/icons/log-out.svg";
 import searchIcon from "../../assets/icons/search.svg";
 import bellIcon from "../../assets/icons/bell.svg";
@@ -88,10 +87,7 @@ class OwnerDashboard {
         </nav>
 
         <div class="p-4 border-t border-gray-200 space-y-2">
-          <button class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-            ${this.getIcon("settings")}
-            <span class="text-sm font-medium">Settings</span>
-          </button>
+
           <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
             ${this.getIcon("log-out")}
             <span class="text-sm font-medium">Logout</span>
@@ -197,7 +193,6 @@ class OwnerDashboard {
       package: packageIcon,
       activity: activityIcon,
       "file-text": fileTextIcon,
-      settings: settingsIcon,
       "log-out": logOutIcon,
     };
     const src = icons[name];
@@ -481,41 +476,7 @@ class InventoryControl {
           </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <p class="text-sm text-gray-500">Total Products</p>
-            <p class="text-3xl font-bold text-gray-900">
-              ${this.inventory.reduce(
-                (total, item) => total + item.quantity,
-                0
-              )}
-            </p>
-            <p class="text-xs text-gray-500">${
-              this.inventory.length
-            } products in stock</p>
-          </div>
-          <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <p class="text-sm text-gray-500">Low Stock Items</p>
-            <p class="text-3xl font-bold text-yellow-600">${this.inventory.reduce(
-              (count, item) =>
-                item.quantity < item.minStock ? count + 1 : count,
-              0
-            )}</p>
-            <p class="text-xs text-yellow-600">Requires attention</p>
-          </div>
-          <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <p class="text-sm text-gray-500">Stock Value</p>
-            <p class="text-3xl font-bold text-gray-900">
-              ${this.inventory
-                .reduce((total, item) => total + item.quantity * item.price, 0)
-                .toLocaleString("en-US", {
-                  style: "currency",
-                  currency: "LKR",
-                })}
-            </p>
-            <p class="text-xs text-gray-500">Total inventory value</p>
-          </div>
-        </div>
+        
 
         <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
           <div class="overflow-x-auto">

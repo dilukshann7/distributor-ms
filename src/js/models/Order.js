@@ -14,7 +14,7 @@ export class Order {
     this.updatedAt = data.updatedAt;
   }
 
-  static async getAll(filters) {
+  static async getAll() {
     const apiURL = "http://localhost:3000/api/orders";
 
     return axios.get(apiURL);

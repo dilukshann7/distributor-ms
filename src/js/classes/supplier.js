@@ -6,6 +6,7 @@ import { Invoice } from "../models/Invoice.js";
 import { getIconHTML } from "../../assets/icons/index.js";
 import "../../css/supplier-style.css";
 import axios from "axios";
+import { Report } from "../models/Report.js";
 
 class SupplierDashboard {
   constructor(container) {
@@ -139,7 +140,6 @@ class SupplierDashboard {
       await sectionInstance.getSalesData();
     } else if (section === "orders") {
       await sectionInstance.getOrders();
-      await sectionInstance.getSummary();
     } else if (section === "products") {
       await sectionInstance.getSupply();
     } else if (section === "shipments") {
@@ -195,16 +195,6 @@ class PurchaseOrders {
     } catch (error) {
       console.error("Error fetching orders:", error);
       this.orders = [];
-    }
-  }
-
-  async getSummary() {
-    try {
-      const response = await Order.getSummary();
-      this.summary = response.data;
-    } catch (error) {
-      console.error("Error fetching order summary:", error);
-      this.summary = {};
     }
   }
 
@@ -452,9 +442,7 @@ class PurchaseOrders {
 
       Order.update(this.editingOrder.id, orderData)
         .then(() => {
-          this.getOrders().then(() =>
-            this.getSummary().then(() => switchToList())
-          );
+          this.getOrders().then(() => switchToList());
         })
         .catch((error) => {
           console.error("Error updating order:", error);
@@ -1534,25 +1522,26 @@ class SalesAnalytics {
         <div class="card-container">
           <div class="p-6">
             <h4 class="card-title mb-4">Export Analytics</h4>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
+            
+            <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">Start Date</label>
+                <input type="date" id="exportStartDate" class="input-field" />
+              </div>
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">End Date</label>
+                <input type="date" id="exportEndDate" class="input-field" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4">
+              <button id="exportPdfBtn" class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                 </svg>
                 Export to PDF
               </button>
-              <button class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-                Export to Excel
-              </button>
-              <button class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                </svg>
-                Print Report
-              </button>
+          
             </div>
           </div>
         </div>
@@ -1562,6 +1551,10 @@ class SalesAnalytics {
 
   attachListeners(container) {
     const periodSelectors = container.querySelectorAll(".period-selector");
+    const exportPdfBtn = container.querySelector("#exportPdfBtn");
+    const startDateInput = container.querySelector("#exportStartDate");
+    const endDateInput = container.querySelector("#exportEndDate");
+
     if (periodSelectors.length > 0) {
       periodSelectors.forEach((btn) => {
         if (btn.textContent.trim() === "Daily") {
@@ -1593,6 +1586,34 @@ class SalesAnalytics {
             await this.handlePeriodChange("monthly", container);
           }
         });
+      });
+    }
+
+    const getDateRange = () => {
+      const startDate = startDateInput?.value;
+      const endDate = endDateInput?.value;
+
+      if (!startDate || !endDate) {
+        alert("Please select both start and end dates");
+        return null;
+      }
+
+      if (new Date(startDate) > new Date(endDate)) {
+        alert("Start date must be before end date");
+        return null;
+      }
+
+      return { startDate, endDate };
+    };
+
+    if (exportPdfBtn) {
+      exportPdfBtn.addEventListener("click", () => {
+        const dateRange = getDateRange();
+        if (dateRange) {
+          const { startDate, endDate } = dateRange;
+          Report.exportToSupplierPDF(startDate, endDate);
+          alert("PDF exported successfully");
+        }
       });
     }
   }
