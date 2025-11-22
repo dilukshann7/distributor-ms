@@ -47,6 +47,76 @@ export class Report {
     return `LKR ${parseFloat(amount || 0).toFixed(2)}`;
   }
 
+  static async exportSalesmanReport(startDate, endDate) {
+    try {
+      const orderResponse = await Order.getAll();
+      const allOrders = orderResponse.data || [];
+
+      const filteredOrders = this.filterOrdersByDateRange(
+        allOrders,
+        startDate,
+        endDate
+      );
+
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text("Sales Report", 14, 20);
+
+      doc.setFontSize(11);
+      doc.text(
+        `Date Range: ${this.formatDate(startDate)} - ${this.formatDate(
+          endDate
+        )}`,
+        14,
+        28
+      );
+
+      const totalOrders = filteredOrders.length;
+      const totalAmount = filteredOrders.reduce(
+        (sum, order) => sum + parseFloat(order.totalAmount || 0),
+        0
+      );
+
+      doc.setFontSize(10);
+      doc.text(`Total Orders: ${totalOrders}`, 14, 36);
+      doc.text(
+        `Total Sales Amount: ${this.formatCurrency(totalAmount)}`,
+        14,
+        42
+      );
+
+      autoTable(doc, {
+        startY: 50,
+        head: [
+          [
+            "Order ID",
+            "Customer ID",
+            "Date",
+            "Status",
+            "Total Amount",
+            "Due Date",
+          ],
+        ],
+        body: filteredOrders.map((order) => [
+          order.id || "N/A",
+          order.customerId || "N/A",
+          this.formatDate(order.orderDate),
+          order.status || "N/A",
+          this.formatCurrency(order.totalAmount),
+          order.dueDate ? this.formatDate(order.dueDate) : "N/A",
+        ]),
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [14, 165, 233] },
+      });
+
+      doc.save(`sales-report-${startDate}-to-${endDate}.pdf`);
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      throw error;
+    }
+  }
+
   static async exportSupplierReport(startDate, endDate) {
     try {
       const orderResponse = await Order.getAll();
