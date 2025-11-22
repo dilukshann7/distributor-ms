@@ -21,37 +21,9 @@ export class Product {
     this.updatedAt = data.updatedAt;
   }
 
-  // Static methods
-  static async create(productData) {}
-  static async findById(id) {}
-  static async findBySku(sku) {}
   static async getAll(filters) {
     const apiURL = "http://localhost:3000/api/products";
 
     return axios.get(apiURL);
   }
-  static async search(searchTerm) {}
-  static async getLowStockItems() {}
-  static async getCriticalStockItems() {}
-  static async getExpiringProducts(days) {}
-  static async getBySupplier(supplierId) {}
-  static async getStockValue() {}
-
-  // Instance methods
-  async update(updateData) {}
-  async delete() {}
-  async addStock(quantity, batchNumber, expiryDate) {}
-  async removeStock(quantity) {}
-  async adjustStock(newQuantity, reason) {}
-  async checkStockStatus() {}
-  async isLowStock() {}
-  async isCritical() {}
-  async isExpiringSoon(days) {}
-  async updatePrice(newPrice) {}
-  async updateLocation(newLocation) {}
-  async getStockHistory(startDate, endDate) {}
-  async getOrderHistory() {}
-  async calculateReorderQuantity() {}
-  async getSupplier() {}
-  async createStockAlert() {}
 }
