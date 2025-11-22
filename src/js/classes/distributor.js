@@ -3,12 +3,23 @@ import { SalesOrder } from "../models/SalesOrder.js";
 import { Driver } from "../models/Drivers.js";
 import { Product } from "../models/Product.js";
 import { Delivery } from "../models/Delivery.js";
+import { Customer } from "../models/Customer.js";
+import { getIconHTML } from "../../assets/icons/index.js";
 import "../../css/distributor-style.css";
+import "../../css/supplier-style.css";
 
 class DistributorDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "orders";
+    this.sections = {
+      orders: new OrderManagement(),
+      drivers: new DriverManagement(),
+      stock: new StockTracking(),
+      routes: new DeliveryRoutes(),
+      delivery: new ProofOfDelivery(),
+      authorization: new OrderAuthorization(),
+    };
   }
 
   async render() {
@@ -27,6 +38,13 @@ class DistributorDashboard {
       </div>
     `;
     this.attachEventListeners();
+
+    const sectionInstance = this.sections[this.currentSection];
+    if (this.currentSection === "orders") {
+      if (typeof sectionInstance.attachListeners === "function") {
+        sectionInstance.attachListeners(this.container);
+      }
+    }
   }
 
   renderSidebar() {
@@ -88,15 +106,7 @@ class DistributorDashboard {
   }
 
   async renderSection(section) {
-    const sections = {
-      orders: new OrderManagement(),
-      drivers: new DriverManagement(),
-      stock: new StockTracking(),
-      routes: new DeliveryRoutes(),
-      delivery: new ProofOfDelivery(),
-      authorization: new OrderAuthorization(),
-    };
-    const sectionInstance = sections[section];
+    const sectionInstance = this.sections[section];
     if (section === "orders") {
       await sectionInstance.getOrders();
     } else if (section === "drivers") {
@@ -138,6 +148,13 @@ class DistributorDashboard {
     const content = this.container.querySelector("#dashboardContent");
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+
+    const sectionInstance = this.sections[section];
+    if (section === "orders") {
+      if (typeof sectionInstance.attachListeners === "function") {
+        sectionInstance.attachListeners(this.container);
+      }
+    }
 
     const navItems = this.container.querySelectorAll(".dist-nav-item");
     navItems.forEach((item) => {
@@ -184,6 +201,8 @@ class DistributorDashboard {
 class OrderManagement {
   constructor() {
     this.orders = [];
+    this.view = "list";
+    this.editingOrder = null;
   }
 
   async getOrders() {
@@ -197,6 +216,10 @@ class OrderManagement {
   }
 
   render() {
+    return this.renderList();
+  }
+
+  renderList() {
     return `
       <div class="space-y-6">
         <div class="flex items-center justify-between">
@@ -204,10 +227,6 @@ class OrderManagement {
             <h3 class="text-2xl font-bold text-gray-800">Order Management</h3>
             <p class="text-gray-600 mt-1">Manage and track all distribution orders</p>
           </div>
-          <button class="bg-orange-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-orange-700 transition-colors flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-            New Order
-          </button>
         </div>
 
         <div class="dist-card">
@@ -221,7 +240,6 @@ class OrderManagement {
                 <th class="dist-table-th">Status</th>
                 <th class="dist-table-th">Auth</th>
                 <th class="dist-table-th">Date</th>
-                <th class="dist-table-th">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -268,20 +286,10 @@ class OrderManagement {
                       ${order.authorized ? "Yes" : "No"}
                     </span>
                   </td>
-                  <td class="dist-table-td text-gray-600">${order.date}</td>
-                  <td class="dist-table-td">
-                    <div class="flex items-center gap-2">
-                      <button class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                      </button>
-                      <button class="p-2 text-orange-600 hover:bg-orange-50 rounded transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                      </button>
-                      <button class="p-2 text-red-600 hover:bg-red-50 rounded transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                      </button>
-                    </div>
-                  </td>
+                  <td class="dist-table-td text-gray-600">${
+                    order.orderDate
+                  }</td>
+                  
                 </tr>
               `
                 )

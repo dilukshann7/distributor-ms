@@ -757,6 +757,34 @@ app.post("/api/invoices", async (req, res) => {
   }
 });
 
+app.post("/api/sales-orders", async (req, res) => {
+  try {
+    const orderData = req.body;
+    const newOrder = await prisma.salesOrder.create({
+      data: orderData,
+    });
+    res.status(201).json(newOrder);
+  } catch (e) {
+    console.error("Error creating order:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.put("/api/sales-orders/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const orderData = req.body;
+    const updatedOrder = await prisma.salesOrder.update({
+      where: { id },
+      data: orderData,
+    });
+    res.json(updatedOrder);
+  } catch (e) {
+    console.error("Error updating order:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -8,7 +8,6 @@ class SalesmanDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "orders";
-    this.isSidebarOpen = true;
   }
 
   async render() {
@@ -39,15 +38,7 @@ class SalesmanDashboard {
     ];
 
     return `
-      <!-- Mobile Toggle -->
-      <button id="mobileToggle" class="lg:hidden fixed top-4 left-4 z-40 p-2 bg-sky-700 text-white rounded-lg">
-        ${this.isSidebarOpen ? this.getIcon("x") : this.getIcon("menu")}
-      </button>
-
-      <!-- Sidebar -->
-      <div class="${
-        this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-sky-700 to-sky-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
+      <div class="fixed lg:relative w-64 h-screen bg-gradient-to-b from-sky-700 to-sky-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
                 <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
@@ -69,20 +60,8 @@ class SalesmanDashboard {
             .join("")}
         </nav>
 
-        <div class="p-4 border-t border-sky-600">
-          <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sky-100 hover:bg-sky-600 transition-all">
-            ${this.getIcon("log-out")}
-            <span class="font-medium">Logout</span>
-          </button>
-        </div>
+      
       </div>
-
-      <!-- Overlay for mobile -->
-      ${
-        this.isSidebarOpen
-          ? '<div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>'
-          : ""
-      }
     `;
   }
 
@@ -154,34 +133,38 @@ class SalesmanDashboard {
         });
       });
     }
-
-    const mobileToggle = this.container.querySelector("#mobileToggle");
-    if (mobileToggle) {
-      mobileToggle.addEventListener("click", () => {
-        this.isSidebarOpen = !this.isSidebarOpen;
-        this.render();
-      });
-    }
-
-    const mobileOverlay = this.container.querySelector("#mobileOverlay");
-    if (mobileOverlay) {
-      mobileOverlay.addEventListener("click", () => {
-        this.isSidebarOpen = false;
-        this.render();
-      });
-    }
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    const sectionContent = await this.renderSection(section);
+
+    const sections = {
+      orders: new SalesOrders(),
+      stock: new StockAvailability(),
+      customers: new CustomerAccounts(),
+      reports: new SalesReports(),
+      returns: new ReturnsAndCancellations(),
+    };
+
+    const sectionInstance = sections[section];
+
+    if (section === "orders") {
+      await sectionInstance.getOrders();
+    } else if (section === "stock") {
+      await sectionInstance.getInventoryItems();
+    } else if (section === "customers") {
+      await sectionInstance.getCustomers();
+    }
+
+    const sectionContent = sectionInstance.render();
 
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
-    if (section === "reports") {
-      const reports = new SalesReports();
-      reports.attachListeners(this.container);
+    if (section === "orders") {
+      sectionInstance.attachEventListeners(this.container);
+    } else if (section === "reports") {
+      sectionInstance.attachListeners(this.container);
     }
 
     const navItems = this.container.querySelectorAll(".nav-item");
@@ -230,6 +213,10 @@ class SalesmanDashboard {
 class SalesOrders {
   constructor() {
     this.orders = [];
+    this.products = [];
+    this.customers = [];
+    this.view = "list";
+    this.editingOrder = null;
   }
 
   async getOrders() {
@@ -242,7 +229,37 @@ class SalesOrders {
     }
   }
 
+  async getProducts() {
+    try {
+      const response = await Product.getAll();
+      this.products = response.data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      this.products = [];
+    }
+  }
+
+  async getCustomers() {
+    try {
+      const response = await Customer.getAll();
+      this.customers = response.data;
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      this.customers = [];
+    }
+  }
+
   render() {
+    if (this.view === "add") {
+      return this.renderAddForm();
+    }
+    if (this.view === "edit") {
+      return this.renderEditForm();
+    }
+    return this.renderList();
+  }
+
+  renderList() {
     return `
       <div class="space-y-6">
         <div class="flex items-center justify-between">
@@ -254,34 +271,6 @@ class SalesOrders {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             New Order
           </button>
-        </div>
-
-        <div id="orderFormContainer" class="hidden">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sky-600">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Create New Order</h3>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
-                <input type="text" placeholder="Enter customer name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Product Code</label>
-                <input type="text" placeholder="Enter product code" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                <input type="number" placeholder="Enter quantity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Price</label>
-                <input type="number" placeholder="Enter price" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <button class="flex-1 bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700 transition-colors font-medium">Create Order</button>
-              <button id="cancelFormBtn" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Cancel</button>
-            </div>
-          </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -306,7 +295,9 @@ class SalesOrders {
                     order.id
                   }</td>
                   <td class="px-6 py-4 text-gray-700">${order.customerName}</td>
-                  <td class="px-6 py-4 text-gray-700">${order.orderDate}</td>
+                  <td class="px-6 py-4 text-gray-700">${new Date(
+                    order.orderDate
+                  ).toLocaleDateString()}</td>
                   <td class="px-6 py-4 text-gray-700">${
                     order.items
                       ?.filter((item) => item && item.name)
@@ -318,7 +309,7 @@ class SalesOrders {
                       )
                       .join(", ") || "No items"
                   }</td>
-                  <td class="px-6 py-4 font-semibold text-gray-900">Rs. ${order.totalAmount.toLocaleString()}</td>
+                  <td class="px-6 py-4 font-semibold text-gray-900">Rs. ${order.subtotal.toLocaleString()}</td>
                   <td class="px-6 py-4">
                     <span class="px-3 py-1 rounded-full text-sm font-medium ${this.getStatusColor(
                       order.status
@@ -330,10 +321,9 @@ class SalesOrders {
                     </span>
                   </td>
                   <td class="px-6 py-4 flex gap-2">
-                    <button class="p-2 text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    </button>
-                    <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                    <button class="edit-order-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" data-order-id="${
+                      order.id
+                    }">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     </button>
                     <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
@@ -351,21 +341,569 @@ class SalesOrders {
     `;
   }
 
+  renderAddForm() {
+    return `
+      <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">Create New Sales Order</h3>
+            <p class="text-gray-600 mt-1">Add a new order to the system</p>
+          </div>
+        </div>
+
+        <form id="addOrderForm" class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-8 space-y-8">
+            
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Order Details
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Order Number</label>
+                  <input type="text" name="orderNumber" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="e.g. ORD-2024-001">
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Customer</label>
+                  <select name="customerId" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="">-- Select Customer --</option>
+                    ${this.customers
+                      .map(
+                        (customer) => `
+                      <option value="${customer.id}" data-name="${customer.name}">
+                        ${customer.name}
+                      </option>
+                    `
+                      )
+                      .join("")}
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Order Date</label>
+                  <input type="date" name="orderDate" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Total Amount (LKR)</label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-3 text-gray-500 font-medium">Rs.</span>
+                    <input type="number" id="subtotal" name="subtotal" required min="0" step="0.01" class="w-full px-4 py-2.5 pl-12 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="0.00" readonly>
+                  </div>
+                  <p class="text-xs text-gray-500">Calculated automatically from items</p>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Status</label>
+                  <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="pending" selected>Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Authorized</label>
+                  <select name="authorized" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="false" selected>No</option>
+                    <option value="true">Yes</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-sm font-medium text-gray-700">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="notes" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="Enter order notes or special instructions..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                Order Items
+              </h4>
+              <div class="space-y-4" id="itemsContainer">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 item-row bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <div class="space-y-2 md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Product</label>
+                    <select name="productId[]" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-white product-select" data-row="0">
+                      <option value="">-- Select Product --</option>
+                      ${this.products
+                        .map(
+                          (product) => `
+                        <option value="${product.id}" data-name="${
+                            product.name
+                          }" data-price="${product.price}" data-stock="${
+                            product.quantity
+                          }">
+                          ${product.name} - Rs. ${product.price.toFixed(
+                            2
+                          )} (Stock: ${product.quantity})
+                        </option>
+                      `
+                        )
+                        .join("")}
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                    <input type="number" name="itemQuantity[]" required min="1" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-white item-quantity" data-row="0" placeholder="1">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Subtotal</label>
+                    <input type="text" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 item-subtotal font-medium text-gray-900" data-row="0" readonly placeholder="Rs. 0.00">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Action</label>
+                    <button type="button" class="remove-item-btn w-full px-4 py-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium flex items-center justify-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" id="addItemBtn" class="mt-4 px-6 py-2.5 bg-sky-100 text-sky-700 rounded-lg hover:bg-sky-200 transition-colors flex items-center gap-2 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Add Another Item
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" id="cancelFormBtn" class="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="px-6 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors font-medium flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Create Order
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  renderEditForm() {
+    const order = this.editingOrder;
+    if (!order) return this.renderList();
+
+    return `
+      <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">Edit Sales Order</h3>
+            <p class="text-gray-600 mt-1">Update order information</p>
+          </div>
+        </div>
+
+        <form id="editOrderForm" class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-8 space-y-8">
+            
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Order Details
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Order Number</label>
+                  <input type="text" name="orderNumber" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" value="${
+                    order.orderNumber || ""
+                  }">
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Customer Name</label>
+                  <input type="text" name="customerName" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-gray-100" value="${
+                    order.customerName || ""
+                  }" readonly>
+                  <p class="text-xs text-gray-500">Customer cannot be changed</p>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Order Date</label>
+                  <input type="date" name="orderDate" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" value="${
+                    order.orderDate ? order.orderDate.split("T")[0] : ""
+                  }">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Total Amount (LKR)</label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-3 text-gray-500 font-medium">Rs.</span>
+                    <input type="number" name="subtotal" required min="0" step="0.01" class="w-full px-4 py-2.5 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" value="${
+                      order.subtotal || 0
+                    }">
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Status</label>
+                  <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="pending" ${
+                      order.status === "pending" ? "selected" : ""
+                    }>Pending</option>
+                    <option value="confirmed" ${
+                      order.status === "confirmed" ? "selected" : ""
+                    }>Confirmed</option>
+                    <option value="delivered" ${
+                      order.status === "delivered" ? "selected" : ""
+                    }>Delivered</option>
+                    <option value="cancelled" ${
+                      order.status === "cancelled" ? "selected" : ""
+                    }>Cancelled</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Authorized</label>
+                  <select name="authorized" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="false" ${
+                      !order.authorized ? "selected" : ""
+                    }>No</option>
+                    <option value="true" ${
+                      order.authorized ? "selected" : ""
+                    }>Yes</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Payment Status</label>
+                  <select name="paymentStatus" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="pending" ${
+                      order.paymentStatus === "pending" ? "selected" : ""
+                    }>Pending</option>
+                    <option value="paid" ${
+                      order.paymentStatus === "paid" ? "selected" : ""
+                    }>Paid</option>
+                    <option value="failed" ${
+                      order.paymentStatus === "failed" ? "selected" : ""
+                    }>Failed</option>
+                    <option value="refunded" ${
+                      order.paymentStatus === "refunded" ? "selected" : ""
+                    }>Refunded</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-sm font-medium text-gray-700">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="notes" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">${
+                    order.notes || ""
+                  }</textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                Order Items
+              </h4>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <p class="text-sm text-gray-600 mb-2">Current Items:</p>
+                <ul class="list-disc list-inside text-sm text-gray-700">
+                  ${
+                    order.items
+                      ? order.items
+                          .map(
+                            (item) =>
+                              `<li>${item.name} - Quantity: ${item.quantity}</li>`
+                          )
+                          .join("")
+                      : "<li>No items</li>"
+                  }
+                </ul>
+                <p class="text-xs text-gray-500 mt-2">Note: Item editing not available. Cancel and create a new order if items need to be changed.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" id="cancelEditOrderBtn" class="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="px-6 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors font-medium flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Update Order
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
   attachEventListeners(container) {
     const toggleBtn = container.querySelector("#toggleFormBtn");
     const cancelBtn = container.querySelector("#cancelFormBtn");
-    const formContainer = container.querySelector("#orderFormContainer");
+    const cancelEditBtn = container.querySelector("#cancelEditOrderBtn");
+    const addForm = container.querySelector("#addOrderForm");
+    const editForm = container.querySelector("#editOrderForm");
+    const addItemBtn = container.querySelector("#addItemBtn");
+    const editBtns = container.querySelectorAll(".edit-order-btn");
+
+    const showFormHandler = async () => {
+      await this.getProducts();
+      await this.getCustomers();
+      this.view = "add";
+      this.editingOrder = null;
+      this.refresh(container);
+    };
+
+    const switchToEdit = (orderId) => {
+      this.editingOrder = this.orders.find((o) => o.id === parseInt(orderId));
+      this.view = "edit";
+      this.refresh(container);
+    };
+
+    const switchToList = () => {
+      this.view = "list";
+      this.editingOrder = null;
+      this.refresh(container);
+    };
+
+    const calculateTotal = () => {
+      const rows = container.querySelectorAll(".item-row");
+      let total = 0;
+
+      rows.forEach((row) => {
+        const subtotalInput = row.querySelector(".item-subtotal");
+        if (subtotalInput && subtotalInput.value) {
+          const subtotal = parseFloat(
+            subtotalInput.value.replace("Rs. ", "").replace(",", "")
+          );
+          if (!isNaN(subtotal)) {
+            total += subtotal;
+          }
+        }
+      });
+
+      const subtotalInput = container.querySelector("#subtotal");
+      if (subtotalInput) {
+        subtotalInput.value = total.toFixed(2);
+      }
+    };
+
+    const updateSubtotal = (row) => {
+      const productSelect = row.querySelector(".product-select");
+      const quantityInput = row.querySelector(".item-quantity");
+      const subtotalInput = row.querySelector(".item-subtotal");
+
+      if (productSelect && quantityInput && subtotalInput) {
+        const selectedOption =
+          productSelect.options[productSelect.selectedIndex];
+        const price = parseFloat(selectedOption.dataset.price || 0);
+        const quantity = parseInt(quantityInput.value || 0);
+        const stock = parseInt(selectedOption.dataset.stock || 0);
+
+        if (quantity > stock && stock > 0) {
+          alert(`Only ${stock} units available in stock!`);
+          quantityInput.value = stock;
+          return;
+        }
+
+        const subtotal = price * quantity;
+        subtotalInput.value = `Rs. ${subtotal.toFixed(2)}`;
+        calculateTotal();
+      }
+    };
+
+    const attachItemListeners = () => {
+      const productSelects = container.querySelectorAll(".product-select");
+      const quantityInputs = container.querySelectorAll(".item-quantity");
+
+      productSelects.forEach((select) => {
+        select.addEventListener("change", (e) => {
+          const row = e.target.closest(".item-row");
+          updateSubtotal(row);
+        });
+      });
+
+      quantityInputs.forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const row = e.target.closest(".item-row");
+          updateSubtotal(row);
+        });
+      });
+    };
+
+    const addItemRow = () => {
+      const itemsContainer = container.querySelector("#itemsContainer");
+      const rowCount = itemsContainer.querySelectorAll(".item-row").length;
+      const newRow = document.createElement("div");
+      newRow.className =
+        "grid grid-cols-1 md:grid-cols-5 gap-4 item-row bg-gray-50 p-4 rounded-lg border border-gray-200";
+      newRow.innerHTML = `
+        <div class="space-y-2 md:col-span-2">
+          <select name="productId[]" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-white product-select" data-row="${rowCount}">
+            <option value="">-- Select Product --</option>
+            ${this.products
+              .map(
+                (product) => `
+              <option value="${product.id}" data-name="${
+                  product.name
+                }" data-price="${product.price}" data-stock="${
+                  product.quantity
+                }">
+                ${product.name} - Rs. ${product.price.toFixed(2)} (Stock: ${
+                  product.quantity
+                })
+              </option>
+            `
+              )
+              .join("")}
+          </select>
+        </div>
+        <div class="space-y-2">
+          <input type="number" name="itemQuantity[]" required min="1" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-white item-quantity" data-row="${rowCount}" placeholder="1">
+        </div>
+        <div class="space-y-2">
+          <input type="text" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 item-subtotal font-medium text-gray-900" data-row="${rowCount}" readonly placeholder="Rs. 0.00">
+        </div>
+        <div class="space-y-2">
+          <button type="button" class="remove-item-btn w-full px-4 py-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            Remove
+          </button>
+        </div>
+      `;
+      itemsContainer.appendChild(newRow);
+      attachRemoveListeners();
+      attachItemListeners();
+    };
+
+    const attachRemoveListeners = () => {
+      const removeBtns = container.querySelectorAll(".remove-item-btn");
+      removeBtns.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const row = e.target.closest(".item-row");
+          const itemsContainer = container.querySelector("#itemsContainer");
+          if (itemsContainer.querySelectorAll(".item-row").length > 1) {
+            row.remove();
+            calculateTotal();
+          } else {
+            alert("At least one item is required");
+          }
+        });
+      });
+    };
+
+    const submitAddForm = (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const productIds = formData.getAll("productId[]");
+      const itemQuantities = formData.getAll("itemQuantity[]");
+
+      const items = productIds
+        .map((productId, index) => {
+          const product = this.products.find(
+            (p) => p.id === parseInt(productId)
+          );
+          return {
+            name: product?.name || "Unknown",
+            quantity: parseInt(itemQuantities[index], 10),
+          };
+        })
+        .filter((item) => item.quantity > 0);
+
+      if (items.length === 0) {
+        alert("Please add at least one item to the order");
+        return;
+      }
+
+      const customerId = parseInt(formData.get("customerId"));
+      const customer = this.customers.find((c) => c.id === customerId);
+
+      const orderData = {
+        orderNumber: formData.get("orderNumber"),
+        customerName: customer?.name || "Unknown Customer",
+        customerId: customerId,
+        orderDate: new Date(formData.get("orderDate")).toISOString(),
+        status: formData.get("status"),
+        paymentStatus: "unpaid", // default
+        notes: formData.get("notes") || null,
+        items: items,
+        subtotal: parseFloat(formData.get("subtotal")),
+      };
+
+      SalesOrder.create(orderData)
+        .then(() => {
+          this.getOrders().then(() => switchToList());
+        })
+        .catch((error) => {
+          console.error("Error creating order:", error);
+          alert("Error creating order. Please try again.");
+        });
+    };
+
+    const submitEditForm = (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const orderData = {
+        orderNumber: formData.get("orderNumber"),
+        orderDate: new Date(formData.get("orderDate")).toISOString(),
+        subtotal: parseFloat(formData.get("subtotal")),
+        status: formData.get("status"),
+        paymentStatus: formData.get("paymentStatus"),
+        notes: formData.get("notes") || null,
+      };
+
+      SalesOrder.update(this.editingOrder.id, orderData)
+        .then(() => {
+          this.getOrders().then(() => switchToList());
+        })
+        .catch((error) => {
+          console.error("Error updating order:", error);
+          alert("Error updating order. Please try again.");
+        });
+    };
 
     if (toggleBtn) {
-      toggleBtn.addEventListener("click", () => {
-        formContainer.classList.toggle("hidden");
-      });
+      toggleBtn.addEventListener("click", showFormHandler);
     }
 
-    if (cancelBtn) {
-      cancelBtn.addEventListener("click", () => {
-        formContainer.classList.add("hidden");
+    editBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const orderId = e.currentTarget.dataset.orderId;
+        switchToEdit(orderId);
       });
+    });
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", switchToList);
+    }
+
+    if (cancelEditBtn) {
+      cancelEditBtn.addEventListener("click", switchToList);
+    }
+
+    if (addForm) {
+      addForm.addEventListener("submit", submitAddForm);
+    }
+
+    if (editForm) {
+      editForm.addEventListener("submit", submitEditForm);
+    }
+
+    if (addItemBtn) {
+      addItemBtn.addEventListener("click", addItemRow);
+    }
+
+    attachRemoveListeners();
+    attachItemListeners();
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+      this.attachEventListeners(container);
     }
   }
 
@@ -399,15 +937,6 @@ class StockAvailability {
   }
 
   render() {
-    const totalProducts = this.products.length;
-    const inStock = this.products.filter((p) => p.status === "in-stock").length;
-    const lowStock = this.products.filter(
-      (p) => p.status === "low-stock"
-    ).length;
-    const critical = this.products.filter(
-      (p) => p.status === "critical"
-    ).length;
-
     return `
       <div class="space-y-6">
         <div>
@@ -1060,5 +1589,6 @@ export async function renderSalesmanDashboard(container) {
 
   const content = container.querySelector("#dashboardContent");
   const ordersSection = new SalesOrders();
-  ordersSection.attachEventListeners(content);
+  await ordersSection.getOrders();
+  ordersSection.attachEventListeners(container);
 }

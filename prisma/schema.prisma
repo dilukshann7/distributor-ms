@@ -111,12 +111,8 @@ model SalesOrder {
   orderNumber   String   @unique
   customerId    Int
   customerName  String
-  salesmanId    Int
   orderDate     DateTime
   subtotal      Float
-  tax           Float
-  discount      Float
-  totalAmount   Float
   status        String   @default("pending")
   paymentStatus String   @default("unpaid")
   items         Json

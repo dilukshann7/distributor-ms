@@ -57,3 +57,19 @@
 .dist-nav-item-inactive {
   @apply text-orange-100 hover:bg-orange-600/50;
 }
+
+/* Animations */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
