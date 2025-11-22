@@ -785,6 +785,17 @@ app.put("/api/sales-orders/:id", async (req, res) => {
   }
 });
 
+app.delete("/api/sales-orders/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await prisma.salesOrder.delete({ where: { id } });
+    res.status(204).send();
+  } catch (e) {
+    console.error("Error deleting order:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

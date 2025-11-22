@@ -38,4 +38,10 @@ export class SalesOrder {
 
     return axios.put(apiURL, orderData);
   }
+
+  static async delete(id) {
+    const apiURL = "http://localhost:3000/api/sales-orders/" + id;
+
+    return axios.delete(apiURL);
+  }
 }
