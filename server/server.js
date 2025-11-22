@@ -686,6 +686,30 @@ app.delete("/api/sales-orders/:id", async (req, res) => {
   }
 });
 
+app.delete("/api/customers/:id", async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await prisma.customer.delete({ where: { id } });
+    res.status(204).send();
+  } catch (e) {
+    console.error("Error deleting customer:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post("/api/customers", async (req, res) => {
+  try {
+    const customerData = req.body;
+    const newCustomer = await prisma.customer.create({
+      data: customerData,
+    });
+    res.status(201).json(newCustomer);
+  } catch (e) {
+    console.error("Error creating customer:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

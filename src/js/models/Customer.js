@@ -20,34 +20,18 @@ export class Customer {
     this.updatedAt = data.updatedAt;
   }
 
-  // Static methods
-  static async create(customerData) {}
-  static async findById(id) {}
-  static async findByEmail(email) {}
-  static async findByPhone(phone) {}
   static async getAll(filters) {
     const apiURL = "http://localhost:3000/api/customers";
     return axios.get(apiURL);
   }
-  static async getVIPCustomers() {}
-  static async getTopCustomers(limit) {}
-  static async search(searchTerm) {}
 
-  // Instance methods
-  async update(updateData) {}
-  async delete() {}
-  async getSalesOrders() {}
-  async getOrderHistory(startDate, endDate) {}
-  async getTotalSpent(startDate, endDate) {}
-  async getAverageOrderValue() {}
-  async updateTotalPurchases() {}
-  async updateTotalSpent() {}
-  async updateLastVisit() {}
-  async promoteToVIP() {}
-  async demoteFromVIP() {}
-  async getFeedback() {}
-  async getRefunds() {}
-  async getLoyaltyPoints() {}
-  async sendEmail(subject, body) {}
-  async sendSMS(message) {}
+  static async create(customerData) {
+    const apiURL = "http://localhost:3000/api/customers";
+    return axios.post(apiURL, customerData);
+  }
+
+  static async delete(customerID) {
+    const apiURL = `http://localhost:3000/api/customers/${customerID}`;
+    return axios.delete(apiURL);
+  }
 }
