@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { Order } from "./Order";
 import { Invoice } from "./Invoice";
+import { Driver } from "./Drivers";
 
 export class Report {
   constructor() {
@@ -48,11 +49,11 @@ export class Report {
 
   static async exportSupplierReport(startDate, endDate) {
     try {
-      const response = await Order.getAll();
-      const allOrders = response.data || [];
+      const orderResponse = await Order.getAll();
+      const allOrders = orderResponse.data || [];
 
-      const response2 = await Invoice.getAll();
-      const allInvoices = response2.data || []; // Filter orders based on the date range
+      const invoiceResponse = await Invoice.getAll();
+      const allInvoices = invoiceResponse.data || []; // Filter orders based on the date range
 
       const filteredOrders = this.filterOrdersByDateRange(
         allOrders,

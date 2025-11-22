@@ -36,13 +36,6 @@ class DistributorDashboard {
       </div>
     `;
     this.attachEventListeners();
-
-    const sectionInstance = this.sections[this.currentSection];
-    if (this.currentSection === "orders") {
-      if (typeof sectionInstance.attachListeners === "function") {
-        sectionInstance.attachListeners(this.container);
-      }
-    }
   }
 
   renderSidebar() {
@@ -152,6 +145,14 @@ class DistributorDashboard {
         sectionInstance.attachListeners(this.container);
       }
     } else if (section === "delivery") {
+      if (typeof sectionInstance.attachListeners === "function") {
+        sectionInstance.attachListeners(this.container);
+      }
+    } else if (section === "authorization") {
+      if (typeof sectionInstance.attachListeners === "function") {
+        sectionInstance.attachListeners(this.container);
+      }
+    } else if (this.currentSection === "orders") {
       if (typeof sectionInstance.attachListeners === "function") {
         sectionInstance.attachListeners(this.container);
       }
@@ -288,6 +289,7 @@ class OrderManagement {
             </tbody>
           </table>
         </div>
+        
       </div>
     `;
   }
@@ -1022,10 +1024,68 @@ class OrderAuthorization {
       this.pendingOrders = response.data.filter(
         (order) => order.status === "pending"
       );
-      console.log("Pending Orders:", this.pendingOrders);
     } catch (error) {
       console.error("Error fetching sales orders:", error);
       this.pendingOrders = [];
+    }
+  }
+
+  attachListeners(container) {
+    const approveBtns = container.querySelectorAll(".approve-order-btn");
+    const rejectBtns = container.querySelectorAll(".reject-order-btn");
+
+    const approveOrder = (orderId) => {
+      if (confirm("Approve this order?")) {
+        const orderData = {
+          status: "processing",
+        };
+
+        SalesOrder.update(orderId, orderData)
+          .then(() => {
+            this.getPendingOrders().then(() => this.refresh(container));
+          })
+          .catch((error) => {
+            console.error("Error approving order:", error);
+            alert("Error approving order. Please try again.");
+          });
+      }
+    };
+
+    const rejectOrder = (orderId) => {
+      if (
+        confirm("Reject and delete this order? This action cannot be undone.")
+      ) {
+        SalesOrder.delete(orderId)
+          .then(() => {
+            this.getPendingOrders().then(() => this.refresh(container));
+          })
+          .catch((error) => {
+            console.error("Error rejecting order:", error);
+            alert("Error rejecting order. Please try again.");
+          });
+      }
+    };
+
+    approveBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const orderId = parseInt(e.currentTarget.dataset.orderId);
+        approveOrder(orderId);
+      });
+    });
+
+    rejectBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const orderId = parseInt(e.currentTarget.dataset.orderId);
+        rejectOrder(orderId);
+      });
+    });
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+      this.attachListeners(container);
     }
   }
 
@@ -1089,11 +1149,17 @@ class OrderAuthorization {
                   </div>
                 </div>
 
-                <div class="flex gap-2">
-                  <button class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+                <div class="flex gap-3">
+                  <button class="approve-order-btn flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2" data-order-id="${
+                    order.id
+                  }">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     Approve
                   </button>
-                  <button class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
+                  <button class="reject-order-btn flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2" data-order-id="${
+                    order.id
+                  }">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     Reject
                   </button>
                 </div>
@@ -1104,18 +1170,7 @@ class OrderAuthorization {
           </div>
         </div>
 
-        <div class="dist-card p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Bulk Actions</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
-              Approve All Normal
-            </button>
-            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors">
-              Export Report
-            </button>
-            
-          </div>
-        </div>
+        
       </div>
     `;
   }
