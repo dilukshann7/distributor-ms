@@ -4,7 +4,6 @@ import usersIcon from "../../assets/icons/users.svg";
 import packageIcon from "../../assets/icons/package.svg";
 import activityIcon from "../../assets/icons/activity.svg";
 import fileTextIcon from "../../assets/icons/file-text.svg";
-import settingsIcon from "../../assets/icons/settings.svg";
 import logOutIcon from "../../assets/icons/log-out.svg";
 import searchIcon from "../../assets/icons/search.svg";
 import bellIcon from "../../assets/icons/bell.svg";
@@ -19,6 +18,8 @@ import downloadIcon from "../../assets/icons/download.svg";
 import filterIcon from "../../assets/icons/filter.svg";
 import { Product } from "../models/Product.js";
 import { User } from "../models/User.js";
+import { Task } from "../models/Task.js";
+import { FinancialReport } from "../models/FinancialReport.js";
 
 class OwnerDashboard {
   constructor(container) {
@@ -86,10 +87,7 @@ class OwnerDashboard {
         </nav>
 
         <div class="p-4 border-t border-gray-200 space-y-2">
-          <button class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-            ${this.getIcon("settings")}
-            <span class="text-sm font-medium">Settings</span>
-          </button>
+
           <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
             ${this.getIcon("log-out")}
             <span class="text-sm font-medium">Logout</span>
@@ -115,15 +113,7 @@ class OwnerDashboard {
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
-            <div class="text-right">
-              <p class="text-sm font-medium text-gray-900">Owner</p>
-              <p class="text-xs text-gray-500">Admin Account</p>
-            </div>
-            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-              <img src="${userCircleIcon}" class="w-5 h-5 text-white" alt="user" />
-            </div>
-          </div>
+    
         </div>
       </header>
     `;
@@ -140,11 +130,14 @@ class OwnerDashboard {
 
     const sectionInstance = sections[section];
 
-    // For inventory section, load data first
     if (section === "inventory") {
-      await sectionInstance.getProducts();
+      await sectionInstance.getInventory();
     } else if (section === "employees") {
       await sectionInstance.getEmployees();
+    } else if (section === "operations") {
+      await sectionInstance.getTasks();
+    } else if (section === "overview") {
+      await sectionInstance.getMonthly();
     }
 
     return sectionInstance.render();
@@ -200,7 +193,6 @@ class OwnerDashboard {
       package: packageIcon,
       activity: activityIcon,
       "file-text": fileTextIcon,
-      settings: settingsIcon,
       "log-out": logOutIcon,
     };
     const src = icons[name];
@@ -210,53 +202,49 @@ class OwnerDashboard {
 
 class FinancialOverview {
   constructor() {
-    this.data = [
-      { month: "Jan", income: 45000, expenses: 32000, profit: 13000 },
-      { month: "Feb", income: 52000, expenses: 35000, profit: 17000 },
-      { month: "Mar", income: 48000, expenses: 33000, profit: 15000 },
-      { month: "Apr", income: 61000, expenses: 38000, profit: 23000 },
-      { month: "May", income: 55000, expenses: 36000, profit: 19000 },
-      { month: "Jun", income: 67000, expenses: 40000, profit: 27000 },
+    this.orders = [];
+    this.data = [];
+    this.currentMonth = new Date().getMonth() + 1;
+    this.monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
   }
 
+  async initialize() {
+    await this.getOrders();
+  }
+
+  async getMonthly() {
+    try {
+      const response = await FinancialReport.getMonthlyOverview();
+      this.data = response.data || [];
+    } catch (error) {
+      console.error("Error fetching financial data:", error);
+      this.data = [];
+    }
+  }
+
+  formatCurrency(amount) {
+    return `Rs. ${Math.abs(amount).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+
   render() {
-    /*html*/
     return `
       <div class="p-8 space-y-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          ${this.renderStatCard(
-            "Total Income",
-            "Rs. 328,000",
-            "+12.5% from last month",
-            "green",
-            "dollar"
-          )}
-          ${this.renderStatCard(
-            "Total Expenses",
-            "Rs. 181,000",
-            "+5.2% from last month",
-            "red",
-            "trending-down"
-          )}
-          ${this.renderStatCard(
-            "Net Profit",
-            "Rs. 147,000",
-            "+18.3% from last month",
-            "green",
-            "pie-chart"
-          )}
-          ${this.renderStatCard(
-            "Profit Margin",
-            "44.8%",
-            "+2.1% from last month",
-            "purple",
-            "percent"
-          )}
-        </div>
-
-        
-
         <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900 mb-6">Monthly Comparison</h3>
           <div class="overflow-x-auto">
@@ -273,15 +261,32 @@ class FinancialOverview {
                 ${this.data
                   .map(
                     (item) => `
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${
-                      item.month
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-blue-600 font-medium">Rs. ${item.income.toLocaleString()}</td>
-                    <td class="px-6 py-4 text-sm text-red-600 font-medium">Rs. ${item.expenses.toLocaleString()}</td>
-                    <td class="px-6 py-4 text-sm text-green-600 font-medium">Rs. ${item.profit.toLocaleString()}</td>
-                  </tr>
-                `
+                    <tr class="hover:bg-gray-50 ${
+                      item.month === this.currentMonth ? "bg-blue-50" : ""
+                    }">
+                      <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                        ${this.monthNames[item.month - 1]}
+                        ${
+                          item.month === this.currentMonth
+                            ? '<span class="ml-2 text-xs text-blue-600">(Current)</span>'
+                            : ""
+                        }
+                      </td>
+                      <td class="px-6 py-4 text-sm text-blue-600 font-medium">${this.formatCurrency(
+                        item.income
+                      )}</td>
+                      <td class="px-6 py-4 text-sm text-red-600 font-medium">${this.formatCurrency(
+                        item.expenses
+                      )}</td>
+                      <td class="px-6 py-4 text-sm ${
+                        item.profit >= 0 ? "text-green-600" : "text-red-600"
+                      } font-medium">
+                        ${item.profit < 0 ? "-" : ""}${this.formatCurrency(
+                      item.profit
+                    )}
+                      </td>
+                    </tr>
+                  `
                   )
                   .join("")}
               </tbody>
@@ -299,27 +304,27 @@ class FinancialOverview {
       blue: "bg-blue-100 text-blue-600",
       purple: "bg-purple-100 text-purple-600",
     };
-    /*html*/
+
+    const isPositive = change.startsWith("+");
+    const trendColor = isPositive ? "text-green-600" : "text-red-600";
+
     return `
-    
       <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm text-gray-500 mb-2">${title}</p>
             <p class="text-3xl font-bold text-gray-900">${value}</p>
-            <p class="text-xs ${
-              color === "red" ? "text-red-600" : "text-green-600"
-            } mt-2 flex items-center gap-1">
-              <img src="${trendUpIcon}" class="w-4 h-4" alt="trend" />
+            <p class="text-xs ${trendColor} mt-2 flex items-center gap-1">
+              <span class="font-semibold">${isPositive ? "↑" : "↓"}</span>
               ${change}
             </p>
           </div>
           <div class="w-12 h-12 rounded-lg ${
             colors[color]
           } flex items-center justify-center">
-            <span class="text-lg font-bold">${
-              icon === "percent" ? "%" : "$"
-            }</span>
+            <span class="text-2xl font-bold">
+              ${icon === "percent" ? "%" : icon === "dollar" ? "$" : "📊"}
+            </span>
           </div>
         </div>
       </div>
@@ -380,8 +385,14 @@ class EmployeeManagement {
                       emp.name
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${emp.role}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">₹${emp.salary.toLocaleString()}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">₹${emp.bonus.toLocaleString()}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${emp.salary.toLocaleString(
+                      "en-us",
+                      { style: "currency", currency: "LKR" }
+                    )}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${emp.bonus.toLocaleString(
+                      "en-us",
+                      { style: "currency", currency: "LKR" }
+                    )}</td>
                     <td class="px-6 py-4 text-sm">
                       <div class="flex items-center gap-2">
                         <div class="w-32 bg-gray-200 rounded-full h-2">
@@ -432,6 +443,16 @@ class InventoryControl {
     this.inventory = [];
   }
 
+  async getInventory() {
+    try {
+      const response = await Product.getAll();
+      this.inventory = response.data;
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+      this.inventory = [];
+    }
+  }
+
   async getProducts() {
     try {
       const response = await Product.getAll();
@@ -455,23 +476,7 @@ class InventoryControl {
           </button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <p class="text-sm text-gray-500">Total Products</p>
-            <p class="text-3xl font-bold text-gray-900">1,180</p>
-            <p class="text-xs text-gray-500">5 products in stock</p>
-          </div>
-          <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <p class="text-sm text-gray-500">Low Stock Items</p>
-            <p class="text-3xl font-bold text-yellow-600">2</p>
-            <p class="text-xs text-yellow-600">Requires attention</p>
-          </div>
-          <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-            <p class="text-sm text-gray-500">Stock Value</p>
-            <p class="text-3xl font-bold text-gray-900">₹4,27,500</p>
-            <p class="text-xs text-gray-500">Total inventory value</p>
-          </div>
-        </div>
+        
 
         <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
           <div class="overflow-x-auto">
@@ -502,9 +507,10 @@ class InventoryControl {
                     <td class="px-6 py-4 text-sm text-gray-900">${
                       item.minStock
                     } units</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">₹${
-                      item.price
-                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-900">${item.price.toLocaleString(
+                      "en-US",
+                      { style: "currency", currency: "LKR" }
+                    )}</td>
                     <td class="px-6 py-4 text-sm">
                       <span class="px-3 py-1 rounded-full text-xs font-medium ${
                         item.status === "In Stock"
@@ -535,40 +541,20 @@ class InventoryControl {
 
 class OperationsMonitor {
   constructor() {
-    this.tasks = [
-      {
-        id: 1,
-        title: "Process supplier order",
-        status: "Completed",
-        assignee: "Rajesh Kumar",
-        dueTime: "10:30 AM",
-      },
-      {
-        id: 2,
-        title: "Verify stock count",
-        status: "In Progress",
-        assignee: "Neha Sharma",
-        dueTime: "02:00 PM",
-      },
-      {
-        id: 3,
-        title: "Prepare delivery routes",
-        status: "Pending",
-        assignee: "Amit Patel",
-        dueTime: "03:30 PM",
-      },
-      {
-        id: 4,
-        title: "Process customer payments",
-        status: "Completed",
-        assignee: "Vikram Desai",
-        dueTime: "11:45 AM",
-      },
-    ];
+    this.tasks = [];
+  }
+
+  async getTasks() {
+    try {
+      const response = await Task.getAll();
+      this.tasks = response.data;
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      this.tasks = [];
+    }
   }
 
   render() {
-    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div>
@@ -650,7 +636,6 @@ class OperationsMonitor {
       purple: "bg-purple-100 text-purple-600",
     };
 
-    /*html*/
     return `
       <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
         <div class="flex items-center justify-between">
@@ -699,7 +684,6 @@ class ReportsSection {
   }
 
   render() {
-    /*html*/
     return `
       <div class="p-8 space-y-6">
         <div class="flex items-center justify-between">
@@ -741,53 +725,11 @@ class ReportsSection {
             "2 days ago"
           )}
         </div>
-
-        <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-          <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Commission Breakdown</h3>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Salesman</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Total Sales</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Target</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Achievement</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Commission</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                ${this.salesData
-                  .map(
-                    (item) => `
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm text-gray-900 font-medium">${
-                      item.salesman
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">₹${item.sales.toLocaleString()}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">₹${item.target.toLocaleString()}</td>
-                    <td class="px-6 py-4 text-sm">
-                      <span class="text-green-600 font-medium">${(
-                        (item.sales / item.target) *
-                        100
-                      ).toFixed(0)}%</span>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-gray-900 font-medium">₹${item.commission.toLocaleString()}</td>
-                  </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
     `;
   }
 
   renderReportCard(title, description, lastGenerated) {
-    /*html*/
     return `
       <div class="bg-white rounded-lg shadow p-5 border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow">
         <h3 class="text-lg font-semibold text-gray-900">${title}</h3>

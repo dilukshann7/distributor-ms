@@ -1,9 +1,12 @@
+import axios from "axios";
+
 // SalesOrder Class
 export class SalesOrder {
   constructor(data) {
     this.id = data.id;
     this.orderNumber = data.orderNumber;
     this.customerId = data.customerId;
+    this.customerName = data.customerName;
     this.salesmanId = data.salesmanId;
     this.orderDate = data.orderDate;
     this.subtotal = data.subtotal;
@@ -12,46 +15,33 @@ export class SalesOrder {
     this.totalAmount = data.totalAmount;
     this.status = data.status;
     this.paymentStatus = data.paymentStatus;
+    this.items = data.items || [];
     this.notes = data.notes;
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }
 
-  // Static methods
-  static async create(orderData) {}
-  static async findById(id) {}
-  static async findByOrderNumber(orderNumber) {}
-  static async getAll(filters) {}
-  static async getByCustomer(customerId) {}
-  static async getBySalesman(salesmanId) {}
-  static async getByStatus(status) {}
-  static async getByDateRange(startDate, endDate) {}
-  static async getTodaysOrders() {}
-  static async getPendingOrders() {}
-  static async getTotalSales(startDate, endDate) {}
+  static async getAll(filters) {
+    const apiURL = "http://localhost:3000/api/sales-orders";
 
-  // Instance methods
-  async update(updateData) {}
-  async delete() {}
-  async addItem(productId, quantity, unitPrice) {}
-  async removeItem(itemId) {}
-  async updateItem(itemId, quantity, unitPrice) {}
-  async applyDiscount(discountAmount) {}
-  async calculateSubtotal() {}
-  async calculateTax() {}
-  async calculateTotal() {}
-  async getItems() {}
-  async getCustomer() {}
-  async getSalesman() {}
-  async markAsPending() {}
-  async markAsProcessing() {}
-  async markAsCompleted() {}
-  async cancel(reason) {}
-  async createTransaction(paymentMethod, amount) {}
-  async createDelivery(driverId, vehicleId) {}
-  async generateInvoice() {}
-  async sendConfirmationEmail() {}
-  async getTransaction() {}
-  async getReceipt() {}
-  async getDelivery() {}
+    return axios.get(apiURL);
+  }
+
+  static async create(orderData) {
+    const apiURL = "http://localhost:3000/api/sales-orders";
+
+    return axios.post(apiURL, orderData);
+  }
+
+  static async update(id, orderData) {
+    const apiURL = "http://localhost:3000/api/sales-orders/" + id;
+
+    return axios.put(apiURL, orderData);
+  }
+
+  static async delete(id) {
+    const apiURL = "http://localhost:3000/api/sales-orders/" + id;
+
+    return axios.delete(apiURL);
+  }
 }

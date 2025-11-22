@@ -8,7 +8,6 @@ class AssistantManagerDashboard {
   }
 
   render() {
-    /*html*/
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -27,13 +26,10 @@ class AssistantManagerDashboard {
 
   renderSidebar() {
     const menuItems = [
-      { id: "overview", label: "Data Verification", icon: "check-circle" },
       { id: "payments", label: "Payment Verification", icon: "dollar" },
-      { id: "schedules", label: "Schedule Mgmt", icon: "calendar" },
       { id: "delivery-stock", label: "Delivery & Stock", icon: "package" },
       { id: "drivers", label: "Driver Management", icon: "truck" },
       { id: "distribution", label: "Distribution Records", icon: "bar-chart" },
-      { id: "emergency", label: "Emergency Data", icon: "alert-circle" },
     ];
     /*html*/
     return `
@@ -95,16 +91,6 @@ class AssistantManagerDashboard {
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
-          <div class="flex items-center gap-3 pl-6 border-l border-gray-200">
-            <div class="text-right">
-              <p class="font-medium text-gray-800">Sarah Johnson</p>
-              <p class="text-xs text-gray-500">Assistant Manager</p>
-            </div>
-            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center text-white font-bold">
-              SJ
-            </div>
-          </div>
-
           <button id="logoutBtn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${this.getIcon("log-out")}
           </button>
@@ -113,17 +99,18 @@ class AssistantManagerDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
-      overview: new DataVerification(),
       payments: new PaymentVerification(),
-      schedules: new ScheduleManagement(),
       "delivery-stock": new DeliveryStockMaintenance(),
       drivers: new DriverManagement(),
       distribution: new DistributionRecords(),
-      emergency: new EmergencyDataRetrieval(),
     };
-    return sections[section].render();
+    const sectionInstance = sections[section];
+    if (section === "emergency") {
+      await sectionInstance.getEmergencyData();
+    }
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -161,10 +148,12 @@ class AssistantManagerDashboard {
     }
   }
 
-  navigateToSection(section) {
+  async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = `<div class="p-8">${this.renderSection(section)}</div>`;
+    content.innerHTML = `<div class="p-8">${await this.renderSection(
+      section
+    )}</div>`;
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -206,187 +195,6 @@ class AssistantManagerDashboard {
         '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
     };
     return icons[name] || "";
-  }
-}
-
-class DataVerification {
-  constructor() {
-    this.verificationItems = [
-      {
-        id: 1,
-        type: "Employee Record",
-        description: "Salary entry for John Smith - $2,500",
-        status: "pending",
-        date: "2025-01-19",
-      },
-      {
-        id: 2,
-        type: "Expense Entry",
-        description: "Fuel expense - $450",
-        status: "verified",
-        date: "2025-01-18",
-      },
-      {
-        id: 3,
-        type: "Inventory Update",
-        description: "Stock count mismatch - 50 units",
-        status: "rejected",
-        date: "2025-01-18",
-      },
-      {
-        id: 4,
-        type: "Order Record",
-        description: "Customer order #1024 - $3,200",
-        status: "pending",
-        date: "2025-01-19",
-      },
-      {
-        id: 5,
-        type: "Delivery Record",
-        description: "Route delivery completion",
-        status: "verified",
-        date: "2025-01-17",
-      },
-    ];
-  }
-
-  render() {
-    /*html*/
-    return `
-      <div class="space-y-6">
-        <div class="grid grid-cols-4 gap-4">
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Total Entries</p>
-                <p class="text-3xl font-bold text-gray-800 mt-2">247</p>
-              </div>
-              <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Verified</p>
-                <p class="text-3xl font-bold text-green-600 mt-2">189</p>
-              </div>
-              <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Pending</p>
-                <p class="text-3xl font-bold text-yellow-600 mt-2">42</p>
-              </div>
-              <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Rejected</p>
-                <p class="text-3xl font-bold text-red-600 mt-2">16</p>
-              </div>
-              <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800">Recent Entries for Verification</h3>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${this.verificationItems
-                  .map(
-                    (item) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm text-gray-800 font-medium">${
-                      item.type
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      item.description
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      item.date
-                    }</td>
-                    <td class="px-6 py-4">
-                      <div class="flex items-center gap-2">
-                        ${this.getStatusIcon(item.status)}
-                        <span class="px-3 py-1 rounded-full text-xs font-medium ${this.getStatusBadge(
-                          item.status
-                        )}">
-                          ${
-                            item.status.charAt(0).toUpperCase() +
-                            item.status.slice(1)
-                          }
-                        </span>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4">
-                      ${
-                        item.status === "pending"
-                          ? `
-                        <div class="flex gap-2">
-                          <button class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition-colors">
-                            Verify
-                          </button>
-                          <button class="px-3 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition-colors">
-                            Reject
-                          </button>
-                        </div>
-                      `
-                          : ""
-                      }
-                    </td>
-                  </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  getStatusIcon(status) {
-    switch (status) {
-      case "verified":
-        return '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-      case "pending":
-        return '<svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-      case "rejected":
-        return '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-      default:
-        return '<svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-    }
-  }
-
-  getStatusBadge(status) {
-    const badges = {
-      verified: "bg-green-100 text-green-800",
-      pending: "bg-yellow-100 text-yellow-800",
-      rejected: "bg-red-100 text-red-800",
-    };
-    return badges[status] || "bg-gray-100 text-gray-800";
   }
 }
 
@@ -540,169 +348,6 @@ class PaymentVerification {
                       `
                           : ""
                       }
-                    </td>
-                  </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-class ScheduleManagement {
-  constructor() {
-    this.schedules = [
-      {
-        id: 1,
-        employee: "Ahmed Hassan",
-        role: "Salesman",
-        date: "2025-01-20",
-        shift: "Morning (8AM - 4PM)",
-        tasks: 5,
-        status: "confirmed",
-      },
-      {
-        id: 2,
-        employee: "Ravi Kumar",
-        role: "Driver",
-        date: "2025-01-20",
-        shift: "Full Day (6AM - 6PM)",
-        tasks: 3,
-        status: "confirmed",
-      },
-      {
-        id: 3,
-        employee: "Maria Garcia",
-        role: "Stock Keeper",
-        date: "2025-01-20",
-        shift: "Afternoon (12PM - 8PM)",
-        tasks: 4,
-        status: "pending",
-      },
-      {
-        id: 4,
-        employee: "John Smith",
-        role: "Salesman",
-        date: "2025-01-21",
-        shift: "Morning (8AM - 4PM)",
-        tasks: 6,
-        status: "confirmed",
-      },
-      {
-        id: 5,
-        employee: "Lisa Wong",
-        role: "Cashier",
-        date: "2025-01-21",
-        shift: "Full Day (6AM - 6PM)",
-        tasks: 2,
-        status: "confirmed",
-      },
-    ];
-  }
-
-  render() {
-    return `
-      <div class="space-y-6">
-        <div class="grid grid-cols-4 gap-4">
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Total Scheduled</p>
-                <p class="text-3xl font-bold text-gray-800 mt-2">24</p>
-              </div>
-              <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Confirmed</p>
-                <p class="text-3xl font-bold text-green-600 mt-2">20</p>
-              </div>
-              <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Pending</p>
-                <p class="text-3xl font-bold text-yellow-600 mt-2">4</p>
-              </div>
-              <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            </div>
-          </div>
-
-          <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Absent</p>
-                <p class="text-3xl font-bold text-red-600 mt-2">0</p>
-              </div>
-              <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800">Staff Schedule</h3>
-            <p class="text-gray-600 text-sm mt-1">Manage and organize staff schedules and shifts</p>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Employee</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Shift</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Tasks</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${this.schedules
-                  .map(
-                    (schedule) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-800">${
-                      schedule.employee
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      schedule.role
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      schedule.date
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      schedule.shift
-                    }</td>
-                    <td class="px-6 py-4 text-sm font-medium text-gray-800">${
-                      schedule.tasks
-                    } tasks</td>
-                    <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-medium ${
-                        schedule.status === "confirmed"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }">
-                        ${
-                          schedule.status.charAt(0).toUpperCase() +
-                          schedule.status.slice(1)
-                        }
-                      </span>
-                    </td>
-                    <td class="px-6 py-4">
-                      <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">Edit</button>
                     </td>
                   </tr>
                 `
@@ -1207,215 +852,6 @@ class DistributionRecords {
                   .join("")}
               </tbody>
             </table>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-class EmergencyDataRetrieval {
-  constructor() {
-    this.backups = [
-      {
-        id: 1,
-        name: "Full System Backup",
-        date: "2025-01-19 23:00",
-        size: "2.4 GB",
-        status: "available",
-        type: "Full",
-      },
-      {
-        id: 2,
-        name: "Employee Records Backup",
-        date: "2025-01-19 12:00",
-        size: "450 MB",
-        status: "available",
-        type: "Partial",
-      },
-      {
-        id: 3,
-        name: "Financial Data Backup",
-        date: "2025-01-18 23:00",
-        size: "890 MB",
-        status: "available",
-        type: "Partial",
-      },
-      {
-        id: 4,
-        name: "Inventory Backup",
-        date: "2025-01-18 12:00",
-        size: "320 MB",
-        status: "available",
-        type: "Partial",
-      },
-    ];
-
-    this.recoveryLogs = [
-      {
-        id: 1,
-        action: "Data Export",
-        timestamp: "2025-01-19 14:30",
-        user: "Admin",
-        status: "success",
-      },
-      {
-        id: 2,
-        action: "Backup Verification",
-        timestamp: "2025-01-19 10:15",
-        user: "System",
-        status: "success",
-      },
-      {
-        id: 3,
-        action: "Data Recovery Test",
-        timestamp: "2025-01-18 16:45",
-        user: "Admin",
-        status: "success",
-      },
-    ];
-  }
-
-  render() {
-    return `
-      <div class="space-y-6">
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Total Backups</p>
-                <p class="text-3xl font-bold text-gray-900 mt-2">4</p>
-              </div>
-              <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/>
-              </svg>
-            </div>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Available</p>
-                <p class="text-3xl font-bold text-green-600 mt-2">4</p>
-              </div>
-              <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-amber-600">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Last Backup</p>
-                <p class="text-lg font-bold text-gray-900 mt-2">23:00</p>
-                <p class="text-xs text-gray-500">Today</p>
-              </div>
-              <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-gray-600 text-sm">Total Size</p>
-                <p class="text-3xl font-bold text-gray-900 mt-2">4.0 GB</p>
-              </div>
-              <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <!-- Two Column Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Available Backups -->
-          <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-              <h3 class="text-lg font-semibold text-gray-900">Available Backups</h3>
-              <p class="text-gray-600 text-sm mt-1">Retrieve data in case of emergency</p>
-            </div>
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Backup Name</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Size</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                  ${this.backups
-                    .map(
-                      (backup) => `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                      <td class="px-6 py-4 text-sm font-medium text-gray-900">${backup.name}</td>
-                      <td class="px-6 py-4 text-sm text-gray-600">${backup.date}</td>
-                      <td class="px-6 py-4 text-sm text-gray-600">${backup.size}</td>
-                      <td class="px-6 py-4">
-                        <button class="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                          </svg>
-                          Retrieve
-                        </button>
-                      </td>
-                    </tr>
-                  `
-                    )
-                    .join("")}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Recovery Logs -->
-          <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="p-6 border-b border-gray-200">
-              <h3 class="text-lg font-semibold text-gray-900">Recovery Logs</h3>
-              <p class="text-gray-600 text-sm mt-1">Data retrieval and recovery history</p>
-            </div>
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Timestamp</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">User</th>
-                    <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                  ${this.recoveryLogs
-                    .map(
-                      (log) => `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                      <td class="px-6 py-4 text-sm font-medium text-gray-900">${
-                        log.action
-                      }</td>
-                      <td class="px-6 py-4 text-sm text-gray-600">${
-                        log.timestamp
-                      }</td>
-                      <td class="px-6 py-4 text-sm text-gray-600">${
-                        log.user
-                      }</td>
-                      <td class="px-6 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
-                          ${
-                            log.status.charAt(0).toUpperCase() +
-                            log.status.slice(1)
-                          }
-                        </span>
-                      </td>
-                    </tr>
-                  `
-                    )
-                    .join("")}
-                </tbody>
-              </table>
-            </div>
           </div>
         </div>
       </div>

@@ -1,13 +1,17 @@
 import logo from "../../assets/logo-tr.png";
+import { SalesOrder } from "../models/SalesOrder.js";
+import { Product } from "../models/Product.js";
+import { Customer } from "../models/Customer.js";
+import axios from "axios";
 
 class SalesmanDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "orders";
-    this.isSidebarOpen = true;
   }
 
-  render() {
+  async render() {
+    const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -15,7 +19,7 @@ class SalesmanDashboard {
           ${this.renderHeader()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
-              ${this.renderSection(this.currentSection)}
+              ${sectionContent}
             </div>
           </main>
         </div>
@@ -30,20 +34,11 @@ class SalesmanDashboard {
       { id: "stock", label: "Stock Availability", icon: "package" },
       { id: "customers", label: "Customer Accounts", icon: "users" },
       { id: "reports", label: "Sales Reports", icon: "bar-chart" },
-      { id: "returns", label: "Returns & Cancellations", icon: "rotate-ccw" },
-      { id: "promotions", label: "Promotions & Pricing", icon: "tag" },
+      { id: "returns", label: "Returns Cancellations", icon: "rotate-ccw" },
     ];
 
     return `
-      <!-- Mobile Toggle -->
-      <button id="mobileToggle" class="lg:hidden fixed top-4 left-4 z-40 p-2 bg-sky-700 text-white rounded-lg">
-        ${this.isSidebarOpen ? this.getIcon("x") : this.getIcon("menu")}
-      </button>
-
-      <!-- Sidebar -->
-      <div class="${
-        this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-sky-700 to-sky-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
+      <div class="fixed lg:relative w-64 h-screen bg-gradient-to-b from-sky-700 to-sky-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
                 <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
@@ -65,20 +60,7 @@ class SalesmanDashboard {
             .join("")}
         </nav>
 
-        <div class="p-4 border-t border-sky-600">
-          <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sky-100 hover:bg-sky-600 transition-all">
-            ${this.getIcon("log-out")}
-            <span class="font-medium">Logout</span>
-          </button>
-        </div>
       </div>
-
-      <!-- Overlay for mobile -->
-      ${
-        this.isSidebarOpen
-          ? '<div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>'
-          : ""
-      }
     `;
   }
 
@@ -86,7 +68,7 @@ class SalesmanDashboard {
     return `
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Sales Management Dashboard</h2>
+          <h2 class="text-2xl font-bold text-gray-900">Salesman Dashboard</h2>
           <p class="text-gray-600 text-sm mt-1">Manage orders, customers, and sales activities</p>
         </div>
 
@@ -96,16 +78,6 @@ class SalesmanDashboard {
             <span class="absolute top-1 right-1 w-2 h-2 bg-sky-600 rounded-full"></span>
           </button>
 
-          <div class="flex items-center gap-3 pl-6 border-l border-gray-200">
-            <div class="text-right">
-              <p class="font-medium text-gray-800">Sarah Johnson</p>
-              <p class="text-xs text-gray-600">Sales Executive</p>
-            </div>
-            <div class="w-10 h-10 bg-gradient-to-br from-sky-400 to-sky-600 rounded-full flex items-center justify-center text-white font-bold">
-              SJ
-            </div>
-          </div>
-
           <button id="logoutBtnHeader" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${this.getIcon("log-out")}
           </button>
@@ -114,16 +86,23 @@ class SalesmanDashboard {
     `;
   }
 
-  renderSection(section) {
+  async renderSection(section) {
     const sections = {
       orders: new SalesOrders(),
       stock: new StockAvailability(),
       customers: new CustomerAccounts(),
       reports: new SalesReports(),
       returns: new ReturnsAndCancellations(),
-      promotions: new PromotionsAndPricing(),
     };
-    return sections[section].render();
+    const sectionInstance = sections[section];
+    if (section === "orders") {
+      await sectionInstance.getOrders();
+    } else if (section === "stock") {
+      await sectionInstance.getInventoryItems();
+    } else if (section === "customers") {
+      await sectionInstance.getCustomers();
+    }
+    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -153,28 +132,39 @@ class SalesmanDashboard {
         });
       });
     }
-
-    const mobileToggle = this.container.querySelector("#mobileToggle");
-    if (mobileToggle) {
-      mobileToggle.addEventListener("click", () => {
-        this.isSidebarOpen = !this.isSidebarOpen;
-        this.render();
-      });
-    }
-
-    const mobileOverlay = this.container.querySelector("#mobileOverlay");
-    if (mobileOverlay) {
-      mobileOverlay.addEventListener("click", () => {
-        this.isSidebarOpen = false;
-        this.render();
-      });
-    }
   }
 
-  navigateToSection(section) {
+  async navigateToSection(section) {
     this.currentSection = section;
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = `<div class="p-8">${this.renderSection(section)}</div>`;
+
+    const sections = {
+      orders: new SalesOrders(),
+      stock: new StockAvailability(),
+      customers: new CustomerAccounts(),
+      reports: new SalesReports(),
+      returns: new ReturnsAndCancellations(),
+    };
+
+    const sectionInstance = sections[section];
+
+    if (section === "orders") {
+      await sectionInstance.getOrders();
+    } else if (section === "stock") {
+      await sectionInstance.getInventoryItems();
+    } else if (section === "customers") {
+      await sectionInstance.getCustomers();
+    }
+
+    const sectionContent = sectionInstance.render();
+
+    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+
+    if (section === "orders") {
+      sectionInstance.attachEventListeners(this.container);
+    } else if (section === "customers") {
+      sectionInstance.attachEventListeners(this.container);
+    }
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -221,36 +211,54 @@ class SalesmanDashboard {
 
 class SalesOrders {
   constructor() {
-    this.orders = [
-      {
-        id: "ORD-001",
-        customer: "ABC Retail Store",
-        date: "2024-10-19",
-        items: 5,
-        total: 15000,
-        status: "pending",
-      },
-      {
-        id: "ORD-002",
-        customer: "XYZ Supermarket",
-        date: "2024-10-18",
-        items: 8,
-        total: 24500,
-        status: "confirmed",
-      },
-      {
-        id: "ORD-003",
-        customer: "Quick Shop",
-        date: "2024-10-17",
-        items: 3,
-        total: 8900,
-        status: "delivered",
-      },
-    ];
-    this.showForm = false;
+    this.orders = [];
+    this.products = [];
+    this.customers = [];
+    this.view = "list";
+    this.editingOrder = null;
+  }
+
+  async getOrders() {
+    try {
+      const response = await SalesOrder.getAll();
+      this.orders = response.data;
+    } catch (error) {
+      console.error("Error fetching sales orders:", error);
+      this.orders = [];
+    }
+  }
+
+  async getProducts() {
+    try {
+      const response = await Product.getAll();
+      this.products = response.data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      this.products = [];
+    }
+  }
+
+  async getCustomers() {
+    try {
+      const response = await Customer.getAll();
+      this.customers = response.data;
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      this.customers = [];
+    }
   }
 
   render() {
+    if (this.view === "add") {
+      return this.renderAddForm();
+    }
+    if (this.view === "edit") {
+      return this.renderEditForm();
+    }
+    return this.renderList();
+  }
+
+  renderList() {
     return `
       <div class="space-y-6">
         <div class="flex items-center justify-between">
@@ -262,34 +270,6 @@ class SalesOrders {
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             New Order
           </button>
-        </div>
-
-        <div id="orderFormContainer" class="hidden">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sky-600">
-            <h3 class="text-xl font-bold text-gray-900 mb-4">Create New Order</h3>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Customer Name</label>
-                <input type="text" placeholder="Enter customer name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Product Code</label>
-                <input type="text" placeholder="Enter product code" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                <input type="number" placeholder="Enter quantity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Price</label>
-                <input type="number" placeholder="Enter price" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
-              </div>
-            </div>
-            <div class="flex gap-3">
-              <button class="flex-1 bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700 transition-colors font-medium">Create Order</button>
-              <button id="cancelFormBtn" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 transition-colors font-medium">Cancel</button>
-            </div>
-          </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -313,10 +293,22 @@ class SalesOrders {
                   <td class="px-6 py-4 font-medium text-gray-900">${
                     order.id
                   }</td>
-                  <td class="px-6 py-4 text-gray-700">${order.customer}</td>
-                  <td class="px-6 py-4 text-gray-700">${order.date}</td>
-                  <td class="px-6 py-4 text-gray-700">${order.items}</td>
-                  <td class="px-6 py-4 font-semibold text-gray-900">Rs. ${order.total.toLocaleString()}</td>
+                  <td class="px-6 py-4 text-gray-700">${order.customerName}</td>
+                  <td class="px-6 py-4 text-gray-700">${new Date(
+                    order.orderDate
+                  ).toLocaleDateString()}</td>
+                  <td class="px-6 py-4 text-gray-700">${
+                    order.items
+                      ?.filter((item) => item && item.name)
+                      .map(
+                        (item) =>
+                          `${item.name}${
+                            item.quantity ? ` (x${item.quantity})` : ""
+                          }`
+                      )
+                      .join(", ") || "No items"
+                  }</td>
+                  <td class="px-6 py-4 font-semibold text-gray-900">Rs. ${order.subtotal.toLocaleString()}</td>
                   <td class="px-6 py-4">
                     <span class="px-3 py-1 rounded-full text-sm font-medium ${this.getStatusColor(
                       order.status
@@ -328,13 +320,14 @@ class SalesOrders {
                     </span>
                   </td>
                   <td class="px-6 py-4 flex gap-2">
-                    <button class="p-2 text-sky-600 hover:bg-sky-50 rounded-lg transition-colors">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                    </button>
-                    <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                    <button class="edit-order-btn p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" data-order-id="${
+                      order.id
+                    }">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                     </button>
-                    <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    <button class="delete-order-btn p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" data-order-id="${
+                      order.id
+                    }">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>
                   </td>
@@ -349,21 +342,594 @@ class SalesOrders {
     `;
   }
 
+  renderAddForm() {
+    return `
+      <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">Create New Sales Order</h3>
+            <p class="text-gray-600 mt-1">Add a new order to the system</p>
+          </div>
+        </div>
+
+        <form id="addOrderForm" class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-8 space-y-8">
+            
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Order Details
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Order Number</label>
+                  <input type="text" name="orderNumber" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="e.g. ORD-2024-001">
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Customer</label>
+                  <select name="customerId" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="">-- Select Customer --</option>
+                    ${this.customers
+                      .map(
+                        (customer) => `
+                      <option value="${customer.id}" data-name="${customer.name}">
+                        ${customer.name}
+                      </option>
+                    `
+                      )
+                      .join("")}
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Order Date</label>
+                  <input type="date" name="orderDate" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Total Amount (LKR)</label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-3 text-gray-500 font-medium">Rs.</span>
+                    <input type="number" id="subtotal" name="subtotal" required min="0" step="0.01" class="w-full px-4 py-2.5 pl-12 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="0.00" readonly>
+                  </div>
+                  <p class="text-xs text-gray-500">Calculated automatically from items</p>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Status</label>
+                  <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="pending" selected>Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Authorized</label>
+                  <select name="authorized" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="false" selected>No</option>
+                    <option value="true">Yes</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-sm font-medium text-gray-700">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="notes" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="Enter order notes or special instructions..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                Order Items
+              </h4>
+              <div class="space-y-4" id="itemsContainer">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 item-row bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <div class="space-y-2 md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700">Product</label>
+                    <select name="productId[]" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-white product-select" data-row="0">
+                      <option value="">-- Select Product --</option>
+                      ${this.products
+                        .map(
+                          (product) => `
+                        <option value="${product.id}" data-name="${
+                            product.name
+                          }" data-price="${product.price}" data-stock="${
+                            product.quantity
+                          }">
+                          ${product.name} - Rs. ${product.price.toFixed(
+                            2
+                          )} (Stock: ${product.quantity})
+                        </option>
+                      `
+                        )
+                        .join("")}
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Quantity</label>
+                    <input type="number" name="itemQuantity[]" required min="1" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-white item-quantity" data-row="0" placeholder="1">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Subtotal</label>
+                    <input type="text" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 item-subtotal font-medium text-gray-900" data-row="0" readonly placeholder="Rs. 0.00">
+                  </div>
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-700">Action</label>
+                    <button type="button" class="remove-item-btn w-full px-4 py-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium flex items-center justify-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button type="button" id="addItemBtn" class="mt-4 px-6 py-2.5 bg-sky-100 text-sky-700 rounded-lg hover:bg-sky-200 transition-colors flex items-center gap-2 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Add Another Item
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" id="cancelFormBtn" class="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="px-6 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors font-medium flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Create Order
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  renderEditForm() {
+    const order = this.editingOrder;
+    if (!order) return this.renderList();
+
+    return `
+      <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">Edit Sales Order</h3>
+            <p class="text-gray-600 mt-1">Update order information</p>
+          </div>
+        </div>
+
+        <form id="editOrderForm" class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-8 space-y-8">
+            
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Order Details
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Order Number</label>
+                  <input type="text" name="orderNumber" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" value="${
+                    order.orderNumber || ""
+                  }">
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Customer Name</label>
+                  <input type="text" name="customerName" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-gray-100" value="${
+                    order.customerName || ""
+                  }" readonly>
+                  <p class="text-xs text-gray-500">Customer cannot be changed</p>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Order Date</label>
+                  <input type="date" name="orderDate" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" value="${
+                    order.orderDate ? order.orderDate.split("T")[0] : ""
+                  }">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Total Amount (LKR)</label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-3 text-gray-500 font-medium">Rs.</span>
+                    <input type="number" name="subtotal" required min="0" step="0.01" class="w-full px-4 py-2.5 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" value="${
+                      order.subtotal || 0
+                    }">
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Status</label>
+                  <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="pending" ${
+                      order.status === "pending" ? "selected" : ""
+                    }>Pending</option>
+                    <option value="confirmed" ${
+                      order.status === "confirmed" ? "selected" : ""
+                    }>Confirmed</option>
+                    <option value="delivered" ${
+                      order.status === "delivered" ? "selected" : ""
+                    }>Delivered</option>
+                    <option value="cancelled" ${
+                      order.status === "cancelled" ? "selected" : ""
+                    }>Cancelled</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Authorized</label>
+                  <select name="authorized" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="false" ${
+                      !order.authorized ? "selected" : ""
+                    }>No</option>
+                    <option value="true" ${
+                      order.authorized ? "selected" : ""
+                    }>Yes</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Payment Status</label>
+                  <select name="paymentStatus" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="pending" ${
+                      order.paymentStatus === "pending" ? "selected" : ""
+                    }>Pending</option>
+                    <option value="paid" ${
+                      order.paymentStatus === "paid" ? "selected" : ""
+                    }>Paid</option>
+                    <option value="failed" ${
+                      order.paymentStatus === "failed" ? "selected" : ""
+                    }>Failed</option>
+                    <option value="refunded" ${
+                      order.paymentStatus === "refunded" ? "selected" : ""
+                    }>Refunded</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-sm font-medium text-gray-700">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="notes" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">${
+                    order.notes || ""
+                  }</textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                Order Items
+              </h4>
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <p class="text-sm text-gray-600 mb-2">Current Items:</p>
+                <ul class="list-disc list-inside text-sm text-gray-700">
+                  ${
+                    order.items
+                      ? order.items
+                          .map(
+                            (item) =>
+                              `<li>${item.name} - Quantity: ${item.quantity}</li>`
+                          )
+                          .join("")
+                      : "<li>No items</li>"
+                  }
+                </ul>
+                <p class="text-xs text-gray-500 mt-2">Note: Item editing not available. Cancel and create a new order if items need to be changed.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" id="cancelEditOrderBtn" class="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="px-6 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors font-medium flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Update Order
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
   attachEventListeners(container) {
     const toggleBtn = container.querySelector("#toggleFormBtn");
     const cancelBtn = container.querySelector("#cancelFormBtn");
-    const formContainer = container.querySelector("#orderFormContainer");
+    const cancelEditBtn = container.querySelector("#cancelEditOrderBtn");
+    const addForm = container.querySelector("#addOrderForm");
+    const editForm = container.querySelector("#editOrderForm");
+    const addItemBtn = container.querySelector("#addItemBtn");
+    const editBtns = container.querySelectorAll(".edit-order-btn");
+    const deleteBtns = container.querySelectorAll(".delete-order-btn");
+
+    const showFormHandler = async () => {
+      await this.getProducts();
+      await this.getCustomers();
+      this.view = "add";
+      this.editingOrder = null;
+      this.refresh(container);
+    };
+
+    const switchToEdit = (orderId) => {
+      this.editingOrder = this.orders.find((o) => o.id === parseInt(orderId));
+      this.view = "edit";
+      this.refresh(container);
+    };
+
+    const switchToList = () => {
+      this.view = "list";
+      this.editingOrder = null;
+      this.refresh(container);
+    };
+
+    const deleteOrder = (orderId) => {
+      if (
+        confirm(
+          "Are you sure you want to delete this order? This action cannot be undone."
+        )
+      ) {
+        SalesOrder.delete(orderId)
+          .then(() => {
+            this.getOrders().then(() => switchToList());
+          })
+          .catch((error) => {
+            console.error("Error deleting order:", error);
+            alert("Error deleting order. Please try again.");
+          });
+      }
+    };
+
+    const calculateTotal = () => {
+      const rows = container.querySelectorAll(".item-row");
+      let total = 0;
+
+      rows.forEach((row) => {
+        const subtotalInput = row.querySelector(".item-subtotal");
+        if (subtotalInput && subtotalInput.value) {
+          const subtotal = parseFloat(
+            subtotalInput.value.replace("Rs. ", "").replace(",", "")
+          );
+          if (!isNaN(subtotal)) {
+            total += subtotal;
+          }
+        }
+      });
+
+      const subtotalInput = container.querySelector("#subtotal");
+      if (subtotalInput) {
+        subtotalInput.value = total.toFixed(2);
+      }
+    };
+
+    const updateSubtotal = (row) => {
+      const productSelect = row.querySelector(".product-select");
+      const quantityInput = row.querySelector(".item-quantity");
+      const subtotalInput = row.querySelector(".item-subtotal");
+
+      if (productSelect && quantityInput && subtotalInput) {
+        const selectedOption =
+          productSelect.options[productSelect.selectedIndex];
+        const price = parseFloat(selectedOption.dataset.price || 0);
+        const quantity = parseInt(quantityInput.value || 0);
+        const stock = parseInt(selectedOption.dataset.stock || 0);
+
+        if (quantity > stock && stock > 0) {
+          alert(`Only ${stock} units available in stock!`);
+          quantityInput.value = stock;
+          return;
+        }
+
+        const subtotal = price * quantity;
+        subtotalInput.value = `Rs. ${subtotal.toFixed(2)}`;
+        calculateTotal();
+      }
+    };
+
+    const attachItemListeners = () => {
+      const productSelects = container.querySelectorAll(".product-select");
+      const quantityInputs = container.querySelectorAll(".item-quantity");
+
+      productSelects.forEach((select) => {
+        select.addEventListener("change", (e) => {
+          const row = e.target.closest(".item-row");
+          updateSubtotal(row);
+        });
+      });
+
+      quantityInputs.forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const row = e.target.closest(".item-row");
+          updateSubtotal(row);
+        });
+      });
+    };
+
+    const addItemRow = () => {
+      const itemsContainer = container.querySelector("#itemsContainer");
+      const rowCount = itemsContainer.querySelectorAll(".item-row").length;
+      const newRow = document.createElement("div");
+      newRow.className =
+        "grid grid-cols-1 md:grid-cols-5 gap-4 item-row bg-gray-50 p-4 rounded-lg border border-gray-200";
+      newRow.innerHTML = `
+        <div class="space-y-2 md:col-span-2">
+          <select name="productId[]" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-white product-select" data-row="${rowCount}">
+            <option value="">-- Select Product --</option>
+            ${this.products
+              .map(
+                (product) => `
+              <option value="${product.id}" data-name="${
+                  product.name
+                }" data-price="${product.price}" data-stock="${
+                  product.quantity
+                }">
+                ${product.name} - Rs. ${product.price.toFixed(2)} (Stock: ${
+                  product.quantity
+                })
+              </option>
+            `
+              )
+              .join("")}
+          </select>
+        </div>
+        <div class="space-y-2">
+          <input type="number" name="itemQuantity[]" required min="1" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all bg-white item-quantity" data-row="${rowCount}" placeholder="1">
+        </div>
+        <div class="space-y-2">
+          <input type="text" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 item-subtotal font-medium text-gray-900" data-row="${rowCount}" readonly placeholder="Rs. 0.00">
+        </div>
+        <div class="space-y-2">
+          <button type="button" class="remove-item-btn w-full px-4 py-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            Remove
+          </button>
+        </div>
+      `;
+      itemsContainer.appendChild(newRow);
+      attachRemoveListeners();
+      attachItemListeners();
+    };
+
+    const attachRemoveListeners = () => {
+      const removeBtns = container.querySelectorAll(".remove-item-btn");
+      removeBtns.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const row = e.target.closest(".item-row");
+          const itemsContainer = container.querySelector("#itemsContainer");
+          if (itemsContainer.querySelectorAll(".item-row").length > 1) {
+            row.remove();
+            calculateTotal();
+          } else {
+            alert("At least one item is required");
+          }
+        });
+      });
+    };
+
+    const submitAddForm = (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const productIds = formData.getAll("productId[]");
+      const itemQuantities = formData.getAll("itemQuantity[]");
+
+      const items = productIds
+        .map((productId, index) => {
+          const product = this.products.find(
+            (p) => p.id === parseInt(productId)
+          );
+          return {
+            name: product?.name || "Unknown",
+            quantity: parseInt(itemQuantities[index], 10),
+          };
+        })
+        .filter((item) => item.quantity > 0);
+
+      if (items.length === 0) {
+        alert("Please add at least one item to the order");
+        return;
+      }
+
+      const customerId = parseInt(formData.get("customerId"));
+      const customer = this.customers.find((c) => c.id === customerId);
+
+      const orderData = {
+        orderNumber: formData.get("orderNumber"),
+        customerName: customer?.name || "Unknown Customer",
+        customerId: customerId,
+        orderDate: new Date(formData.get("orderDate")).toISOString(),
+        status: formData.get("status"),
+        paymentStatus: "unpaid", // default
+        notes: formData.get("notes") || null,
+        items: items,
+        subtotal: parseFloat(formData.get("subtotal")),
+      };
+
+      SalesOrder.create(orderData)
+        .then(() => {
+          this.getOrders().then(() => switchToList());
+        })
+        .catch((error) => {
+          console.error("Error creating order:", error);
+          alert("Error creating order. Please try again.");
+        });
+    };
+
+    const submitEditForm = (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const orderData = {
+        orderNumber: formData.get("orderNumber"),
+        orderDate: new Date(formData.get("orderDate")).toISOString(),
+        subtotal: parseFloat(formData.get("subtotal")),
+        status: formData.get("status"),
+        paymentStatus: formData.get("paymentStatus"),
+        notes: formData.get("notes") || null,
+      };
+
+      SalesOrder.update(this.editingOrder.id, orderData)
+        .then(() => {
+          this.getOrders().then(() => switchToList());
+        })
+        .catch((error) => {
+          console.error("Error updating order:", error);
+          alert("Error updating order. Please try again.");
+        });
+    };
 
     if (toggleBtn) {
-      toggleBtn.addEventListener("click", () => {
-        formContainer.classList.toggle("hidden");
-      });
+      toggleBtn.addEventListener("click", showFormHandler);
     }
 
-    if (cancelBtn) {
-      cancelBtn.addEventListener("click", () => {
-        formContainer.classList.add("hidden");
+    editBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const orderId = e.currentTarget.dataset.orderId;
+        switchToEdit(orderId);
       });
+    });
+
+    deleteBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const orderId = e.currentTarget.dataset.orderId;
+        deleteOrder(orderId);
+      });
+    });
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", switchToList);
+    }
+
+    if (cancelEditBtn) {
+      cancelEditBtn.addEventListener("click", switchToList);
+    }
+
+    if (addForm) {
+      addForm.addEventListener("submit", submitAddForm);
+    }
+
+    if (editForm) {
+      editForm.addEventListener("submit", submitEditForm);
+    }
+
+    if (addItemBtn) {
+      addItemBtn.addEventListener("click", addItemRow);
+    }
+
+    attachRemoveListeners();
+    attachItemListeners();
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+      this.attachEventListeners(container);
     }
   }
 
@@ -383,113 +949,25 @@ class SalesOrders {
 
 class StockAvailability {
   constructor() {
-    this.products = [
-      {
-        id: 1,
-        name: "Air Freshener",
-        sku: "AF-001",
-        category: "Home Care",
-        available: 450,
-        reserved: 50,
-        price: 250,
-        status: "in-stock",
-      },
-      {
-        id: 2,
-        name: "Handwash",
-        sku: "HW-002",
-        category: "Personal Care",
-        available: 45,
-        reserved: 15,
-        price: 180,
-        status: "low-stock",
-      },
-      {
-        id: 3,
-        name: "Dish Liquid",
-        sku: "DL-003",
-        category: "Kitchen",
-        available: 8,
-        reserved: 5,
-        price: 320,
-        status: "critical",
-      },
-      {
-        id: 4,
-        name: "Floor Cleaner",
-        sku: "FC-004",
-        category: "Home Care",
-        available: 280,
-        reserved: 30,
-        price: 420,
-        status: "in-stock",
-      },
-      {
-        id: 5,
-        name: "Laundry Detergent",
-        sku: "LD-005",
-        category: "Laundry",
-        available: 150,
-        reserved: 20,
-        price: 550,
-        status: "in-stock",
-      },
-      {
-        id: 6,
-        name: "Glass Cleaner",
-        sku: "GC-006",
-        category: "Home Care",
-        available: 35,
-        reserved: 10,
-        price: 280,
-        status: "low-stock",
-      },
-    ];
+    this.products = [];
+  }
+
+  async getInventoryItems() {
+    try {
+      const response = await Product.getAll();
+      this.products = response.data;
+    } catch (error) {
+      console.error("Error fetching inventory items:", error);
+      this.products = [];
+    }
   }
 
   render() {
-    const totalProducts = this.products.length;
-    const inStock = this.products.filter((p) => p.status === "in-stock").length;
-    const lowStock = this.products.filter(
-      (p) => p.status === "low-stock"
-    ).length;
-    const critical = this.products.filter(
-      (p) => p.status === "critical"
-    ).length;
-
     return `
       <div class="space-y-6">
         <div>
-          <h3 class="text-2xl font-bold text-gray-900">Stock Availability</h3>
+          <h3 class="text-3xl font-bold text-gray-900">Stock Availability</h3>
           <p class="text-gray-600 mt-1">Check real-time product inventory</p>
-        </div>
-
-        <!-- Stock Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sky-600">
-            <p class="text-gray-600 text-sm">Total Products</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${totalProducts}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">In Stock</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">${inStock}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-600">
-            <p class="text-gray-600 text-sm">Low Stock</p>
-            <p class="text-3xl font-bold text-yellow-600 mt-2">${lowStock}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
-            <p class="text-gray-600 text-sm">Critical</p>
-            <p class="text-3xl font-bold text-red-600 mt-2">${critical}</p>
-          </div>
-        </div>
-
-        <!-- Search Bar -->
-        <div class="bg-white rounded-lg shadow-md p-4">
-          <div class="flex gap-4">
-            <input type="text" placeholder="Search by product name or SKU..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
-            <button class="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors font-medium">Search</button>
-          </div>
         </div>
 
         <!-- Stock Table -->
@@ -505,10 +983,7 @@ class StockAvailability {
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">SKU</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Available</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Reserved</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -526,34 +1001,12 @@ class StockAvailability {
                       product.category
                     }</td>
                     <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
-                      product.available
+                      product.quantity
                     }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      product.reserved
-                    }</td>
+                    </td>
                     <td class="px-6 py-4 text-sm font-semibold text-sky-600">Rs. ${product.price.toFixed(
                       2
                     )}</td>
-                    <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        product.status === "in-stock"
-                          ? "bg-green-100 text-green-800"
-                          : product.status === "low-stock"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }">
-                        ${
-                          product.status === "in-stock"
-                            ? "In Stock"
-                            : product.status === "low-stock"
-                            ? "Low Stock"
-                            : "Critical"
-                        }
-                      </span>
-                    </td>
-                    <td class="px-6 py-4">
-                      <button class="text-sky-600 hover:text-sky-800 font-medium text-sm">View Details</button>
-                    </td>
                   </tr>
                 `
                   )
@@ -562,33 +1015,6 @@ class StockAvailability {
             </table>
           </div>
         </div>
-
-        <!-- Stock Alerts -->
-        ${
-          lowStock + critical > 0
-            ? `
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-yellow-900 mb-1">Stock Alerts</h5>
-              <p class="text-sm text-yellow-800">
-                ${
-                  critical > 0
-                    ? `${critical} product(s) at critical level. `
-                    : ""
-                }
-                ${lowStock > 0 ? `${lowStock} product(s) running low.` : ""} 
-                Consider informing customers about potential delays.
-              </p>
-            </div>
-          </div>
-        </div>
-        `
-            : ""
-        }
       </div>
     `;
   }
@@ -596,41 +1022,28 @@ class StockAvailability {
 
 class CustomerAccounts {
   constructor() {
-    this.customers = [
-      {
-        id: "C001",
-        name: "ABC Retail Store",
-        contact: "Mr. Rajesh",
-        phone: "0771234567",
-        email: "rajesh@abcretail.com",
-        totalOrders: 15,
-        totalSpent: 125000,
-        status: "active",
-      },
-      {
-        id: "C002",
-        name: "XYZ Supermarket",
-        contact: "Ms. Priya",
-        phone: "0772345678",
-        email: "priya@xyzsupermarket.com",
-        totalOrders: 22,
-        totalSpent: 185000,
-        status: "active",
-      },
-      {
-        id: "C003",
-        name: "Quick Shop",
-        contact: "Mr. Kumar",
-        phone: "0773456789",
-        email: "kumar@quickshop.com",
-        totalOrders: 8,
-        totalSpent: 65000,
-        status: "inactive",
-      },
-    ];
+    this.customers = [];
+    this.view = "list";
+  }
+
+  async getCustomers() {
+    try {
+      const response = await Customer.getAll();
+      this.customers = response.data;
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      this.customers = [];
+    }
   }
 
   render() {
+    if (this.view === "add") {
+      return this.renderAddForm();
+    }
+    return this.renderList();
+  }
+
+  renderList() {
     return `
       <div class="space-y-6">
         <div class="flex items-center justify-between">
@@ -638,25 +1051,10 @@ class CustomerAccounts {
             <h2 class="text-3xl font-bold text-gray-900">Customer Accounts</h2>
             <p class="text-gray-600 mt-1">Manage customer information and purchase history</p>
           </div>
-          <button class="flex items-center gap-2 bg-sky-600 text-white px-6 py-3 rounded-lg hover:bg-sky-700 transition-colors font-medium">
+          <button id="addCustomerBtn" class="flex items-center gap-2 bg-sky-600 text-white px-6 py-3 rounded-lg hover:bg-sky-700 transition-colors font-medium">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Add Customer
           </button>
-        </div>
-
-        <div class="grid grid-cols-3 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sky-500">
-            <p class="text-gray-600 text-sm font-medium">Total Customers</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">3</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-            <p class="text-gray-600 text-sm font-medium">Active Customers</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">2</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-            <p class="text-gray-600 text-sm font-medium">Total Revenue</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">Rs. 375K</p>
-          </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -664,7 +1062,6 @@ class CustomerAccounts {
             <thead class="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Customer Name</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Contact Person</th>
                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Contact Info</th>
                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Total Orders</th>
                 <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Total Spent</th>
@@ -680,7 +1077,6 @@ class CustomerAccounts {
                   <td class="px-6 py-4 font-medium text-gray-900">${
                     customer.name
                   }</td>
-                  <td class="px-6 py-4 text-gray-700">${customer.contact}</td>
                   <td class="px-6 py-4">
                     <div class="flex flex-col gap-1">
                       <a href="tel:${
@@ -698,7 +1094,7 @@ class CustomerAccounts {
                     </div>
                   </td>
                   <td class="px-6 py-4 text-gray-700 font-semibold">${
-                    customer.totalOrders
+                    customer.totalPurchases
                   }</td>
                   <td class="px-6 py-4 text-gray-700 font-semibold">Rs. ${customer.totalSpent.toLocaleString()}</td>
                   <td class="px-6 py-4">
@@ -714,9 +1110,6 @@ class CustomerAccounts {
                     </span>
                   </td>
                   <td class="px-6 py-4 flex gap-2">
-                    <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    </button>
                     <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>
@@ -731,119 +1124,210 @@ class CustomerAccounts {
       </div>
     `;
   }
+
+  renderAddForm() {
+    return `
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">Add New Customer</h3>
+            <p class="text-gray-600 mt-1">Create a new customer account</p>
+          </div>
+        </div>
+
+        <form id="addCustomerForm" class="bg-white rounded-lg shadow-md overflow-hidden">
+          <div class="p-8 space-y-8">
+            
+            <!-- Customer Information -->
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                Customer Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Full Name <span class="text-red-600">*</span></label>
+                  <input type="text" name="name" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="e.g. John Doe">
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Email <span class="text-red-600">*</span></label>
+                  <input type="email" name="email" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="e.g. john@example.com">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Phone Number <span class="text-red-600">*</span></label>
+                  <input type="tel" name="phone" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="e.g. +94771234567">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Company Name <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="text" name="company" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="e.g. ABC Corporation">
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-sm font-medium text-gray-700">Address <span class="text-red-600">*</span></label>
+                  <textarea name="address" rows="3" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="Enter full address with city and postal code"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Account Details -->
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Account Details
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Customer Type</label>
+                  <select name="customerType" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="regular" selected>Regular</option>
+                    <option value="wholesale">Wholesale</option>
+                    <option value="retail">Retail</option>
+                    <option value="corporate">Corporate</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Status</label>
+                  <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="active" selected>Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Credit Limit (LKR) <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <div class="relative">
+                    <span class="absolute left-4 top-3 text-gray-500 font-medium">Rs.</span>
+                    <input type="number" name="creditLimit" min="0" step="0.01" class="w-full px-4 py-2.5 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="0.00">
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Payment Terms</label>
+                  <select name="paymentTerms" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                    <option value="immediate">Immediate</option>
+                    <option value="net15">Net 15 Days</option>
+                    <option value="net30" selected>Net 30 Days</option>
+                    <option value="net60">Net 60 Days</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-sm font-medium text-gray-700">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="notes" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="Enter any additional notes about this customer..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" id="cancelCustomerFormBtn" class="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="px-6 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors font-medium flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              Add Customer
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  attachEventListeners(container) {
+    const addBtn = container.querySelector("#addCustomerBtn");
+    const cancelBtn = container.querySelector("#cancelCustomerFormBtn");
+    const addForm = container.querySelector("#addCustomerForm");
+
+    const showFormHandler = () => {
+      this.view = "add";
+      this.refresh(container);
+    };
+
+    const hideFormHandler = () => {
+      this.view = "list";
+      this.refresh(container);
+    };
+
+    const submitAddForm = (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const customerData = {
+        name: formData.get("name"),
+        email: formData.get("email"),
+        phone: formData.get("phone"),
+        address: formData.get("address"),
+        company: formData.get("company") || null,
+        customerType: formData.get("customerType"),
+        status: formData.get("status"),
+        creditLimit: parseFloat(formData.get("creditLimit")) || 0,
+        paymentTerms: formData.get("paymentTerms"),
+        notes: formData.get("notes") || null,
+        totalPurchases: 0,
+        totalSpent: 0,
+      };
+
+      Customer.create(customerData)
+        .then(() => {
+          this.getCustomers().then(() => hideFormHandler());
+        })
+        .catch((error) => {
+          console.error("Error creating customer:", error);
+          alert("Error creating customer. Please try again.");
+        });
+    };
+
+    if (addBtn) {
+      addBtn.addEventListener("click", showFormHandler);
+    }
+
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", hideFormHandler);
+    }
+
+    if (addForm) {
+      addForm.addEventListener("submit", submitAddForm);
+    }
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+      this.attachEventListeners(container);
+    }
+  }
 }
 
 class SalesReports {
   constructor() {
-    this.dailySales = { orders: 12, revenue: 125000, items: 450 };
-    this.weeklySales = { orders: 85, revenue: 875000, items: 3200 };
-    this.monthlySales = { orders: 320, revenue: 3500000, items: 12500 };
-
-    this.topProducts = [
-      { name: "Floor Cleaner", sold: 350, revenue: 147000 },
-      { name: "Laundry Detergent", sold: 280, revenue: 154000 },
-      { name: "Air Freshener", sold: 245, revenue: 61250 },
-      { name: "Handwash", sold: 220, revenue: 39600 },
-    ];
+    this.salesData = {
+      daily: { orders: 0, revenue: 0, items: 0 },
+      weekly: { orders: 0, revenue: 0, items: 0 },
+      monthly: { orders: 0, revenue: 0, items: 0 },
+    };
   }
 
   render() {
     return `
       <div class="space-y-6">
         <div>
-          <h3 class="text-2xl font-bold text-gray-900">Sales Reports</h3>
-          <p class="text-gray-600 mt-1">View detailed sales analytics and performance</p>
+          <h2 class="text-3xl font-bold text-gray-900">Sales Reports</h2>
+          <p class="text-gray-600 mt-1">View and export sales reports</p>
         </div>
-
-        <!-- Period Selector -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <div class="flex gap-2 mb-6">
-            <button class="px-4 py-2 bg-sky-600 text-white rounded-lg font-medium">Daily</button>
-            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Weekly</button>
-            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300">Monthly</button>
-          </div>
-
-          <!-- Sales Stats -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
-              <p class="text-gray-700 text-sm font-medium">Total Orders</p>
-              <p class="text-3xl font-bold text-blue-600 mt-2">${
-                this.dailySales.orders
-              }</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
-              <p class="text-gray-700 text-sm font-medium">Revenue</p>
-              <p class="text-3xl font-bold text-green-600 mt-2">Rs. ${(
-                this.dailySales.revenue / 1000
-              ).toFixed(0)}K</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-
-            <div class="bg-gradient-to-br from-sky-50 to-sky-100 rounded-lg p-6 border border-sky-200">
-              <p class="text-gray-700 text-sm font-medium">Items Sold</p>
-              <p class="text-3xl font-bold text-sky-600 mt-2">${
-                this.dailySales.items
-              }</p>
-              <p class="text-xs text-gray-600 mt-2">Today</p>
-            </div>
-          </div>
-        </div>
-
-        
-
-        <!-- Top Products -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h4 class="text-lg font-semibold text-gray-900">Top Selling Products</h4>
-          </div>
-          <div class="p-6">
-            <div class="space-y-4">
-              ${this.topProducts
-                .map(
-                  (product, index) => `
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center font-bold text-lg">
-                      ${index + 1}
-                    </div>
-                    <div>
-                      <p class="font-semibold text-gray-900">${product.name}</p>
-                      <p class="text-sm text-gray-600">${
-                        product.sold
-                      } units sold</p>
-                    </div>
-                  </div>
-                  <div class="text-right">
-                    <p class="font-bold text-sky-600">Rs. ${product.revenue.toFixed(
-                      2
-                    )}</p>
-                    <p class="text-xs text-gray-600">Revenue</p>
-                  </div>
-                </div>
-              `
-                )
-                .join("")}
-            </div>
-          </div>
-        </div>
-
-        <!-- Export Options -->
         <div class="bg-white rounded-lg shadow-md p-6">
           <h4 class="text-lg font-semibold text-gray-900 mb-4">Export Reports</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 gap-4">
             <button class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
               </svg>
               Export to PDF
-            </button>
-            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
-              Export to Excel
             </button>
             <button class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -918,44 +1402,12 @@ class ReturnsAndCancellations {
   }
 
   render() {
-    const pendingReturns = this.returns.filter(
-      (r) => r.status === "pending"
-    ).length;
-    const pendingCancellations = this.cancellations.filter(
-      (c) => c.status === "pending"
-    ).length;
-
     return `
       <div class="space-y-6">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-900">Returns & Cancellations</h3>
-          <p class="text-gray-600 mt-1">Manage product returns and order cancellations</p>
-        </div>
-
-        <!-- Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sky-600">
-            <p class="text-gray-600 text-sm">Total Returns</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.returns.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-600">
-            <p class="text-gray-600 text-sm">Pending Returns</p>
-            <p class="text-3xl font-bold text-orange-600 mt-2">${pendingReturns}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-600">
-            <p class="text-gray-600 text-sm">Cancellations</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.cancellations.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-600">
-            <p class="text-gray-600 text-sm">Pending Cancellations</p>
-            <p class="text-3xl font-bold text-red-600 mt-2">${pendingCancellations}</p>
-          </div>
-        </div>
-
+          <div>
+            <h2 class="text-3xl font-bold text-gray-900">Returns & Cancellations</h2>
+            <p class="text-gray-600 mt-1">Manage product returns and order cancellations</p>
+          </div>  
         <!-- Returns Table -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-200">
@@ -1118,281 +1570,18 @@ class ReturnsAndCancellations {
           </div>
         </div>
 
-        <!-- Guidelines -->
-        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-blue-900 mb-1">Return & Cancellation Policy</h5>
-              <ul class="text-sm text-blue-800 space-y-1">
-                <li>• Returns accepted within 7 days of delivery</li>
-                <li>• Damaged or defective products eligible for immediate return</li>
-                <li>• Cancellations must be processed before order shipment</li>
-                <li>• Refunds processed within 5-7 business days</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        
       </div>
     `;
   }
 }
 
-class PromotionsAndPricing {
-  constructor() {
-    this.activePromotions = [
-      {
-        id: "PROMO-001",
-        name: "New Year Sale",
-        discount: "20%",
-        products: ["Floor Cleaner", "Laundry Detergent"],
-        validFrom: "2025-01-01",
-        validTo: "2025-01-31",
-        status: "active",
-      },
-      {
-        id: "PROMO-002",
-        name: "Bulk Purchase Discount",
-        discount: "15%",
-        products: ["All Products"],
-        validFrom: "2025-01-15",
-        validTo: "2025-02-15",
-        status: "active",
-      },
-      {
-        id: "PROMO-003",
-        name: "Weekend Special",
-        discount: "10%",
-        products: ["Air Freshener", "Handwash"],
-        validFrom: "2025-01-20",
-        validTo: "2025-01-21",
-        status: "upcoming",
-      },
-    ];
-
-    this.pricingTiers = [
-      { tier: "Regular", minQty: 1, maxQty: 10, discount: "0%" },
-      { tier: "Wholesale", minQty: 11, maxQty: 50, discount: "10%" },
-      { tier: "Bulk", minQty: 51, maxQty: null, discount: "20%" },
-    ];
-  }
-
-  render() {
-    const activeCount = this.activePromotions.filter(
-      (p) => p.status === "active"
-    ).length;
-    const upcomingCount = this.activePromotions.filter(
-      (p) => p.status === "upcoming"
-    ).length;
-
-    return `
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-900">Promotions & Pricing</h3>
-          <p class="text-gray-600 mt-1">Manage promotional offers and pricing strategies</p>
-        </div>
-
-        <!-- Promo Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-sky-600">
-            <p class="text-gray-600 text-sm">Total Promotions</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">${
-              this.activePromotions.length
-            }</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
-            <p class="text-gray-600 text-sm">Active</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">${activeCount}</p>
-          </div>
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-600">
-            <p class="text-gray-600 text-sm">Upcoming</p>
-            <p class="text-3xl font-bold text-blue-600 mt-2">${upcomingCount}</p>
-          </div>
-        </div>
-
-        <!-- Active Promotions -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Active Promotions</h3>
-          </div>
-          <div class="divide-y divide-gray-200">
-            ${this.activePromotions
-              .map(
-                (promo) => `
-              <div class="p-6 hover:bg-gray-50 transition-colors">
-                <div class="flex items-start justify-between mb-4">
-                  <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                      <h4 class="text-lg font-semibold text-gray-900">${
-                        promo.name
-                      }</h4>
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        promo.status === "active"
-                          ? "bg-green-100 text-green-800"
-                          : promo.status === "upcoming"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-gray-100 text-gray-800"
-                      }">
-                        ${
-                          promo.status.charAt(0).toUpperCase() +
-                          promo.status.slice(1)
-                        }
-                      </span>
-                    </div>
-                    <p class="text-sm text-gray-600">Promo ID: ${promo.id}</p>
-                  </div>
-                  <div class="text-right">
-                    <div class="text-3xl font-bold text-sky-600">${
-                      promo.discount
-                    }</div>
-                    <p class="text-xs text-gray-600">Discount</p>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p class="text-xs text-gray-500">Applicable Products</p>
-                    <p class="text-sm font-semibold text-gray-900">${promo.products.join(
-                      ", "
-                    )}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs text-gray-500">Valid From</p>
-                    <p class="text-sm font-semibold text-gray-900">${
-                      promo.validFrom
-                    }</p>
-                  </div>
-                  <div>
-                    <p class="text-xs text-gray-500">Valid To</p>
-                    <p class="text-sm font-semibold text-gray-900">${
-                      promo.validTo
-                    }</p>
-                  </div>
-                </div>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
-
-        <!-- Pricing Tiers -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Pricing Tiers</h3>
-          </div>
-          <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              ${this.pricingTiers
-                .map(
-                  (tier, index) => `
-                <div class="border-2 ${
-                  index === 0
-                    ? "border-gray-300"
-                    : index === 1
-                    ? "border-blue-400"
-                    : "border-green-400"
-                } rounded-lg p-6 hover:shadow-lg transition-shadow">
-                  <div class="text-center mb-4">
-                    <h4 class="text-xl font-bold text-gray-900 mb-2">${
-                      tier.tier
-                    }</h4>
-                    <div class="text-4xl font-bold ${
-                      index === 0
-                        ? "text-gray-600"
-                        : index === 1
-                        ? "text-blue-600"
-                        : "text-green-600"
-                    }">${tier.discount}</div>
-                    <p class="text-sm text-gray-600 mt-1">Discount</p>
-                  </div>
-                  <div class="border-t pt-4">
-                    <p class="text-sm text-gray-700 mb-2">
-                      <span class="font-semibold">Minimum:</span> ${
-                        tier.minQty
-                      } units
-                    </p>
-                    <p class="text-sm text-gray-700">
-                      <span class="font-semibold">Maximum:</span> ${
-                        tier.maxQty ? tier.maxQty + " units" : "Unlimited"
-                      }
-                    </p>
-                  </div>
-                </div>
-              `
-                )
-                .join("")}
-            </div>
-          </div>
-        </div>
-
-        <!-- Quick Price Calculator -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Price Calculator</h4>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Product</label>
-              <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
-                <option>Select product...</option>
-                <option>Air Freshener</option>
-                <option>Handwash</option>
-                <option>Floor Cleaner</option>
-                <option>Laundry Detergent</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-              <input type="number" placeholder="Enter quantity" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Apply Promo</label>
-              <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500">
-                <option>No promotion</option>
-                ${this.activePromotions
-                  .filter((p) => p.status === "active")
-                  .map(
-                    (promo) => `
-                  <option>${promo.name} (${promo.discount})</option>
-                `
-                  )
-                  .join("")}
-              </select>
-            </div>
-            <div class="flex items-end">
-              <button class="w-full bg-sky-600 text-white py-2 rounded-lg hover:bg-sky-700 transition-colors font-medium">Calculate</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pricing Tips -->
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-green-900 mb-1">Pricing Tips</h5>
-              <ul class="text-sm text-green-800 space-y-1">
-                <li>• Offer bulk discounts to encourage larger orders</li>
-                <li>• Promote seasonal items with special pricing</li>
-                <li>• Inform customers about active promotions</li>
-                <li>• Check competitor pricing regularly</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-}
-
-export function renderSalesmanDashboard(container) {
+export async function renderSalesmanDashboard(container) {
   const dashboard = new SalesmanDashboard(container);
-  dashboard.render();
+  await dashboard.render();
 
   const content = container.querySelector("#dashboardContent");
   const ordersSection = new SalesOrders();
-  ordersSection.attachEventListeners(content);
+  await ordersSection.getOrders();
+  ordersSection.attachEventListeners(container);
 }

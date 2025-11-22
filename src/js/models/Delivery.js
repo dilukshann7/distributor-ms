@@ -1,3 +1,5 @@
+import axios from "axios";
+
 // Delivery Class
 export class Delivery {
   constructor(data) {
@@ -22,7 +24,11 @@ export class Delivery {
   static async create(deliveryData) {}
   static async findById(id) {}
   static async findByDeliveryNumber(deliveryNumber) {}
-  static async getAll(filters) {}
+  static async getAll(filters) {
+    const apiURL = "http://localhost:3000/api/deliveries";
+
+    return axios.get(apiURL);
+  }
   static async getByDriver(driverId) {}
   static async getByStatus(status) {}
   static async getPending() {}

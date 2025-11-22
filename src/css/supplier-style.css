@@ -1,0 +1,158 @@
+/* Supplier Dashboard Custom Styles */
+
+/* Common Card Styles */
+.stat-card {
+  @apply bg-white rounded-lg shadow-md p-6;
+}
+
+.stat-card-border-indigo {
+  @apply border-l-4 border-indigo-600;
+}
+
+.stat-card-border-yellow {
+  @apply border-l-4 border-yellow-600;
+}
+
+.stat-card-border-blue {
+  @apply border-l-4 border-blue-600;
+}
+
+.stat-card-border-green {
+  @apply border-l-4 border-green-600;
+}
+
+.stat-card-border-red {
+  @apply border-l-4 border-red-600;
+}
+
+/* Navigation Styles */
+.nav-item-active {
+  @apply w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all bg-white text-indigo-700 font-semibold shadow-lg;
+}
+
+.nav-item-inactive {
+  @apply w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-indigo-100 hover:bg-indigo-600;
+}
+
+/* Button Styles */
+.btn-primary {
+  @apply bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors;
+}
+
+.btn-icon {
+  @apply p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors;
+}
+
+.btn-action {
+  @apply p-2 hover:bg-blue-50 rounded transition-colors;
+}
+
+/* Table Styles */
+.table-header {
+  @apply px-6 py-3 text-left text-sm font-semibold text-gray-700;
+}
+
+.table-row {
+  @apply border-b border-gray-200 hover:bg-gray-50 transition-colors;
+}
+
+.table-cell {
+  @apply px-6 py-4 text-sm text-gray-600;
+}
+
+.table-cell-bold {
+  @apply px-6 py-4 text-sm font-semibold text-gray-900;
+}
+
+.table-cell-medium {
+  @apply px-6 py-4 text-sm font-medium text-gray-900;
+}
+
+/* Status Badge Styles */
+.status-badge {
+  @apply px-3 py-1 rounded-full text-xs font-semibold;
+}
+
+.status-yellow {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.status-blue {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.status-indigo {
+  @apply bg-indigo-100 text-indigo-800;
+}
+
+.status-green {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-red {
+  @apply bg-red-100 text-red-800;
+}
+
+.status-gray {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* Stats Display Styles */
+.stat-label {
+  @apply text-gray-600 text-sm;
+}
+
+.stat-value {
+  @apply text-3xl font-bold text-gray-900 mt-2;
+}
+
+.stat-value-colored {
+  @apply text-3xl font-bold mt-2;
+}
+
+/* Period Selector Styles */
+.period-selector-active {
+  @apply px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium;
+}
+
+.period-selector-inactive {
+  @apply px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium;
+}
+
+/* Analytics Card Styles */
+.analytics-card-blue {
+  @apply bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200;
+}
+
+.analytics-card-green {
+  @apply bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200;
+}
+
+.analytics-card-indigo {
+  @apply bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-6 border border-indigo-200;
+}
+
+/* Common Layout Styles */
+.section-header {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.section-subtitle {
+  @apply text-gray-600 mt-1;
+}
+
+.card-container {
+  @apply bg-white rounded-lg shadow-md overflow-hidden;
+}
+
+.card-header {
+  @apply p-6 border-b border-gray-200;
+}
+
+.card-title {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.input-field {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all;
+}

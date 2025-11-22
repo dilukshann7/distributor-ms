@@ -1,3 +1,5 @@
+import axios from "axios";
+
 // Task Class
 export class Task {
   constructor(data) {
@@ -18,7 +20,11 @@ export class Task {
   // Static methods
   static async create(taskData) {}
   static async findById(id) {}
-  static async getAll(filters) {}
+  static async getAll(filters) {
+    const apiURL = "http://localhost:3000/api/tasks";
+
+    return axios.get(apiURL);
+  }
   static async getByAssignee(assigneeId) {}
   static async getByStatus(status) {}
   static async getPending() {}

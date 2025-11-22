@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+  // Use default output so `@prisma/client` is generated under node_modules and available to the server
 }
 
 datasource db {
@@ -48,4 +48,226 @@ model Product {
   status      String    @default("active")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+model Task {
+  id            Int       @id @default(autoincrement())
+  title         String
+  description   String?
+  assigneeId    Int
+  assignerId    Int
+  dueDate       DateTime?
+  priority      String?
+  status        String    @default("pending")
+  completedDate DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model CustomerFeedback {
+  id          Int       @id @default(autoincrement())
+  customerId  Int
+  orderId     Int
+  rating      Int
+  comment     String?
+  category    String?
+  status      String    @default("new")
+  response    String?
+  respondedBy Int?
+  respondedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Delivery {
+  id              Int       @id @default(autoincrement())
+  deliveryNumber  String
+  driverId        Int
+  vehicleId       Int
+  deliveryAddress String
+  scheduledDate   DateTime
+  deliveredDate   DateTime?
+  estimatedTime   Int
+  status          String
+  signature       String?
+  proofOfDelivery String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relation: One Delivery belongs to one Driver
+  driver Driver @relation(fields: [driverId], references: [id])
+
+  // Relation: One Delivery has many SalesOrders
+  salesOrders SalesOrder[]
+
+  // New back-relation: One Delivery can have many SalesInvoices
+  invoices SalesInvoice[]
+}
+
+model SalesOrder {
+  id            Int      @id @default(autoincrement())
+  orderNumber   String   @unique
+  customerId    Int
+  customerName  String
+  orderDate     DateTime
+  subtotal      Float
+  status        String   @default("pending")
+  paymentStatus String   @default("unpaid")
+  items         Json
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Foreign key to Delivery
+  deliveryId Int?
+  delivery   Delivery? @relation(fields: [deliveryId], references: [id])
+
+  // New back-relation: One SalesOrder can have many SalesInvoices
+  invoices SalesInvoice[]
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  customerId  Int
+  orderDate   DateTime
+  status      String   @default("pending")
+  totalAmount Float
+  dueDate     DateTime
+  itemIDs     Int[]
+  items       Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  shipments Shipment[] // existing
+  invoices  Invoice[] // <-- back-relation for invoices
+}
+
+model Supply {
+  id        Int      @id @default(autoincrement())
+  name      String
+  sku       String   @unique
+  category  String?
+  stock     Int
+  price     Float
+  status    String   @default("available")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Invoice {
+  id              Int       @id @default(autoincrement())
+  invoiceNumber   String    @unique
+  purchaseOrderId Int
+  supplierId      Int
+  invoiceDate     DateTime
+  dueDate         DateTime
+  paidDate        DateTime?
+  totalAmount     Float
+  paidAmount      Float?
+  balance         Float?
+  status          String    @default("pending")
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  order Order @relation(fields: [purchaseOrderId], references: [id])
+}
+
+model Shipment {
+  id                   Int      @id @default(autoincrement())
+  shipmentNumber       String
+  purchaseOrderId      Int
+  supplierId           Int
+  shipmentDate         DateTime
+  expectedDeliveryDate DateTime
+  actualDeliveryDate   DateTime
+  trackingNumber       String
+  carrier              String
+  status               String   @default("pending")
+  notes                String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  order Order @relation(fields: [purchaseOrderId], references: [id])
+}
+
+model Customer {
+  id             Int       @id @default(autoincrement())
+  name           String
+  email          String    @unique
+  phone          String?
+  address        String?
+  businessName   String?
+  customerType   String?
+  isVIP          Boolean   @default(false)
+  totalPurchases Int       @default(0)
+  totalSpent     Float     @default(0.0)
+  lastVisit      DateTime?
+  loyaltyPoints  Int       @default(0)
+  status         String    @default("active")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Driver {
+  id              Int      @id @default(autoincrement())
+  name            String
+  vehicleId       String
+  vehicleType     String
+  licenseNumber   String   @unique
+  phone           String
+  email           String   @unique
+  currentLocation String?
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relation: One Driver has many Deliveries
+  deliveries Delivery[] // 👈 back-relation
+}
+
+model SalesInvoice {
+  id              Int       @id @default(autoincrement())
+  invoiceNumber   String    @unique
+  customerId      Int
+  salesOrderId    Int? // link to SalesOrder
+  deliveryId      Int? // link to Delivery
+  date            DateTime
+  paymentMethod   String
+  items           Json
+  subtotal        Float
+  collectedAmount Float
+  collectedAt     DateTime?
+  status          String    @default("pending")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
+  delivery   Delivery?   @relation(fields: [deliveryId], references: [id])
+}
+
+model Cart {
+  id          Int      @id @default(autoincrement())
+  items       Json
+  totalAmount Float
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  smallOrder SmallOrder?
+}
+
+model SmallOrder {
+  id            Int      @id @default(autoincrement())
+  orderNumber   String   @unique
+  cartId        Int      @unique // Added @unique for one-to-one relation
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  paymentMethod String?
+
+  cart Cart @relation(fields: [cartId], references: [id]) // Fixed: use cartId, not id
 }
