@@ -87,7 +87,7 @@ class DistributorDashboard {
     return `
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-gray-800">Distribution Management System</h2>
+          <h2 class="text-2xl font-bold text-gray-800">Distributor Dashboard</h2>
           <p class="text-gray-600 text-sm mt-1">Manage orders, drivers, and deliveries</p>
         </div>
 
@@ -238,7 +238,6 @@ class OrderManagement {
                 <th class="dist-table-th">Items</th>
                 <th class="dist-table-th">Total</th>
                 <th class="dist-table-th">Status</th>
-                <th class="dist-table-th">Auth</th>
                 <th class="dist-table-th">Date</th>
               </tr>
             </thead>
@@ -264,8 +263,8 @@ class OrderManagement {
                       )
                       .join(", ") || "No items"
                   }</td>                  
-                  <td class="dist-table-td font-semibold text-gray-800">${
-                    order.totalAmount
+                  <td class="dist-table-td font-semibold text-gray-800">Rs. ${
+                    order.subtotal
                   }</td>
                   <td class="dist-table-td">
                     <span class="dist-badge ${this.getStatusColor(
@@ -277,18 +276,9 @@ class OrderManagement {
                       }
                     </span>
                   </td>
-                  <td class="dist-table-td">
-                    <span class="dist-badge ${
-                      order.authorized
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }">
-                      ${order.authorized ? "Yes" : "No"}
-                    </span>
-                  </td>
-                  <td class="dist-table-td text-gray-600">${
+                  <td class="dist-table-td text-gray-600">${new Date(
                     order.orderDate
-                  }</td>
+                  ).toLocaleDateString()}</td>
                   
                 </tr>
               `
@@ -333,74 +323,15 @@ class DriverManagement {
   }
 
   render() {
-    const totalDrivers = this.drivers.length;
-    const activeDrivers = this.drivers.filter(
-      (d) => d.status === "active"
-    ).length;
-    const inactiveDrivers = this.drivers.filter(
-      (d) => d.status !== "active"
-    ).length;
-    const activeRoutes = this.drivers.filter((d) => d.currentLocation).length; // assuming currentLocation means assigned route
-
     return `
     <div class="space-y-6">
-      <div class="grid grid-cols-4 gap-4">
-        <div class="dist-card p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-600 text-sm">Total Drivers</p>
-              <p class="text-3xl font-bold text-gray-800 mt-2">${totalDrivers}</p>
-            </div>
-            <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/>
-            </svg>
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800">Driver Management & Communication</h3>
+            <p class="text-gray-600 mt-1">Manage drivers and maintain communication system</p>
           </div>
         </div>
-
-        <div class="dist-card p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-600 text-sm">Active</p>
-              <p class="text-3xl font-bold text-green-600 mt-2">${activeDrivers}</p>
-            </div>
-            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-        </div>
-
-        <div class="dist-card p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-600 text-sm">Inactive</p>
-              <p class="text-3xl font-bold text-gray-600 mt-2">${inactiveDrivers}</p>
-            </div>
-            <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-        </div>
-
-        <div class="dist-card p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-600 text-sm">Routes Active</p>
-              <p class="text-3xl font-bold text-amber-600 mt-2">${activeRoutes}</p>
-            </div>
-            <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-          </div>
-        </div>
-      </div>
-
         <div class="dist-card">
-          <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800">Driver Management & Communication</h3>
-            <p class="text-gray-600 text-sm mt-1">Manage drivers and maintain communication system</p>
-          </div>
-
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead class="bg-gray-50 border-b border-gray-200">
@@ -460,6 +391,7 @@ class DriverManagement {
           </div>
         </div>
       </div>
+    </div>
     `;
   }
 }
