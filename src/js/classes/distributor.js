@@ -60,10 +60,6 @@ class DistributorDashboard {
             )
             .join("")}
         </nav>
-
-        <div class="p-4 border-t border-orange-600 bg-orange-900/50">
-          <p class="text-xs text-orange-200">Distribution System v1.0</p>
-        </div>
       </div>
 
     `;
@@ -706,18 +702,9 @@ class ProofOfDelivery {
   }
 
   render() {
-    // Filter only delivered deliveries
     const deliveredDeliveries = this.deliveries.filter(
       (d) => d.status === "delivered"
     );
-
-    const signedCount = deliveredDeliveries.filter(
-      (d) => d.status === "signed"
-    ).length;
-    const pendingCount = deliveredDeliveries.filter(
-      (d) => d.status === "pending"
-    ).length;
-    const withPhotos = deliveredDeliveries.filter((d) => d.photo).length;
 
     return `
     <div class="space-y-6">
