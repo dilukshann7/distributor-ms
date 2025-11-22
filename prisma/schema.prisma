@@ -90,8 +90,6 @@ model Delivery {
   deliveredDate   DateTime?
   estimatedTime   Int
   status          String
-  signature       String?
-  proofOfDelivery String?
   notes           String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -183,7 +181,6 @@ model Shipment {
   shipmentDate         DateTime
   expectedDeliveryDate DateTime
   actualDeliveryDate   DateTime
-  trackingNumber       String
   carrier              String
   status               String   @default("pending")
   notes                String?
@@ -201,10 +198,8 @@ model Customer {
   address        String?
   businessName   String?
   customerType   String?
-  isVIP          Boolean   @default(false)
   totalPurchases Int       @default(0)
   totalSpent     Float     @default(0.0)
-  lastVisit      DateTime?
   loyaltyPoints  Int       @default(0)
   status         String    @default("active")
   createdAt      DateTime  @default(now())
