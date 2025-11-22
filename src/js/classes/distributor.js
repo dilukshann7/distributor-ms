@@ -3,8 +3,6 @@ import { SalesOrder } from "../models/SalesOrder.js";
 import { Driver } from "../models/Drivers.js";
 import { Product } from "../models/Product.js";
 import { Delivery } from "../models/Delivery.js";
-import { Customer } from "../models/Customer.js";
-import { getIconHTML } from "../../assets/icons/index.js";
 import "../../css/distributor-style.css";
 import "../../css/supplier-style.css";
 
@@ -1093,19 +1091,10 @@ class OrderAuthorization {
 
                 <div class="flex gap-2">
                   <button class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
                     Approve
                   </button>
                   <button class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
                     Reject
-                  </button>
-                  <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors">
-                    View Details
                   </button>
                 </div>
               </div>
@@ -1115,20 +1104,13 @@ class OrderAuthorization {
           </div>
         </div>
 
-        <!-- Bulk Actions -->
         <div class="dist-card p-6">
           <h4 class="text-lg font-semibold text-gray-900 mb-4">Bulk Actions</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
               Approve All Normal
             </button>
             <button class="flex items-center justify-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-              </svg>
               Export Report
             </button>
             
