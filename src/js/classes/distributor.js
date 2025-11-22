@@ -3,12 +3,12 @@ import { SalesOrder } from "../models/SalesOrder.js";
 import { Driver } from "../models/Drivers.js";
 import { Product } from "../models/Product.js";
 import { Delivery } from "../models/Delivery.js";
+import "../../css/distributor-style.css";
 
 class DistributorDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "orders";
-    this.isSidebarOpen = true;
   }
 
   async render() {
@@ -40,27 +40,18 @@ class DistributorDashboard {
     ];
 
     return `
-      <!-- Mobile Toggle -->
-      <button id="mobileToggle" class="lg:hidden fixed top-4 left-4 z-40 p-2 bg-orange-700 text-white rounded-lg">
-        ${this.isSidebarOpen ? this.getIcon("x") : this.getIcon("menu")}
-      </button>
-
       <!-- Sidebar -->
-      <div class="${
-        this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-orange-700 to-orange-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
+      <div class="lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-orange-700 to-orange-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
                 <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${
-              item.id
-            }" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+            <button data-section="${item.id}" class="dist-nav-item ${
                 this.currentSection === item.id
-                  ? "bg-orange-600 text-white shadow-lg"
-                  : "text-orange-100 hover:bg-orange-600/50"
+                  ? "dist-nav-item-active"
+                  : "dist-nav-item-inactive"
               }">
               ${this.getIcon(item.icon)}
               <span class="font-medium">${item.label}</span>
@@ -75,12 +66,6 @@ class DistributorDashboard {
         </div>
       </div>
 
-      <!-- Overlay for mobile -->
-      ${
-        this.isSidebarOpen
-          ? '<div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>'
-          : ""
-      }
     `;
   }
 
@@ -134,7 +119,7 @@ class DistributorDashboard {
   }
 
   attachEventListeners() {
-    const navItems = this.container.querySelectorAll(".nav-item");
+    const navItems = this.container.querySelectorAll(".dist-nav-item");
     navItems.forEach((item) => {
       item.addEventListener("click", (e) => {
         const section = e.currentTarget.dataset.section;
@@ -150,22 +135,6 @@ class DistributorDashboard {
         });
       });
     }
-
-    const mobileToggle = this.container.querySelector("#mobileToggle");
-    if (mobileToggle) {
-      mobileToggle.addEventListener("click", () => {
-        this.isSidebarOpen = !this.isSidebarOpen;
-        this.render();
-      });
-    }
-
-    const mobileOverlay = this.container.querySelector("#mobileOverlay");
-    if (mobileOverlay) {
-      mobileOverlay.addEventListener("click", () => {
-        this.isSidebarOpen = false;
-        this.render();
-      });
-    }
   }
 
   async navigateToSection(section) {
@@ -174,14 +143,12 @@ class DistributorDashboard {
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
-    const navItems = this.container.querySelectorAll(".nav-item");
+    const navItems = this.container.querySelectorAll(".dist-nav-item");
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all bg-orange-600 text-white shadow-lg";
+        item.className = "dist-nav-item dist-nav-item-active";
       } else {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-orange-100 hover:bg-orange-600/50";
+        item.className = "dist-nav-item dist-nav-item-inactive";
       }
     });
   }
@@ -247,18 +214,18 @@ class OrderManagement {
           </button>
         </div>
 
-        <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="dist-card">
           <table class="w-full">
             <thead class="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Buyer</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Items</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Total</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Auth</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                <th class="dist-table-th">Order ID</th>
+                <th class="dist-table-th">Buyer</th>
+                <th class="dist-table-th">Items</th>
+                <th class="dist-table-th">Total</th>
+                <th class="dist-table-th">Status</th>
+                <th class="dist-table-th">Auth</th>
+                <th class="dist-table-th">Date</th>
+                <th class="dist-table-th">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -266,11 +233,13 @@ class OrderManagement {
                 .map(
                   (order) => `
                 <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 font-semibold text-gray-800">${
+                  <td class="dist-table-td font-semibold text-gray-800">${
                     order.orderNumber
                   }</td>
-                  <td class="px-6 py-4 text-gray-700">${order.customerName}</td>
-                  <td class="px-6 py-4 text-gray-700">${
+                  <td class="dist-table-td text-gray-700">${
+                    order.customerName
+                  }</td>
+                  <td class="dist-table-td text-gray-700">${
                     order.items
                       ?.filter((item) => item && item.name)
                       .map(
@@ -281,11 +250,11 @@ class OrderManagement {
                       )
                       .join(", ") || "No items"
                   }</td>                  
-                  <td class="px-6 py-4 font-semibold text-gray-800">${
+                  <td class="dist-table-td font-semibold text-gray-800">${
                     order.totalAmount
                   }</td>
-                  <td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getStatusColor(
+                  <td class="dist-table-td">
+                    <span class="dist-badge ${this.getStatusColor(
                       order.status
                     )}">
                       ${
@@ -294,8 +263,8 @@ class OrderManagement {
                       }
                     </span>
                   </td>
-                  <td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                  <td class="dist-table-td">
+                    <span class="dist-badge ${
                       order.authorized
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800"
@@ -303,8 +272,8 @@ class OrderManagement {
                       ${order.authorized ? "Yes" : "No"}
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-gray-600">${order.date}</td>
-                  <td class="px-6 py-4">
+                  <td class="dist-table-td text-gray-600">${order.date}</td>
+                  <td class="dist-table-td">
                     <div class="flex items-center gap-2">
                       <button class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -372,7 +341,7 @@ class DriverManagement {
     return `
     <div class="space-y-6">
       <div class="grid grid-cols-4 gap-4">
-        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div class="dist-card p-6">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-gray-600 text-sm">Total Drivers</p>
@@ -384,7 +353,7 @@ class DriverManagement {
           </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div class="dist-card p-6">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-gray-600 text-sm">Active</p>
@@ -396,7 +365,7 @@ class DriverManagement {
           </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div class="dist-card p-6">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-gray-600 text-sm">Inactive</p>
@@ -408,7 +377,7 @@ class DriverManagement {
           </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div class="dist-card p-6">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-gray-600 text-sm">Routes Active</p>
@@ -422,7 +391,7 @@ class DriverManagement {
         </div>
       </div>
 
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div class="dist-card">
           <div class="p-6 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-800">Driver Management & Communication</h3>
             <p class="text-gray-600 text-sm mt-1">Manage drivers and maintain communication system</p>
@@ -432,13 +401,13 @@ class DriverManagement {
             <table class="w-full">
               <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Driver Name</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Contact</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Vehicle</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Current Route</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Last Update</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
+                  <th class="dist-table-th">Driver Name</th>
+                  <th class="dist-table-th">Contact</th>
+                  <th class="dist-table-th">Vehicle</th>
+                  <th class="dist-table-th">Current Route</th>
+                  <th class="dist-table-th">Status</th>
+                  <th class="dist-table-th">Last Update</th>
+                  <th class="dist-table-th">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -446,22 +415,22 @@ class DriverManagement {
                   .map(
                     (driver) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-800">${
+                    <td class="dist-table-td text-sm font-medium text-gray-800">${
                       driver.name
                     }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600 flex items-center gap-2">
+                    <td class="dist-table-td text-sm text-gray-600 flex items-center gap-2">
                       <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                       ${driver.phone}
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
+                    <td class="dist-table-td text-sm text-gray-600">${
                       driver.licenseNumber
                     }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600 flex items-center gap-2">
+                    <td class="dist-table-td text-sm text-gray-600 flex items-center gap-2">
                       <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                       ${driver.currentLocation}
                     </td>
-                    <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-medium ${
+                    <td class="dist-table-td">
+                      <span class="dist-badge ${
                         driver.status === "active"
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
@@ -472,10 +441,10 @@ class DriverManagement {
                         }
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
+                    <td class="dist-table-td text-sm text-gray-600">${
                       driver.updatedAt
                     }</td>
-                    <td class="px-6 py-4">
+                    <td class="dist-table-td">
                       <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">Message</button>
                     </td>
                   </tr>
@@ -514,7 +483,7 @@ class StockTracking {
           <p class="text-gray-600 mt-1">Track specific stock locations for received orders</p>
         </div>
 
-        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div class="dist-card">
           <div class="p-6 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-800">Stock Locations by Order</h3>
           </div>
@@ -523,12 +492,12 @@ class StockTracking {
             <table class="w-full">
               <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Product</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Quantity</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Last Updated</th>
+                  <th class="dist-table-th">Order ID</th>
+                  <th class="dist-table-th">Product</th>
+                  <th class="dist-table-th">Quantity</th>
+                  <th class="dist-table-th">Location</th>
+                  <th class="dist-table-th">Status</th>
+                  <th class="dist-table-th">Last Updated</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -536,19 +505,19 @@ class StockTracking {
                   .map(
                     (item) => `
                   <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 font-semibold text-gray-800">${
+                    <td class="dist-table-td font-semibold text-gray-800">${
                       item.id
                     }</td>
-                    <td class="px-6 py-4 text-gray-700">${item.name}</td>
-                    <td class="px-6 py-4 text-gray-700">${
+                    <td class="dist-table-td text-gray-700">${item.name}</td>
+                    <td class="dist-table-td text-gray-700">${
                       item.quantity
                     } units</td>
-                    <td class="px-6 py-4 text-gray-700 flex items-center gap-2">
+                    <td class="dist-table-td text-gray-700 flex items-center gap-2">
                       <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                       ${item.location}
                     </td>
-                    <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${this.getStatusColor(
+                    <td class="dist-table-td">
+                      <span class="dist-badge ${this.getStatusColor(
                         item.status
                       )}">
                         ${
@@ -557,7 +526,7 @@ class StockTracking {
                         }
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-gray-600 text-sm">${
+                    <td class="dist-table-td text-gray-600 text-sm">${
                       item.updatedAt
                     }</td>
                   </tr>
@@ -758,7 +727,7 @@ class ProofOfDelivery {
       </div>
 
       <!-- Deliveries Table -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="dist-card">
         <div class="px-6 py-4 border-b border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900">Delivered Records</h3>
         </div>
@@ -766,13 +735,13 @@ class ProofOfDelivery {
           <table class="w-full">
             <thead class="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">POD ID</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Delivered By</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date & Time</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                <th class="dist-table-th">POD ID</th>
+                <th class="dist-table-th">Order ID</th>
+                <th class="dist-table-th">Customer</th>
+                <th class="dist-table-th">Delivered By</th>
+                <th class="dist-table-th">Date & Time</th>
+                <th class="dist-table-th">Status</th>
+                <th class="dist-table-th">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -780,22 +749,22 @@ class ProofOfDelivery {
                 .map(
                   (delivery) => `
                 <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                  <td class="px-6 py-4 text-sm font-semibold text-gray-900">${delivery.deliveryNumber}</td>
-                  <td class="px-6 py-4 text-sm text-orange-600 font-medium">${delivery.id}</td>
-                  <td class="px-6 py-4">
+                  <td class="dist-table-td text-sm font-semibold text-gray-900">${delivery.deliveryNumber}</td>
+                  <td class="dist-table-td text-sm text-orange-600 font-medium">${delivery.id}</td>
+                  <td class="dist-table-td">
                     <div>
                       <p class="text-sm font-medium text-gray-900">${delivery.deliveryAddress}</p>
                     </div>
                   </td>
-                  <td class="px-6 py-4 text-sm text-gray-900">${delivery.driver.name}</td>
-                  <td class="px-6 py-4 text-sm text-gray-600">${delivery.deliveredDate}</td>
+                  <td class="dist-table-td text-sm text-gray-900">${delivery.driver.name}</td>
+                  <td class="dist-table-td text-sm text-gray-600">${delivery.deliveredDate}</td>
                   
-                  <td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                  <td class="dist-table-td">
+                    <span class="dist-badge bg-green-100 text-green-800">
                       Delivered
                     </span>
                   </td>
-                  <td class="px-6 py-4">
+                  <td class="dist-table-td">
                     <button class="text-orange-600 hover:text-orange-800 font-medium text-sm">View Details</button>
                   </td>
                 </tr>
@@ -838,7 +807,7 @@ class OrderAuthorization {
         </div>
 
         <!-- Pending Orders -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="dist-card">
           
           <div class="divide-y divide-gray-200">
             ${this.pendingOrders
@@ -915,7 +884,7 @@ class OrderAuthorization {
         </div>
 
         <!-- Bulk Actions -->
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="dist-card p-6">
           <h4 class="text-lg font-semibold text-gray-900 mb-4">Bulk Actions</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
