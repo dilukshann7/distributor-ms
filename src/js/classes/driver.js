@@ -64,13 +64,6 @@ class DriverDashboard {
             )
             .join("")}
         </nav>
-
-        <div class="p-4 border-t border-green-600">
-          <button id="logoutBtn" class="w-full flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-medium">
-            ${this.getIcon("log-out")}
-            Logout
-          </button>
-        </div>
       </div>
 
       <!-- Overlay for mobile -->
@@ -232,7 +225,11 @@ class DeliveryDetails {
   }
 
   render() {
-    if (!this.deliveries || !this.deliveries.deliveries || !Array.isArray(this.deliveries.deliveries)) {
+    if (
+      !this.deliveries ||
+      !this.deliveries.deliveries ||
+      !Array.isArray(this.deliveries.deliveries)
+    ) {
       return `<p class="text-gray-600">No deliveries found for this driver.</p>`;
     }
 
@@ -342,7 +339,11 @@ class ProofOfDelivery {
   }
 
   render() {
-    if (!this.deliveries || !this.deliveries.deliveries || !Array.isArray(this.deliveries.deliveries)) {
+    if (
+      !this.deliveries ||
+      !this.deliveries.deliveries ||
+      !Array.isArray(this.deliveries.deliveries)
+    ) {
       return `
         <div class="space-y-6">
           <div>
@@ -515,17 +516,6 @@ class PaymentCollection {
       this.payments = [];
     }
 
-    const totalAmount = this.payments.reduce((sum, p) => sum + p.amount, 0);
-    const collected = this.payments
-      .filter((p) => p.status === "collected")
-      .reduce((sum, p) => sum + p.amount, 0);
-    const pending = this.payments
-      .filter((p) => p.status === "pending")
-      .reduce((sum, p) => sum + p.amount, 0);
-    const collectedCount = this.payments.filter(
-      (p) => p.status === "collected"
-    ).length;
-
     return `
       <div class="space-y-6">
         <div>
@@ -584,39 +574,39 @@ class PaymentCollection {
               </thead>
               <tbody>
                 ${this.payments
+                  .filter((payment) => payment && payment.salesOrder)
                   .map(
                     (payment) => `
                   <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
-                      payment.id
+                      payment.id || "N/A"
                     }</td>
                     <td class="px-6 py-4 text-sm text-green-600 font-medium">${
-                      payment.salesOrder.orderNumber
+                      payment.salesOrder?.orderNumber || "N/A"
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-900">${
-                      payment.salesOrder.customerName
+                      payment.salesOrder?.customerName || "N/A"
                     }</td>
-                    <td class="px-6 py-4 text-sm font-bold text-gray-900">Rs. ${payment.salesOrder.totalAmount.toFixed(
-                      2
-                    )}</td>
+                    <td class="px-6 py-4 text-sm font-bold text-gray-900">Rs. ${
+                      payment.salesOrder?.totalAmount?.toFixed(2) || "0.00"
+                    }</td>
                     <td class="px-6 py-4 text-sm text-gray-600 capitalize">${
-                      payment.paymentMethod
+                      payment.paymentMethod || "N/A"
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-600">${
-                      payment.collectedAt
+                      payment.collectedAt || "N/A"
                     }</td>
                     <td class="px-6 py-4">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        payment.salesOrder.status === "confirmed"
+                        payment.salesOrder?.status === "confirmed"
                           ? "bg-green-100 text-green-800"
                           : "bg-orange-100 text-orange-800"
                       }">
                        ${
-                         (console.log(payment.salesOrder.status),
-                         payment.salesOrder.status?.toLowerCase() ===
+                         payment.salesOrder?.status?.toLowerCase() ===
                          "confirmed"
                            ? "Confirmed"
-                           : "Pending")
+                           : "Pending"
                        }
                       </span>
                     </td>

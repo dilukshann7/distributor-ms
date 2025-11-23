@@ -183,24 +183,7 @@ export class StockAuditing {
           </div>
         </div>
 
-        <!-- Audit Instructions -->
-        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-          <div class="flex gap-3">
-            <svg class="w-6 h-6 text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <div>
-              <h5 class="font-semibold text-purple-900 mb-1">Audit Best Practices</h5>
-              <ul class="text-sm text-purple-800 space-y-1">
-                <li>• Conduct regular audits to maintain inventory accuracy</li>
-                <li>• Count items during low-activity periods for better accuracy</li>
-                <li>• Document all discrepancies and investigate root causes</li>
-                <li>• Use barcode scanning for faster and more accurate counts</li>
-                <li>• Update system counts immediately after physical verification</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        
       </div>
     `;
   }
