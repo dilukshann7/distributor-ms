@@ -1,6 +1,7 @@
 import logo from "../../assets/logo-tr.png";
 import { Product } from "../models/Product.js";
 import { Shipment } from "../models/Shipment.js";
+import "../../css/stock-keeper-style.css";
 
 class StockKeeperDashboard {
   constructor(container) {
@@ -36,26 +37,17 @@ class StockKeeperDashboard {
     ];
     /*html*/
     return `
-      <!-- Mobile Toggle -->
-      <button id="mobileToggle" class="lg:hidden fixed top-4 left-4 z-40 p-2 bg-purple-600 text-white rounded-lg">
-        ${this.isSidebarOpen ? this.getIcon("x") : this.getIcon("menu")}
-      </button>
-
       <!-- Sidebar -->
-      <aside class="${
-        this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
+      <aside class="translate-x-0 lg:translate-x-0 fixed lg:relative w-64 h-screen bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
         <img src="${logo}" alt="Logo" class="w-full  h-auto p-4" />
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${
-              item.id
-            }" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+            <button data-section="${item.id}" class="nav-item sk-nav-item ${
                 this.currentSection === item.id
-                  ? "bg-purple-100 text-purple-700 font-medium"
-                  : "text-gray-700 hover:bg-gray-100"
+                  ? "sk-nav-item-active"
+                  : "sk-nav-item-inactive"
               }">
               ${this.getIcon(item.icon)}
               <span>${item.label}</span>
@@ -67,13 +59,6 @@ class StockKeeperDashboard {
 
         
       </aside>
-
-      <!-- Overlay for mobile -->
-      ${
-        this.isSidebarOpen
-          ? '<div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>'
-          : ""
-      }
     `;
   }
 
@@ -81,7 +66,7 @@ class StockKeeperDashboard {
     return `
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-gray-800">Stock Management</h2>
+          <h2 class="sk-header-title">Stock Management</h2>
           <p class="text-sm text-gray-500">Manage inventory, track stock levels, and generate reports</p>
         </div>
 
@@ -105,13 +90,15 @@ class StockKeeperDashboard {
   }
 
   async renderSection(section) {
-    const sections = {
-      inventory: new InventoryManagement(),
-      receiving: new ReceivingShipment(),
-      reports: new StockReports(),
-      auditing: new StockAuditing(),
-    };
-    const sectionInstance = sections[section];
+    if (!this.sections) {
+      this.sections = {
+        inventory: new InventoryManagement(this.container),
+        receiving: new ReceivingShipment(this.container),
+        reports: new StockReports(this.container),
+        auditing: new StockAuditing(),
+      };
+    }
+    const sectionInstance = this.sections[section];
     if (section === "inventory") {
       await sectionInstance.getInventoryItems();
     } else if (section === "receiving") {
@@ -137,22 +124,6 @@ class StockKeeperDashboard {
         });
       });
     }
-
-    const mobileToggle = this.container.querySelector("#mobileToggle");
-    if (mobileToggle) {
-      mobileToggle.addEventListener("click", () => {
-        this.isSidebarOpen = !this.isSidebarOpen;
-        this.render();
-      });
-    }
-
-    const mobileOverlay = this.container.querySelector("#mobileOverlay");
-    if (mobileOverlay) {
-      mobileOverlay.addEventListener("click", () => {
-        this.isSidebarOpen = false;
-        this.render();
-      });
-    }
   }
 
   async navigateToSection(section) {
@@ -162,19 +133,18 @@ class StockKeeperDashboard {
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
     if (section === "receiving") {
-      const receivingShipment = new ReceivingShipment();
-      // Use renderAndAttach so the same instance fetches data, renders and wires listeners
+      const receivingShipment = new ReceivingShipment(this.container);
       await receivingShipment.renderAndAttach(content);
+    } else if (section === "reports") {
+      this.sections.reports.attachEventListeners(content);
     }
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all bg-purple-100 text-purple-700 font-medium";
+        item.className = "nav-item sk-nav-item sk-nav-item-active";
       } else {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-gray-700 hover:bg-gray-100";
+        item.className = "nav-item sk-nav-item sk-nav-item-inactive";
       }
     });
   }
@@ -217,8 +187,11 @@ class StockKeeperDashboard {
 }
 
 class InventoryManagement {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.inventoryItems = [];
+    this.view = "list";
+    this.editingItem = null;
   }
 
   async getInventoryItems() {
@@ -232,14 +205,24 @@ class InventoryManagement {
   }
 
   render() {
+    if (this.view === "add") {
+      return this.renderAddForm();
+    }
+    if (this.view === "edit") {
+      return this.renderEditForm();
+    }
+    return this.renderList();
+  }
+
+  renderList() {
     return `
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-2xl font-bold text-gray-800">Inventory Management</h3>
-            <p class="text-gray-600 mt-1">Add, edit, and manage inventory items</p>
+            <h3 class="sk-header-title">Inventory Management</h3>
+            <p class="sk-text-muted">Add, edit, and manage inventory items</p>
           </div>
-          <button class="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2">
+          <button onclick="window.stockKeeperDashboard.sections.inventory.switchToAdd()" class="sk-btn-primary px-4">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Add Item
           </button>
@@ -255,51 +238,51 @@ class InventoryManagement {
             <table class="w-full">
               <thead>
                 <tr class="border-b border-gray-200">
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Item Name</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">SKU</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Quantity</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Expiry Date</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Batch #</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Location</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                  <th class="sk-table-header">Item Name</th>
+                  <th class="sk-table-header">SKU</th>
+                  <th class="sk-table-header">Quantity</th>
+                  <th class="sk-table-header">Expiry Date</th>
+                  <th class="sk-table-header">Batch #</th>
+                  <th class="sk-table-header">Location</th>
+                  <th class="sk-table-header">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 ${this.inventoryItems
                   .map(
                     (item) => `
-                  <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="py-3 px-4 text-gray-800 font-medium">${
-                      item.name
-                    }</td>
-                    <td class="py-3 px-4 text-gray-600">${item.sku}</td>
+                  <tr class="sk-table-row">
+                    <td class="sk-table-cell-main">${item.name}</td>
+                    <td class="sk-table-cell">${item.sku}</td>
                     <td class="py-3 px-4">
-                      <span class="px-3 py-1 rounded-full text-sm font-medium ${
+                      <span class="sk-badge ${
                         item.quantity < item.minStock
-                          ? "bg-red-100 text-red-700"
+                          ? "sk-badge-red"
                           : item.quantity > item.maxStock
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-green-100 text-green-700"
+                          ? "sk-badge-yellow"
+                          : "sk-badge-green"
                       }">
                         ${item.quantity}
                       </span>
                     </td>
                     
-                    <td class="py-3 px-4 text-gray-600">${
-                      item.expiryDate ? item.expiryDate : "N/A"
+                    <td class="sk-table-cell">${
+                      item.expiryDate
+                        ? new Date(item.expiryDate).toLocaleDateString()
+                        : "N/A"
                     }</td>
-                    <td class="py-3 px-4 text-gray-600 text-sm">${
+                    <td class="sk-table-cell text-sm">${
                       item.batchNumber ? item.batchNumber : "N/A"
                     }</td>
-                    <td class="py-3 px-4 text-gray-600 font-medium">${
-                      item.location
-                    }</td>
+                    <td class="sk-table-cell font-medium">${item.location}</td>
                     <td class="py-3 px-4">
                       <div class="flex items-center gap-2">
-                        <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <button onclick="window.stockKeeperDashboard.sections.inventory.switchToEdit('${
+                          item.id
+                        }')" class="sk-btn-icon-blue" title="Edit">
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         </button>
-                        <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <button class="sk-btn-icon-red" title="Delete">
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                       </div>
@@ -315,12 +298,268 @@ class InventoryManagement {
       </div>
     `;
   }
+
+  renderAddForm() {
+    return `
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="sk-header-title">Add New Item</h3>
+            <p class="sk-text-muted">Add a new item to your inventory</p>
+          </div>
+        </div>
+
+        <form id="addItemForm" class="sk-card" onsubmit="window.stockKeeperDashboard.sections.inventory.submitAddForm(event)">
+          <div class="p-8 space-y-8">
+            
+            <div>
+              <h4 class="sk-subheader">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                Basic Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="sk-label">Item Name</label>
+                  <input type="text" name="name" required class="sk-input" placeholder="e.g. Air Freshener">
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="sk-label">SKU</label>
+                  <input type="text" name="sku" required class="sk-input" placeholder="e.g. INV-001">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="sk-label">Batch Number <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="text" name="batchNumber" class="sk-input" placeholder="e.g. BATCH-001">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="sk-label">Location</label>
+                  <input type="text" name="location" required class="sk-input" placeholder="e.g. Warehouse A, Shelf 3">
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="sk-subheader">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                Stock Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <div class="space-y-2">
+                  <label class="sk-label">Quantity</label>
+                  <input type="number" name="quantity" required min="0" step="1" class="sk-input" placeholder="0">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="sk-label">Min Stock</label>
+                  <input type="number" name="minStock" required min="0" step="1" class="sk-input" placeholder="0">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="sk-label">Max Stock</label>
+                  <input type="number" name="maxStock" required min="0" step="1" class="sk-input" placeholder="0">
+                </div>
+
+                <div class="space-y-2 md:col-span-3">
+                  <label class="sk-label">Expiry Date <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="date" name="expiryDate" class="sk-input">
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" onclick="window.stockKeeperDashboard.sections.inventory.switchToList()" class="sk-btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" class="sk-btn-primary">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Save Item
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  renderEditForm() {
+    const item = this.editingItem;
+    if (!item) return this.renderList();
+
+    return `
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="sk-header-title">Edit Item</h3>
+            <p class="sk-text-muted">Update item information</p>
+          </div>
+        </div>
+
+        <form id="editItemForm" class="sk-card" onsubmit="window.stockKeeperDashboard.sections.inventory.submitEditForm(event)">
+          <div class="p-8 space-y-8">
+            <div>
+              <h4 class="sk-subheader">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                Basic Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="sk-label">Item Name</label>
+                  <input type="text" name="name" required class="sk-input" placeholder="e.g. Air Freshener" value="${
+                    item.name
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="sk-label">SKU</label>
+                  <input type="text" name="sku" required class="sk-input" placeholder="e.g. INV-001" value="${
+                    item.sku
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="sk-label">Batch Number <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="text" name="batchNumber" class="sk-input" placeholder="e.g. BATCH-001" value="${
+                    item.batchNumber || ""
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="sk-label">Location</label>
+                  <input type="text" name="location" required class="sk-input" placeholder="e.g. Warehouse A, Shelf 3" value="${
+                    item.location
+                  }">
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="sk-subheader">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                Stock Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="space-y-2">
+                  <label class="sk-label">Quantity</label>
+                  <input type="number" name="quantity" required min="0" step="1" class="sk-input" placeholder="0" value="${
+                    item.quantity
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="sk-label">Min Stock</label>
+                  <input type="number" name="minStock" required min="0" step="1" class="sk-input" placeholder="0" value="${
+                    item.minStock
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="sk-label">Max Stock</label>
+                  <input type="number" name="maxStock" required min="0" step="1" class="sk-input" placeholder="0" value="${
+                    item.maxStock
+                  }">
+                </div>
+                <div class="space-y-2 md:col-span-3">
+                  <label class="sk-label">Expiry Date <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="date" name="expiryDate" class="sk-input" value="${
+                    item.expiryDate || ""
+                  }">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" onclick="window.stockKeeperDashboard.sections.inventory.switchToList()" class="sk-btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" class="sk-btn-primary">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Update Item
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  switchToAdd() {
+    this.view = "add";
+    this.editingItem = null;
+    this.refresh(this.container);
+  }
+
+  switchToEdit(itemId) {
+    this.editingItem = this.inventoryItems.find(
+      (item) => item.id === parseInt(itemId)
+    );
+    this.view = "edit";
+    this.refresh(this.container);
+  }
+
+  switchToList() {
+    this.view = "list";
+    this.editingItem = null;
+    this.refresh(this.container);
+  }
+
+  submitAddForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const rawData = Object.fromEntries(formData.entries());
+
+    const itemData = {
+      ...rawData,
+      quantity: parseInt(rawData.quantity, 10),
+      minStock: parseInt(rawData.minStock, 10),
+      maxStock: parseInt(rawData.maxStock, 10),
+    };
+
+    Product.create(itemData)
+      .then(() => {
+        this.getInventoryItems().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error creating item:", error);
+      });
+  }
+
+  submitEditForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const rawData = Object.fromEntries(formData.entries());
+
+    const itemData = {
+      ...rawData,
+      quantity: parseInt(rawData.quantity, 10),
+      minStock: parseInt(rawData.minStock, 10),
+      maxStock: parseInt(rawData.maxStock, 10),
+    };
+
+    Product.update(this.editingItem.id, itemData)
+      .then(() => {
+        this.getInventoryItems().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error updating item:", error);
+      });
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+    }
+  }
 }
 
 class ReceivingShipment {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.shipments = { in_transit: [], received: [], pending: [] };
     this.activeTab = "in_transit";
+    this.view = "list";
+    this.editingShipment = null;
   }
 
   async getShipments() {
@@ -338,14 +577,21 @@ class ReceivingShipment {
   }
 
   render() {
+    if (this.view === "add") {
+      return this.renderAddForm();
+    }
+    return this.renderList();
+  }
+
+  renderList() {
     return `
       <div class="space-y-6 p-8">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-2xl font-bold text-gray-800">Receiving & Shipment</h3>
-            <p class="text-gray-600 mt-1">Track incoming and outgoing shipments</p>
+            <h3 class="sk-header-title">Receiving & Shipment</h3>
+            <p class="sk-text-muted">Track incoming and outgoing shipments</p>
           </div>
-          <button class="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2">
+          <button onclick="window.stockKeeperDashboard.sections.receiving.switchToAdd()" class="sk-btn-primary px-4">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -403,7 +649,7 @@ class ReceivingShipment {
               <h4 class="font-semibold text-gray-800">${
                 shipment.shipmentNumber
               }</h4>
-              <p class="text-sm text-gray-600 mt-1">PO: ${
+              <p class="text-sm sk-text-muted">PO: ${
                 shipment.purchaseOrderId
               }</p>
               <p class="text-sm text-gray-600">
@@ -490,12 +736,144 @@ class ReceivingShipment {
   async renderAndAttach(container) {
     await this.getShipments();
     container.innerHTML = this.render();
-    this.attachTabListeners(container);
+    if (this.view === "list") {
+      this.attachTabListeners(container);
+    }
+  }
+
+  renderAddForm() {
+    return `
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="sk-header-title">New Shipment</h3>
+            <p class="sk-text-muted">Create a new shipment record</p>
+          </div>
+        </div>
+
+        <form id="addShipmentForm" class="sk-card" onsubmit="window.stockKeeperDashboard.sections.receiving.submitAddForm(event)">
+          <div class="p-8 space-y-8">
+            
+            <div>
+              <h4 class="sk-subheader">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+                Shipment Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="sk-label">Shipment Number</label>
+                  <input type="text" name="shipmentNumber" required class="sk-input" placeholder="e.g. SHP-001">
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="sk-label">Purchase Order ID</label>
+                  <input type="text" name="purchaseOrderId" required class="sk-input" placeholder="e.g. PO-001">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="sk-label">Expected Delivery Date</label>
+                  <input type="date" name="expectedDeliveryDate" required class="sk-input">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="sk-label">Status</label>
+                  <select name="status" class="sk-input">
+                    <option value="pending" selected>Pending</option>
+                    <option value="in_transit">In Transit</option>
+                    <option value="received">Received</option>
+                  </select>
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="sk-label">Tracking Number <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="text" name="trackingNumber" class="sk-input" placeholder="e.g. TRK-123456">
+                </div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-8">
+              <h4 class="sk-subheader">
+                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                Shipping Details
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="space-y-2">
+                  <label class="sk-label">Carrier Name</label>
+                  <input type="text" name="carrierName" class="sk-input" placeholder="e.g. DHL, FedEx">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="sk-label">Origin Location</label>
+                  <input type="text" name="originLocation" class="sk-input" placeholder="e.g. Warehouse A">
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="sk-label">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="notes" rows="3" class="sk-input" placeholder="Additional notes about the shipment..."></textarea>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" onclick="window.stockKeeperDashboard.sections.receiving.switchToList()" class="sk-btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" class="sk-btn-primary">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Create Shipment
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  switchToAdd() {
+    this.view = "add";
+    this.editingShipment = null;
+    this.refresh(this.container);
+  }
+
+  switchToList() {
+    this.view = "list";
+    this.editingShipment = null;
+    this.refresh(this.container);
+  }
+
+  submitAddForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const shipmentData = Object.fromEntries(formData.entries());
+
+    Shipment.create(shipmentData)
+      .then(() => {
+        this.getShipments().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error creating shipment:", error);
+      });
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+      if (this.view === "list") {
+        this.attachTabListeners(content);
+      }
+    }
   }
 }
 
 class StockReports {
-  constructor() {
+  constructor(container) {
+    this.container = container;
+    this.startDate = "";
+    this.endDate = "";
     this.dailyData = [
       { date: "Mon", inbound: 120, outbound: 95, balance: 25 },
       { date: "Tue", inbound: 150, outbound: 110, balance: 40 },
@@ -517,57 +895,69 @@ class StockReports {
   render() {
     return `
       <div class="space-y-6">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-900">Stock Reports</h3>
-          <p class="text-gray-600 mt-1">Daily stock movements</p>
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900">Stock Reports</h3>
+            <p class="sk-text-muted">Daily stock movements</p>
+          </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          ${[
-            { label: "Total Items", value: "1,245", change: "+5.2%" },
-            { label: "Items In", value: "950", change: "+12.3%" },
-            { label: "Items Out", value: "715", change: "-3.1%" },
-            { label: "Stock Value", value: "$85,420", change: "+8.7%" },
-          ]
-            .map(
-              (stat) => `
-            <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-              <p class="text-sm text-gray-600 font-medium">${stat.label}</p>
-              <p class="text-2xl font-bold text-gray-900 mt-2">${stat.value}</p>
-              <p class="text-xs text-green-600 font-medium mt-2">${stat.change}</p>
-            </div>
-          `
-            )
-            .join("")}
-        </div>
-
-        <!-- Report Actions -->
-        <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+        
+        <div class="sk-card p-6">
           <h4 class="font-bold text-gray-900 mb-4">Generate Reports</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 gap-4">
             <button class="flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
               </svg>
               Export to PDF
             </button>
-            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-              </svg>
-              Export to Excel
-            </button>
-            <button class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
-              </svg>
-              Print Report
-            </button>
+          
           </div>
         </div>
       </div>
     `;
+  }
+
+  formatDate(dateString) {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  attachEventListeners(container) {
+    const form = container.querySelector("#dateRangeForm");
+    const clearBtn = container.querySelector("#clearFilterBtn");
+
+    if (form) {
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        this.startDate = formData.get("startDate");
+        this.endDate = formData.get("endDate");
+        this.refresh(this.container);
+      });
+    }
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        this.startDate = "";
+        this.endDate = "";
+        this.refresh(this.container);
+      });
+    }
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+      this.attachEventListeners(content);
+    }
   }
 }
 
@@ -628,9 +1018,9 @@ class StockAuditing {
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-2xl font-bold text-gray-900">Stock Auditing</h3>
-            <p class="text-gray-600 mt-1">Physical inventory counts and discrepancy tracking</p>
+            <p class="sk-text-muted">Physical inventory counts and discrepancy tracking</p>
           </div>
-          <button class="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2">
+          <button class="sk-btn-primary px-4">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -668,7 +1058,7 @@ class StockAuditing {
           ]
             .map(
               (stat) => `
-            <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+            <div class="sk-card p-4">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-sm text-gray-600 font-medium">${stat.label}</p>
@@ -685,27 +1075,27 @@ class StockAuditing {
         </div>
 
         <!-- Audits Table -->
-        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+        <div class="sk-card overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="border-b border-gray-200 bg-gray-50">
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Date</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Item</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Physical Count</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">System Count</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Discrepancy</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Auditor</th>
-                  <th class="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                  <th class="sk-table-header">Date</th>
+                  <th class="sk-table-header">Item</th>
+                  <th class="sk-table-header">Physical Count</th>
+                  <th class="sk-table-header">System Count</th>
+                  <th class="sk-table-header">Discrepancy</th>
+                  <th class="sk-table-header">Status</th>
+                  <th class="sk-table-header">Auditor</th>
+                  <th class="sk-table-header">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 ${this.audits
                   .map(
                     (audit) => `
-                  <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="py-3 px-4 text-gray-600">${audit.date}</td>
+                  <tr class="sk-table-row">
+                    <td class="sk-table-cell">${audit.date}</td>
                     <td class="py-3 px-4">
                       <div>
                         <p class="font-medium text-gray-900">${
@@ -739,7 +1129,7 @@ class StockAuditing {
                         }
                       </span>
                     </td>
-                    <td class="py-3 px-4 text-gray-600">${audit.auditor}</td>
+                    <td class="sk-table-cell">${audit.auditor}</td>
                     <td class="py-3 px-4">
                       <button class="text-purple-600 hover:text-purple-800 font-medium text-sm">
                         Review
@@ -779,11 +1169,11 @@ class StockAuditing {
   getStatusColor(status) {
     switch (status) {
       case "minor":
-        return "bg-yellow-100 text-yellow-700";
+        return "sk-badge-yellow";
       case "major":
-        return "bg-red-100 text-red-700";
+        return "sk-badge-red";
       case "resolved":
-        return "bg-green-100 text-green-700";
+        return "sk-badge-green";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -806,6 +1196,6 @@ class StockAuditing {
 }
 
 export async function renderStockKeeperDashboard(container) {
-  const dashboard = new StockKeeperDashboard(container);
-  await dashboard.render();
+  window.stockKeeperDashboard = new StockKeeperDashboard(container);
+  await window.stockKeeperDashboard.render();
 }

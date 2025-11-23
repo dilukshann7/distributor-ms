@@ -61,11 +61,11 @@ export class ReturnsAndCancellations {
     return `
       <div class="space-y-6">
           <div>
-            <h2 class="text-3xl font-bold text-gray-900">Returns & Cancellations</h2>
-            <p class="text-gray-600 mt-1">Manage product returns and order cancellations</p>
+            <h2 class="sm-header-title">Returns & Cancellations</h2>
+            <p class="sm-text-muted">Manage product returns and order cancellations</p>
           </div>  
         <!-- Returns Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="sm-card">
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Product Returns</h3>
           </div>
@@ -73,45 +73,35 @@ export class ReturnsAndCancellations {
             <table class="w-full">
               <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Return ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Product</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Quantity</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Reason</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                  <th class="sm-table-header">Return ID</th>
+                  <th class="sm-table-header">Order ID</th>
+                  <th class="sm-table-header">Customer</th>
+                  <th class="sm-table-header">Product</th>
+                  <th class="sm-table-header">Quantity</th>
+                  <th class="sm-table-header">Reason</th>
+                  <th class="sm-table-header">Date</th>
+                  <th class="sm-table-header">Status</th>
+                  <th class="sm-table-header">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="divide-y divide-gray-200">
                 ${this.returns
                   .map(
                     (returnItem) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
-                      returnItem.id
-                    }</td>
+                  <tr class="sm-table-row">
+                    <td class="sm-table-cell-main">${returnItem.id}</td>
                     <td class="px-6 py-4 text-sm text-sky-600 font-medium">${
                       returnItem.orderId
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-900">${
                       returnItem.customer
                     }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      returnItem.product
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      returnItem.quantity
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      returnItem.reason
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      returnItem.requestDate
-                    }</td>
+                    <td class="sm-table-cell">${returnItem.product}</td>
+                    <td class="sm-table-cell">${returnItem.quantity}</td>
+                    <td class="sm-table-cell">${returnItem.reason}</td>
+                    <td class="sm-table-cell">${returnItem.requestDate}</td>
                     <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                      <span class="sm-badge ${
                         returnItem.status === "approved"
                           ? "bg-green-100 text-green-800"
                           : returnItem.status === "rejected"
@@ -146,7 +136,7 @@ export class ReturnsAndCancellations {
         </div>
 
         <!-- Cancellations Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="sm-card">
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Order Cancellations</h3>
           </div>
@@ -154,45 +144,37 @@ export class ReturnsAndCancellations {
             <table class="w-full">
               <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Cancellation ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Items</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Value</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Reason</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                  <th class="sm-table-header">Cancellation ID</th>
+                  <th class="sm-table-header">Order ID</th>
+                  <th class="sm-table-header">Customer</th>
+                  <th class="sm-table-header">Items</th>
+                  <th class="sm-table-header">Value</th>
+                  <th class="sm-table-header">Reason</th>
+                  <th class="sm-table-header">Date</th>
+                  <th class="sm-table-header">Status</th>
+                  <th class="sm-table-header">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="divide-y divide-gray-200">
                 ${this.cancellations
                   .map(
                     (cancel) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
-                      cancel.id
-                    }</td>
+                  <tr class="sm-table-row">
+                    <td class="sm-table-cell-main">${cancel.id}</td>
                     <td class="px-6 py-4 text-sm text-sky-600 font-medium">${
                       cancel.orderId
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-900">${
                       cancel.customer
                     }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      cancel.items
-                    } items</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">Rs. ${cancel.value.toFixed(
+                    <td class="sm-table-cell">${cancel.items} items</td>
+                    <td class="sm-table-cell-main">Rs. ${cancel.value.toFixed(
                       2
                     )}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      cancel.reason
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      cancel.requestDate
-                    }</td>
+                    <td class="sm-table-cell">${cancel.reason}</td>
+                    <td class="sm-table-cell">${cancel.requestDate}</td>
                     <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                      <span class="sm-badge ${
                         cancel.status === "approved"
                           ? "bg-green-100 text-green-800"
                           : cancel.status === "rejected"
@@ -225,8 +207,6 @@ export class ReturnsAndCancellations {
             </table>
           </div>
         </div>
-
-        
       </div>
     `;
   }

@@ -30,37 +30,35 @@ export class CustomerAccounts {
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-3xl font-bold text-gray-900">Customer Accounts</h2>
-            <p class="text-gray-600 mt-1">Manage customer information and purchase history</p>
+            <h2 class="sm-header-title">Customer Accounts</h2>
+            <p class="sm-text-muted">Manage customer information and purchase history</p>
           </div>
-          <button onclick="$s.customers.showFormHandler()" class="flex items-center gap-2 bg-sky-600 text-white px-6 py-3 rounded-lg hover:bg-sky-700 transition-colors font-medium">
+          <button onclick="$s.customers.showFormHandler()" class="sm-btn-primary">
             ${getIconHTML("plus")}
             Add Customer
           </button>
         </div>
 
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="sm-card">
           <table class="w-full">
             <thead class="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Customer Name</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Contact Info</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Total Orders</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Total Spent</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Loyalty Points</th>
-                <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
+                <th class="sm-table-header">Customer Name</th>
+                <th class="sm-table-header">Contact Info</th>
+                <th class="sm-table-header">Total Orders</th>
+                <th class="sm-table-header">Total Spent</th>
+                <th class="sm-table-header">Loyalty Points</th>
+                <th class="sm-table-header">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
               ${this.customers
                 .map(
                   (customer) => `
-                <tr class="hover:bg-gray-50 transition-colors">
+                <tr class="sm-table-row">
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-2">
-                      <span class="font-medium text-gray-900">${
-                        customer.name
-                      }</span>
+                      <span class="sm-table-cell-main">${customer.name}</span>
                       ${
                         customer.isVIP
                           ? '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-semibold rounded">VIP</span>'
@@ -94,18 +92,18 @@ export class CustomerAccounts {
                       </a>
                     </div>
                   </td>
-                  <td class="px-6 py-4 text-gray-700 font-semibold">${
+                  <td class="sm-table-cell font-semibold text-gray-700">${
                     customer.totalPurchases
                   }</td>
-                  <td class="px-6 py-4 text-gray-700 font-semibold">Rs. ${customer.totalSpent.toLocaleString()}</td>
-                  <td class="px-6 py-4 text-gray-700 font-semibold">${
+                  <td class="sm-table-cell font-semibold text-gray-700">Rs. ${customer.totalSpent.toLocaleString()}</td>
+                  <td class="sm-table-cell font-semibold text-gray-700">${
                     customer.loyaltyPoints
                   }</td>
                   
                   <td class="px-6 py-4 flex gap-2">
                     <button onclick="$s.customers.deleteCustomerHandler(${
                       customer.id
-                    })" class="p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    })" class="sm-btn-icon-red">
                       ${getIconHTML("trash")}
                     </button>
                   </td>
@@ -125,17 +123,17 @@ export class CustomerAccounts {
       <div class="max-w-4xl mx-auto animate-fade-in">
         <div class="flex items-center justify-between mb-8">
           <div>
-            <h3 class="text-2xl font-bold text-gray-900">Add New Customer</h3>
-            <p class="text-gray-600 mt-1">Create a new customer account</p>
+            <h3 class="sm-header-title">Add New Customer</h3>
+            <p class="sm-text-muted">Create a new customer account</p>
           </div>
         </div>
 
-        <form id="addCustomerForm" class="bg-white rounded-lg shadow-md overflow-hidden" onsubmit="$s.customers.submitAddForm(event)">
+        <form id="addCustomerForm" class="sm-card" onsubmit="$s.customers.submitAddForm(event)">
           <div class="p-8 space-y-8">
             
             <!-- Customer Information -->
             <div>
-              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <h4 class="sm-subheader">
                 ${getIconHTML("users").replace(
                   'class="w-5 h-5"',
                   'class="w-5 h-5 text-sky-600"'
@@ -144,35 +142,35 @@ export class CustomerAccounts {
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Full Name <span class="text-red-600">*</span></label>
-                  <input type="text" name="name" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="e.g. John Doe">
+                  <label class="sm-label">Full Name <span class="text-red-600">*</span></label>
+                  <input type="text" name="name" required class="sm-input" placeholder="e.g. John Doe">
                 </div>
                 
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Email <span class="text-red-600">*</span></label>
-                  <input type="email" name="email" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="e.g. john@example.com">
+                  <label class="sm-label">Email <span class="text-red-600">*</span></label>
+                  <input type="email" name="email" required class="sm-input" placeholder="e.g. john@example.com">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Phone Number <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="tel" name="phone" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="e.g. +94771234567">
+                  <label class="sm-label">Phone Number <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="tel" name="phone" class="sm-input" placeholder="e.g. +94771234567">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Business Name <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="text" name="businessName" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="e.g. ABC Corporation">
+                  <label class="sm-label">Business Name <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="text" name="businessName" class="sm-input" placeholder="e.g. ABC Corporation">
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
-                  <label class="text-sm font-medium text-gray-700">Address <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <textarea name="address" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="Enter full address with city and postal code"></textarea>
+                  <label class="sm-label">Address <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="address" rows="3" class="sm-input" placeholder="Enter full address with city and postal code"></textarea>
                 </div>
               </div>
             </div>
 
             <!-- Account Details -->
             <div class="border-t border-gray-100 pt-8">
-              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <h4 class="sm-subheader">
                 ${getIconHTML("shopping-cart").replace(
                   'class="w-5 h-5"',
                   'class="w-5 h-5 text-sky-600"'
@@ -181,8 +179,8 @@ export class CustomerAccounts {
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Customer Type</label>
-                  <select name="customerType" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                  <label class="sm-label">Customer Type</label>
+                  <select name="customerType" class="sm-input">
                     <option value="regular" selected>Regular</option>
                     <option value="wholesale">Wholesale</option>
                     <option value="retail">Retail</option>
@@ -191,15 +189,15 @@ export class CustomerAccounts {
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Status</label>
-                  <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all">
+                  <label class="sm-label">Status</label>
+                  <select name="status" class="sm-input">
                     <option value="active" selected>Active</option>
                     <option value="inactive">Inactive</option>
                   </select>
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">VIP Customer</label>
+                  <label class="sm-label">VIP Customer</label>
                   <div class="flex items-center h-[42px]">
                     <input type="checkbox" name="isVIP" id="isVIP" class="w-5 h-5 text-sky-600 border-gray-300 rounded focus:ring-sky-500">
                     <label for="isVIP" class="ml-3 text-sm text-gray-700">Mark as VIP customer</label>
@@ -207,18 +205,18 @@ export class CustomerAccounts {
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Initial Loyalty Points</label>
-                  <input type="number" name="loyaltyPoints" min="0" value="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all" placeholder="0">
+                  <label class="sm-label">Initial Loyalty Points</label>
+                  <input type="number" name="loyaltyPoints" min="0" value="0" class="sm-input" placeholder="0">
                 </div>
               </div>
             </div>
           </div>
 
           <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" onclick="$s.customers.hideFormHandler()" class="px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+            <button type="button" onclick="$s.customers.hideFormHandler()" class="sm-btn-secondary">
               Cancel
             </button>
-            <button type="submit" class="px-6 py-2.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors font-medium flex items-center gap-2">
+            <button type="submit" class="sm-btn-primary">
               ${getIconHTML("check-circle")}
               Add Customer
             </button>

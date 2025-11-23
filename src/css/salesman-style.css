@@ -1,0 +1,103 @@
+/* Salesman Dashboard Custom Styles */
+
+/* Input Fields */
+.sm-input {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all;
+}
+
+.sm-input-readonly {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all;
+}
+
+/* Buttons */
+.sm-btn-primary {
+  @apply bg-sky-600 text-white px-6 py-2.5 rounded-lg hover:bg-sky-700 transition-colors font-medium flex items-center gap-2;
+}
+
+.sm-btn-secondary {
+  @apply px-6 py-2.5 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors;
+}
+
+.sm-btn-icon {
+  @apply p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors;
+}
+
+.sm-btn-icon-blue {
+  @apply p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors;
+}
+
+.sm-btn-icon-red {
+  @apply p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors;
+}
+
+.sm-btn-danger {
+  @apply bg-red-600 text-white px-6 py-2.5 rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2;
+}
+
+.sm-btn-danger-light {
+  @apply w-full px-4 py-2.5 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium flex items-center justify-center gap-2;
+}
+
+.sm-btn-secondary-accent {
+  @apply mt-4 px-6 py-2.5 bg-sky-100 text-sky-700 rounded-lg hover:bg-sky-200 transition-colors flex items-center gap-2 font-medium;
+}
+
+/* Table Styles */
+.sm-table-header {
+  @apply px-6 py-3 text-left text-sm font-semibold text-gray-900;
+}
+
+.sm-table-row {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.sm-table-cell {
+  @apply px-6 py-4 text-gray-700;
+}
+
+.sm-table-cell-main {
+  @apply px-6 py-4 font-medium text-gray-900;
+}
+
+/* Typography */
+.sm-header-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.sm-subheader {
+  @apply text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2;
+}
+
+.sm-label {
+  @apply text-sm font-medium text-gray-700;
+}
+
+.sm-text-muted {
+  @apply text-gray-600 mt-1;
+}
+
+/* Components */
+.sm-card {
+  @apply bg-white rounded-lg shadow-md overflow-hidden;
+}
+
+.sm-card-sub {
+  @apply bg-gray-50 p-4 rounded-lg border border-gray-200;
+}
+
+.sm-badge {
+  @apply px-3 py-1 rounded-full text-sm font-medium;
+}
+
+/* Navigation */
+.sm-nav-item {
+  @apply w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all;
+}
+
+.sm-nav-item-active {
+  @apply bg-sky-500 text-white shadow-lg;
+}
+
+.sm-nav-item-inactive {
+  @apply text-sky-100 hover:bg-sky-600;
+}

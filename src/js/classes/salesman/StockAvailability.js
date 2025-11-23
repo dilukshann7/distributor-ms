@@ -19,12 +19,12 @@ export class StockAvailability {
     return `
       <div class="space-y-6">
         <div>
-          <h3 class="text-3xl font-bold text-gray-900">Stock Availability</h3>
-          <p class="text-gray-600 mt-1">Check real-time product inventory</p>
+          <h3 class="sm-header-title">Stock Availability</h3>
+          <p class="sm-text-muted">Check real-time product inventory</p>
         </div>
 
         <!-- Stock Table -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="sm-card">
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Product Inventory</h3>
           </div>
@@ -32,32 +32,26 @@ export class StockAvailability {
             <table class="w-full">
               <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Product Name</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">SKU</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Available</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
+                  <th class="sm-table-header">Product Name</th>
+                  <th class="sm-table-header">SKU</th>
+                  <th class="sm-table-header">Category</th>
+                  <th class="sm-table-header">Available</th>
+                  <th class="sm-table-header">Price</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="divide-y divide-gray-200">
                 ${this.products
                   .map(
                     (product) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${
-                      product.name
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      product.sku
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      product.category
-                    }</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-900">${
+                  <tr class="sm-table-row">
+                    <td class="sm-table-cell-main">${product.name}</td>
+                    <td class="sm-table-cell">${product.sku}</td>
+                    <td class="sm-table-cell">${product.category}</td>
+                    <td class="sm-table-cell font-semibold text-gray-900">${
                       product.quantity
                     }</td>
                     </td>
-                    <td class="px-6 py-4 text-sm font-semibold text-sky-600">Rs. ${product.price.toFixed(
+                    <td class="sm-table-cell font-semibold text-sky-600">Rs. ${product.price.toFixed(
                       2
                     )}</td>
                   </tr>

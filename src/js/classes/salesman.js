@@ -1,5 +1,6 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
+import "../../css/salesman-style.css";
 
 import { SalesOrders } from "./salesman/SalesOrders.js";
 import { StockAvailability } from "./salesman/StockAvailability.js";
@@ -58,10 +59,10 @@ class SalesmanDashboard {
               item.id
             }" onclick="window.salesmanDashboard.navigateToSection('${
                 item.id
-              }')" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+              }')" class="nav-item sm-nav-item ${
                 this.currentSection === item.id
-                  ? "bg-sky-500 text-white shadow-lg"
-                  : "text-sky-100 hover:bg-sky-600"
+                  ? "sm-nav-item-active"
+                  : "sm-nav-item-inactive"
               }">
               ${this.getIcon(item.icon)}
               <span class="font-medium">${item.label}</span>
@@ -79,8 +80,8 @@ class SalesmanDashboard {
     return `
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Salesman Dashboard</h2>
-          <p class="text-gray-600 text-sm mt-1">Manage orders, customers, and sales activities</p>
+          <h2 class="sm-header-title">Salesman Dashboard</h2>
+          <p class="sm-text-muted text-sm">Manage orders, customers, and sales activities</p>
         </div>
 
         <div class="flex items-center gap-6">
@@ -130,11 +131,9 @@ class SalesmanDashboard {
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all bg-sky-500 text-white shadow-lg";
+        item.className = "nav-item sm-nav-item sm-nav-item-active";
       } else {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-sky-100 hover:bg-sky-600";
+        item.className = "nav-item sm-nav-item sm-nav-item-inactive";
       }
     });
   }

@@ -35,10 +35,8 @@ export const credentials = {
 export function renderLogin(container) {
   container.innerHTML = `
     <div class="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 relative overflow-hidden">
-      <!-- Subtle geometric pattern overlay -->
       <div class="absolute inset-0 opacity-[0.03]" style="background-image: linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px); background-size: 40px 40px;"></div>
       
-      <!-- Clean accent gradient -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-br from-blue-600/20 via-transparent to-transparent rounded-full blur-3xl"></div>
         <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-slate-700/30 via-transparent to-transparent rounded-full blur-3xl"></div>
@@ -47,7 +45,6 @@ export function renderLogin(container) {
       <div class="w-full max-w-6xl flex items-center justify-center gap-12 relative z-10">
         
 
-        <!-- Right Side - Login Form -->
         <div class="w-full max-w-md">
           <div class="bg-white/10 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 border border-white/30">
             <div class="text-center mb-8">
@@ -113,7 +110,6 @@ export function renderLogin(container) {
             </form>
           </div>
 
-          <!-- Demo Credentials -->
           <div class="mt-6 bg-white/10 backdrop-blur-2xl rounded-2xl p-6 border border-white/30 shadow-lg">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-white font-bold text-sm flex items-center gap-2">
