@@ -1,25 +1,9 @@
-import logo from "../../assets/logo.png";
-import chartBarIcon from "../../assets/icons/chart-bar.svg";
-import usersIcon from "../../assets/icons/users.svg";
-import packageIcon from "../../assets/icons/package.svg";
-import activityIcon from "../../assets/icons/activity.svg";
-import fileTextIcon from "../../assets/icons/file-text.svg";
-import logOutIcon from "../../assets/icons/log-out.svg";
-import searchIcon from "../../assets/icons/search.svg";
-import bellIcon from "../../assets/icons/bell.svg";
-import userCircleIcon from "../../assets/icons/user-circle.svg";
-import trendUpIcon from "../../assets/icons/trend-up.svg";
-import plusIcon from "../../assets/icons/plus.svg";
-import eyeIcon from "../../assets/icons/eye.svg";
-import editIcon from "../../assets/icons/edit.svg";
-import trashIcon from "../../assets/icons/trash.svg";
-import clockIcon from "../../assets/icons/clock.svg";
-import downloadIcon from "../../assets/icons/download.svg";
-import filterIcon from "../../assets/icons/filter.svg";
 import { Product } from "../models/Product.js";
 import { User } from "../models/User.js";
 import { Task } from "../models/Task.js";
 import { FinancialReport } from "../models/FinancialReport.js";
+import { getIconHTML } from "../../assets/icons/index.js";
+import logo from "../../assets/logo-tr.png";
 
 class OwnerDashboard {
   constructor(container) {
@@ -102,14 +86,14 @@ class OwnerDashboard {
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div class="flex-1 max-w-md">
           <div class="relative">
-            <img src="${searchIcon}" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" alt="search" />
+            ${getIconHTML("search")}
             <input type="text" placeholder="Search..." class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
           </div>
         </div>
 
         <div class="flex items-center gap-4 ml-8">
           <button class="relative p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-            <img src="${bellIcon}" class="w-5 h-5" alt="notifications" />
+            ${getIconHTML("bell")}
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
@@ -187,16 +171,7 @@ class OwnerDashboard {
   }
 
   getIcon(name) {
-    const icons = {
-      "chart-bar": chartBarIcon,
-      users: usersIcon,
-      package: packageIcon,
-      activity: activityIcon,
-      "file-text": fileTextIcon,
-      "log-out": logOutIcon,
-    };
-    const src = icons[name];
-    return src ? `<img src="${src}" class="w-5 h-5" alt="${name}" />` : "";
+    return getIconHTML(name);
   }
 }
 
@@ -356,7 +331,7 @@ class EmployeeManagement {
             <p class="text-gray-500 mt-1">Manage staff, salaries, and performance</p>
           </div>
           <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
-            <img src="${plusIcon}" class="w-4 h-4" alt="add" />
+            ${getIconHTML("plus")}
             Add Employee
           </button>
         </div>
@@ -416,13 +391,13 @@ class EmployeeManagement {
                     </td>
                     <td class="px-6 py-4 text-sm flex items-center gap-2">
                       <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-700">
-                        <img src="${eyeIcon}" class="w-4 h-4" alt="view" />
+                        ${getIconHTML("eye")}
                       </button>
                       <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-700">
-                        <img src="${editIcon}" class="w-4 h-4" alt="edit" />
+                        ${getIconHTML("edit")}
                       </button>
                       <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-red-600">
-                        <img src="${trashIcon}" class="w-4 h-4" alt="delete" />
+                        ${getIconHTML("trash")}
                       </button>
                     </td>
                   </tr>
@@ -471,7 +446,7 @@ class InventoryControl {
             <p class="text-gray-500 mt-1">Manage stock levels and product details</p>
           </div>
           <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
-            <img src="${plusIcon}" class="w-4 h-4" alt="add" />
+            ${getIconHTML("plus")}
             Add Product
           </button>
         </div>
@@ -644,8 +619,10 @@ class OperationsMonitor {
             <p class="text-3xl font-bold text-gray-900">${value}</p>
             <p class="text-xs text-${color} mt-2">${subtitle}</p>
           </div>
-          <div class="w-12 h-12 rounded-lg ${colors[color]} flex items-center justify-center">
-            <img src="${clockIcon}" class="w-6 h-6" alt="icon" />
+          <div class="w-12 h-12 rounded-lg ${
+            colors[color]
+          } flex items-center justify-center">
+            ${getIconHTML("clock")}
           </div>
         </div>
       </div>
@@ -693,11 +670,11 @@ class ReportsSection {
           </div>
           <div class="flex gap-3">
             <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors">
-              <img src="${filterIcon}" class="w-4 h-4" alt="filter" />
+              ${getIconHTML("filter")}
               Filter
             </button>
             <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
-              <img src="${downloadIcon}" class="w-4 h-4" alt="export" />
+              ${getIconHTML("download")}
               Export All
             </button>
           </div>
