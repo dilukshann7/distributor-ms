@@ -1,3 +1,5 @@
+import { getIconHTML } from "../../../assets/icons";
+
 export class StockAuditing {
   constructor() {
     this.audits = [
@@ -103,7 +105,7 @@ export class StockAuditing {
                     stat.value
                   }</p>
                 </div>
-                ${this.getStatIcon(stat.icon, stat.color)}
+                ${getIconHTML(stat.icon)}
               </div>
             </div>
           `
@@ -214,20 +216,5 @@ export class StockAuditing {
       default:
         return "bg-gray-100 text-gray-700";
     }
-  }
-
-  getStatIcon(icon, color) {
-    const icons = {
-      "check-circle": `<svg class="w-8 h-8 ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>`,
-      "alert-circle": `<svg class="w-8 h-8 ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>`,
-      "trending-up": `<svg class="w-8 h-8 ${color}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-      </svg>`,
-    };
-    return icons[icon] || "";
   }
 }

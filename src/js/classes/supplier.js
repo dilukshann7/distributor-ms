@@ -1,7 +1,6 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import "../../css/supplier-style.css";
-
 import { PurchaseOrders } from "./supplier/PurchaseOrders.js";
 import { ProductCatalog } from "./supplier/ProductCatalog.js";
 import { ShipmentTracking } from "./supplier/ShipmentTracking.js";
@@ -126,34 +125,8 @@ class SupplierDashboard {
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
-    const navItems = this.container.querySelectorAll(".nav-item");
-    navItems.forEach((item) => {
-      // The onclick handler on the button doesn't have dataset.section anymore,
-      // but we can check the onclick attribute or just rebuild the sidebar.
-      // Actually, rebuilding the sidebar is expensive.
-      // Let's just rely on the fact that we are re-rendering the sidebar?
-      // No, we are not re-rendering the sidebar, only the content.
-      // So we need to update classes manually.
-      // But wait, the buttons in renderSidebar use onclick="...navigateToSection('id')".
-      // They don't have data-section anymore in my new code?
-      // Let's check renderSidebar above.
-      // I removed data-section="${item.id}" in the new renderSidebar?
-      // No, I should probably keep it or use another way to identify.
-      // Actually, I can just loop through and check the text content or something?
-      // Or better, just re-render the sidebar? No, that's flickering.
-      // Let's look at how I did it in distributor.js.
-      // In distributor.js I used dataset.section.
-      // So I should add data-section back to the buttons in renderSidebar.
-    });
-
-    // Re-implementing the active class logic properly
-    // I need to update the sidebar buttons to reflect the active state.
-    // Since I'm not re-rendering the whole page, I need to update the DOM.
-    // I'll add data-section back to the buttons in renderSidebar for this purpose.
     const buttons = this.container.querySelectorAll(".nav-item");
     buttons.forEach((btn) => {
-      // We can't easily get the section from the onclick string reliably without parsing.
-      // So let's add data-section to the markup in renderSidebar.
       if (btn.dataset.section === section) {
         btn.className = "nav-item nav-item-active";
       } else {

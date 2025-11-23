@@ -1,4 +1,5 @@
 import { Shipment } from "../../models/Shipment.js";
+import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class ReceivingShipment {
   constructor(container) {
@@ -62,7 +63,7 @@ export class ReceivingShipment {
                     ? "text-purple-600 border-b-2 border-purple-600"
                     : "text-gray-600 hover:text-gray-800"
                 }">
-                ${this.getTabIcon(tab.icon)}
+                ${getIconHTML(tab.icon)}
                 ${tab.label}
               </button>
             `
@@ -131,30 +132,10 @@ export class ReceivingShipment {
               }
             </div>
           </div>
-          <div class="mt-4 flex gap-2">
-            ${
-              period === "pending"
-                ? '<button class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">Mark Received</button>'
-                : ""
-            }
-            <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors">View Details</button>
-          </div>
         </div>
       `
       )
       .join("");
-  }
-
-  getTabIcon(name) {
-    const icons = {
-      clock:
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-      "check-circle":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-      "alert-circle":
-        '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-    };
-    return icons[name] || "";
   }
 
   // Attach click listeners to tab buttons within a root element
