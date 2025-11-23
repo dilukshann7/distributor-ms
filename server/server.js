@@ -710,6 +710,19 @@ app.post("/api/customers", async (req, res) => {
   }
 });
 
+app.post("/api/shipments", async (req, res) => {
+  try {
+    const shipmentData = req.body;
+    const newShipment = await prisma.shipment.create({
+      data: shipmentData,
+    });
+    res.status(201).json(newShipment);
+  } catch (e) {
+    console.error("Error creating shipment:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
