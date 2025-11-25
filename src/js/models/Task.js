@@ -17,9 +17,6 @@ export class Task {
     this.updatedAt = data.updatedAt;
   }
 
-  // Static methods
-  static async create(taskData) {}
-  static async findById(id) {}
   static async getAll(filters) {
     const apiURL = "http://localhost:3000/api/tasks";
 
