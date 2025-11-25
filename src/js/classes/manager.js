@@ -1,29 +1,10 @@
-import chartBarIcon from "../../assets/icons/chart-bar.svg";
-import usersIcon from "../../assets/icons/users.svg";
-import checkSquareIcon from "../../assets/icons/check-square.svg";
-import packageIcon from "../../assets/icons/package.svg";
-import messageSquareIcon from "../../assets/icons/message-square.svg";
-import truckIcon from "../../assets/icons/truck.svg";
-import bellIcon from "../../assets/icons/bell.svg";
-import settingsIcon from "../../assets/icons/settings.svg";
-import logOutIcon from "../../assets/icons/log-out.svg";
-import menuIcon from "../../assets/icons/menu.svg";
-import xIcon from "../../assets/icons/x.svg";
-import clockIcon from "../../assets/icons/clock.svg";
-import alertCircleIcon from "../../assets/icons/alert-circle.svg";
-import plusIcon from "../../assets/icons/plus.svg";
-import editIcon from "../../assets/icons/edit.svg";
-import trashIcon from "../../assets/icons/trash.svg";
-import checkCircleIcon from "../../assets/icons/check-circle.svg";
-import activityIcon from "../../assets/icons/activity.svg";
 import logo from "../../assets/logo-tr.png";
 import { User } from "../models/User.js";
 import { Task } from "../models/Task.js";
 import { Product } from "../models/Product.js";
 import { Feedback } from "../models/Feedback.js";
 import { Delivery } from "../models/Delivery.js";
-import filterIcon from "../../assets/icons/filter.svg";
-import downloadIcon from "../../assets/icons/download.svg";
+import { getIconHTML } from "../../assets/icons/index.js";
 
 class ManagerDashboard {
   constructor(container) {
@@ -55,7 +36,7 @@ class ManagerDashboard {
     const menuItems = [
       { id: "overview", label: "Employee Oversight", icon: "users" },
       { id: "tasks", label: "Task Assignment", icon: "check-square" },
-      { id: "reports", label: "Reports & Analytics", icon: "bar-chart" },
+      { id: "reports", label: "Reports & Analytics", icon: "chart-bar" },
       { id: "stock", label: "Stock Management", icon: "package" },
       { id: "feedback", label: "Customer Feedback", icon: "message-square" },
       { id: "delivery", label: "Delivery Tracking", icon: "truck" },
@@ -65,7 +46,7 @@ class ManagerDashboard {
     
       <!-- Mobile Toggle -->
       <button id="mobileToggle" class="lg:hidden fixed top-4 left-4 z-40 p-2 bg-emerald-600 text-white rounded-lg">
-        ${this.isSidebarOpen ? this.getIcon("x") : this.getIcon("menu")}
+        ${this.isSidebarOpen ? getIconHTML("x") : getIconHTML("menu")}
       </button>
 
       <!-- Sidebar -->
@@ -214,31 +195,7 @@ class ManagerDashboard {
   }
 
   getIcon(name) {
-    const icons = {
-      users: usersIcon,
-      "check-square": checkSquareIcon,
-      "bar-chart": chartBarIcon,
-      package: packageIcon,
-      "message-square": messageSquareIcon,
-      truck: truckIcon,
-      bell: bellIcon,
-      settings: settingsIcon,
-      "log-out": logOutIcon,
-      menu: menuIcon,
-      x: xIcon,
-      clock: clockIcon,
-      "alert-circle": alertCircleIcon,
-      plus: plusIcon,
-      edit: editIcon,
-      trash: trashIcon,
-      "check-circle": checkCircleIcon,
-    };
-    const src = icons[name];
-    if (!src) return "";
-    const sizeMap = { menu: "w-6 h-6", x: "w-6 h-6" };
-    const cls = sizeMap[name] || "w-5 h-5";
-
-    return `<img src="${src}" class="${cls}" alt="${name}" />`;
+    return getIconHTML(name);
   }
 }
 
@@ -268,7 +225,7 @@ class EmployeeOversight {
             <p class="text-gray-600 mt-1">Monitor team performance, attendance, and schedules</p>
           </div>
           <button class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
-            <img src="${plusIcon}" class="w-5 h-5 invert" alt="add" />
+            ${getIconHTML("plus")}
             Add Employee
           </button>
         </div>
@@ -322,10 +279,10 @@ class EmployeeOversight {
                     </td>
                     <td class="px-6 py-4 text-sm flex gap-2">
                       <button class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                        <img src="${editIcon}" class="w-4 h-4" alt="edit" />
+                        ${getIconHTML("edit")}
                       </button>
                       <button class="p-2 text-red-600 hover:bg-red-50 rounded transition-colors">
-                        <img src="${trashIcon}" class="w-4 h-4" alt="delete" />
+                        ${getIconHTML("trash")}
                       </button>
                     </td>
                   </tr>
@@ -367,7 +324,7 @@ class TaskAssignment {
             <p class="text-gray-600 mt-1">Assign and track staff tasks and responsibilities</p>
           </div>
           <button id="assignTaskBtn" class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
-            <img src="${plusIcon}" class="w-5 h-5" alt="add" />
+            ${getIconHTML("plus")}
             Assign Task
           </button>
         </div>
@@ -436,10 +393,10 @@ class TaskAssignment {
                 </div>
                 <div class="flex gap-2">
                   <button class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                    <img src="${editIcon}" class="w-4 h-4" alt="edit" />
+                    ${getIconHTML("edit")}
                   </button>
                   <button class="p-2 text-red-600 hover:bg-red-50 rounded transition-colors">
-                    <img src="${trashIcon}" class="w-4 h-4" alt="delete" />
+                    ${getIconHTML("trash")}
                   </button>
                 </div>
               </div>
@@ -455,11 +412,11 @@ class TaskAssignment {
   getStatusIcon(status) {
     switch (status) {
       case "Completed":
-        return '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+        return '<div class="text-green-600">' + getIconHTML("check-circle") + '</div>';
       case "In Progress":
-        return '<svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+        return '<div class="text-blue-600">' + getIconHTML("clock") + '</div>';
       default:
-        return '<svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+        return '<div class="text-yellow-600">' + getIconHTML("alert-circle") + '</div>';
     }
   }
 
@@ -515,11 +472,11 @@ class OperationalReports {
             </div>
             <div class="flex gap-3">
               <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors">
-                <img src="${filterIcon}" class="w-4 h-4" alt="filter" />
+                ${getIconHTML("filter")}
                 Filter
               </button>
               <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
-                <img src="${downloadIcon}" class="w-4 h-4" alt="export" />
+                ${getIconHTML("download")}
                 Export All
               </button>
             </div>
@@ -588,7 +545,7 @@ class StockManagement {
             <p class="text-gray-600 mt-1">Monitor and manage inventory levels</p>
           </div>
           <button class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            ${getIconHTML("plus")}
             Add Product
           </button>
         </div>

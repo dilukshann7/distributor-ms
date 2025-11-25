@@ -291,136 +291,6 @@ app.get("/api/sales-orders", async (req, res) => {
   }
 });
 
-app.get("/api/salesman/overall-summary", async (req, res) => {
-  try {
-    // Daily Summary
-    const today = new Date();
-    const startOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-    const endOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() + 1
-    );
-    const dailySales = await prisma.salesOrder.findMany({
-      where: {
-        orderDate: {
-          gte: startOfDay,
-          lt: endOfDay,
-        },
-      },
-    });
-    const dailySummary = {
-      orders: dailySales.length,
-      revenue: dailySales.reduce((sum, o) => sum + o.totalAmount, 0),
-      items: dailySales.reduce((sum, o) => {
-        try {
-          const items =
-            typeof o.items === "string" ? JSON.parse(o.items) : o.items || [];
-          return (
-            sum +
-            (Array.isArray(items)
-              ? items.reduce((n, i) => n + (i.quantity || 0), 0)
-              : 0)
-          );
-        } catch (err) {
-          console.error(
-            "Error parsing salesOrder items for daily summary:",
-            err
-          );
-          return sum;
-        }
-      }, 0),
-    };
-
-    // Monthly Summary
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDayOfMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      1
-    );
-    const monthlySales = await prisma.salesOrder.findMany({
-      where: {
-        orderDate: {
-          gte: firstDayOfMonth,
-          lt: lastDayOfMonth,
-        },
-      },
-    });
-
-    const monthlySummary = {
-      orders: monthlySales.length,
-      revenue: monthlySales.reduce((sum, o) => sum + o.totalAmount, 0),
-      items: monthlySales.reduce((sum, o) => {
-        try {
-          const items =
-            typeof o.items === "string" ? JSON.parse(o.items) : o.items || [];
-          return (
-            sum +
-            (Array.isArray(items)
-              ? items.reduce((n, i) => n + (i.quantity || 0), 0)
-              : 0)
-          );
-        } catch (err) {
-          console.error(
-            "Error parsing salesOrder items for monthly summary:",
-            err
-          );
-          return sum;
-        }
-      }, 0),
-    };
-
-    // Weekly Summary
-    const firstDayOfWeek = new Date(today);
-    firstDayOfWeek.setDate(today.getDate() - today.getDay());
-    const lastDayOfWeek = new Date(firstDayOfWeek);
-    lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 7);
-    const weeklySales = await prisma.salesOrder.findMany({
-      where: {
-        orderDate: {
-          gte: firstDayOfWeek,
-          lt: lastDayOfWeek,
-        },
-      },
-    });
-    const weeklySummary = {
-      orders: weeklySales.length,
-      revenue: weeklySales.reduce((sum, o) => sum + o.totalAmount, 0),
-      items: weeklySales.reduce((sum, o) => {
-        try {
-          const items =
-            typeof o.items === "string" ? JSON.parse(o.items) : o.items || [];
-          return (
-            sum +
-            (Array.isArray(items)
-              ? items.reduce((n, i) => n + (i.quantity || 0), 0)
-              : 0)
-          );
-        } catch (err) {
-          console.error(
-            "Error parsing salesOrder items for weekly summary:",
-            err
-          );
-          return sum;
-        }
-      }, 0),
-    };
-    res.json({
-      daily: dailySummary,
-      weekly: weeklySummary,
-      monthly: monthlySummary,
-    });
-  } catch (e) {
-    console.error("Error fetching overall summary:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
 app.get("/api/drivers", async (req, res) => {
   try {
     const drivers = await prisma.driver.findMany({
@@ -564,7 +434,6 @@ app.get("/api/small-orders", async (req, res) => {
   }
 });
 
-// Monthly Income (SalesOrder) Expenses (Orders) And Profit
 app.get("/api/financial-overview", async (req, res) => {
   try {
     const currentYear = new Date().getFullYear();
@@ -706,6 +575,19 @@ app.post("/api/customers", async (req, res) => {
     res.status(201).json(newCustomer);
   } catch (e) {
     console.error("Error creating customer:", e);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.post("/api/shipments", async (req, res) => {
+  try {
+    const shipmentData = req.body;
+    const newShipment = await prisma.shipment.create({
+      data: shipmentData,
+    });
+    res.status(201).json(newShipment);
+  } catch (e) {
+    console.error("Error creating shipment:", e);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });

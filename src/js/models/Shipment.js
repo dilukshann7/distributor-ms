@@ -17,28 +17,14 @@ export class Shipment {
     this.updatedAt = data.updatedAt;
   }
 
-  // Static methods
-  static async create(shipmentData) {}
-  static async findById(id) {}
-  static async findByShipmentNumber(number) {}
+  static async create(shipmentData) {
+    const apiURL = "http://localhost:3000/api/shipments";
+    return axios.post(apiURL, shipmentData);
+  }
+
   static async getAll(filters) {
     const apiURL = "http://localhost:3000/api/shipments";
 
     return axios.get(apiURL);
   }
-  static async getPending() {}
-  static async getInTransit() {}
-  static async getBySupplier(supplierId) {}
-
-  // Instance methods
-  async update(updateData) {}
-  async delete() {}
-  async markInTransit() {}
-  async markDelivered() {}
-  async reportIssue(issueDescription) {}
-  async resolveIssue() {}
-  async getPurchaseOrder() {}
-  async getSupplier() {}
-  async updateTracking(trackingNumber) {}
-  async estimateDelivery() {}
 }
