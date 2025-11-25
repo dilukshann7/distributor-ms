@@ -25,30 +25,4 @@ export class Task {
 
     return axios.get(apiURL);
   }
-  static async getByAssignee(assigneeId) {}
-  static async getByStatus(status) {}
-  static async getPending() {}
-  static async getInProgress() {}
-  static async getCompleted() {}
-  static async getOverdue() {}
-  static async getByPriority(priority) {}
-
-  // Instance methods
-  async update(updateData) {}
-  async delete() {}
-  async assignTo(employeeId) {}
-  async markPending() {}
-  async markInProgress() {}
-  async markCompleted() {}
-  async updatePriority(priority) {}
-  async updateDueDate(dueDate) {}
-  async getAssignee() {}
-  async getAssigner() {}
-  async addComment(comment) {}
-  async getComments() {}
-  async notifyAssignee() {}
-  async sendReminder() {}
-  async isOverdue() {}
-  async getDaysRemaining() {}
-  async getDaysOverdue() {}
 }
