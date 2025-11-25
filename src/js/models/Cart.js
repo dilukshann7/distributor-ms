@@ -3,7 +3,7 @@ import axios from "axios";
 export class Cart {
   constructor(data) {
     this.id = data.id;
-    this.items = data.items; // Array of items
+    this.items = data.items;
     this.totalAmount = data.totalAmount;
     this.status = data.status;
     this.createdAt = data.createdAt;

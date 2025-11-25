@@ -19,43 +19,9 @@ export class Delivery {
     this.createdAt = data.createdAt;
     this.updatedAt = data.updatedAt;
   }
-
-  // Static methods
-  static async create(deliveryData) {}
-  static async findById(id) {}
-  static async findByDeliveryNumber(deliveryNumber) {}
   static async getAll(filters) {
     const apiURL = "http://localhost:3000/api/deliveries";
 
     return axios.get(apiURL);
   }
-  static async getByDriver(driverId) {}
-  static async getByStatus(status) {}
-  static async getPending() {}
-  static async getInTransit() {}
-  static async getCompleted() {}
-  static async getTodaysDeliveries() {}
-
-  // Instance methods
-  async update(updateData) {}
-  async delete() {}
-  async markPending() {}
-  async markInTransit() {}
-  async markDelivered(signature, proof) {}
-  async markFailed(reason) {}
-  async assignDriver(driverId) {}
-  async assignVehicle(vehicleId) {}
-  async updateRoute(routeData) {}
-  async updateEstimatedTime(time) {}
-  async getOrder() {}
-  async getDriver() {}
-  async getVehicle() {}
-  async uploadProofOfDelivery(file) {}
-  async uploadSignature(file) {}
-  async calculateDistance() {}
-  async estimateDeliveryTime() {}
-  async notifyCustomer() {}
-  async sendDriverUpdate() {}
-  async trackLocation() {}
-  async getDeliveryHistory() {}
 }
