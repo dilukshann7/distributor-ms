@@ -19,37 +19,13 @@ export class Invoice {
     this.updatedAt = data.updatedAt;
   }
 
-  // Static methods
   static async create(invoiceData) {
     const apiURL = "http://localhost:3000/api/invoices";
     return axios.post(apiURL, invoiceData);
   }
-  static async findById(id) {}
-  static async findByInvoiceNumber(invoiceNumber) {}
   static async getAll(filters) {
     const apiURL = "http://localhost:3000/api/invoices";
 
     return axios.get(apiURL);
   }
-  static async getBySupplier(supplierId) {}
-  static async getPending() {}
-  static async getPaid() {}
-  static async getOverdue() {}
-  static async getTotalAmount(startDate, endDate) {}
-
-  // Instance methods
-  async update(updateData) {}
-  async delete() {}
-  async markPaid(paidDate) {}
-  async markOverdue() {}
-  async markPartial(amount) {}
-  async getPurchaseOrder() {}
-  async getSupplier() {}
-  async calculateBalance() {}
-  async sendReminder() {}
-  async generatePDF() {}
-  async processPayment(amount, method) {}
-  async isOverdue() {}
-  async getDaysUntilDue() {}
-  async getDaysOverdue() {}
 }
