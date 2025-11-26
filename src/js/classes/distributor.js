@@ -59,9 +59,11 @@ class DistributorDashboard {
           ${menuItems
             .map(
               (item) => `
-            <button onclick="window.distributorDashboard.navigateToSection('${
+            <button data-section="${
               item.id
-            }')" class="dist-nav-item ${
+            }" onclick="window.distributorDashboard.navigateToSection('${
+                item.id
+              }')" class="dist-nav-item ${
                 this.currentSection === item.id
                   ? "dist-nav-item-active"
                   : "dist-nav-item-inactive"
