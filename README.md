@@ -194,17 +194,17 @@ Development server settings in `webpack.config.js`:
 
 The system includes demo credentials for testing all user roles:
 
-| Role | Email | Password |
-|------|-------|----------|
-| Owner | owner@dbms.com | owner |
-| Manager | manager@dbms.com | manager |
-| Assistant Manager | asst@dbms.com | assistant |
-| Stock Keeper | stock@dbms.com | stock |
-| Cashier | cashier@dbms.com | cashier |
-| Supplier | supplier@dbms.com | supplier |
-| Distributor | distributor@dbms.com | distributor |
-| Salesman | salesman@dbms.com | salesman |
-| Driver | driver@dbms.com | driver |
+| Role              | Email                | Password    |
+| ----------------- | -------------------- | ----------- |
+| Owner             | owner@dbms.com       | owner       |
+| Manager           | manager@dbms.com     | manager     |
+| Assistant Manager | asst@dbms.com        | assistant   |
+| Stock Keeper      | stock@dbms.com       | stock       |
+| Cashier           | cashier@dbms.com     | cashier     |
+| Supplier          | supplier@dbms.com    | supplier    |
+| Distributor       | distributor@dbms.com | distributor |
+| Salesman          | salesman@dbms.com    | salesman    |
+| Driver            | driver@dbms.com      | driver      |
 
 ⚠️ **Note**: These are demo credentials for development/testing purposes only. Replace with proper authentication in production.
 
