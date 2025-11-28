@@ -222,10 +222,6 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
 
-## 📞 Support
-
-For support or questions, please contact the development team or open an issue in the repository.
-
 ---
 
 **Built with ❤️ for ADP Namasinghe Distribution**
