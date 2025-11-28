@@ -61,12 +61,14 @@ Before running this project, ensure you have the following installed:
 ## 🚀 Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd distributor-ms
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -167,6 +169,7 @@ Build artifacts are placed in the `dist/` directory and are ready for deployment
 ### Tailwind CSS
 
 Configure Tailwind in `tailwind.config.js`:
+
 - Content paths for class detection
 - Theme customization
 - Plugin configuration
@@ -174,12 +177,14 @@ Configure Tailwind in `tailwind.config.js`:
 ### PostCSS
 
 PostCSS processes CSS with:
+
 - Tailwind CSS directives
 - Modern CSS feature support via preset-env
 
 ### Webpack Dev Server
 
 Development server settings in `webpack.config.js`:
+
 - Port: 8080
 - Hot reload enabled
 - Automatic browser opening
