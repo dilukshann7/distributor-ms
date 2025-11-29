@@ -24,7 +24,7 @@ model User {
   address           String?
   salary            Float?
   bonus             Float?
-  attendance        Int?
+  attendance        String?
   performanceRating Int?
   status            String   @default("active")
   createdAt         DateTime @default(now())
