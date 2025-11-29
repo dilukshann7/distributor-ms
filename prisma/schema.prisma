@@ -29,6 +29,9 @@ model User {
   status            String   @default("active")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+
+  assignedTasks Task[] @relation("AssignedTasks")
+  createdTasks  Task[] @relation("CreatedTasks")
 }
 
 model Product {
@@ -63,6 +66,9 @@ model Task {
   notes         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  assignee User @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  assigner User @relation("CreatedTasks", fields: [assignerId], references: [id])
 }
 
 model CustomerFeedback {
