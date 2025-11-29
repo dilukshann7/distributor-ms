@@ -120,11 +120,13 @@ model SalesOrder {
   paymentStatus String   @default("unpaid")
   items         Json
   notes         String?
+  driverId      Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   deliveryId Int?
   delivery   Delivery? @relation(fields: [deliveryId], references: [id])
+  driver     Driver?   @relation(fields: [driverId], references: [id])
 
   invoices SalesInvoice[]
 }
@@ -217,8 +219,9 @@ model Driver {
   licenseNumber   String?  @unique
   currentLocation String?
 
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deliveries Delivery[]
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries  Delivery[]
+  salesOrders SalesOrder[]
 }
 
 model Manager {
