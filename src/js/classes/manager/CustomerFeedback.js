@@ -21,12 +21,12 @@ export class CustomerFeedback {
     return `
       <div class="space-y-6">
         <div>
-          <h3 class="text-2xl font-bold text-gray-900">Customer Feedback</h3>
-          <p class="text-gray-600 mt-1">Review and respond to customer feedback</p>
+          <h3 class="manager-header-title">Customer Feedback</h3>
+          <p class="manager-header-subtitle">Review and respond to customer feedback</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="manager-card">
             <p class="text-gray-600 text-sm">Average Rating</p>
             <p class="text-3xl font-bold text-gray-900 mt-2">
             ${(
@@ -46,13 +46,13 @@ export class CustomerFeedback {
                 .join("")}
             </div>
           </div>
-          <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="manager-card">
             <p class="text-gray-600 text-sm">Total Feedback</p>
             <p class="text-3xl font-bold text-gray-900 mt-2">${
               this.feedback.length
             }</p>
           </div>
-          <div class="bg-white rounded-lg shadow-md p-6">
+          <div class="manager-card">
             <p class="text-gray-600 text-sm">Pending Reviews</p>
             <p class="text-3xl font-bold text-yellow-600 mt-2">1</p>
           </div>
@@ -62,7 +62,7 @@ export class CustomerFeedback {
           ${this.feedback
             .map(
               (item) => `
-            <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="manager-card">
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center gap-3">
@@ -84,12 +84,12 @@ export class CustomerFeedback {
                     <span class="text-xs text-gray-500">${item.createdAt}</span>
                   </div>
                   <p class="text-gray-600 mt-2">${item.comment}</p>
-                  <span class="inline-block mt-3 px-3 py-1 rounded-full text-xs font-semibold ${
+                  <span class="inline-block mt-3 manager-badge ${
                     item.status === "Resolved"
-                      ? "bg-green-100 text-green-800"
+                      ? "manager-badge-green"
                       : item.status === "Pending"
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-blue-100 text-blue-800"
+                      ? "manager-badge-yellow"
+                      : "manager-badge-blue"
                   }">
                     ${item.status}
                   </span>
