@@ -169,7 +169,6 @@ class SalesTransaction {
       const response = await smallOrder.getAll();
 
       if (response.data && response.data.length > 0) {
-        // Filter orders with status "completed"
         const completedOrders = response.data.filter(
           (order) => order.status === "completed"
         );
@@ -191,52 +190,52 @@ class SalesTransaction {
     const total = subtotal + tax;
 
     return `
-      <div class="space-y-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="cashier-section-spacing">
+        <div class="cashier-grid-layout">
           <!-- Add Product Form -->
-          <div class="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <div class="lg:col-span-2 cashier-card">
+            <h3 class="cashier-section-title mb-4 flex items-center gap-2">
               Add Product to Sale
             </h3>
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
-                <input type="text" placeholder="Enter product name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent" />
+                <label class="cashier-label">Product Name</label>
+                <input type="text" placeholder="Enter product name" class="cashier-input" />
               </div>
-              <div class="grid grid-cols-2 gap-4">
+              <div class="cashier-grid-2col">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                  <input type="number" placeholder="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent" />
+                  <label class="cashier-label">Quantity</label>
+                  <input type="number" placeholder="0" class="cashier-input" />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Price</label>
-                  <input type="number" placeholder="0.00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent" />
+                  <label class="cashier-label">Price</label>
+                  <input type="number" placeholder="0.00" class="cashier-input" />
                 </div>
               </div>
-              <button class="w-full bg-cyan-600 text-white py-2 rounded-lg hover:bg-cyan-700 transition-colors flex items-center justify-center gap-2 font-medium">
-                ${this.getIcon("plus")}
+              <button class="cashier-btn-primary cashier-btn-icon">
+                ${getIconHTML("plus")}
                 Add to Cart
               </button>
             </div>
           </div>
 
           <!-- Cart Summary -->
-          <div class="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-lg shadow-md p-6 border border-cyan-200">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Cart Summary</h3>
+          <div class="cashier-card-gradient">
+            <h3 class="cashier-section-title mb-4">Cart Summary</h3>
             <div class="space-y-3">
-              <div class="flex justify-between text-gray-700">
+              <div class="cashier-summary-row">
                 <span>Subtotal:</span>
                 <span class="font-semibold">Rs. ${subtotal.toFixed(2)}</span>
               </div>
-              <div class="flex justify-between text-gray-700">
+              <div class="cashier-summary-row">
                 <span>Tax (10%):</span>
                 <span class="font-semibold">Rs. ${tax.toFixed(2)}</span>
               </div>
-              <div class="border-t border-cyan-300 pt-3 flex justify-between text-lg font-bold text-cyan-700">
+              <div class="cashier-divider cashier-total-row">
                 <span>Total:</span>
                 <span>Rs. ${total.toFixed(2)}</span>
               </div>
-              <button class="w-full bg-cyan-600 text-white py-2 rounded-lg hover:bg-cyan-700 transition-colors font-medium mt-4">
+              <button class="cashier-btn-primary mt-4">
                 Proceed to Payment
               </button>
             </div>
@@ -244,43 +243,39 @@ class SalesTransaction {
         </div>
 
         <!-- Cart Items -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="cashier-card overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800">Cart Items (${
+            <h3 class="cashier-section-title">Cart Items (${
               this.cartItems.length
             })</h3>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
+              <thead class="cashier-table-head">
                 <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Product</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Quantity</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Price</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Total</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
+                  <th class="cashier-table-header">Product</th>
+                  <th class="cashier-table-header">Quantity</th>
+                  <th class="cashier-table-header">Price</th>
+                  <th class="cashier-table-header">Total</th>
+                  <th class="cashier-table-header">Action</th>
                 </tr>
               </thead>
               <tbody>
                 ${this.cartItems
                   .map(
                     (item) => `
-                    <tr class="border-b border-gray-200 hover:bg-gray-50">
-                      <td class="px-6 py-4 text-sm text-gray-800">${
-                        item.name
-                      }</td>
-                      <td class="px-6 py-4 text-sm text-gray-800">${
-                        item.quantity
-                      }</td>
-                      <td class="px-6 py-4 text-sm text-gray-800">Rs. ${item.price.toFixed(
+                    <tr class="cashier-table-row">
+                      <td class="cashier-table-cell">${item.name}</td>
+                      <td class="cashier-table-cell">${item.quantity}</td>
+                      <td class="cashier-table-cell">Rs. ${item.price.toFixed(
                         2
                       )}</td>
-                      <td class="px-6 py-4 text-sm font-semibold text-gray-800">Rs. ${item.total.toFixed(
+                      <td class="cashier-table-cell font-semibold">Rs. ${item.total.toFixed(
                         2
                       )}</td>
-                      <td class="px-6 py-4 text-sm">
-                        <button class="text-red-600 hover:text-red-800 transition-colors">
-                          ${this.getIcon("trash")}
+                      <td class="cashier-table-cell">
+                        <button class="cashier-btn-delete">
+                          ${getIconHTML("trash")}
                         </button>
                       </td>
                     </tr>
@@ -291,41 +286,41 @@ class SalesTransaction {
             </table>
           </div>
         </div>
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="cashier-card overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800">Payment History</h3>
+            <h3 class="cashier-section-title">Payment History</h3>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
+              <thead class="cashier-table-head">
                 <tr>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Method</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Time</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                  <th class="cashier-table-header">Method</th>
+                  <th class="cashier-table-header">Amount</th>
+                  <th class="cashier-table-header">Time</th>
+                  <th class="cashier-table-header">Status</th>
                 </tr>
               </thead>
               <tbody>
-                ${this.smallOrder && this.smallOrder.length > 0
-                  ? this.smallOrder.map(
-                      (order) => `
-                    <tr class="border-b border-gray-200 hover:bg-gray-50">
-                      <td class="px-6 py-4 text-sm text-gray-800">${
-                        order.paymentMethod
-                      }</td>
-                      <td class="px-6 py-4 text-sm font-semibold text-gray-800">Rs. ${order.cart.totalAmount.toFixed(
+                ${
+                  this.smallOrder && this.smallOrder.length > 0
+                    ? this.smallOrder
+                        .map(
+                          (order) => `
+                    <tr class="cashier-table-row">
+                      <td class="cashier-table-cell">${order.paymentMethod}</td>
+                      <td class="cashier-table-cell font-semibold">Rs. ${order.cart.totalAmount.toFixed(
                         2
                       )}</td>
-                      <td class="px-6 py-4 text-sm text-gray-600">${
+                      <td class="cashier-table-cell text-gray-600">${
                         order.createdAt
                       }</td>
-                      <td class="px-6 py-4 text-sm">
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold ${
+                      <td class="cashier-table-cell">
+                        <span class="cashier-badge ${
                           order.status === "completed"
-                            ? "bg-green-100 text-green-800"
+                            ? "cashier-badge-success"
                             : order.status === "pending"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
+                            ? "cashier-badge-warning"
+                            : "cashier-badge-error"
                         }">
                           ${
                             order.status.charAt(0).toUpperCase() +
@@ -335,9 +330,10 @@ class SalesTransaction {
                       </td>
                     </tr>
                   `
-                    )
-                    .join("")
-                  : '<tr><td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No payment history available</td></tr>'}
+                        )
+                        .join("")
+                    : '<tr><td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No payment history available</td></tr>'
+                }
               </tbody>
             </table>
           </div>
