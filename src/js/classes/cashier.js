@@ -1,6 +1,8 @@
 import logo from "../../assets/logo-tr.png";
 import { Cart } from "../models/Cart.js";
+import "../../css/cashier-style.css";
 import { smallOrder } from "../models/SmallOrder.js";
+import { getIconHTML } from "../../assets/icons/index.js";
 
 class CashierDashboard {
   constructor(container) {
