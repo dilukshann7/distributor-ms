@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  // Use default output so `@prisma/client` is generated under node_modules and available to the server
 }
 
 datasource db {
@@ -32,6 +25,15 @@ model User {
 
   assignedTasks Task[] @relation("AssignedTasks")
   createdTasks  Task[] @relation("CreatedTasks")
+
+  driverProfile           Driver?
+  managerProfile          Manager?
+  salesmanProfile         Salesman?
+  stockKeeperProfile      StockKeeper?
+  cashierProfile          Cashier?
+  supplierProfile         Supplier?
+  distributorProfile      Distributor?
+  assistantManagerProfile AssistantManager?
 }
 
 model Product {
@@ -100,13 +102,10 @@ model Delivery {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  // Relation: One Delivery belongs to one Driver
   driver Driver @relation(fields: [driverId], references: [id])
 
-  // Relation: One Delivery has many SalesOrders
   salesOrders SalesOrder[]
 
-  // New back-relation: One Delivery can have many SalesInvoices
   invoices SalesInvoice[]
 }
 
@@ -124,11 +123,9 @@ model SalesOrder {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  // Foreign key to Delivery
   deliveryId Int?
   delivery   Delivery? @relation(fields: [deliveryId], references: [id])
 
-  // New back-relation: One SalesOrder can have many SalesInvoices
   invoices SalesInvoice[]
 }
 
@@ -180,61 +177,110 @@ model Invoice {
 }
 
 model Shipment {
-  id                   Int      @id @default(autoincrement())
+  id                   Int       @id @default(autoincrement())
   shipmentNumber       String
   purchaseOrderId      Int
   supplierId           Int
   shipmentDate         DateTime
   expectedDeliveryDate DateTime
-  actualDeliveryDate   DateTime
+  actualDeliveryDate   DateTime?
   carrier              String
-  status               String   @default("pending")
+  status               String    @default("pending")
   notes                String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   order Order @relation(fields: [purchaseOrderId], references: [id])
 }
 
 model Customer {
-  id             Int       @id @default(autoincrement())
+  id             Int      @id @default(autoincrement())
   name           String
-  email          String    @unique
+  email          String   @unique
   phone          String?
   address        String?
   businessName   String?
   customerType   String?
-  totalPurchases Int       @default(0)
-  totalSpent     Float     @default(0.0)
-  loyaltyPoints  Int       @default(0)
-  status         String    @default("active")
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  totalPurchases Int      @default(0)
+  totalSpent     Float    @default(0.0)
+  loyaltyPoints  Int      @default(0)
+  status         String   @default("active")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Driver {
   id              Int      @id @default(autoincrement())
-  name            String
-  vehicleId       String
-  vehicleType     String
-  licenseNumber   String   @unique
-  phone           String
-  email           String   @unique
+  userId          Int      @unique
+  vehicleId       String?
+  vehicleType     String?
+  licenseNumber   String?  @unique
   currentLocation String?
-  status          String   @default("active")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
 
-  // Relation: One Driver has many Deliveries
-  deliveries Delivery[] // 👈 back-relation
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries Delivery[]
+}
+
+model Manager {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Salesman {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  salesTarget Float?
+  totalSales  Float    @default(0)
+  commission  Float    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StockKeeper {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Cashier {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Supplier {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  companyName  String?
+  supplierType String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Distributor {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AssistantManager {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model SalesInvoice {
   id              Int       @id @default(autoincrement())
   invoiceNumber   String    @unique
   customerId      Int
-  salesOrderId    Int? // link to SalesOrder
-  deliveryId      Int? // link to Delivery
+  salesOrderId    Int?
+  deliveryId      Int?
   date            DateTime
   paymentMethod   String
   items           Json
@@ -245,9 +291,9 @@ model SalesInvoice {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  // Relations
   salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
-  delivery   Delivery?   @relation(fields: [deliveryId], references: [id])
+
+  delivery Delivery? @relation(fields: [deliveryId], references: [id])
 }
 
 model Cart {
@@ -264,11 +310,11 @@ model Cart {
 model SmallOrder {
   id            Int      @id @default(autoincrement())
   orderNumber   String   @unique
-  cartId        Int      @unique // Added @unique for one-to-one relation
+  cartId        Int      @unique
   status        String   @default("pending")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   paymentMethod String?
 
-  cart Cart @relation(fields: [cartId], references: [id]) // Fixed: use cartId, not id
+  cart Cart @relation(fields: [cartId], references: [id])
 }
