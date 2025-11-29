@@ -72,7 +72,12 @@ app.delete(
 app.get(
   "/api/tasks",
   asyncHandler(async (req, res) => {
-    const tasks = await prisma.task.findMany();
+    const tasks = await prisma.task.findMany({
+      include: {
+        assignee: true,
+        assigner: true,
+      },
+    });
     res.json(tasks);
   })
 );
