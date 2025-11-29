@@ -289,7 +289,7 @@ class DeliveryDetails {
                     <div>
                       <p class="text-xs text-gray-500 font-medium">Contact</p>
                       <p class="text-sm text-gray-900">${
-                        this.deliveries.phone || "N/A"
+                        delivery.salesOrders[0].customer.phone || "N/A"
                       }</p>
                     </div>
                   </div>
@@ -866,7 +866,6 @@ class VehicleManagement {
         const { latitude, longitude } = position.coords;
 
         try {
-          // Use OpenStreetMap's Nominatim for reverse geocoding (free, no API key needed)
           const response = await fetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
             {
@@ -883,11 +882,11 @@ class VehicleManagement {
           const data = await response.json();
           const address = data.display_name || `${latitude}, ${longitude}`;
 
-          locationInput.value = address;
+          locationInput.value = address.split(",").slice(0, 2).join(",");
           this.showMessage("Location fetched successfully!", "success");
         } catch (error) {
           console.error("Error fetching address:", error);
-          // Fallback to coordinates if reverse geocoding fails
+
           locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(
             6
           )}`;
@@ -896,7 +895,6 @@ class VehicleManagement {
             "info"
           );
         } finally {
-          // Restore button state
           gpsBtn.disabled = false;
           gpsBtn.innerHTML = `
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -926,7 +924,6 @@ class VehicleManagement {
 
         this.showMessage(errorMessage, "error");
 
-        // Restore button state
         gpsBtn.disabled = false;
         gpsBtn.innerHTML = `
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
