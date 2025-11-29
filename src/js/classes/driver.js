@@ -25,6 +25,16 @@ class DriverDashboard {
       </div>
     `;
     this.attachEventListeners();
+
+    // Attach vehicle management listeners if on vehicle section
+    if (this.currentSection === "vehicle") {
+      const vehicleSection = new VehicleManagement();
+      const id = window.location.search.split("id=")[1];
+      const response = await Driver.findById(id);
+      vehicleSection.vehicleData = response.data;
+      vehicleSection.driverId = id;
+      vehicleSection.attachEventListeners();
+    }
   }
 
   renderSidebar() {
@@ -32,6 +42,7 @@ class DriverDashboard {
       { id: "deliveries", label: "Delivery Details", icon: "package" },
       { id: "proof", label: "Proof of Delivery", icon: "file-check" },
       { id: "payment", label: "Payment Collection", icon: "credit-card" },
+      { id: "vehicle", label: "Vehicle Management", icon: "truck" },
     ];
 
     return `
@@ -89,6 +100,7 @@ class DriverDashboard {
       deliveries: new DeliveryDetails(),
       proof: new ProofOfDelivery(),
       payment: new PaymentCollection(),
+      vehicle: new VehicleManagement(),
     };
     const sectionInstance = sections[section];
     if (section === "deliveries") {
@@ -97,6 +109,8 @@ class DriverDashboard {
       await sectionInstance.getProofDeliveries();
     } else if (section === "payment") {
       await sectionInstance.getPayments();
+    } else if (section === "vehicle") {
+      await sectionInstance.getVehicleDetails();
     }
     return sectionInstance.render();
   }
@@ -136,6 +150,16 @@ class DriverDashboard {
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
+    // Attach event listeners for vehicle management section
+    if (section === "vehicle") {
+      const vehicleSection = new VehicleManagement();
+      const id = window.location.search.split("id=")[1];
+      const response = await Driver.findById(id);
+      vehicleSection.vehicleData = response.data;
+      vehicleSection.driverId = id;
+      vehicleSection.attachEventListeners();
+    }
+
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
@@ -146,6 +170,16 @@ class DriverDashboard {
           "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-green-100 hover:bg-green-600";
       }
     });
+  }
+
+  getCurrentVehicleData() {
+    // Helper method to get current vehicle data for event listener attachment
+    return {
+      vehicleId: null,
+      vehicleType: null,
+      licenseNumber: null,
+      currentLocation: null,
+    };
   }
 
   getIcon(name) {
@@ -602,6 +636,334 @@ class PaymentCollection {
         </div>
       </div>
     `;
+  }
+}
+
+class VehicleManagement {
+  constructor() {
+    this.vehicleData = null;
+    this.driverId = null;
+  }
+
+  async getVehicleDetails() {
+    try {
+      this.driverId = window.location.search.split("id=")[1];
+      const response = await Driver.findById(this.driverId);
+      this.vehicleData = response.data;
+    } catch (error) {
+      console.error("Error fetching vehicle details:", error);
+      this.vehicleData = null;
+    }
+  }
+
+  render() {
+    if (!this.vehicleData) {
+      return `<p class="text-gray-600">Unable to load vehicle details.</p>`;
+    }
+
+    return `
+      <div class="space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">Vehicle Management</h2>
+          <p class="text-gray-600">Update and manage your vehicle information</p>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+          <form id="vehicleForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Vehicle ID
+                </label>
+                <input 
+                  type="text" 
+                  id="vehicleId" 
+                  value="${this.vehicleData.vehicleId || ""}" 
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter vehicle ID"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Vehicle Type
+                </label>
+                <select 
+                  id="vehicleType" 
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">Select vehicle type</option>
+                  <option value="truck" ${
+                    this.vehicleData.vehicleType === "truck" ? "selected" : ""
+                  }>Truck</option>
+                  <option value="van" ${
+                    this.vehicleData.vehicleType === "van" ? "selected" : ""
+                  }>Van</option>
+                  <option value="motorcycle" ${
+                    this.vehicleData.vehicleType === "motorcycle"
+                      ? "selected"
+                      : ""
+                  }>Motorcycle</option>
+                  <option value="car" ${
+                    this.vehicleData.vehicleType === "car" ? "selected" : ""
+                  }>Car</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  License Number
+                </label>
+                <input 
+                  type="text" 
+                  id="licenseNumber" 
+                  value="${this.vehicleData.licenseNumber || ""}" 
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter license number"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Current Location
+                </label>
+                <div class="flex gap-2">
+                  <input 
+                    type="text" 
+                    id="currentLocation" 
+                    value="${this.vehicleData.currentLocation || ""}" 
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Enter current location"
+                  />
+                  <button 
+                    type="button" 
+                    id="gpsBtn"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    title="Use GPS to get current location"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    GPS
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4 pt-4">
+              <button 
+                type="submit" 
+                class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Update Vehicle Details
+              </button>
+              <button 
+                type="button" 
+                id="resetBtn"
+                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+              >
+                Reset
+              </button>
+            </div>
+          </form>
+
+          <div id="messageContainer" class="mt-4"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  attachEventListeners() {
+    const form = document.getElementById("vehicleForm");
+    const resetBtn = document.getElementById("resetBtn");
+    const gpsBtn = document.getElementById("gpsBtn");
+
+    if (form) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await this.handleSubmit();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        this.resetForm();
+      });
+    }
+
+    if (gpsBtn) {
+      gpsBtn.addEventListener("click", () => {
+        this.getCurrentLocation();
+      });
+    }
+  }
+
+  async handleSubmit() {
+    const vehicleId = document.getElementById("vehicleId").value;
+    const vehicleType = document.getElementById("vehicleType").value;
+    const licenseNumber = document.getElementById("licenseNumber").value;
+    const currentLocation = document.getElementById("currentLocation").value;
+
+    const updatedData = {
+      vehicleId: vehicleId || null,
+      vehicleType: vehicleType || null,
+      licenseNumber: licenseNumber || null,
+      currentLocation: currentLocation || null,
+    };
+
+    try {
+      await Driver.update(this.driverId, updatedData);
+      this.showMessage("Vehicle details updated successfully!", "success");
+      await this.getVehicleDetails();
+    } catch (error) {
+      console.error("Error updating vehicle details:", error);
+      this.showMessage(
+        "Failed to update vehicle details. Please try again.",
+        "error"
+      );
+    }
+  }
+
+  resetForm() {
+    document.getElementById("vehicleId").value =
+      this.vehicleData.vehicleId || "";
+    document.getElementById("vehicleType").value =
+      this.vehicleData.vehicleType || "";
+    document.getElementById("licenseNumber").value =
+      this.vehicleData.licenseNumber || "";
+    document.getElementById("currentLocation").value =
+      this.vehicleData.currentLocation || "";
+    this.showMessage("Form reset to original values.", "info");
+  }
+
+  getCurrentLocation() {
+    const gpsBtn = document.getElementById("gpsBtn");
+    const locationInput = document.getElementById("currentLocation");
+
+    if (!navigator.geolocation) {
+      this.showMessage(
+        "Geolocation is not supported by your browser.",
+        "error"
+      );
+      return;
+    }
+
+    // Disable button and show loading state
+    gpsBtn.disabled = true;
+    gpsBtn.innerHTML = `
+      <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      Getting...
+    `;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          // Use OpenStreetMap's Nominatim for reverse geocoding (free, no API key needed)
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+            {
+              headers: {
+                "User-Agent": "DistributorMS/1.0",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch address");
+          }
+
+          const data = await response.json();
+          const address = data.display_name || `${latitude}, ${longitude}`;
+
+          locationInput.value = address;
+          this.showMessage("Location fetched successfully!", "success");
+        } catch (error) {
+          console.error("Error fetching address:", error);
+          // Fallback to coordinates if reverse geocoding fails
+          locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(
+            6
+          )}`;
+          this.showMessage(
+            "Using coordinates (address lookup unavailable).",
+            "info"
+          );
+        } finally {
+          // Restore button state
+          gpsBtn.disabled = false;
+          gpsBtn.innerHTML = `
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            GPS
+          `;
+        }
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        let errorMessage = "Unable to retrieve your location.";
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage =
+              "Location access denied. Please enable location permissions.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information is unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out.";
+            break;
+        }
+
+        this.showMessage(errorMessage, "error");
+
+        // Restore button state
+        gpsBtn.disabled = false;
+        gpsBtn.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          GPS
+        `;
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  }
+
+  showMessage(message, type) {
+    const messageContainer = document.getElementById("messageContainer");
+    if (!messageContainer) return;
+
+    const bgColor =
+      type === "success"
+        ? "bg-green-100 border-green-400 text-green-700"
+        : type === "error"
+        ? "bg-red-100 border-red-400 text-red-700"
+        : "bg-blue-100 border-blue-400 text-blue-700";
+
+    messageContainer.innerHTML = `
+      <div class="${bgColor} border px-4 py-3 rounded relative" role="alert">
+        <span class="block sm:inline">${message}</span>
+      </div>
+    `;
+
+    setTimeout(() => {
+      messageContainer.innerHTML = "";
+    }, 5000);
   }
 }
 
