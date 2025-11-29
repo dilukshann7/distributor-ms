@@ -184,7 +184,6 @@ export class SalesOrders {
                 <div class="space-y-2">
                   <label class="sm-label">Total Amount (LKR)</label>
                   <div class="relative">
-                    <span class="absolute left-4 top-3 text-gray-500 font-medium">Rs.</span>
                     <input type="number" id="subtotal" name="subtotal" required min="0" step="0.01" class="sm-input pl-12" placeholder="0.00" readonly>
                   </div>
                   <p class="text-xs text-gray-500">Calculated automatically from items</p>
@@ -252,7 +251,7 @@ export class SalesOrders {
                   </div>
                   <div class="space-y-2">
                     <label class="block sm-label">Subtotal</label>
-                    <input type="text" class="sm-input bg-gray-100" data-row="0" readonly placeholder="Rs. 0.00">
+                    <input type="text" class="sm-input bg-gray-100 item-subtotal" data-row="0" readonly placeholder="Rs. 0.00">
                   </div>
                   <div class="space-y-2">
                     <label class="block sm-label">Action</label>
@@ -334,7 +333,6 @@ export class SalesOrders {
                 <div class="space-y-2">
                   <label class="sm-label">Total Amount (LKR)</label>
                   <div class="relative">
-                    <span class="absolute left-4 top-3 text-gray-500 font-medium">Rs.</span>
                     <input type="number" name="subtotal" required min="0" step="0.01" class="sm-input pl-12" value="${
                       order.subtotal || 0
                     }">
@@ -550,7 +548,7 @@ export class SalesOrders {
         <input type="number" name="itemQuantity[]" required min="1" class="sm-input bg-white item-quantity" data-row="${rowCount}" placeholder="1" oninput="window.salesmanDashboard.sections.orders.updateSubtotal(this.closest('.item-row'))">
       </div>
       <div class="space-y-2">
-        <input type="text" class="sm-input bg-gray-100" data-row="${rowCount}" readonly placeholder="Rs. 0.00">
+        <input type="text" class="sm-input bg-gray-100 item-subtotal" data-row="${rowCount}" readonly placeholder="Rs. 0.00">
       </div>
       <div class="space-y-2">
         <button type="button" class="remove-item-btn sm-btn-danger-light" onclick="window.salesmanDashboard.sections.orders.removeItemRow(this)">
