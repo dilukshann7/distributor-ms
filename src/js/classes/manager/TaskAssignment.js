@@ -1,11 +1,13 @@
 import { Task } from "../../models/Task.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
+import { User } from "../../models/User.js";
 
 export class TaskAssignment {
   constructor(container) {
     this.container = container;
     this.tasks = [];
     this.view = "list";
+    this.users = [];
     this.editingTask = null;
   }
 
@@ -16,6 +18,16 @@ export class TaskAssignment {
     } catch (error) {
       console.error("Error fetching tasks:", error);
       this.tasks = [];
+    }
+  }
+
+  async getUsers() {
+    try {
+      const response = await User.getAll();
+      this.users = response.data;
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      this.users = [];
     }
   }
 
@@ -30,10 +42,8 @@ export class TaskAssignment {
   }
 
   renderList() {
-    /*html*/
     return `
       <div class="space-y-6">
-        <!-- Header -->
         <div class="flex items-center justify-between">
           <div>
             <h3 class="manager-header-title">Task Assignment</h3>
@@ -45,11 +55,9 @@ export class TaskAssignment {
           </button>
         </div>
 
-        <!-- Tasks List -->
         <div class="space-y-3">
           ${this.tasks
             .map(
-              /*html*/
               (task) => `
             <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
               <div class="flex items-start justify-between">
@@ -59,8 +67,13 @@ export class TaskAssignment {
                     <h4 class="font-semibold text-gray-900">${task.title}</h4>
                     <p class="text-sm text-gray-600 mt-1">
                       Assigned to: <span class="font-medium">${
-                        task.assigneeId
+                        task.assignee.name
                       }</span>
+                      ${
+                        task.assigner.name
+                          ? `<span class="text-gray-400 mx-2">|</span> Assigned by: <span class="font-medium">${task.assigner.name}</span>`
+                          : ""
+                      }
                     </p>
                     <div class="flex items-center gap-3 mt-2">
                       <span class="manager-badge ${this.getPriorityColor(
@@ -109,7 +122,6 @@ export class TaskAssignment {
         <form id="addTaskForm" class="manager-card-overflow" onsubmit="window.managerDashboard.sections.tasks.submitAddForm(event)">
           <div class="p-8 space-y-8">
             
-            <!-- Task Information -->
             <div>
               <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                 ${getIconHTML("clipboard").replace(
@@ -125,18 +137,36 @@ export class TaskAssignment {
                 </div>
                 
                 <div class="space-y-2 md:col-span-2">
-                  <label class="block text-sm font-semibold text-gray-700">Description <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <label class="block text-sm font-semibold text-gray-700">Description </label>
                   <textarea name="description" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Task description and requirements"></textarea>
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Assignee ID <span class="text-red-600">*</span></label>
-                  <input type="number" name="assigneeId" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Employee ID">
+                  <select name="assigneeId" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="">Select an assignee</option>
+                    ${this.users
+                      .map(
+                        (user) => `
+                      <option value="${user.id}">${user.name}</option>
+                    `
+                      )
+                      .join("")}
+                  </select>
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Assigner ID <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="number" name="assignerId" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Manager ID">
+                  <select name="assignerId" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="">Select an assigner</option>
+                    ${this.users
+                      .map(
+                        (user) => `
+                      <option value="${user.id}">${user.name}</option>
+                    `
+                      )
+                      .join("")}
+                  </select>
                 </div>
 
                 <div class="space-y-2">
@@ -201,7 +231,6 @@ export class TaskAssignment {
         <form id="editTaskForm" class="manager-card-overflow" onsubmit="window.managerDashboard.sections.tasks.submitEditForm(event)">
           <div class="p-8 space-y-8">
             
-            <!-- Task Information -->
             <div>
               <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                 ${getIconHTML("clipboard").replace(
@@ -213,50 +242,94 @@ export class TaskAssignment {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2 md:col-span-2">
                   <label class="block text-sm font-semibold text-gray-700">Task Title <span class="text-red-600">*</span></label>
-                  <input type="text" name="title" required value="${task.title}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Prepare monthly sales report">
+                  <input type="text" name="title" required value="${
+                    task.title
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Prepare monthly sales report">
                 </div>
                 
                 <div class="space-y-2 md:col-span-2">
                   <label class="block text-sm font-semibold text-gray-700">Description <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <textarea name="description" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Task description and requirements">${task.description || ""}</textarea>
+                  <textarea name="description" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Task description and requirements">${
+                    task.description || ""
+                  }</textarea>
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Assignee ID <span class="text-red-600">*</span></label>
-                  <input type="number" name="assigneeId" required value="${task.assigneeId}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Employee ID">
+                  <select name="assigneeId" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="">Select an assignee</option>
+                    ${this.users
+                      .map(
+                        (user) => `
+                      <option value="${user.id}" ${
+                          task.assigneeId === user.id ? "selected" : ""
+                        }>${user.name}</option>
+                    `
+                      )
+                      .join("")}
+                  </select>
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Assigner ID <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="number" name="assignerId" value="${task.assignerId || ""}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Manager ID">
+                  <select name="assignerId" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="">Select an assigner</option>
+                    ${this.users
+                      .map(
+                        (user) => `
+                      <option value="${user.id}" ${
+                          task.assignerId === user.id ? "selected" : ""
+                        }>${user.name}</option>
+                    `
+                      )
+                      .join("")}
+                  </select>
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Due Date <span class="text-red-600">*</span></label>
-                  <input type="date" name="dueDate" required value="${task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : ""}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                  <input type="date" name="dueDate" required value="${
+                    task.dueDate
+                      ? new Date(task.dueDate).toISOString().split("T")[0]
+                      : ""
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Priority <span class="text-red-600">*</span></label>
                   <select name="priority" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-                    <option value="High" ${task.priority === "High" ? "selected" : ""}>High</option>
-                    <option value="Medium" ${task.priority === "Medium" ? "selected" : ""}>Medium</option>
-                    <option value="Low" ${task.priority === "Low" ? "selected" : ""}>Low</option>
+                    <option value="High" ${
+                      task.priority === "High" ? "selected" : ""
+                    }>High</option>
+                    <option value="Medium" ${
+                      task.priority === "Medium" ? "selected" : ""
+                    }>Medium</option>
+                    <option value="Low" ${
+                      task.priority === "Low" ? "selected" : ""
+                    }>Low</option>
                   </select>
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Status</label>
                   <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-                    <option value="Pending" ${task.status === "Pending" ? "selected" : ""}>Pending</option>
-                    <option value="In Progress" ${task.status === "In Progress" ? "selected" : ""}>In Progress</option>
-                    <option value="Completed" ${task.status === "Completed" ? "selected" : ""}>Completed</option>
+                    <option value="Pending" ${
+                      task.status === "Pending" ? "selected" : ""
+                    }>Pending</option>
+                    <option value="In Progress" ${
+                      task.status === "In Progress" ? "selected" : ""
+                    }>In Progress</option>
+                    <option value="Completed" ${
+                      task.status === "Completed" ? "selected" : ""
+                    }>Completed</option>
                   </select>
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
                   <label class="block text-sm font-semibold text-gray-700">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <textarea name="notes" rows="2" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Additional notes">${task.notes || ""}</textarea>
+                  <textarea name="notes" rows="2" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Additional notes">${
+                    task.notes || ""
+                  }</textarea>
                 </div>
               </div>
             </div>
@@ -302,7 +375,9 @@ export class TaskAssignment {
       title: formData.get("title"),
       description: formData.get("description") || null,
       assigneeId: parseInt(formData.get("assigneeId")),
-      assignerId: formData.get("assignerId") ? parseInt(formData.get("assignerId")) : null,
+      assignerId: formData.get("assignerId")
+        ? parseInt(formData.get("assignerId"))
+        : null,
       dueDate: new Date(formData.get("dueDate")),
       priority: formData.get("priority"),
       status: formData.get("status"),
@@ -328,7 +403,9 @@ export class TaskAssignment {
       title: formData.get("title"),
       description: formData.get("description") || null,
       assigneeId: parseInt(formData.get("assigneeId")),
-      assignerId: formData.get("assignerId") ? parseInt(formData.get("assignerId")) : null,
+      assignerId: formData.get("assignerId")
+        ? parseInt(formData.get("assignerId"))
+        : null,
       dueDate: new Date(formData.get("dueDate")),
       priority: formData.get("priority"),
       status: formData.get("status"),
