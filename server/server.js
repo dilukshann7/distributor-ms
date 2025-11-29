@@ -16,58 +16,53 @@ app.use(
 );
 const PORT = process.env.PORT || 3000;
 
-app.get("/api/users", async (req, res) => {
-  try {
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+
+app.get(
+  "/api/users",
+  asyncHandler(async (req, res) => {
     const posts = await prisma.user.findMany();
     res.json(posts);
-  } catch (e) {
-    console.error("Error fetching users:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/products", async (req, res) => {
-  try {
+app.get(
+  "/api/products",
+  asyncHandler(async (req, res) => {
     const products = await prisma.product.findMany();
     res.json(products);
-  } catch (e) {
-    console.error("Error fetching products:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/tasks", async (req, res) => {
-  try {
+app.get(
+  "/api/tasks",
+  asyncHandler(async (req, res) => {
     const tasks = await prisma.task.findMany();
     res.json(tasks);
-  } catch (e) {
-    console.error("Error fetching tasks:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/customer-feedbacks", async (req, res) => {
-  try {
+app.get(
+  "/api/customer-feedbacks",
+  asyncHandler(async (req, res) => {
     const feedbacks = await prisma.customerFeedback.findMany();
     res.json(feedbacks);
-  } catch (e) {
-    console.error("Error fetching customer feedbacks:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/orders", async (req, res) => {
-  try {
+app.get(
+  "/api/orders",
+  asyncHandler(async (req, res) => {
     const orders = await prisma.order.findMany();
     res.json(orders);
-  } catch (e) {
-    console.error("Error fetching orders:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.put("/api/orders/:id", async (req, res) => {
-  try {
+app.put(
+  "/api/orders/:id",
+  asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const orderData = req.body;
     const updatedOrder = await prisma.order.update({
@@ -75,36 +70,30 @@ app.put("/api/orders/:id", async (req, res) => {
       data: orderData,
     });
     res.json(updatedOrder);
-  } catch (e) {
-    console.error("Error updating order:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/shipments", async (req, res) => {
-  try {
+app.get(
+  "/api/shipments",
+  asyncHandler(async (req, res) => {
     const shipments = await prisma.shipment.findMany({
       include: { order: true },
     });
     res.json(shipments);
-  } catch (e) {
-    console.error("Error fetching shipments:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/invoices", async (req, res) => {
-  try {
+app.get(
+  "/api/invoices",
+  asyncHandler(async (req, res) => {
     const invoices = await prisma.invoice.findMany({});
     res.json(invoices);
-  } catch (e) {
-    console.error("Error fetching invoices:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/supplies", async (req, res) => {
-  try {
+app.get(
+  "/api/supplies",
+  asyncHandler(async (req, res) => {
     const { top } = req.query;
     const supplies = top
       ? await prisma.supply.findMany({
@@ -115,14 +104,12 @@ app.get("/api/supplies", async (req, res) => {
         })
       : await prisma.supply.findMany();
     res.json(supplies);
-  } catch (e) {
-    console.error("Error fetching supplies:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/orders/daily", async (req, res) => {
-  try {
+app.get(
+  "/api/orders/daily",
+  asyncHandler(async (req, res) => {
     const today = new Date();
     const startOfDay = new Date(
       today.getFullYear(),
@@ -154,14 +141,12 @@ app.get("/api/orders/daily", async (req, res) => {
     res.json({
       daily: { orders: totalOrders, revenue: totalRevenue, items: totalItems },
     });
-  } catch (e) {
-    console.error("Error fetching daily orders:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/orders/weekly", async (req, res) => {
-  try {
+app.get(
+  "/api/orders/weekly",
+  asyncHandler(async (req, res) => {
     const today = new Date();
     const firstDayOfWeek = new Date(today);
     firstDayOfWeek.setDate(today.getDate() - today.getDay());
@@ -187,14 +172,12 @@ app.get("/api/orders/weekly", async (req, res) => {
     res.json({
       weekly: { orders: totalOrders, revenue: totalRevenue, items: totalItems },
     });
-  } catch (e) {
-    console.error("Error fetching weekly orders:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/orders/monthly", async (req, res) => {
-  try {
+app.get(
+  "/api/orders/monthly",
+  asyncHandler(async (req, res) => {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); // start of month
     const firstDayOfNextMonth = new Date(
@@ -226,14 +209,12 @@ app.get("/api/orders/monthly", async (req, res) => {
         items: totalItems,
       },
     });
-  } catch (e) {
-    console.error("Error fetching monthly orders:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/orders/summary", async (req, res) => {
-  try {
+app.get(
+  "/api/orders/summary",
+  asyncHandler(async (req, res) => {
     const totalOrders = await prisma.order.count();
     const pendingOrders = await prisma.order.count({
       where: { status: "pending" },
@@ -251,14 +232,12 @@ app.get("/api/orders/summary", async (req, res) => {
       shipped: shippedOrders,
       completed: completedOrders,
     });
-  } catch (e) {
-    console.error("Error fetching order summary:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/shipments/summary", async (req, res) => {
-  try {
+app.get(
+  "/api/shipments/summary",
+  asyncHandler(async (req, res) => {
     const totalShipments = await prisma.shipment.count();
     const pendingShipments = await prisma.shipment.count({
       where: { status: "pending" },
@@ -275,24 +254,20 @@ app.get("/api/shipments/summary", async (req, res) => {
       inTransit: inTransitShipments,
       delivered: deliveredShipments,
     });
-  } catch (e) {
-    console.error("Error fetching shipment summary:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/sales-orders", async (req, res) => {
-  try {
+app.get(
+  "/api/sales-orders",
+  asyncHandler(async (req, res) => {
     const salesOrders = await prisma.salesOrder.findMany();
     res.json(salesOrders);
-  } catch (e) {
-    console.error("Error fetching sales orders:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/drivers", async (req, res) => {
-  try {
+app.get(
+  "/api/drivers",
+  asyncHandler(async (req, res) => {
     const drivers = await prisma.driver.findMany({
       include: {
         deliveries: {
@@ -304,20 +279,18 @@ app.get("/api/drivers", async (req, res) => {
     });
 
     res.json(drivers);
-  } catch (e) {
-    console.error("Error fetching drivers with deliveries:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/drivers/:id", async (req, res) => {
-  const driverId = parseInt(req.params.id, 10);
+app.get(
+  "/api/drivers/:id",
+  asyncHandler(async (req, res) => {
+    const driverId = parseInt(req.params.id, 10);
 
-  if (isNaN(driverId)) {
-    return res.status(400).json({ error: "Invalid driver ID" });
-  }
+    if (isNaN(driverId)) {
+      return res.status(400).json({ error: "Invalid driver ID" });
+    }
 
-  try {
     const driver = await prisma.driver.findUnique({
       where: { id: driverId },
       include: {
@@ -334,14 +307,12 @@ app.get("/api/drivers/:id", async (req, res) => {
     }
 
     res.json(driver);
-  } catch (e) {
-    console.error("Error fetching driver with deliveries:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/deliveries", async (req, res) => {
-  try {
+app.get(
+  "/api/deliveries",
+  asyncHandler(async (req, res) => {
     const deliveries = await prisma.delivery.findMany({
       include: {
         driver: true,
@@ -353,24 +324,20 @@ app.get("/api/deliveries", async (req, res) => {
     });
 
     res.json(deliveries);
-  } catch (error) {
-    console.error("Error fetching deliveries:", error);
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
+  })
+);
 
-app.get("/api/customers", async (req, res) => {
-  try {
+app.get(
+  "/api/customers",
+  asyncHandler(async (req, res) => {
     const customers = await prisma.customer.findMany();
     res.json(customers);
-  } catch (e) {
-    console.error("Error fetching customers:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/sales-invoices", async (req, res) => {
-  try {
+app.get(
+  "/api/sales-invoices",
+  asyncHandler(async (req, res) => {
     const salesInvoices = await prisma.salesInvoice.findMany({
       include: {
         salesOrder: true, // include linked SalesOrder
@@ -379,16 +346,14 @@ app.get("/api/sales-invoices", async (req, res) => {
     });
 
     res.json(salesInvoices);
-  } catch (error) {
-    console.error("Error fetching sales invoices:", error);
-    res.status(500).json({ error: "Failed to fetch sales invoices" });
-  }
-});
+  })
+);
 
-app.get("/api/sales-invoices/driver/:driverId", async (req, res) => {
-  const driverId = parseInt(req.params.driverId);
+app.get(
+  "/api/sales-invoices/driver/:driverId",
+  asyncHandler(async (req, res) => {
+    const driverId = parseInt(req.params.driverId);
 
-  try {
     const salesInvoices = await prisma.salesInvoice.findMany({
       where: {
         delivery: {
@@ -402,40 +367,32 @@ app.get("/api/sales-invoices/driver/:driverId", async (req, res) => {
     });
 
     res.json(salesInvoices);
-  } catch (error) {
-    console.error("Error fetching sales invoices by driver:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to fetch sales invoices for this driver" });
-  }
-});
+  })
+);
 
-app.get("/api/carts", async (req, res) => {
-  try {
+app.get(
+  "/api/carts",
+  asyncHandler(async (req, res) => {
     const carts = await prisma.cart.findMany();
     res.json(carts);
-  } catch (error) {
-    console.error("Error fetching carts:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/small-orders", async (req, res) => {
-  try {
+app.get(
+  "/api/small-orders",
+  asyncHandler(async (req, res) => {
     const smallOrders = await prisma.smallOrder.findMany({
       include: {
         cart: true,
       },
     });
     res.json(smallOrders);
-  } catch (error) {
-    console.error("Error fetching small orders:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.get("/api/financial-overview", async (req, res) => {
-  try {
+app.get(
+  "/api/financial-overview",
+  asyncHandler(async (req, res) => {
     const currentYear = new Date().getFullYear();
     const monthlyData = [];
     for (let month = 1; month < 13; month++) {
@@ -469,27 +426,23 @@ app.get("/api/financial-overview", async (req, res) => {
       monthlyData.push({ month, income, expenses, profit });
     }
     res.json(monthlyData);
-  } catch (error) {
-    console.error("Error fetching financial overview:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.post("/api/supplies", async (req, res) => {
-  try {
+app.post(
+  "/api/supplies",
+  asyncHandler(async (req, res) => {
     const supplyData = req.body;
     const newSupply = await prisma.supply.create({
       data: supplyData,
     });
     res.status(201).json(newSupply);
-  } catch (e) {
-    console.error("Error creating supply:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.put("/api/supplies/:id", async (req, res) => {
-  try {
+app.put(
+  "/api/supplies/:id",
+  asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const supplyData = req.body;
     const updatedSupply = await prisma.supply.update({
@@ -497,40 +450,34 @@ app.put("/api/supplies/:id", async (req, res) => {
       data: supplyData,
     });
     res.json(updatedSupply);
-  } catch (e) {
-    console.error("Error updating supply:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.post("/api/invoices", async (req, res) => {
-  try {
+app.post(
+  "/api/invoices",
+  asyncHandler(async (req, res) => {
     const invoiceData = req.body;
     const newInvoice = await prisma.invoice.create({
       data: invoiceData,
     });
     res.status(201).json(newInvoice);
-  } catch (e) {
-    console.error("Error creating invoice:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.post("/api/sales-orders", async (req, res) => {
-  try {
+app.post(
+  "/api/sales-orders",
+  asyncHandler(async (req, res) => {
     const orderData = req.body;
     const newOrder = await prisma.salesOrder.create({
       data: orderData,
     });
     res.status(201).json(newOrder);
-  } catch (e) {
-    console.error("Error creating order:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.put("/api/sales-orders/:id", async (req, res) => {
-  try {
+app.put(
+  "/api/sales-orders/:id",
+  asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const orderData = req.body;
     const updatedOrder = await prisma.salesOrder.update({
@@ -538,58 +485,85 @@ app.put("/api/sales-orders/:id", async (req, res) => {
       data: orderData,
     });
     res.json(updatedOrder);
-  } catch (e) {
-    console.error("Error updating order:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.delete("/api/sales-orders/:id", async (req, res) => {
-  try {
+app.delete(
+  "/api/sales-orders/:id",
+  asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id, 10);
     await prisma.salesOrder.delete({ where: { id } });
     res.status(204).send();
-  } catch (e) {
-    console.error("Error deleting order:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.delete("/api/customers/:id", async (req, res) => {
-  try {
+app.delete(
+  "/api/customers/:id",
+  asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id, 10);
     await prisma.customer.delete({ where: { id } });
     res.status(204).send();
-  } catch (e) {
-    console.error("Error deleting customer:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.post("/api/customers", async (req, res) => {
-  try {
+app.post(
+  "/api/customers",
+  asyncHandler(async (req, res) => {
     const customerData = req.body;
     const newCustomer = await prisma.customer.create({
       data: customerData,
     });
     res.status(201).json(newCustomer);
-  } catch (e) {
-    console.error("Error creating customer:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+  })
+);
 
-app.post("/api/shipments", async (req, res) => {
-  try {
+app.post(
+  "/api/shipments",
+  asyncHandler(async (req, res) => {
     const shipmentData = req.body;
     const newShipment = await prisma.shipment.create({
       data: shipmentData,
     });
     res.status(201).json(newShipment);
-  } catch (e) {
-    console.error("Error creating shipment:", e);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
+  })
+);
+
+app.post(
+  "/api/users",
+  asyncHandler(async (req, res) => {
+    const userData = req.body;
+    const newUser = await prisma.user.create({
+      data: userData,
+    });
+    res.status(201).json(newUser);
+  })
+);
+
+app.put(
+  "/api/users/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const userData = req.body;
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: userData,
+    });
+    res.json(updatedUser);
+  })
+);
+
+app.delete(
+  "/api/users/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    await prisma.user.delete({ where: { id } });
+    res.status(204).send();
+  })
+);
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: err.message || "Internal Server Error" });
 });
 
 app.listen(PORT, () => {
