@@ -11,7 +11,6 @@ class ManagerDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "overview";
-    this.isSidebarOpen = true;
   }
 
   async render() {
@@ -97,13 +96,15 @@ class ManagerDashboard {
 
   async renderSection(section) {
     const sections = {
-      overview: new EmployeeOversight(),
+      overview: new EmployeeOversight(this.container),
       tasks: new TaskAssignment(),
       reports: new OperationalReports(),
       stock: new StockManagement(),
       feedback: new CustomerFeedback(),
       delivery: new DeliveryTracking(),
     };
+    this.sections = sections;
+    window.managerDashboard = this;
     const sectionInstance = sections[section];
     if (section === "delivery") {
       await sectionInstance.getDeliveries();
