@@ -342,7 +342,15 @@ app.get(
 app.get(
   "/api/sales-orders",
   asyncHandler(async (req, res) => {
-    const salesOrders = await prisma.salesOrder.findMany();
+    const salesOrders = await prisma.salesOrder.findMany({
+      include: {
+        driver: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
     res.json(salesOrders);
   })
 );
