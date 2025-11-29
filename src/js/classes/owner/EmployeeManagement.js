@@ -31,51 +31,51 @@ export class EmployeeManagement {
 
   renderList() {
     return `
-      <div class="p-8 space-y-6">
+      <div class="owner-section-container">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900">Employee Management</h2>
-            <p class="text-gray-500 mt-1">Manage staff, salaries, and performance</p>
+            <h2 class="owner-title">Employee Management</h2>
+            <p class="owner-subtitle">Manage staff, salaries, and performance</p>
           </div>
-          <button onclick="window.ownerDashboard.sections.employees.showAddFormHandler()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
+          <button onclick="window.ownerDashboard.sections.employees.showAddFormHandler()" class="owner-btn-primary">
             ${getIconHTML("plus")}
             Add Employee
           </button>
         </div>
 
-        <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+        <div class="owner-card">
           <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
+            <table class="owner-table">
+              <thead class="owner-table-head">
                 <tr>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Name</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Role</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Salary</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Bonus</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Attendance</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                  <th class="owner-table-th">Name</th>
+                  <th class="owner-table-th">Role</th>
+                  <th class="owner-table-th">Salary</th>
+                  <th class="owner-table-th">Bonus</th>
+                  <th class="owner-table-th">Attendance</th>
+                  <th class="owner-table-th">Status</th>
+                  <th class="owner-table-th">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200">
+              <tbody class="owner-table-body">
                 ${this.employees
                   .map(
                     /*html*/
                     (emp) => `
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm text-gray-900 font-medium">${
+                  <tr class="owner-table-tr">
+                    <td class="owner-table-td font-medium text-gray-900">${
                       emp.name
                     }</td>
-                    <td class="px-6 py-4 text-sm text-gray-500">${emp.role}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${emp.salary.toLocaleString(
+                    <td class="owner-table-td text-gray-500">${emp.role}</td>
+                    <td class="owner-table-td text-gray-900">${emp.salary.toLocaleString(
                       "en-us",
                       { style: "currency", currency: "LKR" }
                     )}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${emp.bonus.toLocaleString(
+                    <td class="owner-table-td text-gray-900">${emp.bonus.toLocaleString(
                       "en-us",
                       { style: "currency", currency: "LKR" }
                     )}</td>
-                    <td class="px-6 py-4 text-sm">
+                    <td class="owner-table-td">
                       <div class="flex items-center gap-2">
                         <div class="w-32 bg-gray-200 rounded-full h-2">
                           <div class="bg-green-500 h-2 rounded-full" style="width: ${
@@ -87,27 +87,27 @@ export class EmployeeManagement {
                         }%</span>
                       </div>
                     </td>
-                    <td class="px-6 py-4 text-sm">
-                      <span class="px-3 py-1 rounded-full text-xs font-medium ${
+                    <td class="owner-table-td">
+                      <span class="owner-badge ${
                         emp.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                          ? "owner-badge-success"
+                          : "owner-badge-danger"
                       }">
                         ${emp.status}
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-sm flex items-center gap-2">
-                      <button class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-700">
+                    <td class="owner-table-td flex items-center gap-2">
+                      <button class="owner-btn-icon">
                         ${getIconHTML("eye")}
                       </button>
                       <button onclick="window.ownerDashboard.sections.employees.showEditFormHandler(${
                         emp.id
-                      })" class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-700">
+                      })" class="owner-btn-icon">
                         ${getIconHTML("edit")}
                       </button>
                       <button onclick="window.ownerDashboard.sections.employees.deleteEmployeeHandler(${
                         emp.id
-                      })" class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-red-600">
+                      })" class="owner-btn-icon-danger">
                         ${getIconHTML("trash")}
                       </button>
                     </td>
@@ -125,20 +125,20 @@ export class EmployeeManagement {
 
   renderAddForm() {
     return `
-      <div class="max-w-4xl mx-auto p-8 animate-fade-in">
+      <div class="owner-form-container">
         <div class="flex items-center justify-between mb-8">
           <div>
-            <h3 class="text-2xl font-bold text-gray-900">Add New Employee</h3>
-            <p class="text-gray-500 mt-1">Create a new employee account</p>
+            <h3 class="owner-title">Add New Employee</h3>
+            <p class="owner-subtitle">Create a new employee account</p>
           </div>
         </div>
 
-        <form id="addEmployeeForm" class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden" onsubmit="window.ownerDashboard.sections.employees.submitAddForm(event)">
+        <form id="addEmployeeForm" class="owner-card" onsubmit="window.ownerDashboard.sections.employees.submitAddForm(event)">
           <div class="p-8 space-y-8">
             
             <!-- Personal Information -->
             <div>
-              <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+              <h4 class="owner-section-title">
                 ${getIconHTML("user").replace(
                   'class="w-5 h-5"',
                   'class="w-5 h-5 text-blue-600"'
@@ -147,35 +147,35 @@ export class EmployeeManagement {
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Full Name <span class="text-red-600">*</span></label>
-                  <input type="text" name="name" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. John Doe">
+                  <label class="owner-label">Full Name <span class="text-red-600">*</span></label>
+                  <input type="text" name="name" required class="owner-input" placeholder="e.g. John Doe">
                 </div>
                 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Email <span class="text-red-600">*</span></label>
-                  <input type="email" name="email" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. john@example.com">
+                  <label class="owner-label">Email <span class="text-red-600">*</span></label>
+                  <input type="email" name="email" required class="owner-input" placeholder="e.g. john@example.com">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Phone Number <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="tel" name="phone" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. +94771234567">
+                  <label class="owner-label">Phone Number <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="tel" name="phone" class="owner-input" placeholder="e.g. +94771234567">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Password <span class="text-red-600">*</span></label>
-                  <input type="password" name="password" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter password">
+                  <label class="owner-label">Password <span class="text-red-600">*</span></label>
+                  <input type="password" name="password" required class="owner-input" placeholder="Enter password">
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
-                  <label class="block text-sm font-semibold text-gray-700">Address <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <textarea name="address" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter full address"></textarea>
+                  <label class="owner-label">Address <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="address" rows="3" class="owner-input" placeholder="Enter full address"></textarea>
                 </div>
               </div>
             </div>
 
             <!-- Employment Details -->
             <div class="border-t border-gray-100 pt-8">
-              <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+              <h4 class="owner-section-title">
                 ${getIconHTML("briefcase").replace(
                   'class="w-5 h-5"',
                   'class="w-5 h-5 text-blue-600"'
@@ -184,8 +184,8 @@ export class EmployeeManagement {
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Role <span class="text-red-600">*</span></label>
-                  <select name="role" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <label class="owner-label">Role <span class="text-red-600">*</span></label>
+                  <select name="role" required class="owner-input">
                     <option value="" disabled selected>Select role</option>
                     <option value="Salesman">Salesman</option>
                     <option value="Driver">Driver</option>
@@ -199,8 +199,8 @@ export class EmployeeManagement {
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Status</label>
-                  <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <label class="owner-label">Status</label>
+                  <select name="status" class="owner-input">
                     <option value="Active" selected>Active</option>
                     <option value="On Leave">On Leave</option>
                     <option value="Inactive">Inactive</option>
@@ -208,33 +208,33 @@ export class EmployeeManagement {
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Attendance <span class="text-gray-400 font-normal">(Days)</span></label>
-                  <input type="text" name="attendance" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. 22/30">
+                  <label class="owner-label">Attendance <span class="text-gray-400 font-normal">(Days)</span></label>
+                  <input type="text" name="attendance" class="owner-input" placeholder="e.g. 22/30">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Performance Rating</label>
-                  <input type="number" name="performanceRating" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. 5">
+                  <label class="owner-label">Performance Rating</label>
+                  <input type="number" name="performanceRating" class="owner-input" placeholder="e.g. 5">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Salary <span class="text-gray-400 font-normal">(LKR)</span></label>
-                  <input type="number" name="salary" step="0.01" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. 50000">
+                  <label class="owner-label">Salary <span class="text-gray-400 font-normal">(LKR)</span></label>
+                  <input type="number" name="salary" step="0.01" class="owner-input" placeholder="e.g. 50000">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Bonus <span class="text-gray-400 font-normal">(LKR)</span></label>
-                  <input type="number" name="bonus" step="0.01" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. 5000">
+                  <label class="owner-label">Bonus <span class="text-gray-400 font-normal">(LKR)</span></label>
+                  <input type="number" name="bonus" step="0.01" class="owner-input" placeholder="e.g. 5000">
                 </div>
               </div>
             </div>
           </div>
 
           <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" onclick="window.ownerDashboard.sections.employees.hideFormHandler()" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors">
+            <button type="button" onclick="window.ownerDashboard.sections.employees.hideFormHandler()" class="owner-btn-secondary">
               Cancel
             </button>
-            <button type="submit" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
+            <button type="submit" class="owner-btn-primary">
               ${getIconHTML("check-circle")}
               Add Employee
             </button>
@@ -249,20 +249,20 @@ export class EmployeeManagement {
     if (!emp) return this.renderList();
 
     return `
-      <div class="max-w-4xl mx-auto p-8 animate-fade-in">
+      <div class="owner-form-container">
         <div class="flex items-center justify-between mb-8">
           <div>
-            <h3 class="text-2xl font-bold text-gray-900">Edit Employee</h3>
-            <p class="text-gray-500 mt-1">Update employee information</p>
+            <h3 class="owner-title">Edit Employee</h3>
+            <p class="owner-subtitle">Update employee information</p>
           </div>
         </div>
 
-        <form id="editEmployeeForm" class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden" onsubmit="window.ownerDashboard.sections.employees.submitEditForm(event)">
+        <form id="editEmployeeForm" class="owner-card" onsubmit="window.ownerDashboard.sections.employees.submitEditForm(event)">
           <div class="p-8 space-y-8">
             
             <!-- Personal Information -->
             <div>
-              <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+              <h4 class="owner-section-title">
                 ${getIconHTML("user").replace(
                   'class="w-5 h-5"',
                   'class="w-5 h-5 text-blue-600"'
@@ -271,34 +271,34 @@ export class EmployeeManagement {
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Full Name <span class="text-red-600">*</span></label>
+                  <label class="owner-label">Full Name <span class="text-red-600">*</span></label>
                   <input type="text" name="name" required value="${
                     emp.name
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. John Doe">
+                  }" class="owner-input" placeholder="e.g. John Doe">
                 </div>
                 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Email <span class="text-red-600">*</span></label>
+                  <label class="owner-label">Email <span class="text-red-600">*</span></label>
                   <input type="email" name="email" required value="${
                     emp.email
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. john@example.com">
+                  }" class="owner-input" placeholder="e.g. john@example.com">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Phone Number <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <label class="owner-label">Phone Number <span class="text-gray-400 font-normal">(Optional)</span></label>
                   <input type="tel" name="phone" value="${
                     emp.phone || ""
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. +94771234567">
+                  }" class="owner-input" placeholder="e.g. +94771234567">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Password <span class="text-gray-400 font-normal">(Leave blank to keep current)</span></label>
-                  <input type="password" name="password" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter new password">
+                  <label class="owner-label">Password <span class="text-gray-400 font-normal">(Leave blank to keep current)</span></label>
+                  <input type="password" name="password" class="owner-input" placeholder="Enter new password">
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
-                  <label class="block text-sm font-semibold text-gray-700">Address <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <textarea name="address" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter full address">${
+                  <label class="owner-label">Address <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="address" rows="3" class="owner-input" placeholder="Enter full address">${
                     emp.address || ""
                   }</textarea>
                 </div>
@@ -307,7 +307,7 @@ export class EmployeeManagement {
 
             <!-- Employment Details -->
             <div class="border-t border-gray-100 pt-8">
-              <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+              <h4 class="owner-section-title">
                 ${getIconHTML("briefcase").replace(
                   'class="w-5 h-5"',
                   'class="w-5 h-5 text-blue-600"'
@@ -316,8 +316,8 @@ export class EmployeeManagement {
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Role <span class="text-red-600">*</span></label>
-                  <select name="role" required class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <label class="owner-label">Role <span class="text-red-600">*</span></label>
+                  <select name="role" required class="owner-input">
                     <option value="Salesman" ${
                       emp.role === "Salesman" ? "selected" : ""
                     }>Salesman</option>
@@ -346,8 +346,8 @@ export class EmployeeManagement {
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Status</label>
-                  <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <label class="owner-label">Status</label>
+                  <select name="status" class="owner-input">
                     <option value="Active" ${
                       emp.status === "Active" ? "selected" : ""
                     }>Active</option>
@@ -361,41 +361,41 @@ export class EmployeeManagement {
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Attendance <span class="text-gray-400 font-normal">(Days)</span></label>
+                  <label class="owner-label">Attendance <span class="text-gray-400 font-normal">(Days)</span></label>
                   <input type="text" name="attendance" value="${
                     emp.attendance || ""
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. 22/30">
+                  }" class="owner-input" placeholder="e.g. 22/30">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Performance Rating</label>
+                  <label class="owner-label">Performance Rating</label>
                   <input type="number" name="performanceRating" value="${
                     emp.performanceRating || ""
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. 5">
+                  }" class="owner-input" placeholder="e.g. 5">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Salary <span class="text-gray-400 font-normal">(LKR)</span></label>
+                  <label class="owner-label">Salary <span class="text-gray-400 font-normal">(LKR)</span></label>
                   <input type="number" name="salary" step="0.01" value="${
                     emp.salary || ""
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. 50000">
+                  }" class="owner-input" placeholder="e.g. 50000">
                 </div>
 
                 <div class="space-y-2">
-                  <label class="block text-sm font-semibold text-gray-700">Bonus <span class="text-gray-400 font-normal">(LKR)</span></label>
+                  <label class="owner-label">Bonus <span class="text-gray-400 font-normal">(LKR)</span></label>
                   <input type="number" name="bonus" step="0.01" value="${
                     emp.bonus || ""
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g. 5000">
+                  }" class="owner-input" placeholder="e.g. 5000">
                 </div>
               </div>    
             </div>
           </div>
 
           <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" onclick="window.ownerDashboard.sections.employees.hideFormHandler()" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors">
+            <button type="button" onclick="window.ownerDashboard.sections.employees.hideFormHandler()" class="owner-btn-secondary">
               Cancel
             </button>
-            <button type="submit" class="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
+            <button type="submit" class="owner-btn-primary">
               ${getIconHTML("check-circle")}
               Update Employee
             </button>

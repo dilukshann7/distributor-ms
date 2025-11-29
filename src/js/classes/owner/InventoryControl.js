@@ -28,63 +28,63 @@ export class InventoryControl {
 
   render() {
     return `
-      <div class="p-8 space-y-6">
+      <div class="owner-section-container">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900">Inventory Control</h2>
-            <p class="text-gray-500 mt-1">Manage stock levels and product details</p>
+            <h2 class="owner-title">Inventory Control</h2>
+            <p class="owner-subtitle">Manage stock levels and product details</p>
           </div>
-          <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
+          <button class="owner-btn-primary">
             ${getIconHTML("plus")}
             Add Product
           </button>
         </div>
 
-        <div class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+        <div class="owner-card">
           <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
+            <table class="owner-table">
+              <thead class="owner-table-head">
                 <tr>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Product Name</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">SKU</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Quantity</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Min Stock</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Price</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+                  <th class="owner-table-th">Product Name</th>
+                  <th class="owner-table-th">SKU</th>
+                  <th class="owner-table-th">Quantity</th>
+                  <th class="owner-table-th">Min Stock</th>
+                  <th class="owner-table-th">Price</th>
+                  <th class="owner-table-th">Status</th>
+                  <th class="owner-table-th">Actions</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200">
+              <tbody class="owner-table-body">
                 ${this.inventory
                   .map(
                     (item) => `
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm text-gray-900 font-medium">${
+                  <tr class="owner-table-tr">
+                    <td class="owner-table-td font-medium text-gray-900">${
                       item.name
                     }</td>
-                    <td class="px-6 py-4 text-sm text-gray-500">${item.sku}</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${
+                    <td class="owner-table-td text-gray-500">${item.sku}</td>
+                    <td class="owner-table-td text-gray-900">${
                       item.quantity
                     } units</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${
+                    <td class="owner-table-td text-gray-900">${
                       item.minStock
                     } units</td>
-                    <td class="px-6 py-4 text-sm text-gray-900">${item.price.toLocaleString(
+                    <td class="owner-table-td text-gray-900">${item.price.toLocaleString(
                       "en-US",
                       { style: "currency", currency: "LKR" }
                     )}</td>
-                    <td class="px-6 py-4 text-sm">
-                      <span class="px-3 py-1 rounded-full text-xs font-medium ${
+                    <td class="owner-table-td">
+                      <span class="owner-badge ${
                         item.status === "In Stock"
-                          ? "bg-green-100 text-green-700"
+                          ? "owner-badge-success"
                           : item.status === "Low Stock"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
+                          ? "owner-badge-warning"
+                          : "owner-badge-danger"
                       }">
                         ${item.status}
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-sm flex items-center gap-2">
+                    <td class="owner-table-td flex items-center gap-2">
                       <button class="px-3 py-1 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium">Edit</button>
                       <button class="px-3 py-1 rounded-lg bg-red-600 text-white hover:bg-red-700 text-xs font-medium">Delete</button>
                     </td>

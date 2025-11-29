@@ -5,18 +5,18 @@ export class ReportsSection {
 
   render() {
     return `
-      <div class="p-8 space-y-6">
+      <div class="owner-section-container">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
-            <p class="text-gray-500 mt-1">Generate and view business reports</p>
+            <h2 class="owner-title">Reports & Analytics</h2>
+            <p class="owner-subtitle">Generate and view business reports</p>
           </div>
           <div class="flex gap-3">
-            <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors">
+            <button class="owner-btn-secondary flex items-center gap-2">
               ${getIconHTML("filter")}
               Filter
             </button>
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
+            <button class="owner-btn-primary">
               ${getIconHTML("download")}
               Export All
             </button>
@@ -51,7 +51,7 @@ export class ReportsSection {
 
   renderReportCard(title, description, lastGenerated) {
     return `
-      <div class="bg-white rounded-lg shadow p-5 border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow">
+      <div class="owner-card p-5 cursor-pointer hover:shadow-lg transition-shadow">
         <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
         <p class="text-sm text-gray-500 mt-1">${description}</p>
         <div class="flex items-center justify-between mt-3">

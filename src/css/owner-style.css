@@ -1,0 +1,133 @@
+/* Owner Dashboard Styles */
+
+/* Layout & Containers */
+.owner-dashboard-container {
+  @apply flex h-screen bg-gray-50;
+}
+
+.owner-main-content {
+  @apply flex-1 flex flex-col overflow-hidden;
+}
+
+.owner-content-area {
+  @apply flex-1 overflow-auto bg-gray-50;
+}
+
+.owner-section-container {
+  @apply p-8 space-y-6;
+}
+
+.owner-card {
+  @apply bg-white rounded-lg shadow border border-gray-200 overflow-hidden;
+}
+
+.owner-form-container {
+  @apply max-w-4xl mx-auto p-8 animate-fade-in;
+}
+
+/* Sidebar */
+.owner-sidebar {
+  @apply w-64 bg-white border-r border-gray-200 flex flex-col;
+}
+
+.owner-nav-item {
+  @apply w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors;
+}
+
+.owner-nav-item-active {
+  @apply bg-blue-600 text-white;
+}
+
+.owner-nav-item-inactive {
+  @apply text-gray-700 hover:bg-gray-100;
+}
+
+/* Header */
+.owner-header {
+  @apply bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between;
+}
+
+.owner-search-input {
+  @apply w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+/* Typography */
+.owner-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.owner-subtitle {
+  @apply text-gray-500 mt-1;
+}
+
+.owner-section-title {
+  @apply text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2;
+}
+
+.owner-label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+/* Buttons */
+.owner-btn-primary {
+  @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors;
+}
+
+.owner-btn-secondary {
+  @apply px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors;
+}
+
+.owner-btn-icon {
+  @apply p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-700;
+}
+
+.owner-btn-icon-danger {
+  @apply p-2 hover:bg-gray-100 rounded-lg transition-colors text-red-600;
+}
+
+/* Tables */
+.owner-table {
+  @apply w-full;
+}
+
+.owner-table-head {
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+.owner-table-th {
+  @apply px-6 py-4 text-left text-sm font-semibold text-gray-700;
+}
+
+.owner-table-body {
+  @apply divide-y divide-gray-200;
+}
+
+.owner-table-tr {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.owner-table-td {
+  @apply px-6 py-4 text-sm;
+}
+
+/* Forms */
+.owner-input {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+}
+
+/* Badges */
+.owner-badge {
+  @apply px-3 py-1 rounded-full text-xs font-medium;
+}
+
+.owner-badge-success {
+  @apply bg-green-100 text-green-700;
+}
+
+.owner-badge-warning {
+  @apply bg-yellow-100 text-yellow-700;
+}
+
+.owner-badge-danger {
+  @apply bg-red-100 text-red-700;
+}

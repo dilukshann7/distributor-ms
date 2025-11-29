@@ -18,9 +18,9 @@ export class OperationsMonitor {
 
   render() {
     return `
-      <div class="p-8 space-y-6">
-        <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-900 mb-6">Today's Tasks</h3>
+      <div class="owner-section-container">
+        <div class="owner-card p-6">
+          <h3 class="owner-section-title">Today's Tasks</h3>
           <div class="space-y-3">
             ${this.tasks
               .map(
@@ -36,12 +36,12 @@ export class OperationsMonitor {
                   <span class="text-sm text-gray-500">${new Date(
                     task.dueDate
                   ).toLocaleDateString()}</span>
-                  <span class="px-3 py-1 rounded-full text-xs font-medium ${
+                  <span class="owner-badge ${
                     task.status === "Completed"
-                      ? "bg-green-100 text-green-700"
+                      ? "owner-badge-success"
                       : task.status === "In Progress"
                       ? "bg-blue-100 text-blue-700"
-                      : "bg-yellow-100 text-yellow-700"
+                      : "owner-badge-warning"
                   }">
                     ${task.status}
                   </span>

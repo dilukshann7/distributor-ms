@@ -1,5 +1,6 @@
 import { getIconHTML } from "../../assets/icons/index.js";
 import logo from "../../assets/logo-tr.png";
+import "../../css/owner-style.css";
 import { EmployeeManagement } from "./owner/EmployeeManagement.js";
 import { InventoryControl } from "./owner/InventoryControl.js";
 import { OperationsMonitor } from "./owner/OperationsMonitor.js";
@@ -13,11 +14,11 @@ class OwnerDashboard {
 
   async render() {
     this.container.innerHTML = `
-      <div class="flex h-screen bg-gray-50">
+      <div class="owner-dashboard-container">
         ${this.renderSidebar()}
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="owner-main-content">
           ${this.renderHeader()}
-          <main id="dashboardContent" class="flex-1 overflow-auto bg-gray-50">
+          <main id="dashboardContent" class="owner-content-area">
             <div class="p-8 text-center text-gray-500">Loading...</div>
           </main>
         </div>
@@ -40,7 +41,7 @@ class OwnerDashboard {
     ];
 
     return `
-      <aside class="w-64 bg-white border-r border-gray-200 flex flex-col">
+      <aside class="owner-sidebar">
         <div class="p-6 border-b border-gray-200">
           <div class="flex items-center gap-3">
             <div>
@@ -53,12 +54,10 @@ class OwnerDashboard {
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${
-              item.id
-            }" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+            <button data-section="${item.id}" class="nav-item owner-nav-item ${
                 this.currentSection === item.id
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-700 hover:bg-gray-100"
+                  ? "owner-nav-item-active"
+                  : "owner-nav-item-inactive"
               }">
               ${this.getIcon(item.icon)}
               <span class="text-sm font-medium">${item.label}</span>
@@ -81,11 +80,11 @@ class OwnerDashboard {
 
   renderHeader() {
     return `
-      <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
+      <header class="owner-header">
         <div class="flex-1 max-w-md">
           <div class="relative">
             ${getIconHTML("search")}
-            <input type="text" placeholder="Search..." class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 text-gray-900 placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            <input type="text" placeholder="Search..." class="owner-search-input"/>
           </div>
         </div>
 
@@ -94,7 +93,6 @@ class OwnerDashboard {
             ${getIconHTML("bell")}
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
-
     
         </div>
       </header>
@@ -108,7 +106,7 @@ class OwnerDashboard {
       operations: new OperationsMonitor(),
       reports: new ReportsSection(),
     };
-    
+
     this.sections = sections;
     window.ownerDashboard = this;
 
