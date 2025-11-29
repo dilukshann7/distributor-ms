@@ -77,6 +77,39 @@ app.get(
   })
 );
 
+app.post(
+  "/api/tasks",
+  asyncHandler(async (req, res) => {
+    const taskData = req.body;
+    const newTask = await prisma.task.create({
+      data: taskData,
+    });
+    res.status(201).json(newTask);
+  })
+);
+
+app.put(
+  "/api/tasks/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const taskData = req.body;
+    const updatedTask = await prisma.task.update({
+      where: { id },
+      data: taskData,
+    });
+    res.json(updatedTask);
+  })
+);
+
+app.delete(
+  "/api/tasks/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    await prisma.task.delete({ where: { id } });
+    res.status(204).send();
+  })
+);
+
 app.get(
   "/api/customer-feedbacks",
   asyncHandler(async (req, res) => {
