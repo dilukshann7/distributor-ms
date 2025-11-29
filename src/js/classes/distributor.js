@@ -114,7 +114,10 @@ class DistributorDashboard {
     } else if (section === "delivery") {
       await sectionInstance.getDeliveries();
     } else if (section === "authorization") {
-      await sectionInstance.getPendingOrders();
+      await Promise.all([
+        sectionInstance.getPendingOrders(),
+        sectionInstance.getDrivers(),
+      ]);
     }
 
     return sectionInstance.render();
