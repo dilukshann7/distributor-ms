@@ -1,5 +1,6 @@
 import { SalesOrder } from "../../models/SalesOrder.js";
 import { Driver } from "../../models/Drivers.js";
+import { Delivery } from "../../models/Delivery.js";
 
 export class OrderAuthorization {
   constructor(container) {
@@ -35,15 +36,24 @@ export class OrderAuthorization {
     this.selectedDrivers[orderId] = driverId;
   }
 
-  approveOrder(orderId) {
+  async approveOrder(orderId) {
     const driverId = this.selectedDrivers[orderId];
-    
+
     if (!driverId) {
       alert("Please assign a driver before approving the order.");
       return;
     }
 
     if (confirm("Approve this order and assign to selected driver?")) {
+      // Find the order and driver details
+      const order = this.pendingOrders.find((o) => o.id === parseInt(orderId));
+      const driver = this.drivers.find((d) => d.id === parseInt(driverId));
+
+      if (!order || !driver) {
+        alert("Order or driver not found.");
+        return;
+      }
+
       const orderData = {
         status: "processing",
         driverId: parseInt(driverId),
@@ -57,6 +67,45 @@ export class OrderAuthorization {
         .catch((error) => {
           console.error("Error approving order:", error);
           alert("Error approving order. Please try again.");
+        });
+
+      // Generate delivery number
+      const deliveryNumber = `DEL-${Date.now()}-${orderId}`;
+
+      // Use customer name and notes for address (or prompt for it)
+      const deliveryAddress =
+        order.notes || `Delivery for ${order.customerName}`;
+
+      // Set scheduled date (default to tomorrow)
+      const scheduledDate = new Date();
+      scheduledDate.setDate(scheduledDate.getDate() + 1);
+
+      const deliveryData = {
+        deliveryNumber: deliveryNumber,
+        driverId: parseInt(driverId),
+        vehicleId: driver.vehicleId ? parseInt(driver.vehicleId) : 0,
+        deliveryAddress: deliveryAddress,
+        scheduledDate: scheduledDate.toISOString(),
+        estimatedTime: 60, // Default 60 minutes
+        status: "pending",
+        notes: `Order ${order.orderNumber} - ${order.customerName}`,
+      };
+
+      Delivery.create(deliveryData)
+        .then((response) => {
+          // Link the delivery to the sales order
+          const deliveryId = response.data.id;
+          SalesOrder.update(orderId, { deliveryId: deliveryId })
+            .then(() => {
+              this.getPendingOrders().then(() => this.refresh(this.container));
+            })
+            .catch((error) => {
+              console.error("Error linking delivery to order:", error);
+            });
+        })
+        .catch((error) => {
+          console.error("Error creating delivery:", error);
+          alert("Error creating delivery. Please try again.");
         });
     }
   }
@@ -83,12 +132,6 @@ export class OrderAuthorization {
     }
   }
 
-  getDriverOrders(driverId) {
-    return this.pendingOrders.filter(
-      (order) => this.selectedDrivers[order.id] === String(driverId)
-    );
-  }
-
   render() {
     return `
       <div class="space-y-6">
@@ -97,7 +140,6 @@ export class OrderAuthorization {
           <p class="text-gray-600 mt-1">Authorize and approve pending orders with driver assignment</p>
         </div>
 
-        <!-- Pending Orders -->
         <div class="dist-card">
           <div class="divide-y divide-gray-200">
             ${
@@ -149,7 +191,6 @@ export class OrderAuthorization {
                   </div>
                 </div>
 
-                <!-- Driver Assignment Section -->
                 <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <label class="block text-sm font-semibold text-gray-900 mb-2">Assign Driver</label>
                   <select 
@@ -176,21 +217,6 @@ export class OrderAuthorization {
                       )
                       .join("")}
                   </select>
-                  
-                  ${
-                    this.selectedDrivers[order.id]
-                      ? `
-                    <div class="mt-3 p-3 bg-white rounded border border-gray-200">
-                      ${this.renderDriverInfo(
-                        this.drivers.find(
-                          (d) =>
-                            d.id === parseInt(this.selectedDrivers[order.id])
-                        )
-                      )}
-                    </div>
-                  `
-                      : ""
-                  }
                 </div>
 
                 <div class="flex gap-3">
@@ -214,98 +240,6 @@ export class OrderAuthorization {
             }
           </div>
         </div>
-      </div>
-    `;
-  }
-
-  renderDriverInfo(driver) {
-    if (!driver) return "";
-
-    const assignedOrders = driver.deliveries
-      ? driver.deliveries.reduce((count, delivery) => {
-          return count + (delivery.salesOrders ? delivery.salesOrders.length : 0);
-        }, 0)
-      : 0;
-
-    return `
-      <div class="space-y-2">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-semibold text-gray-900">Driver Details</span>
-        </div>
-        <div class="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <span class="text-gray-500">Name:</span>
-            <span class="ml-2 font-medium text-gray-900">${
-              driver.user.name
-            }</span>
-          </div>
-          <div>
-            <span class="text-gray-500">Phone:</span>
-            <span class="ml-2 font-medium text-gray-900">${
-              driver.user.phone || "N/A"
-            }</span>
-          </div>
-          <div>
-            <span class="text-gray-500">Vehicle:</span>
-            <span class="ml-2 font-medium text-gray-900">${
-              driver.vehicleType || "N/A"
-            } (${driver.vehicleId || "No ID"})</span>
-          </div>
-          <div>
-            <span class="text-gray-500">License:</span>
-            <span class="ml-2 font-medium text-gray-900">${
-              driver.licenseNumber || "N/A"
-            }</span>
-          </div>
-          <div>
-            <span class="text-gray-500">Location:</span>
-            <span class="ml-2 font-medium text-gray-900">${
-              driver.currentLocation || "N/A"
-            }</span>
-          </div>
-          <div>
-            <span class="text-gray-500">Active Deliveries:</span>
-            <span class="ml-2 font-medium text-gray-900">${
-              driver.deliveries?.length || 0
-            }</span>
-          </div>
-        </div>
-        
-        ${
-          driver.deliveries && driver.deliveries.length > 0
-            ? `
-          <div class="mt-3 pt-3 border-t border-gray-200">
-            <p class="text-xs font-semibold text-gray-700 mb-2">Current Deliveries:</p>
-            <div class="space-y-1 max-h-32 overflow-y-auto">
-              ${driver.deliveries
-                .map(
-                  (delivery) => `
-                <div class="text-xs bg-gray-50 p-2 rounded">
-                  <div class="flex justify-between">
-                    <span class="font-medium">${delivery.deliveryNumber}</span>
-                    <span class="text-gray-500">${delivery.status}</span>
-                  </div>
-                  <div class="text-gray-600 mt-1">
-                    <div>Scheduled: ${new Date(
-                      delivery.scheduledDate
-                    ).toLocaleDateString()}</div>
-                    ${
-                      delivery.salesOrders && delivery.salesOrders.length > 0
-                        ? `<div>Orders: ${delivery.salesOrders
-                            .map((so) => so.orderNumber)
-                            .join(", ")}</div>`
-                        : ""
-                    }
-                  </div>
-                </div>
-              `
-                )
-                .join("")}
-            </div>
-          </div>
-        `
-            : '<p class="text-xs text-gray-500 mt-2">No active deliveries</p>'
-        }
       </div>
     `;
   }
