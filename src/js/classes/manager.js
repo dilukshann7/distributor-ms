@@ -97,9 +97,9 @@ class ManagerDashboard {
   async renderSection(section) {
     const sections = {
       overview: new EmployeeOversight(this.container),
-      tasks: new TaskAssignment(),
+      tasks: new TaskAssignment(this.container),
       reports: new OperationalReports(),
-      stock: new StockManagement(),
+      stock: new StockManagement(this.container),
       feedback: new CustomerFeedback(),
       delivery: new DeliveryTracking(),
     };
