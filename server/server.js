@@ -23,8 +23,19 @@ const asyncHandler = (fn) => (req, res, next) => {
 app.get(
   "/api/users",
   asyncHandler(async (req, res) => {
-    const posts = await prisma.user.findMany();
-    res.json(posts);
+    const users = await prisma.user.findMany({
+      include: {
+        driverProfile: true,
+        managerProfile: true,
+        salesmanProfile: true,
+        stockKeeperProfile: true,
+        cashierProfile: true,
+        supplierProfile: true,
+        distributorProfile: true,
+        assistantManagerProfile: true,
+      },
+    });
+    res.json(users);
   })
 );
 
@@ -341,6 +352,7 @@ app.get(
   asyncHandler(async (req, res) => {
     const drivers = await prisma.driver.findMany({
       include: {
+        user: true,
         deliveries: {
           include: {
             salesOrders: true,
@@ -365,6 +377,7 @@ app.get(
     const driver = await prisma.driver.findUnique({
       where: { id: driverId },
       include: {
+        user: true,
         deliveries: {
           include: {
             salesOrders: true,
@@ -603,9 +616,80 @@ app.post(
   "/api/users",
   asyncHandler(async (req, res) => {
     const userData = req.body;
-    const newUser = await prisma.user.create({
-      data: userData,
+    const { role } = userData;
+
+    const newUser = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.create({
+        data: userData,
+      });
+
+      switch (role) {
+        case "Driver":
+          await prisma.driver.create({
+            data: {
+              userId: user.id,
+              vehicleId: userData.vehicleId || null,
+              vehicleType: userData.vehicleType || null,
+              licenseNumber: userData.licenseNumber || null,
+            },
+          });
+          break;
+        case "Manager":
+          await prisma.manager.create({
+            data: {
+              userId: user.id,
+            },
+          });
+          break;
+        case "Salesman":
+          await prisma.salesman.create({
+            data: {
+              userId: user.id,
+              salesTarget: userData.salesTarget || null,
+            },
+          });
+          break;
+        case "Stock Keeper":
+          await prisma.stockKeeper.create({
+            data: {
+              userId: user.id,
+            },
+          });
+          break;
+        case "Cashier":
+          await prisma.cashier.create({
+            data: {
+              userId: user.id,
+            },
+          });
+          break;
+        case "Supplier":
+          await prisma.supplier.create({
+            data: {
+              userId: user.id,
+              companyName: userData.companyName || null,
+              supplierType: userData.supplierType || null,
+            },
+          });
+          break;
+        case "Distributor":
+          await prisma.distributor.create({
+            data: {
+              userId: user.id,
+            },
+          });
+          break;
+        case "Assistant Manager":
+          await prisma.assistantManager.create({
+            data: {
+              userId: user.id,
+            },
+          });
+          break;
+      }
+      return user;
     });
+
     res.status(201).json(newUser);
   })
 );
@@ -615,10 +699,105 @@ app.put(
   asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const userData = req.body;
-    const updatedUser = await prisma.user.update({
-      where: { id },
-      data: userData,
+    const { role } = userData;
+
+    const updatedUser = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.update({
+        where: { id },
+        data: userData,
+      });
+
+      switch (role) {
+        case "Driver":
+          await prisma.driver.upsert({
+            where: { userId: id },
+            update: {
+              vehicleId: userData.vehicleId || null,
+              vehicleType: userData.vehicleType || null,
+              licenseNumber: userData.licenseNumber || null,
+            },
+            create: {
+              userId: id,
+              vehicleId: userData.vehicleId || null,
+              vehicleType: userData.vehicleType || null,
+              licenseNumber: userData.licenseNumber || null,
+            },
+          });
+          break;
+        case "Manager":
+          await prisma.manager.upsert({
+            where: { userId: id },
+            update: {},
+            create: {
+              userId: id,
+            },
+          });
+          break;
+        case "Salesman":
+          await prisma.salesman.upsert({
+            where: { userId: id },
+            update: { salesTarget: userData.salesTarget || null },
+            create: {
+              userId: id,
+              salesTarget: userData.salesTarget || null,
+            },
+          });
+          break;
+        case "Stock Keeper":
+          await prisma.stockKeeper.upsert({
+            where: { userId: id },
+            update: {},
+            create: {
+              userId: id,
+            },
+          });
+          break;
+        case "Cashier":
+          await prisma.cashier.upsert({
+            where: { userId: id },
+            update: {},
+            create: {
+              userId: id,
+            },
+          });
+          break;
+        case "Supplier":
+          await prisma.supplier.upsert({
+            where: { userId: id },
+            update: {
+              companyName: userData.companyName || null,
+              supplierType: userData.supplierType || null,
+            },
+            create: {
+              userId: id,
+              companyName: userData.companyName || null,
+              supplierType: userData.supplierType || null,
+            },
+          });
+          break;
+        case "Distributor":
+          await prisma.distributor.upsert({
+            where: { userId: id },
+            update: {},
+            create: {
+              userId: id,
+            },
+          });
+          break;
+        case "Assistant Manager":
+          await prisma.assistantManager.upsert({
+            where: { userId: id },
+            update: {},
+            create: {
+              userId: id,
+            },
+          });
+          break;
+      }
+
+      return user;
     });
+
     res.json(updatedUser);
   })
 );
@@ -629,6 +808,233 @@ app.delete(
     const id = parseInt(req.params.id, 10);
     await prisma.user.delete({ where: { id } });
     res.status(204).send();
+  })
+);
+
+app.post(
+  "/api/drivers",
+  asyncHandler(async (req, res) => {
+    const driverData = req.body;
+    const newDriver = await prisma.driver.create({
+      data: driverData,
+      include: { user: true },
+    });
+    res.status(201).json(newDriver);
+  })
+);
+
+app.put(
+  "/api/drivers/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const driverData = req.body;
+    const updatedDriver = await prisma.driver.update({
+      where: { id },
+      data: driverData,
+      include: { user: true },
+    });
+    res.json(updatedDriver);
+  })
+);
+
+app.get(
+  "/api/stock-keepers",
+  asyncHandler(async (req, res) => {
+    const stockKeepers = await prisma.stockKeeper.findMany({
+      include: { user: true },
+    });
+    res.json(stockKeepers);
+  })
+);
+
+app.get(
+  "/api/stock-keepers/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const stockKeeper = await prisma.stockKeeper.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+    if (!stockKeeper) {
+      return res.status(404).json({ error: "Stock Keeper not found" });
+    }
+    res.json(stockKeeper);
+  })
+);
+
+app.post(
+  "/api/stock-keepers",
+  asyncHandler(async (req, res) => {
+    const stockKeeperData = req.body;
+    const newStockKeeper = await prisma.stockKeeper.create({
+      data: stockKeeperData,
+      include: { user: true },
+    });
+    res.status(201).json(newStockKeeper);
+  })
+);
+
+app.put(
+  "/api/stock-keepers/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const stockKeeperData = req.body;
+    const updatedStockKeeper = await prisma.stockKeeper.update({
+      where: { id },
+      data: stockKeeperData,
+      include: { user: true },
+    });
+    res.json(updatedStockKeeper);
+  })
+);
+
+app.get(
+  "/api/managers",
+  asyncHandler(async (req, res) => {
+    const managers = await prisma.manager.findMany({
+      include: { user: true },
+    });
+    res.json(managers);
+  })
+);
+
+app.get(
+  "/api/managers/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const manager = await prisma.manager.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+    if (!manager) {
+      return res.status(404).json({ error: "Manager not found" });
+    }
+    res.json(manager);
+  })
+);
+
+app.get(
+  "/api/salesmen",
+  asyncHandler(async (req, res) => {
+    const salesmen = await prisma.salesman.findMany({
+      include: { user: true },
+    });
+    res.json(salesmen);
+  })
+);
+
+app.get(
+  "/api/salesmen/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const salesman = await prisma.salesman.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+    if (!salesman) {
+      return res.status(404).json({ error: "Salesman not found" });
+    }
+    res.json(salesman);
+  })
+);
+
+app.get(
+  "/api/cashiers",
+  asyncHandler(async (req, res) => {
+    const cashiers = await prisma.cashier.findMany({
+      include: { user: true },
+    });
+    res.json(cashiers);
+  })
+);
+
+app.get(
+  "/api/cashiers/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const cashier = await prisma.cashier.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+    if (!cashier) {
+      return res.status(404).json({ error: "Cashier not found" });
+    }
+    res.json(cashier);
+  })
+);
+
+app.get(
+  "/api/suppliers",
+  asyncHandler(async (req, res) => {
+    const suppliers = await prisma.supplier.findMany({
+      include: { user: true },
+    });
+    res.json(suppliers);
+  })
+);
+
+app.get(
+  "/api/suppliers/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const supplier = await prisma.supplier.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+    if (!supplier) {
+      return res.status(404).json({ error: "Supplier not found" });
+    }
+    res.json(supplier);
+  })
+);
+
+app.get(
+  "/api/distributors",
+  asyncHandler(async (req, res) => {
+    const distributors = await prisma.distributor.findMany({
+      include: { user: true },
+    });
+    res.json(distributors);
+  })
+);
+
+app.get(
+  "/api/distributors/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const distributor = await prisma.distributor.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+    if (!distributor) {
+      return res.status(404).json({ error: "Distributor not found" });
+    }
+    res.json(distributor);
+  })
+);
+
+app.get(
+  "/api/assistant-managers",
+  asyncHandler(async (req, res) => {
+    const assistantManagers = await prisma.assistantManager.findMany({
+      include: { user: true },
+    });
+    res.json(assistantManagers);
+  })
+);
+
+app.get(
+  "/api/assistant-managers/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const assistantManager = await prisma.assistantManager.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+    if (!assistantManager) {
+      return res.status(404).json({ error: "Assistant Manager not found" });
+    }
+    res.json(assistantManager);
   })
 );
 
