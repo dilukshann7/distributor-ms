@@ -1,4 +1,5 @@
 import "./css/style.css";
+import "./css/cashier-style.css";
 import { router } from "../src/js/middleware/router.js";
 
 // Initialize the router
