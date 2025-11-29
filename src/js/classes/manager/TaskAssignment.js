@@ -23,10 +23,10 @@ export class TaskAssignment {
         <!-- Header -->
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-2xl font-bold text-gray-900">Task Assignment</h3>
-            <p class="text-gray-600 mt-1">Assign and track staff tasks and responsibilities</p>
+            <h3 class="manager-header-title">Task Assignment</h3>
+            <p class="manager-header-subtitle">Assign and track staff tasks and responsibilities</p>
           </div>
-          <button id="assignTaskBtn" class="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
+          <button id="assignTaskBtn" class="manager-btn-primary">
             ${getIconHTML("plus")}
             Assign Task
           </button>
@@ -37,28 +37,28 @@ export class TaskAssignment {
           this.showForm
             ? /*html*/
               `
-          <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-emerald-600">
+          <div class="manager-card border-l-4 border-emerald-600">
             <h4 class="text-lg font-semibold text-gray-900 mb-4">Create New Task</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input type="text" placeholder="Task Title" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-              <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600">
+              <input type="text" placeholder="Task Title" class="manager-input" />
+              <select class="manager-input">
                 <option>Select Assignee</option>
                 <option>Ahmed Hassan</option>
                 <option>Fatima Khan</option>
                 <option>Rajesh Kumar</option>
               </select>
-              <input type="date" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600" />
-              <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600">
+              <input type="date" class="manager-input" />
+              <select class="manager-input">
                 <option>Priority</option>
                 <option>High</option>
                 <option>Medium</option>
                 <option>Low</option>
               </select>
             </div>
-            <textarea placeholder="Task Description" class="w-full mt-4 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600" rows="3"></textarea>
+            <textarea placeholder="Task Description" class="w-full mt-4 manager-input" rows="3"></textarea>
             <div class="flex gap-2 mt-4">
-              <button class="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors">Create Task</button>
-              <button id="cancelTaskBtn" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors">Cancel</button>
+              <button class="manager-btn-primary">Create Task</button>
+              <button id="cancelTaskBtn" class="manager-btn-secondary">Cancel</button>
             </div>
           </div>
         `
@@ -83,7 +83,7 @@ export class TaskAssignment {
                       }</span>
                     </p>
                     <div class="flex items-center gap-3 mt-2">
-                      <span class="text-xs font-semibold px-2 py-1 rounded ${this.getPriorityColor(
+                      <span class="manager-badge ${this.getPriorityColor(
                         task.priority
                       )}">
                         ${task.priority}
@@ -95,10 +95,10 @@ export class TaskAssignment {
                   </div>
                 </div>
                 <div class="flex gap-2">
-                  <button class="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors">
+                  <button class="manager-btn-icon-blue">
                     ${getIconHTML("edit")}
                   </button>
-                  <button class="p-2 text-red-600 hover:bg-red-50 rounded transition-colors">
+                  <button class="manager-btn-icon-red">
                     ${getIconHTML("trash")}
                   </button>
                 </div>
@@ -134,11 +134,11 @@ export class TaskAssignment {
   getPriorityColor(priority) {
     switch (priority) {
       case "High":
-        return "bg-red-100 text-red-800";
+        return "manager-badge-red";
       case "Medium":
-        return "bg-yellow-100 text-yellow-800";
+        return "manager-badge-yellow";
       default:
-        return "bg-green-100 text-green-800";
+        return "manager-badge-green";
     }
   }
 }
