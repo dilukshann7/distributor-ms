@@ -35,8 +35,8 @@ export class OperationalReports {
         <div class=" space-y-6">
           <div class="flex items-center justify-between">
             <div>
-              <h2 class="text-2xl font-bold text-gray-900">Reports & Analytics</h2>
-              <p class="text-gray-500 mt-1">Generate and view business reports</p>
+              <h2 class="manager-header-title">Reports & Analytics</h2>
+              <p class="manager-header-subtitle">Generate and view business reports</p>
             </div>
             <div class="flex gap-3">
               <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors">
