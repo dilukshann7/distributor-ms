@@ -8,10 +8,9 @@ import logo from "../../assets/logo-tr.png";
 class OwnerDashboard {
   constructor(container) {
     this.container = container;
-    this.currentSection = "overview";
+    this.currentSection = "employees";
   }
 
-  /*html*/
   async render() {
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
@@ -34,7 +33,6 @@ class OwnerDashboard {
 
   renderSidebar() {
     const menuItems = [
-      { id: "overview", label: "Financial Overview", icon: "chart-bar" },
       { id: "employees", label: "Employee Management", icon: "users" },
       { id: "inventory", label: "Inventory Control", icon: "package" },
       { id: "operations", label: "Operations Monitor", icon: "activity" },
@@ -105,7 +103,6 @@ class OwnerDashboard {
 
   async renderSection(section) {
     const sections = {
-      overview: new FinancialOverview(),
       employees: new EmployeeManagement(),
       inventory: new InventoryControl(),
       operations: new OperationsMonitor(),
@@ -172,138 +169,6 @@ class OwnerDashboard {
 
   getIcon(name) {
     return getIconHTML(name);
-  }
-}
-
-class FinancialOverview {
-  constructor() {
-    this.orders = [];
-    this.data = [];
-    this.currentMonth = new Date().getMonth() + 1;
-    this.monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-  }
-
-  async initialize() {
-    await this.getOrders();
-  }
-
-  async getMonthly() {
-    try {
-      const response = await FinancialReport.getMonthlyOverview();
-      this.data = response.data || [];
-    } catch (error) {
-      console.error("Error fetching financial data:", error);
-      this.data = [];
-    }
-  }
-
-  formatCurrency(amount) {
-    return `Rs. ${Math.abs(amount).toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  }
-
-  render() {
-    return `
-      <div class="p-8 space-y-8">
-        <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-          <h3 class="text-lg font-semibold text-gray-900 mb-6">Monthly Comparison</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Month</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Income</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Expenses</th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Profit</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-200">
-                ${this.data
-                  .map(
-                    (item) => `
-                    <tr class="hover:bg-gray-50 ${
-                      item.month === this.currentMonth ? "bg-blue-50" : ""
-                    }">
-                      <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                        ${this.monthNames[item.month - 1]}
-                        ${
-                          item.month === this.currentMonth
-                            ? '<span class="ml-2 text-xs text-blue-600">(Current)</span>'
-                            : ""
-                        }
-                      </td>
-                      <td class="px-6 py-4 text-sm text-blue-600 font-medium">${this.formatCurrency(
-                        item.income
-                      )}</td>
-                      <td class="px-6 py-4 text-sm text-red-600 font-medium">${this.formatCurrency(
-                        item.expenses
-                      )}</td>
-                      <td class="px-6 py-4 text-sm ${
-                        item.profit >= 0 ? "text-green-600" : "text-red-600"
-                      } font-medium">
-                        ${item.profit < 0 ? "-" : ""}${this.formatCurrency(
-                      item.profit
-                    )}
-                      </td>
-                    </tr>
-                  `
-                  )
-                  .join("")}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  renderStatCard(title, value, change, color, icon) {
-    const colors = {
-      green: "bg-green-100 text-green-600",
-      red: "bg-red-100 text-red-600",
-      blue: "bg-blue-100 text-blue-600",
-      purple: "bg-purple-100 text-purple-600",
-    };
-
-    const isPositive = change.startsWith("+");
-    const trendColor = isPositive ? "text-green-600" : "text-red-600";
-
-    return `
-      <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-500 mb-2">${title}</p>
-            <p class="text-3xl font-bold text-gray-900">${value}</p>
-            <p class="text-xs ${trendColor} mt-2 flex items-center gap-1">
-              <span class="font-semibold">${isPositive ? "↑" : "↓"}</span>
-              ${change}
-            </p>
-          </div>
-          <div class="w-12 h-12 rounded-lg ${
-            colors[color]
-          } flex items-center justify-center">
-            <span class="text-2xl font-bold">
-              ${icon === "percent" ? "%" : icon === "dollar" ? "$" : "📊"}
-            </span>
-          </div>
-        </div>
-      </div>
-    `;
   }
 }
 
@@ -532,41 +397,7 @@ class OperationsMonitor {
   render() {
     return `
       <div class="p-8 space-y-6">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900">Operations Monitor</h2>
-          <p class="text-gray-500 mt-1">Real-time business operations tracking</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          ${this.renderStatCard(
-            "Active Orders",
-            "28",
-            "+5 from yesterday",
-            "blue",
-            "clock"
-          )}
-          ${this.renderStatCard(
-            "Completed Deliveries",
-            "24",
-            "96% on-time",
-            "green",
-            "check"
-          )}
-          ${this.renderStatCard(
-            "Pending Tasks",
-            "12",
-            "3 overdue",
-            "yellow",
-            "alert"
-          )}
-          ${this.renderStatCard(
-            "Active Staff",
-            "14",
-            "All present",
-            "purple",
-            "users"
-          )}
-        </div>
+        
 
         <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
           <h3 class="text-lg font-semibold text-gray-900 mb-6">Today's Tasks</h3>
@@ -578,11 +409,13 @@ class OperationsMonitor {
                 <div class="flex-1">
                   <p class="font-medium text-gray-900">${task.title}</p>
                   <p class="text-sm text-gray-500 mt-1">Assigned to: ${
-                    task.assignee
+                    task.assignee.name
                   }</p>
                 </div>
                 <div class="flex items-center gap-4">
-                  <span class="text-sm text-gray-500">${task.dueTime}</span>
+                  <span class="text-sm text-gray-500">${new Date(
+                    task.dueDate
+                  ).toLocaleDateString()}</span>
                   <span class="px-3 py-1 rounded-full text-xs font-medium ${
                     task.status === "Completed"
                       ? "bg-green-100 text-green-700"
@@ -602,63 +435,10 @@ class OperationsMonitor {
       </div>
     `;
   }
-
-  renderStatCard(title, value, subtitle, color, icon) {
-    const colors = {
-      blue: "bg-blue-100 text-blue-600",
-      green: "bg-green-100 text-green-600",
-      yellow: "bg-yellow-100 text-yellow-600",
-      purple: "bg-purple-100 text-purple-600",
-    };
-
-    return `
-      <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-500 mb-2">${title}</p>
-            <p class="text-3xl font-bold text-gray-900">${value}</p>
-            <p class="text-xs text-${color} mt-2">${subtitle}</p>
-          </div>
-          <div class="w-12 h-12 rounded-lg ${
-            colors[color]
-          } flex items-center justify-center">
-            ${getIconHTML("clock")}
-          </div>
-        </div>
-      </div>
-    `;
-  }
 }
 
 class ReportsSection {
-  constructor() {
-    this.salesData = [
-      {
-        salesman: "Priya Singh",
-        sales: 125000,
-        target: 100000,
-        commission: 12500,
-      },
-      {
-        salesman: "Rajesh Kumar",
-        sales: 98000,
-        target: 100000,
-        commission: 9800,
-      },
-      {
-        salesman: "Amit Patel",
-        sales: 145000,
-        target: 100000,
-        commission: 14500,
-      },
-      {
-        salesman: "Neha Sharma",
-        sales: 112000,
-        target: 100000,
-        commission: 11200,
-      },
-    ];
-  }
+  constructor() {}
 
   render() {
     return `

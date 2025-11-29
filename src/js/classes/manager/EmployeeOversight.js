@@ -208,6 +208,16 @@ export class EmployeeOversight {
                   <label class="block text-sm font-semibold text-gray-700">Performance Rating</label>
                   <input type="number" name="performanceRating" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 5">
                 </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700">Salary <span class="text-gray-400 font-normal">(LKR)</span></label>
+                  <input type="number" name="salary" step="0.01" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 50000">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700">Bonus <span class="text-gray-400 font-normal">(LKR)</span></label>
+                  <input type="number" name="bonus" step="0.01" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 5000">
+                </div>
               </div>
             </div>
           </div>
@@ -352,6 +362,20 @@ export class EmployeeOversight {
                     emp.performanceRating || ""
                   }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 5">
                 </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700">Salary <span class="text-gray-400 font-normal">(LKR)</span></label>
+                  <input type="number" name="salary" step="0.01" value="${
+                    emp.salary || ""
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 50000">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700">Bonus <span class="text-gray-400 font-normal">(LKR)</span></label>
+                  <input type="number" name="bonus" step="0.01" value="${
+                    emp.bonus || ""
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 5000">
+                </div>
               </div>    
             </div>
           </div>
@@ -402,6 +426,8 @@ export class EmployeeOversight {
       status: formData.get("status"),
       attendance: formData.get("attendance") || null,
       performanceRating: Number(formData.get("performanceRating")) || null,
+      salary: Number(formData.get("salary")) || null,
+      bonus: Number(formData.get("bonus")) || null,
     };
 
     User.create(employeeData)
@@ -428,6 +454,8 @@ export class EmployeeOversight {
       status: formData.get("status"),
       attendance: formData.get("attendance") || null,
       performanceRating: Number(formData.get("performanceRating")) || null,
+      salary: Number(formData.get("salary")) || null,
+      bonus: Number(formData.get("bonus")) || null,
     };
 
     const password = formData.get("password");
