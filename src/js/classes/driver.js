@@ -35,12 +35,6 @@ class DriverDashboard {
     ];
 
     return `
-      <!-- Mobile Toggle -->
-      <button id="mobileToggle" class="lg:hidden fixed top-4 left-4 z-40 p-2 bg-green-700 text-white rounded-lg">
-        ${this.isSidebarOpen ? this.getIcon("x") : this.getIcon("menu")}
-      </button>
-
-      <!-- Sidebar -->
       <div class="${
         this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-green-700 to-green-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
@@ -65,13 +59,6 @@ class DriverDashboard {
             .join("")}
         </nav>
       </div>
-
-      <!-- Overlay for mobile -->
-      ${
-        this.isSidebarOpen
-          ? '<div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>'
-          : ""
-      }
     `;
   }
 
@@ -139,22 +126,6 @@ class DriverDashboard {
         import("../login.js").then((module) => {
           module.renderLogin(this.container);
         });
-      });
-    }
-
-    const mobileToggle = this.container.querySelector("#mobileToggle");
-    if (mobileToggle) {
-      mobileToggle.addEventListener("click", () => {
-        this.isSidebarOpen = !this.isSidebarOpen;
-        this.render();
-      });
-    }
-
-    const mobileOverlay = this.container.querySelector("#mobileOverlay");
-    if (mobileOverlay) {
-      mobileOverlay.addEventListener("click", () => {
-        this.isSidebarOpen = false;
-        this.render();
       });
     }
   }
