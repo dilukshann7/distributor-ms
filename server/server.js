@@ -36,6 +36,39 @@ app.get(
   })
 );
 
+app.post(
+  "/api/products",
+  asyncHandler(async (req, res) => {
+    const productData = req.body;
+    const newProduct = await prisma.product.create({
+      data: productData,
+    });
+    res.status(201).json(newProduct);
+  })
+);
+
+app.put(
+  "/api/products/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const productData = req.body;
+    const updatedProduct = await prisma.product.update({
+      where: { id },
+      data: productData,
+    });
+    res.json(updatedProduct);
+  })
+);
+
+app.delete(
+  "/api/products/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    await prisma.product.delete({ where: { id } });
+    res.status(204).send();
+  })
+);
+
 app.get(
   "/api/tasks",
   asyncHandler(async (req, res) => {
