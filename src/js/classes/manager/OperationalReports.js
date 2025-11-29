@@ -1,35 +1,4 @@
-import { getIconHTML } from "../../../assets/icons/index.js";
-
 export class OperationalReports {
-  constructor() {
-    this.salesData = [
-      {
-        salesman: "Priya Singh",
-        sales: 125000,
-        target: 100000,
-        commission: 12500,
-      },
-      {
-        salesman: "Rajesh Kumar",
-        sales: 98000,
-        target: 100000,
-        commission: 9800,
-      },
-      {
-        salesman: "Amit Patel",
-        sales: 145000,
-        target: 100000,
-        commission: 14500,
-      },
-      {
-        salesman: "Neha Sharma",
-        sales: 112000,
-        target: 100000,
-        commission: 11200,
-      },
-    ];
-  }
-
   render() {
     return `
         <div class=" space-y-6">
@@ -37,16 +6,6 @@ export class OperationalReports {
             <div>
               <h2 class="manager-header-title">Reports & Analytics</h2>
               <p class="manager-header-subtitle">Generate and view business reports</p>
-            </div>
-            <div class="flex gap-3">
-              <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 flex items-center gap-2 transition-colors">
-                ${getIconHTML("filter")}
-                Filter
-              </button>
-              <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors">
-                ${getIconHTML("download")}
-                Export All
-              </button>
             </div>
           </div>
   
