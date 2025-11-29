@@ -80,9 +80,6 @@ class StockKeeperDashboard {
           </button>
 
           <div class="flex items-center gap-3 pl-4 border-l border-gray-200">
-            <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-              ${getIconHTML("user")}
-            </button>
             <button id="logoutBtn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
               ${getIconHTML("log-out")}
             </button>

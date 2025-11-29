@@ -16,7 +16,6 @@ export class DeliveryRoutes {
   }
 
   render() {
-    // ✅ Only show scheduled and in_transit routes
     const activeRoutes = this.routes.filter(
       (r) => r.status === "scheduled" || r.status === "in_transit"
     );
@@ -28,7 +27,6 @@ export class DeliveryRoutes {
           <p class="text-gray-600 mt-1">Optimize and manage delivery routes</p>
         </div>
 
-        <!-- Routes List -->
         <div class="space-y-4">
           ${activeRoutes
             .map(
@@ -63,7 +61,6 @@ export class DeliveryRoutes {
                   
                 </div>
 
-                <!-- Route Details Grid -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   <div>
                     <p class="text-xs text-gray-500">Driver</p>
@@ -91,7 +88,6 @@ export class DeliveryRoutes {
                   </div>
                 </div>
 
-                <!-- Orders List -->
                 <div>
                   <p class="text-sm font-medium text-gray-700 mb-2">Orders (${
                     route.salesOrders.length
