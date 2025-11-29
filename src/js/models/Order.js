@@ -1,19 +1,6 @@
 import axios from "axios";
 
 export class Order {
-  constructor(data) {
-    this.id = data.id;
-    this.customerId = data.customerId;
-    this.orderDate = data.orderDate;
-    this.status = data.status;
-    this.totalAmount = data.totalAmount;
-    this.dueDate = data.dueDate;
-    this.itemIDs = data.itemIDs;
-    this.items = data.items;
-    this.createdAt = data.createdAt;
-    this.updatedAt = data.updatedAt;
-  }
-
   static async getAll() {
     const apiURL = "http://localhost:3000/api/orders";
 
