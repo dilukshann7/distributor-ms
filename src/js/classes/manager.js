@@ -42,15 +42,8 @@ class ManagerDashboard {
       { id: "feedback", label: "Customer Feedback", icon: "message-square" },
       { id: "delivery", label: "Delivery Tracking", icon: "truck" },
     ];
-    /*html*/
-    return `
-    
-      <!-- Mobile Toggle -->
-      <button id="mobileToggle" class="lg:hidden fixed top-4 left-4 z-40 p-2 bg-emerald-600 text-white rounded-lg">
-        ${this.isSidebarOpen ? getIconHTML("x") : getIconHTML("menu")}
-      </button>
 
-      <!-- Sidebar -->
+    return `
       <aside class="${
         this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
       } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-emerald-700 to-emerald-900 text-white transition-transform duration-300 z-30 overflow-y-auto">
@@ -64,12 +57,10 @@ class ManagerDashboard {
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${
-              item.id
-            }" class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+            <button data-section="${item.id}" class="manager-nav-item ${
                 this.currentSection === item.id
-                  ? "bg-white text-emerald-700 font-semibold shadow-lg"
-                  : "text-emerald-100  hover:bg-emerald-600"
+                  ? "manager-nav-item-active"
+                  : "manager-nav-item-inactive"
               }">
               ${this.getIcon(item.icon)}
               <span>${item.label}</span>
@@ -79,13 +70,6 @@ class ManagerDashboard {
             .join("")}
         </nav>
       </aside>
-
-      <!-- Overlay for mobile -->
-      ${
-        this.isSidebarOpen
-          ? '<div id="mobileOverlay" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"></div>'
-          : ""
-      }
     `;
   }
 
@@ -93,8 +77,8 @@ class ManagerDashboard {
     return `
       <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Manager Dashboard</h2>
-          <p class="text-gray-600 text-sm mt-1">Manage operations and team performance</p>
+          <h2 class="manager-header-title">Manager Dashboard</h2>
+          <p class="manager-header-subtitle">Manage operations and team performance</p>
         </div>
 
         <div class="flex items-center gap-6">
@@ -103,13 +87,6 @@ class ManagerDashboard {
             ${this.getIcon("bell")}
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
-
-          <!-- Settings -->
-          <button class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-            ${this.getIcon("settings")}
-          </button>
-
-          <!-- Logout -->
           <button id="logoutBtn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${this.getIcon("log-out")}
           </button>
@@ -143,7 +120,7 @@ class ManagerDashboard {
   }
 
   attachEventListeners() {
-    const navItems = this.container.querySelectorAll(".nav-item");
+    const navItems = this.container.querySelectorAll(".manager-nav-item");
     navItems.forEach((item) => {
       item.addEventListener("click", (e) => {
         const section = e.currentTarget.dataset.section;
@@ -159,22 +136,6 @@ class ManagerDashboard {
         });
       });
     }
-
-    const mobileToggle = this.container.querySelector("#mobileToggle");
-    if (mobileToggle) {
-      mobileToggle.addEventListener("click", () => {
-        this.isSidebarOpen = !this.isSidebarOpen;
-        this.render();
-      });
-    }
-
-    const mobileOverlay = this.container.querySelector("#mobileOverlay");
-    if (mobileOverlay) {
-      mobileOverlay.addEventListener("click", () => {
-        this.isSidebarOpen = false;
-        this.render();
-      });
-    }
   }
 
   async navigateToSection(section) {
@@ -183,14 +144,12 @@ class ManagerDashboard {
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
-    const navItems = this.container.querySelectorAll(".nav-item");
+    const navItems = this.container.querySelectorAll(".manager-nav-item");
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all bg-white text-emerald-700 font-semibold shadow-lg";
+        item.className = "manager-nav-item manager-nav-item-active";
       } else {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-emerald-100 hover:bg-emerald-600";
+        item.className = "manager-nav-item manager-nav-item-inactive";
       }
     });
   }
