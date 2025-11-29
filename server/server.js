@@ -388,7 +388,11 @@ app.get(
         user: true,
         deliveries: {
           include: {
-            salesOrders: true,
+            salesOrders: {
+              include: {
+                customer: true,
+              },
+            },
           },
         },
       },
@@ -407,8 +411,16 @@ app.get(
   asyncHandler(async (req, res) => {
     const deliveries = await prisma.delivery.findMany({
       include: {
-        driver: true,
-        salesOrders: true,
+        driver: {
+          include: {
+            user: true,
+          },
+        },
+        salesOrders: {
+          include: {
+            customer: true,
+          },
+        },
       },
       orderBy: {
         scheduledDate: "desc",
@@ -1043,6 +1055,21 @@ app.get(
       return res.status(404).json({ error: "Assistant Manager not found" });
     }
     res.json(assistantManager);
+  })
+);
+
+app.post(
+  "/api/deliveries",
+  asyncHandler(async (req, res) => {
+    const deliveryData = req.body;
+    const newDelivery = await prisma.delivery.create({
+      data: deliveryData,
+      include: {
+        driver: true,
+        salesOrders: true,
+      },
+    });
+    res.status(201).json(newDelivery);
   })
 );
 
