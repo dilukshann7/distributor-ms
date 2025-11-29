@@ -3,7 +3,14 @@ import { autoTable } from "jspdf-autotable";
 import { Order } from "./Order";
 import { Invoice } from "./Invoice";
 import { Driver } from "./Drivers";
+import { SalesOrder } from "./SalesOrder";
 import { Product } from "./Product";
+import {
+  filterOrdersByDateRange,
+  filterInvoicesByDateRange,
+  formatDate,
+  formatCurrency,
+} from "../utils/reportUtils.js";
 
 export class Report {
   constructor() {
@@ -13,127 +20,22 @@ export class Report {
     this.invoices = [];
   }
 
-  static filterOrdersByDateRange(orders, startDate, endDate) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-
-    return orders.filter((order) => {
-      const orderDate = new Date(order.orderDate);
-      return orderDate >= start && orderDate <= end;
-    });
-  }
-
-  static filterInvoicesByDateRange(invoices, startDate, endDate) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-
-    return invoices.filter((invoice) => {
-      const invoiceDate = new Date(invoice.invoiceDate);
-      return invoiceDate >= start && invoiceDate <= end;
-    });
-  }
-
-  static formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  }
-
-  static formatCurrency(amount) {
-    return `LKR ${parseFloat(amount || 0).toFixed(2)}`;
-  }
-
-  static async exportSalesmanReport(startDate, endDate) {
-    try {
-      const orderResponse = await Order.getAll();
-      const allOrders = orderResponse.data || [];
-
-      const filteredOrders = this.filterOrdersByDateRange(
-        allOrders,
-        startDate,
-        endDate
-      );
-
-      const doc = new jsPDF();
-
-      doc.setFontSize(18);
-      doc.text("Sales Report", 14, 20);
-
-      doc.setFontSize(11);
-      doc.text(
-        `Date Range: ${this.formatDate(startDate)} - ${this.formatDate(
-          endDate
-        )}`,
-        14,
-        28
-      );
-
-      const totalOrders = filteredOrders.length;
-      const totalAmount = filteredOrders.reduce(
-        (sum, order) => sum + parseFloat(order.totalAmount || 0),
-        0
-      );
-
-      doc.setFontSize(10);
-      doc.text(`Total Orders: ${totalOrders}`, 14, 36);
-      doc.text(
-        `Total Sales Amount: ${this.formatCurrency(totalAmount)}`,
-        14,
-        42
-      );
-
-      autoTable(doc, {
-        startY: 50,
-        head: [
-          [
-            "Order ID",
-            "Customer ID",
-            "Date",
-            "Status",
-            "Total Amount",
-            "Due Date",
-          ],
-        ],
-        body: filteredOrders.map((order) => [
-          order.id || "N/A",
-          order.customerId || "N/A",
-          this.formatDate(order.orderDate),
-          order.status || "N/A",
-          this.formatCurrency(order.totalAmount),
-          order.dueDate ? this.formatDate(order.dueDate) : "N/A",
-        ]),
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [14, 165, 233] },
-      });
-
-      doc.save(`sales-report-${startDate}-to-${endDate}.pdf`);
-    } catch (error) {
-      console.error("Error exporting PDF:", error);
-      throw error;
-    }
-  }
-
   static async exportSupplierReport(startDate, endDate) {
     try {
-      const orderResponse = await Order.getAll();
+      const orderResponse = await SalesOrder.getAll();
       const allOrders = orderResponse.data || [];
 
       const invoiceResponse = await Invoice.getAll();
       const allInvoices = invoiceResponse.data || []; // Filter orders based on the date range
 
-      const filteredOrders = this.filterOrdersByDateRange(
+      const filteredOrders = filterOrdersByDateRange(
         allOrders,
         startDate,
         endDate
       );
 
       // Filter invoices based on the date range
-      const filteredInvoices = this.filterInvoicesByDateRange(
+      const filteredInvoices = filterInvoicesByDateRange(
         allInvoices,
         startDate,
         endDate
@@ -146,9 +48,7 @@ export class Report {
 
       doc.setFontSize(11);
       doc.text(
-        `Date Range: ${this.formatDate(startDate)} - ${this.formatDate(
-          endDate
-        )}`,
+        `Date Range: ${formatDate(startDate)} - ${formatDate(endDate)}`,
         14,
         28
       );
@@ -161,11 +61,7 @@ export class Report {
 
       doc.setFontSize(10);
       doc.text(`Total Orders: ${totalOrders}`, 14, 36);
-      doc.text(
-        `Total Order Amount: ${this.formatCurrency(totalAmount)}`,
-        14,
-        42
-      ); // Orders Table
+      doc.text(`Total Order Amount: ${formatCurrency(totalAmount)}`, 14, 42); // Orders Table
 
       autoTable(doc, {
         startY: 50,
@@ -182,10 +78,10 @@ export class Report {
         body: filteredOrders.map((order) => [
           order.id || "N/A",
           order.customerId || "N/A",
-          this.formatDate(order.orderDate),
+          formatDate(order.orderDate),
           order.status || "N/A",
-          this.formatCurrency(order.totalAmount),
-          order.dueDate ? this.formatDate(order.dueDate) : "N/A",
+          formatCurrency(order.totalAmount),
+          order.dueDate ? formatDate(order.dueDate) : "N/A",
         ]),
         styles: { fontSize: 9 },
         headStyles: { fillColor: [59, 130, 246] }, // Blue color for orders
@@ -205,7 +101,7 @@ export class Report {
       doc.setFontSize(10);
       doc.text(`Total Invoices: ${totalInvoices}`, 14, invoiceStartY + 8);
       doc.text(
-        `Total Invoice Amount: ${this.formatCurrency(totalInvoiceAmount)}`,
+        `Total Invoice Amount: ${formatCurrency(totalInvoiceAmount)}`,
         14,
         invoiceStartY + 14
       ); // Invoice table
@@ -227,10 +123,10 @@ export class Report {
           invoice.id || "N/A",
           invoice.purchaseOrderId || "N/A",
           invoice.supplierId || "N/A",
-          this.formatDate(invoice.invoiceDate),
-          invoice.dueDate ? this.formatDate(invoice.dueDate) : "N/A",
+          formatDate(invoice.invoiceDate),
+          invoice.dueDate ? formatDate(invoice.dueDate) : "N/A",
           invoice.status || "N/A",
-          this.formatCurrency(invoice.totalAmount),
+          formatCurrency(invoice.totalAmount),
         ]),
         styles: { fontSize: 9 },
         headStyles: { fillColor: [34, 197, 94] },
@@ -254,11 +150,7 @@ export class Report {
       doc.text("Stock Report", 14, 20);
 
       doc.setFontSize(11);
-      doc.text(
-        `Generated on: ${this.formatDate(new Date().toISOString())}`,
-        14,
-        28
-      );
+      doc.text(`Generated on: ${formatDate(new Date().toISOString())}`, 14, 28);
 
       const totalProducts = allProducts.length;
       const totalStockValue = allProducts.reduce(
@@ -273,11 +165,7 @@ export class Report {
 
       doc.setFontSize(10);
       doc.text(`Total Products: ${totalProducts}`, 14, 36);
-      doc.text(
-        `Total Stock Value: ${this.formatCurrency(totalStockValue)}`,
-        14,
-        42
-      );
+      doc.text(`Total Stock Value: ${formatCurrency(totalStockValue)}`, 14, 42);
       doc.text(`Low Stock Items: ${lowStockItems}`, 14, 48);
 
       autoTable(doc, {
@@ -302,7 +190,7 @@ export class Report {
           product.sku || "N/A",
           product.category || "N/A",
           product.quantity || 0,
-          this.formatCurrency(product.price),
+          formatCurrency(product.price),
           product.minStock || 0,
           product.maxStock || 0,
           product.location || "N/A",
@@ -312,7 +200,7 @@ export class Report {
         headStyles: { fillColor: [147, 51, 234] },
       });
 
-      const timestamp = new Date().toISOString().split('T')[0];
+      const timestamp = new Date().toISOString().split("T")[0];
       doc.save(`stock-report-${timestamp}.pdf`);
     } catch (error) {
       console.error("Error exporting PDF:", error);

@@ -1,4 +1,4 @@
-import { Report } from "../../models/Report.js";
+import { Salesman } from "../../models/Salesman.js";
 
 export class SalesReports {
   constructor() {
@@ -58,7 +58,7 @@ export class SalesReports {
     }
 
     try {
-      await Report.exportSalesmanReport(startDate, endDate);
+      await Salesman.exportReport(startDate, endDate);
       alert("PDF exported successfully");
     } catch (error) {
       console.error("Error exporting PDF:", error);
