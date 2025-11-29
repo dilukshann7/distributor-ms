@@ -1,0 +1,83 @@
+.manager-card {
+  @apply bg-white rounded-lg shadow-md p-6;
+}
+
+.manager-card-overflow {
+  @apply bg-white rounded-lg shadow-md overflow-hidden;
+}
+
+.manager-header-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.manager-header-subtitle {
+  @apply text-gray-600 mt-1;
+}
+
+.manager-btn-primary {
+  @apply flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors;
+}
+
+.manager-btn-secondary {
+  @apply bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors;
+}
+
+.manager-btn-icon-blue {
+  @apply p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors;
+}
+
+.manager-btn-icon-red {
+  @apply p-2 text-red-600 hover:bg-red-50 rounded transition-colors;
+}
+
+.manager-table-header {
+  @apply bg-gray-50 border-b border-gray-200;
+}
+
+.manager-table-th {
+  @apply px-6 py-3 text-left text-sm font-semibold text-gray-700;
+}
+
+.manager-table-row {
+  @apply hover:bg-gray-50 transition-colors;
+}
+
+.manager-table-td {
+  @apply px-6 py-4 text-sm;
+}
+
+.manager-input {
+  @apply px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600;
+}
+
+.manager-badge {
+  @apply px-3 py-1 rounded-full text-xs font-semibold;
+}
+
+.manager-badge-green {
+  @apply bg-green-100 text-green-800;
+}
+
+.manager-badge-yellow {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.manager-badge-red {
+  @apply bg-red-100 text-red-800;
+}
+
+.manager-badge-blue {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.manager-nav-item {
+  @apply w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all;
+}
+
+.manager-nav-item-active {
+  @apply bg-white text-emerald-700 font-semibold shadow-lg;
+}
+
+.manager-nav-item-inactive {
+  @apply text-emerald-100 hover:bg-emerald-600;
+}
