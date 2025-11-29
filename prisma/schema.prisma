@@ -127,6 +127,7 @@ model SalesOrder {
   deliveryId Int?
   delivery   Delivery? @relation(fields: [deliveryId], references: [id])
   driver     Driver?   @relation(fields: [driverId], references: [id])
+  customer   Customer  @relation(fields: [customerId], references: [id])
 
   invoices SalesInvoice[]
 }
@@ -209,6 +210,8 @@ model Customer {
   status         String   @default("active")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  salesOrders SalesOrder[]
 }
 
 model Driver {
