@@ -59,6 +59,10 @@
   @apply px-6 py-4 font-medium text-gray-900;
 }
 
+.sm-table-cell-secondary {
+  @apply font-medium text-gray-900;
+}
+
 /* Typography */
 .sm-header-title {
   @apply text-2xl font-bold text-gray-900;
