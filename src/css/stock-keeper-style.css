@@ -1,11 +1,7 @@
-/* Stock Keeper Dashboard Custom Styles */
-
-/* Input Fields */
 .sk-input {
   @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all;
 }
 
-/* Buttons */
 .sk-btn-primary {
   @apply bg-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors flex items-center gap-2;
 }
@@ -26,7 +22,6 @@
   @apply p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors;
 }
 
-/* Table Styles */
 .sk-table-header {
   @apply text-left py-3 px-4 font-semibold text-gray-700;
 }
@@ -43,7 +38,6 @@
   @apply py-3 px-4 text-gray-800 font-medium;
 }
 
-/* Typography */
 .sk-header-title {
   @apply text-2xl font-bold text-gray-800;
 }
@@ -60,7 +54,6 @@
   @apply text-gray-600 mt-1;
 }
 
-/* Components */
 .sk-card {
   @apply bg-white rounded-lg border border-gray-200 shadow-sm;
 }
@@ -81,7 +74,6 @@
   @apply bg-yellow-100 text-yellow-700;
 }
 
-/* Navigation */
 .sk-nav-item {
   @apply w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all;
 }
