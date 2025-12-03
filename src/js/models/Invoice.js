@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// Invoice Class
 export class Invoice {
   static async create(invoiceData) {
     const apiURL = "http://localhost:3000/api/invoices";
