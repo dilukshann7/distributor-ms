@@ -1,4 +1,7 @@
 export class OperationalReports {
+  constructor(container) {
+    this.container = container;
+  }
   render() {
     return `
         <div class=" space-y-6">
