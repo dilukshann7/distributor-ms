@@ -8,6 +8,8 @@ export class OrderAuthorization {
     this.pendingOrders = [];
     this.drivers = [];
     this.selectedDrivers = {};
+    this.getPendingOrders();
+    this.getDrivers();
   }
 
   async getPendingOrders() {

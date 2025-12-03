@@ -4,6 +4,7 @@ export class DeliveryRoutes {
   constructor(container) {
     this.container = container;
     this.routes = [];
+    this.getDeliveryRoutes();
   }
 
   async getDeliveryRoutes() {

@@ -4,6 +4,7 @@ export class StockTracking {
   constructor(container) {
     this.container = container;
     this.stockLocations = [];
+    this.getInventoryItems();
   }
 
   async getInventoryItems() {

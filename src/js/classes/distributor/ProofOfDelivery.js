@@ -6,6 +6,7 @@ export class ProofOfDelivery {
     this.deliveries = [];
     this.view = "list";
     this.viewingDelivery = null;
+    this.getDeliveries();
   }
 
   async getDeliveries() {
