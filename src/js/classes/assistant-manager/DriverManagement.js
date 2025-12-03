@@ -1,7 +1,8 @@
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class DriverManagement {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.drivers = [
       {
         id: 1,

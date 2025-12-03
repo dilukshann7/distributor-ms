@@ -11,11 +11,18 @@ class AssistantManagerDashboard {
     this.container = container;
     this.currentSection = "payments";
     this.isSidebarOpen = true;
+    this.sections = {
+      payments: new PaymentVerification(this.container),
+      "delivery-stock": new DeliveryStockMaintenance(this.container),
+      drivers: new DriverManagement(this.container),
+      distribution: new DistributionRecords(this.container),
+    };
     this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
+    const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -24,7 +31,7 @@ class AssistantManagerDashboard {
           ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
-              ${this.renderSection(this.currentSection)}
+              ${sectionContent}
             </div>
           </main>
         </div>
@@ -91,13 +98,7 @@ class AssistantManagerDashboard {
   }
 
   async renderSection(section) {
-    const sections = {
-      payments: new PaymentVerification(),
-      "delivery-stock": new DeliveryStockMaintenance(),
-      drivers: new DriverManagement(),
-      distribution: new DistributionRecords(),
-    };
-    const sectionInstance = sections[section];
+    const sectionInstance = this.sections[section];
     if (section === "emergency") {
       await sectionInstance.getEmergencyData();
     }
