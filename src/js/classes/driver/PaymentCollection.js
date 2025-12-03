@@ -1,17 +1,29 @@
-import { SalesInvoice } from "../../models/SalesInvoice.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
+import { SalesOrder } from "../../models/SalesOrder.js";
+import { Payment } from "../../models/Payment.js";
 
 export class PaymentCollection {
   constructor(container) {
     this.container = container;
     this.payments = [];
+    this.orders = [];
+    this.getSalesOrder();
     this.getPayments();
+  }
+
+  async getSalesOrder() {
+    try {
+      const response = await SalesOrder.getAll();
+      this.orders = response.data;
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      this.orders = [];
+    }
   }
 
   async getPayments() {
     try {
-      const id = window.location.search.split("id=")[1];
-      const response = await SalesInvoice.findById(id);
+      const response = await Payment.getAll();
       this.payments = response.data;
     } catch (error) {
       console.error("Error fetching payments:", error);
@@ -19,11 +31,33 @@ export class PaymentCollection {
     }
   }
 
-  render() {
-    if (!Array.isArray(this.payments)) {
-      this.payments = [];
+  async recordPayment() {
+    const orderId = document.getElementById("payment-order-id").value;
+    const amount = document.getElementById("payment-amount").value;
+    const method = document.getElementById("payment-method").value;
+
+    if (!orderId || !amount || !method) {
+      alert("Please fill in all fields");
+      return;
     }
 
+    const paymentData = {
+      salesOrderId: Number(orderId),
+      amount: parseFloat(amount),
+      paymentMethod: method,
+      paymentDate: new Date().toISOString(),
+    };
+
+    try {
+      await Payment.create(paymentData);
+      await this.getPayments();
+    } catch (error) {
+      console.error("Error recording payment:", error);
+      alert("Failed to record payment");
+    }
+  }
+
+  render() {
     return `
       <div class="space-y-6">
         <div>
@@ -31,35 +65,43 @@ export class PaymentCollection {
           <p class="driver-subtitle">Record and manage cash-on-delivery payments</p>
         </div>
 
-        <!-- Payment Collection Form -->
         <div class="driver-panel p-6">
           <h4 class="driver-card-title mb-4">Quick Payment Entry</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div class="grid md:grid-cols-3 gap-4 mb-4">
             <div>
               <label class="driver-label-text">Order ID</label>
-              <input type="text" placeholder="Enter order ID" class="driver-input" />
+              <select id="payment-order-id" class="driver-input">
+                <option value="">Select Order</option>
+                ${this.orders
+                  .map(
+                    (order) =>
+                      `<option value="${order.id}">${
+                        order.orderNumber + " - " + order.customerName
+                      }</option>`
+                  )
+                  .join("")}
+              </select>
             </div>
             <div>
               <label class="driver-label-text">Amount</label>
-              <input type="number" placeholder="Enter amount" class="driver-input" />
+              <input id="payment-amount" type="number" placeholder="Enter amount" class="driver-input" />
             </div>
             <div>
               <label class="driver-label-text">Payment Method</label>
-              <select class="driver-input">
-                <option>Cash</option>
-                <option>Card</option>
-                <option>Mobile Payment</option>
-                <option>Check</option>
+              <select id="payment-method" class="driver-input">
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="Mobile Payment">Mobile Payment</option>
+                <option value="Check">Check</option>
               </select>
             </div>
           </div>
-          <button class="driver-btn-primary driver-btn-action w-full">
+          <button onclick="window.driverDashboard.recordPayment()" class="driver-btn-primary driver-btn-action w-full">
             <div class="w-5 h-5">${getIconHTML("plus")}</div>
             Record Payment
           </button>
         </div>
 
-        <!-- Payment List -->
         <div class="driver-panel">
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-900">Today's Payments</h3>
@@ -74,8 +116,6 @@ export class PaymentCollection {
                   <th class="driver-table-th">Amount</th>
                   <th class="driver-table-th">Method</th>
                   <th class="driver-table-th">Time</th>
-                  <th class="driver-table-th">Status</th>
-                  <th class="driver-table-th">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -100,33 +140,9 @@ export class PaymentCollection {
                       payment.paymentMethod || "N/A"
                     }</td>
                     <td class="driver-table-td text-gray-600">${
-                      payment.collectedAt || "N/A"
+                      new Date(payment.collectedAt).toLocaleDateString() ||
+                      "N/A"
                     }</td>
-                    <td class="px-6 py-4">
-                      <span class="driver-badge ${
-                        payment.salesOrder?.status === "confirmed"
-                          ? "driver-badge-completed"
-                          : "driver-badge-pending"
-                      }">
-                       ${
-                         payment.salesOrder?.status?.toLowerCase() ===
-                         "confirmed"
-                           ? "Confirmed"
-                           : "Pending"
-                       }
-                      </span>
-                    </td>
-                    <td class="px-6 py-4">
-                      ${
-                        payment.delivery.status === "pending"
-                          ? `
-                        <button class="text-green-600 hover:text-green-800 font-medium text-sm">Collect</button>
-                      `
-                          : `
-                        <button class="text-blue-600 hover:text-blue-800 font-medium text-sm">View</button>
-                      `
-                      }
-                    </td>
                   </tr>
                 `
                   )
