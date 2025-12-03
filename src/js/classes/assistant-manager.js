@@ -98,9 +98,7 @@ class AssistantManagerDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
-    if (section === "emergency") {
-      await sectionInstance.getEmergencyData();
-    }
+
     return sectionInstance.render();
   }
 
@@ -122,7 +120,6 @@ class AssistantManagerDashboard {
       });
     }
 
-    // Attach notification panel event listeners
     window.notificationPanel = this.notificationPanel;
     this.notificationPanel.attachEventListeners();
   }
