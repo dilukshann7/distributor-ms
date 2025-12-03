@@ -110,15 +110,7 @@ class DriverDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
-    if (section === "deliveries") {
-      await sectionInstance.getDeliveries();
-    } else if (section === "proof") {
-      await sectionInstance.getProofDeliveries();
-    } else if (section === "payment") {
-      await sectionInstance.getPayments();
-    } else if (section === "vehicle") {
-      await sectionInstance.getVehicleDetails();
-    }
+
     return sectionInstance.render();
   }
 
@@ -150,7 +142,6 @@ class DriverDashboard {
       });
     }
 
-    // Attach notification panel event listeners
     window.notificationPanel = this.notificationPanel;
     this.notificationPanel.attachEventListeners();
   }
