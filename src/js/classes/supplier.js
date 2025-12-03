@@ -15,7 +15,7 @@ class SupplierDashboard {
     this.sections = {
       orders: new PurchaseOrders(container),
       products: new ProductCatalog(container),
-      shipments: new ShipmentTracking(),
+      shipments: new ShipmentTracking(container),
       invoices: new InvoicesPayments(container),
       analytics: new SalesAnalytics(container),
     };
