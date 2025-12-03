@@ -7,6 +7,7 @@ export class ProductCatalog {
     this.products = [];
     this.view = "list";
     this.editingProduct = null;
+    this.getSupply();
   }
 
   async getSupply() {

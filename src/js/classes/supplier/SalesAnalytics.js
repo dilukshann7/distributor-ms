@@ -10,6 +10,8 @@ export class SalesAnalytics {
     this.salesData = [];
     this.summary = [];
     this.period = "daily";
+    this.getTopProducts();
+    this.getSalesData();
   }
 
   async getTopProducts() {

@@ -108,17 +108,7 @@ class SupplierDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
-    if (section === "analytics") {
-      await sectionInstance.getSalesData();
-    } else if (section === "orders") {
-      await sectionInstance.getOrders();
-    } else if (section === "products") {
-      await sectionInstance.getSupply();
-    } else if (section === "shipments") {
-      await sectionInstance.getShipments();
-    } else if (section === "invoices") {
-      await sectionInstance.getInvoices();
-    }
+
     return sectionInstance.render();
   }
 

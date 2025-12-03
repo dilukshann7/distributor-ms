@@ -9,6 +9,8 @@ export class InvoicesPayments {
     this.orders = [];
     this.view = "list";
     this.viewingInvoice = null;
+    this.getInvoices();
+    this.getOrders();
   }
 
   async getInvoices() {

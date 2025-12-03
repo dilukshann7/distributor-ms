@@ -8,6 +8,7 @@ export class PurchaseOrders {
     this.summary = [];
     this.view = "list";
     this.editingOrder = null;
+    this.getOrders();
   }
 
   async getOrders() {
