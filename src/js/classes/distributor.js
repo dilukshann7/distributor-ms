@@ -2,6 +2,7 @@ import logo from "../../assets/logo-tr.png";
 import "../../css/distributor-style.css";
 import "../../css/supplier-style.css";
 import { getIconHTML } from "../../assets/icons/index.js";
+import { NotificationPanel } from "../components/NotificationPanel.js";
 import { OrderManagement } from "./distributor/OrderManagement.js";
 import { DriverManagement } from "./distributor/DriverManagement.js";
 import { StockTracking } from "./distributor/StockTracking.js";
@@ -21,15 +22,18 @@ class DistributorDashboard {
       delivery: new ProofOfDelivery(container),
       authorization: new OrderAuthorization(container),
     };
+    this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
+    await this.notificationPanel.loadTasks();
     const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
+          ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
               ${sectionContent}
@@ -89,7 +93,7 @@ class DistributorDashboard {
         </div>
 
         <div class="flex items-center gap-6">
-          <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${getIconHTML("bell")}
           </button>
 
@@ -148,5 +152,7 @@ class DistributorDashboard {
 
 export function renderDistributorDashboard(container) {
   window.distributorDashboard = new DistributorDashboard(container);
+  window.notificationPanel = window.distributorDashboard.notificationPanel;
+  window.distributorDashboard.notificationPanel.attachEventListeners();
   return window.distributorDashboard.render();
 }

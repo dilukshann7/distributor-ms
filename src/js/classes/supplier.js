@@ -1,6 +1,7 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import "../../css/supplier-style.css";
+import { NotificationPanel } from "../components/NotificationPanel.js";
 import { PurchaseOrders } from "./supplier/PurchaseOrders.js";
 import { ProductCatalog } from "./supplier/ProductCatalog.js";
 import { ShipmentTracking } from "./supplier/ShipmentTracking.js";
@@ -18,15 +19,18 @@ class SupplierDashboard {
       invoices: new InvoicesPayments(container),
       analytics: new SalesAnalytics(container),
     };
+    this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
+    await this.notificationPanel.loadTasks();
     const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
+          ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
               ${sectionContent}
@@ -90,7 +94,7 @@ class SupplierDashboard {
         </div>
 
         <div class="flex items-center gap-6">
-          <button class="relative btn-icon">
+          <button id="notificationBtn" class="relative btn-icon">
             ${getIconHTML("bell")}
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
@@ -144,5 +148,7 @@ class SupplierDashboard {
 
 export async function renderSupplierDashboard(container) {
   window.supplierDashboard = new SupplierDashboard(container);
+  window.notificationPanel = window.supplierDashboard.notificationPanel;
+  window.supplierDashboard.notificationPanel.attachEventListeners();
   await window.supplierDashboard.render();
 }

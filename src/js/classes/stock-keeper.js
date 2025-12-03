@@ -1,5 +1,6 @@
 import logo from "../../assets/logo-tr.png";
 import "../../css/stock-keeper-style.css";
+import { NotificationPanel } from "../components/NotificationPanel.js";
 import { InventoryManagement } from "./stock-keeper/InventoryManagement.js";
 import { ReceivingShipment } from "./stock-keeper/ReceivingShipment.js";
 import { StockReports } from "./stock-keeper/StockReports.js";
@@ -11,15 +12,18 @@ class StockKeeperDashboard {
     this.container = container;
     this.currentSection = "inventory";
     this.isSidebarOpen = true;
+    this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
+    await this.notificationPanel.loadTasks();
     const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
+          ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
               ${sectionContent}
@@ -74,7 +78,7 @@ class StockKeeperDashboard {
         </div>
 
         <div class="flex items-center gap-4">
-          <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${getIconHTML("bell")}
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
@@ -124,6 +128,10 @@ class StockKeeperDashboard {
         });
       });
     }
+
+    // Attach notification panel event listeners
+    window.notificationPanel = this.notificationPanel;
+    this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {

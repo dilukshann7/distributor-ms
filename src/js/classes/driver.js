@@ -1,6 +1,7 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import "../../css/driver-style.css";
+import { NotificationPanel } from "../components/NotificationPanel.js";
 import { DeliveryDetails } from "./driver/DeliveryDetails.js";
 import { ProofOfDelivery } from "./driver/ProofOfDelivery.js";
 import { PaymentCollection } from "./driver/PaymentCollection.js";
@@ -12,15 +13,18 @@ class DriverDashboard {
     this.container = container;
     this.currentSection = "deliveries";
     this.isSidebarOpen = true;
+    this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
+    await this.notificationPanel.loadTasks();
     const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="driver-dashboard-container">
         ${this.renderSidebar()}
         <div class="driver-main-content">
           ${this.renderHeader()}
+          ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="driver-content-area">
             <div class="driver-section-container">
               ${sectionContent}
@@ -85,7 +89,7 @@ class DriverDashboard {
         </div>
 
         <div class="flex items-center gap-6">
-          <button class="relative driver-header-btn">
+          <button id="notificationBtn" class="relative driver-header-btn">
             ${getIconHTML("bell")}
             <span class="absolute top-1 right-1 w-2 h-2 bg-green-600 rounded-full"></span>
           </button>
@@ -145,6 +149,10 @@ class DriverDashboard {
         });
       });
     }
+
+    // Attach notification panel event listeners
+    window.notificationPanel = this.notificationPanel;
+    this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {

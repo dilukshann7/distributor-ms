@@ -1,6 +1,7 @@
 import { getIconHTML } from "../../assets/icons/index.js";
 import logo from "../../assets/logo-tr.png";
 import "../../css/owner-style.css";
+import { NotificationPanel } from "../components/NotificationPanel.js";
 import { EmployeeManagement } from "./owner/EmployeeManagement.js";
 import { InventoryControl } from "./owner/InventoryControl.js";
 import { OperationsMonitor } from "./owner/OperationsMonitor.js";
@@ -10,14 +11,17 @@ class OwnerDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "employees";
+    this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
+    await this.notificationPanel.loadTasks();
     this.container.innerHTML = `
       <div class="owner-dashboard-container">
         ${this.renderSidebar()}
         <div class="owner-main-content">
           ${this.renderHeader()}
+          ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="owner-content-area">
             <div class="p-8 text-center text-gray-500">Loading...</div>
           </main>
@@ -89,7 +93,7 @@ class OwnerDashboard {
         </div>
 
         <div class="flex items-center gap-4 ml-8">
-          <button class="relative p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+          <button id="notificationBtn" class="relative p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
             ${getIconHTML("bell")}
             <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
@@ -142,6 +146,10 @@ class OwnerDashboard {
         });
       });
     }
+
+    // Attach notification panel event listeners
+    window.notificationPanel = this.notificationPanel;
+    this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {

@@ -1,6 +1,7 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import "../../css/salesman-style.css";
+import { NotificationPanel } from "../components/NotificationPanel.js";
 
 import { SalesOrders } from "./salesman/SalesOrders.js";
 import { StockAvailability } from "./salesman/StockAvailability.js";
@@ -19,15 +20,18 @@ class SalesmanDashboard {
       reports: new SalesReports(),
       returns: new ReturnsAndCancellations(),
     };
+    this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
+    await this.notificationPanel.loadTasks();
     const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
+          ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
               ${sectionContent}
@@ -85,7 +89,7 @@ class SalesmanDashboard {
         </div>
 
         <div class="flex items-center gap-6">
-          <button class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${this.getIcon("bell")}
             <span class="absolute top-1 right-1 w-2 h-2 bg-sky-600 rounded-full"></span>
           </button>
@@ -166,6 +170,8 @@ class SalesmanDashboard {
 
 export async function renderSalesmanDashboard(container) {
   window.salesmanDashboard = new SalesmanDashboard(container);
+  window.notificationPanel = window.salesmanDashboard.notificationPanel;
+  window.salesmanDashboard.notificationPanel.attachEventListeners();
   await window.salesmanDashboard.render();
 
   window.$s = window.salesmanDashboard.sections;

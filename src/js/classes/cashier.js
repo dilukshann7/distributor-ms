@@ -3,6 +3,7 @@ import { Cart } from "../models/Cart.js";
 import "../../css/cashier-style.css";
 import { smallOrder } from "../models/SmallOrder.js";
 import { getIconHTML } from "../../assets/icons/index.js";
+import { NotificationPanel } from "../components/NotificationPanel.js";
 import { SalesTransaction } from "./cashier/SalesTransaction.js";
 import { FinancialReports } from "./cashier/FinancialReports.js";
 
@@ -12,15 +13,18 @@ class CashierDashboard {
     this.currentSection = "sales";
     this.isSidebarOpen = true;
     this.currentTime = new Date().toLocaleTimeString();
+    this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
+    await this.notificationPanel.loadTasks();
     const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
+          ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="flex-1 overflow-auto">
             <div class="p-8">
               ${sectionContent}
@@ -83,8 +87,10 @@ class CashierDashboard {
 
         <div class="flex items-center gap-6">
           <div class="relative">
-            ${getIconHTML("bell")}
-            <span class="cashier-notification-badge">3</span>
+            <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+              ${getIconHTML("bell")}
+              <span class="cashier-notification-badge">3</span>
+            </button>
           </div>
         </div>
       </div>
@@ -122,6 +128,10 @@ class CashierDashboard {
         });
       });
     }
+
+    // Attach notification panel event listeners
+    window.notificationPanel = this.notificationPanel;
+    this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {
