@@ -1,48 +1,21 @@
+import { Product } from "../../models/Product";
+
 export class DeliveryStockMaintenance {
   constructor(container) {
     this.container = container;
-    this.deliveryStock = [
-      {
-        id: 1,
-        product: "Air Freshener",
-        quantity: 150,
-        location: "Warehouse A",
-        status: "ready",
-        deliveryDate: "2025-01-20",
-      },
-      {
-        id: 2,
-        product: "Handwash",
-        quantity: 200,
-        location: "Warehouse B",
-        status: "ready",
-        deliveryDate: "2025-01-20",
-      },
-      {
-        id: 3,
-        product: "Car Interior Spray",
-        quantity: 75,
-        location: "Warehouse A",
-        status: "low",
-        deliveryDate: "2025-01-21",
-      },
-      {
-        id: 4,
-        product: "Dish Liquid",
-        quantity: 300,
-        location: "Warehouse C",
-        status: "ready",
-        deliveryDate: "2025-01-20",
-      },
-      {
-        id: 5,
-        product: "Alli Food Products",
-        quantity: 50,
-        location: "Warehouse B",
-        status: "critical",
-        deliveryDate: "2025-01-22",
-      },
-    ];
+    this.deliveryStock = [];
+    this.getInventoryItems();
+  }
+
+  async getInventoryItems() {
+    try {
+      const response = await Product.getAll();
+      console.log(response.data);
+      this.deliveryStock = response.data;
+    } catch (error) {
+      console.error("Error fetching inventory items:", error);
+      this.deliveryStock = [];
+    }
   }
 
   render() {
@@ -59,10 +32,9 @@ export class DeliveryStockMaintenance {
                 <tr>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Product</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Quantity</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Delivery Date</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Category</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Quantity</th>
+                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Last Updated</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -70,35 +42,11 @@ export class DeliveryStockMaintenance {
                   .map(
                     (item) => `
                   <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${
-                      item.product
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      item.quantity
-                    } units</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      item.location
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      item.deliveryDate
-                    }</td>
-                    <td class="px-6 py-4 text-sm">
-                      <span class="px-3 py-1 rounded-full text-xs font-semibold ${
-                        item.status === "ready"
-                          ? "bg-green-100 text-green-800"
-                          : item.status === "low"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }">
-                        ${
-                          item.status.charAt(0).toUpperCase() +
-                          item.status.slice(1)
-                        }
-                      </span>
-                    </td>
-                    <td class="px-6 py-4 text-sm">
-                      <button class="text-blue-600 hover:text-blue-800 font-medium">Update</button>
-                    </td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${item.name}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${item.quantity} units</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${item.category}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${item.quantity}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${item.updatedAt}</td>
                   </tr>
                 `
                   )
