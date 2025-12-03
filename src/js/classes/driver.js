@@ -177,9 +177,14 @@ class DriverDashboard {
       currentLocation: null,
     };
   }
+
+  async recordPayment() {
+    await this.sections.payment.recordPayment();
+    this.navigateToSection("payment");
+  }
 }
 
 export async function renderDriverDashboard(container) {
-  const dashboard = new DriverDashboard(container);
-  await dashboard.render();
+  window.driverDashboard = new DriverDashboard(container);
+  await window.driverDashboard.render();
 }
