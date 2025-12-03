@@ -6,6 +6,8 @@ export class SalesTransaction {
   constructor(container) {
     this.container = container;
     this.cartItems = [];
+    this.getCartItems();
+    this.getSmallOrder();
   }
 
   async getCartItems() {
