@@ -13,6 +13,10 @@ class CashierDashboard {
     this.currentSection = "sales";
     this.isSidebarOpen = true;
     this.currentTime = new Date().toLocaleTimeString();
+    this.sections = {
+      sales: new SalesTransaction(this.container),
+      reports: new FinancialReports(this.container),
+    };
     this.notificationPanel = new NotificationPanel(container);
   }
 
@@ -98,11 +102,7 @@ class CashierDashboard {
   }
 
   async renderSection(section) {
-    const sections = {
-      sales: new SalesTransaction(),
-      reports: new FinancialReports(),
-    };
-    const sectionInstance = sections[section];
+    const sectionInstance = this.sections[section];
 
     if (section === "sales") {
       await sectionInstance.getCartItems();

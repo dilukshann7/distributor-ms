@@ -3,7 +3,8 @@ import { smallOrder } from "../../models/SmallOrder.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class SalesTransaction {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.cartItems = [];
   }
 
