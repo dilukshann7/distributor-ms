@@ -188,15 +188,19 @@ model SalesOrder {
   items         Json
   notes         String?
   driverId      Int?
+  deliveryId Int?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  deliveryId Int?
   delivery   Delivery? @relation(fields: [deliveryId], references: [id])
+
   driver     Driver?   @relation(fields: [driverId], references: [id])
+
   customer   Customer  @relation(fields: [customerId], references: [id])
 
   invoices SalesInvoice[]
+
+  payments Payment[]
 }
 
 model Order {
@@ -301,7 +305,6 @@ model SalesInvoice {
 
   delivery Delivery? @relation(fields: [deliveryId], references: [id])
 
-  payments Payment[]
 }
 
 model Cart {
@@ -329,7 +332,7 @@ model SmallOrder {
 
 model Payment {
   id            Int       @id @default(autoincrement())
-  invoiceId     Int
+  salesOrderId     Int
   amount        Float
   paymentDate   DateTime
   paymentMethod String
@@ -337,5 +340,5 @@ model Payment {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  salesInvoice SalesInvoice @relation(fields: [invoiceId], references: [id])
+  salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
 }
