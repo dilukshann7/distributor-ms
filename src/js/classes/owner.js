@@ -18,6 +18,7 @@ class OwnerDashboard {
       reports: new ReportsSection(this.container),
     };
     window.ownerDashboard = this;
+    this.notificationPanel = new NotificationPanel(this.container);
   }
 
   async render() {
@@ -112,16 +113,6 @@ class OwnerDashboard {
   async renderSection(section) {
     const sectionInstance = this.sections[section];
 
-    if (section === "inventory") {
-      await sectionInstance.getInventory();
-    } else if (section === "employees") {
-      await sectionInstance.getEmployees();
-    } else if (section === "operations") {
-      await sectionInstance.getTasks();
-    } else if (section === "overview") {
-      await sectionInstance.getMonthly();
-    }
-
     return sectionInstance.render();
   }
 
@@ -143,7 +134,6 @@ class OwnerDashboard {
       });
     }
 
-    // Attach notification panel event listeners
     window.notificationPanel = this.notificationPanel;
     this.notificationPanel.attachEventListeners();
   }
