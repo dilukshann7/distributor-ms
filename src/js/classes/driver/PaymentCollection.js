@@ -2,7 +2,8 @@ import { SalesInvoice } from "../../models/SalesInvoice.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class PaymentCollection {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.payments = [];
   }
 
