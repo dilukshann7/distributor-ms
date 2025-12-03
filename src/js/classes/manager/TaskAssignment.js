@@ -9,6 +9,8 @@ export class TaskAssignment {
     this.view = "list";
     this.users = [];
     this.editingTask = null;
+    this.getTasks();
+    this.getUsers();
   }
 
   async getTasks() {

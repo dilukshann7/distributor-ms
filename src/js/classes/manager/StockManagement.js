@@ -7,6 +7,7 @@ export class StockManagement {
     this.inventory = [];
     this.view = "list";
     this.editingProduct = null;
+    this.getProducts();
   }
 
   async getProducts() {
@@ -251,27 +252,37 @@ export class StockManagement {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Product Name <span class="text-red-600">*</span></label>
-                  <input type="text" name="name" required value="${product.name}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Laptop HP ProBook">
+                  <input type="text" name="name" required value="${
+                    product.name
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Laptop HP ProBook">
                 </div>
                 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">SKU <span class="text-red-600">*</span></label>
-                  <input type="text" name="sku" required value="${product.sku}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. SKU-001">
+                  <input type="text" name="sku" required value="${
+                    product.sku
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. SKU-001">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Category <span class="text-red-600">*</span></label>
-                  <input type="text" name="category" required value="${product.category || ""}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Electronics">
+                  <input type="text" name="category" required value="${
+                    product.category || ""
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Electronics">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Price (Rs.) <span class="text-red-600">*</span></label>
-                  <input type="number" name="price" required step="0.01" min="0" value="${product.price}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 1500.00">
+                  <input type="number" name="price" required step="0.01" min="0" value="${
+                    product.price
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 1500.00">
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
                   <label class="block text-sm font-semibold text-gray-700">Description <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <textarea name="description" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Product description">${product.description || ""}</textarea>
+                  <textarea name="description" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Product description">${
+                    product.description || ""
+                  }</textarea>
                 </div>
               </div>
             </div>
@@ -288,40 +299,60 @@ export class StockManagement {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Quantity <span class="text-red-600">*</span></label>
-                  <input type="number" name="quantity" required min="0" value="${product.quantity}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 100">
+                  <input type="number" name="quantity" required min="0" value="${
+                    product.quantity
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 100">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Min Stock <span class="text-red-600">*</span></label>
-                  <input type="number" name="minStock" required min="0" value="${product.minStock}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 10">
+                  <input type="number" name="minStock" required min="0" value="${
+                    product.minStock
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 10">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Max Stock <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="number" name="maxStock" min="0" value="${product.maxStock || ""}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 1000">
+                  <input type="number" name="maxStock" min="0" value="${
+                    product.maxStock || ""
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 1000">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Location <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="text" name="location" value="${product.location || ""}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Warehouse A">
+                  <input type="text" name="location" value="${
+                    product.location || ""
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Warehouse A">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Batch Number <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="text" name="batchNumber" value="${product.batchNumber || ""}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. BATCH-2024-001">
+                  <input type="text" name="batchNumber" value="${
+                    product.batchNumber || ""
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. BATCH-2024-001">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Expiry Date <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="date" name="expiryDate" value="${product.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : ""}" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                  <input type="date" name="expiryDate" value="${
+                    product.expiryDate
+                      ? new Date(product.expiryDate).toISOString().split("T")[0]
+                      : ""
+                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Status</label>
                   <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-                    <option value="In Stock" ${product.status === "In Stock" ? "selected" : ""}>In Stock</option>
-                    <option value="Low Stock" ${product.status === "Low Stock" ? "selected" : ""}>Low Stock</option>
-                    <option value="Out of Stock" ${product.status === "Out of Stock" ? "selected" : ""}>Out of Stock</option>
+                    <option value="In Stock" ${
+                      product.status === "In Stock" ? "selected" : ""
+                    }>In Stock</option>
+                    <option value="Low Stock" ${
+                      product.status === "Low Stock" ? "selected" : ""
+                    }>Low Stock</option>
+                    <option value="Out of Stock" ${
+                      product.status === "Out of Stock" ? "selected" : ""
+                    }>Out of Stock</option>
                   </select>
                 </div>
               </div>
@@ -372,10 +403,14 @@ export class StockManagement {
       price: parseFloat(formData.get("price")),
       quantity: parseInt(formData.get("quantity")),
       minStock: parseInt(formData.get("minStock")),
-      maxStock: formData.get("maxStock") ? parseInt(formData.get("maxStock")) : null,
+      maxStock: formData.get("maxStock")
+        ? parseInt(formData.get("maxStock"))
+        : null,
       location: formData.get("location") || null,
       batchNumber: formData.get("batchNumber") || null,
-      expiryDate: formData.get("expiryDate") ? new Date(formData.get("expiryDate")) : null,
+      expiryDate: formData.get("expiryDate")
+        ? new Date(formData.get("expiryDate"))
+        : null,
       status: formData.get("status"),
     };
 
@@ -402,10 +437,14 @@ export class StockManagement {
       price: parseFloat(formData.get("price")),
       quantity: parseInt(formData.get("quantity")),
       minStock: parseInt(formData.get("minStock")),
-      maxStock: formData.get("maxStock") ? parseInt(formData.get("maxStock")) : null,
+      maxStock: formData.get("maxStock")
+        ? parseInt(formData.get("maxStock"))
+        : null,
       location: formData.get("location") || null,
       batchNumber: formData.get("batchNumber") || null,
-      expiryDate: formData.get("expiryDate") ? new Date(formData.get("expiryDate")) : null,
+      expiryDate: formData.get("expiryDate")
+        ? new Date(formData.get("expiryDate"))
+        : null,
       status: formData.get("status"),
     };
 

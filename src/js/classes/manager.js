@@ -21,6 +21,7 @@ class ManagerDashboard {
       delivery: new DeliveryTracking(this.container),
     };
     window.managerDashboard = this;
+    this.notificationPanel = new NotificationPanel(this.container);
   }
 
   async render() {
@@ -105,18 +106,7 @@ class ManagerDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
-    if (section === "delivery") {
-      await sectionInstance.getDeliveries();
-    } else if (section === "stock") {
-      await sectionInstance.getProducts();
-    } else if (section === "tasks") {
-      await sectionInstance.getTasks();
-      await sectionInstance.getUsers();
-    } else if (section === "overview") {
-      await sectionInstance.getEmployees();
-    } else if (section === "feedback") {
-      await sectionInstance.getFeedback();
-    }
+
     return sectionInstance.render();
   }
 
@@ -138,7 +128,6 @@ class ManagerDashboard {
       });
     }
 
-    // Attach notification panel event listeners
     window.notificationPanel = this.notificationPanel;
     this.notificationPanel.attachEventListeners();
   }
