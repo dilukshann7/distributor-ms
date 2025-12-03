@@ -12,7 +12,6 @@ class DriverDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "deliveries";
-    this.isSidebarOpen = true;
     this.sections = {
       deliveries: new DeliveryDetails(this.container),
       proof: new ProofOfDelivery(this.container),
@@ -20,6 +19,7 @@ class DriverDashboard {
       vehicle: new VehicleManagement(this.container),
     };
     this.notificationPanel = new NotificationPanel(container);
+    this.sections.deliveries.getDeliveries();
   }
 
   async render() {
@@ -41,7 +41,6 @@ class DriverDashboard {
     `;
     this.attachEventListeners();
 
-    // Attach vehicle management listeners if on vehicle section
     if (this.currentSection === "vehicle") {
       const vehicleSection = new VehicleManagement(this.container);
       const id = window.location.search.split("id=")[1];
@@ -61,10 +60,8 @@ class DriverDashboard {
     ];
 
     return `
-      <div class="${
-        this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } driver-sidebar">
-                <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
+      <div class="driver-sidebar">
+        <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
           ${menuItems
@@ -151,7 +148,6 @@ class DriverDashboard {
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
-    // Attach event listeners for vehicle management section
     if (section === "vehicle") {
       const vehicleSection = new VehicleManagement(this.container);
       const id = window.location.search.split("id=")[1];
@@ -174,7 +170,6 @@ class DriverDashboard {
   }
 
   getCurrentVehicleData() {
-    // Helper method to get current vehicle data for event listener attachment
     return {
       vehicleId: null,
       vehicleType: null,
