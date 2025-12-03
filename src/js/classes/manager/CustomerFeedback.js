@@ -1,7 +1,8 @@
 import { Feedback } from "../../models/Feedback.js";
 
 export class CustomerFeedback {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.feedback = [];
   }
 

@@ -1,7 +1,8 @@
 import { Delivery } from "../../models/Delivery.js";
 
 export class DeliveryTracking {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.deliveries = [];
   }
 
