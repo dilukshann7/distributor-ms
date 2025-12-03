@@ -5,6 +5,8 @@ export class InventoryControl {
   constructor(container) {
     this.container = container;
     this.inventory = [];
+    this.getInventory();
+    this.getProducts();
   }
 
   async getInventory() {

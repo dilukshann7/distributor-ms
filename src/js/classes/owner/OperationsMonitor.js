@@ -5,6 +5,7 @@ export class OperationsMonitor {
   constructor(container) {
     this.container = container;
     this.tasks = [];
+    this.getTasks();
   }
 
   async getTasks() {

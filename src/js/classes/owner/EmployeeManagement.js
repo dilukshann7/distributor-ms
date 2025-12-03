@@ -7,6 +7,7 @@ export class EmployeeManagement {
     this.employees = [];
     this.view = "list";
     this.editingEmployee = null;
+    this.getEmployees();
   }
 
   async getEmployees() {
