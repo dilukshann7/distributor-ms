@@ -1,7 +1,8 @@
 import { Product } from "../../models/Product.js";
 
 export class StockTracking {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.stockLocations = [];
   }
 

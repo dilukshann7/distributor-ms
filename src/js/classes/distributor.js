@@ -15,10 +15,10 @@ class DistributorDashboard {
     this.container = container;
     this.currentSection = "orders";
     this.sections = {
-      orders: new OrderManagement(),
-      drivers: new DriverManagement(),
-      stock: new StockTracking(),
-      routes: new DeliveryRoutes(),
+      orders: new OrderManagement(container),
+      drivers: new DriverManagement(container),
+      stock: new StockTracking(container),
+      routes: new DeliveryRoutes(container),
       delivery: new ProofOfDelivery(container),
       authorization: new OrderAuthorization(container),
     };

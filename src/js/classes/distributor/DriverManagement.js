@@ -1,7 +1,8 @@
 import { Driver } from "../../models/Drivers.js";
 
 export class DriverManagement {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.drivers = [];
   }
 

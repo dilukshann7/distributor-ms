@@ -1,7 +1,8 @@
 import { SalesOrder } from "../../models/SalesOrder.js";
 
 export class OrderManagement {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.orders = [];
     this.view = "list";
     this.editingOrder = null;
