@@ -1,4 +1,7 @@
 export class FinancialReports {
+  constructor(container) {
+    this.container = container;
+  }
   render() {
     return `
       <div class="cashier-section-spacing">
