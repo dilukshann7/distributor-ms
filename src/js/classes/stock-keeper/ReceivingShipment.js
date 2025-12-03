@@ -8,6 +8,7 @@ export class ReceivingShipment {
     this.activeTab = "in_transit";
     this.view = "list";
     this.editingShipment = null;
+    this.getShipments();
   }
 
   async getShipments() {

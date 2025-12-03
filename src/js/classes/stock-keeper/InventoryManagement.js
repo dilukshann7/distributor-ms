@@ -6,6 +6,7 @@ export class InventoryManagement {
     this.inventoryItems = [];
     this.view = "list";
     this.editingItem = null;
+    this.getInventoryItems();
   }
 
   async getInventoryItems() {
