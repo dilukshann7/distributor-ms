@@ -1,7 +1,9 @@
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class ReportsSection {
-  constructor() {}
+  constructor(container) {
+    this.container = container;
+  }
 
   render() {
     return `

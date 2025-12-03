@@ -2,7 +2,8 @@ import { Task } from "../../models/Task.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class OperationsMonitor {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.tasks = [];
   }
 

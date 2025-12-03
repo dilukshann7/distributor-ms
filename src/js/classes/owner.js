@@ -11,7 +11,13 @@ class OwnerDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "employees";
-    this.notificationPanel = new NotificationPanel(container);
+    this.sections = {
+      employees: new EmployeeManagement(this.container),
+      inventory: new InventoryControl(this.container),
+      operations: new OperationsMonitor(this.container),
+      reports: new ReportsSection(this.container),
+    };
+    window.ownerDashboard = this;
   }
 
   async render() {
@@ -104,17 +110,7 @@ class OwnerDashboard {
   }
 
   async renderSection(section) {
-    const sections = {
-      employees: new EmployeeManagement(this.container),
-      inventory: new InventoryControl(),
-      operations: new OperationsMonitor(),
-      reports: new ReportsSection(),
-    };
-
-    this.sections = sections;
-    window.ownerDashboard = this;
-
-    const sectionInstance = sections[section];
+    const sectionInstance = this.sections[section];
 
     if (section === "inventory") {
       await sectionInstance.getInventory();
