@@ -1,7 +1,5 @@
 import logo from "../../assets/logo-tr.png";
-import { Cart } from "../models/Cart.js";
 import "../../css/cashier-style.css";
-import { smallOrder } from "../models/SmallOrder.js";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
 import { SalesTransaction } from "./cashier/SalesTransaction.js";
@@ -124,7 +122,6 @@ class CashierDashboard {
       });
     }
 
-    // Attach notification panel event listeners
     window.notificationPanel = this.notificationPanel;
     this.notificationPanel.attachEventListeners();
   }
