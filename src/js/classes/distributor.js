@@ -55,7 +55,6 @@ class DistributorDashboard {
     ];
 
     return `
-      <!-- Sidebar -->
       <div class="lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-orange-700 to-orange-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
                 <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
 
