@@ -1,14 +1,11 @@
 import { Salesman } from "../../models/Salesman.js";
 
 export class SalesReports {
-  constructor() {
-    this.container = null;
+  constructor(container) {
+    this.container = container;
   }
 
   render() {
-    setTimeout(() => {
-      this.container = document.querySelector("#dashboardContent");
-    }, 0);
     return `
       <div class="space-y-6">
         <div>

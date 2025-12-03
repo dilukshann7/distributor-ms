@@ -1,7 +1,8 @@
 import { Product } from "../../models/Product.js";
 
 export class StockAvailability {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.products = [];
   }
 
