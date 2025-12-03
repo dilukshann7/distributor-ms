@@ -12,4 +12,10 @@ export class Delivery {
 
     return axios.post(apiURL, data);
   }
+
+  static async update(id, data) {
+    const apiURL = `http://localhost:3000/api/deliveries/${id}`;
+
+    return axios.put(apiURL, data);
+  }
 }
