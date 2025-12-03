@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { Order } from "./Order";
 import { Invoice } from "./Invoice";
-import { Driver } from "./Drivers";
+import { Driver } from "./Driver.js";
 import { SalesOrder } from "./SalesOrder";
 import { Product } from "./Product";
 import {
