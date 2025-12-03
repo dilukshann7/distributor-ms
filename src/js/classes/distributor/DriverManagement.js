@@ -4,6 +4,7 @@ export class DriverManagement {
   constructor(container) {
     this.container = container;
     this.drivers = [];
+    this.getDrivers();
   }
 
   async getDrivers() {

@@ -106,22 +106,6 @@ class DistributorDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
-    if (section === "orders") {
-      await sectionInstance.getOrders();
-    } else if (section === "drivers") {
-      await sectionInstance.getDrivers();
-    } else if (section === "stock") {
-      await sectionInstance.getInventoryItems();
-    } else if (section === "routes") {
-      await sectionInstance.getDeliveryRoutes();
-    } else if (section === "delivery") {
-      await sectionInstance.getDeliveries();
-    } else if (section === "authorization") {
-      await Promise.all([
-        sectionInstance.getPendingOrders(),
-        sectionInstance.getDrivers(),
-      ]);
-    }
 
     return sectionInstance.render();
   }

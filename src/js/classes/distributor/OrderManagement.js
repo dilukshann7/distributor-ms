@@ -6,6 +6,7 @@ export class OrderManagement {
     this.orders = [];
     this.view = "list";
     this.editingOrder = null;
+    this.getOrders();
   }
 
   async getOrders() {
