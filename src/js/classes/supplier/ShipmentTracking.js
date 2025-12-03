@@ -1,7 +1,8 @@
 import { Shipment } from "../../models/Shipment.js";
 
 export class ShipmentTracking {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.shipments = [];
   }
 
