@@ -2,7 +2,8 @@ import { Driver } from "../../models/Drivers.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class ProofOfDelivery {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.deliveries = [];
   }
 

@@ -13,6 +13,12 @@ class DriverDashboard {
     this.container = container;
     this.currentSection = "deliveries";
     this.isSidebarOpen = true;
+    this.sections = {
+      deliveries: new DeliveryDetails(this.container),
+      proof: new ProofOfDelivery(this.container),
+      payment: new PaymentCollection(this.container),
+      vehicle: new VehicleManagement(this.container),
+    };
     this.notificationPanel = new NotificationPanel(container);
   }
 
@@ -37,7 +43,7 @@ class DriverDashboard {
 
     // Attach vehicle management listeners if on vehicle section
     if (this.currentSection === "vehicle") {
-      const vehicleSection = new VehicleManagement();
+      const vehicleSection = new VehicleManagement(this.container);
       const id = window.location.search.split("id=")[1];
       const response = await Driver.findById(id);
       vehicleSection.vehicleData = response.data;
@@ -103,13 +109,7 @@ class DriverDashboard {
   }
 
   async renderSection(section) {
-    const sections = {
-      deliveries: new DeliveryDetails(),
-      proof: new ProofOfDelivery(),
-      payment: new PaymentCollection(),
-      vehicle: new VehicleManagement(),
-    };
-    const sectionInstance = sections[section];
+    const sectionInstance = this.sections[section];
     if (section === "deliveries") {
       await sectionInstance.getDeliveries();
     } else if (section === "proof") {
@@ -163,7 +163,7 @@ class DriverDashboard {
 
     // Attach event listeners for vehicle management section
     if (section === "vehicle") {
-      const vehicleSection = new VehicleManagement();
+      const vehicleSection = new VehicleManagement(this.container);
       const id = window.location.search.split("id=")[1];
       const response = await Driver.findById(id);
       vehicleSection.vehicleData = response.data;
