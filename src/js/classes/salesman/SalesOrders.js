@@ -11,6 +11,9 @@ export class SalesOrders {
     this.customers = [];
     this.view = "list";
     this.editingOrder = null;
+    this.getOrders();
+    this.getProducts();
+    this.getCustomers();
   }
 
   async getOrders() {

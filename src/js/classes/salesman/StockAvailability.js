@@ -4,6 +4,7 @@ export class StockAvailability {
   constructor(container) {
     this.container = container;
     this.products = [];
+    this.getInventoryItems();
   }
 
   async getInventoryItems() {

@@ -103,13 +103,7 @@ class SalesmanDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
-    if (section === "orders") {
-      await sectionInstance.getOrders();
-    } else if (section === "stock") {
-      await sectionInstance.getInventoryItems();
-    } else if (section === "customers") {
-      await sectionInstance.getCustomers();
-    }
+
     return sectionInstance.render();
   }
 
@@ -118,14 +112,6 @@ class SalesmanDashboard {
     const content = this.container.querySelector("#dashboardContent");
 
     const sectionInstance = this.sections[section];
-
-    if (section === "orders") {
-      await sectionInstance.getOrders();
-    } else if (section === "stock") {
-      await sectionInstance.getInventoryItems();
-    } else if (section === "customers") {
-      await sectionInstance.getCustomers();
-    }
 
     const sectionContent = sectionInstance.render();
 
