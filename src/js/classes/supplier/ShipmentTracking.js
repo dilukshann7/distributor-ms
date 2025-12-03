@@ -4,6 +4,7 @@ export class ShipmentTracking {
   constructor(container) {
     this.container = container;
     this.shipments = [];
+    this.getShipments();
   }
 
   async getShipments() {
