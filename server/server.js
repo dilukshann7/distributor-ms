@@ -1073,6 +1073,29 @@ app.post(
   })
 );
 
+app.get(
+  "/api/payments",
+  asyncHandler(async (req, res) => {
+    const payments = await prisma.payment.findMany({
+      include: {
+        salesOrder: true,
+      },
+    });
+    res.json(payments);
+  })
+);
+
+app.post(
+  "/api/payments",
+  asyncHandler(async (req, res) => {
+    const paymentData = req.body;
+    const newPayment = await prisma.payment.create({
+      data: paymentData,
+    });
+    res.status(201).json(newPayment);
+  })
+);
+
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: err.message || "Internal Server Error" });
