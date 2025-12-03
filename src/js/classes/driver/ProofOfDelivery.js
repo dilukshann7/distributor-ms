@@ -25,6 +25,7 @@ export class ProofOfDelivery {
     try {
       await Delivery.update(deliveryId, {
         status: "completed",
+        deliveredDate: new Date(),
       });
       this.getProofDeliveries();
       this.render();
