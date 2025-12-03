@@ -4,6 +4,7 @@ export class CustomerFeedback {
   constructor(container) {
     this.container = container;
     this.feedback = [];
+    this.getFeedback();
   }
 
   async getFeedback() {
