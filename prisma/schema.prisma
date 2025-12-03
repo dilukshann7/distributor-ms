@@ -177,20 +177,20 @@ model Delivery {
 }
 
 model SalesOrder {
-  id            Int      @id @default(autoincrement())
-  orderNumber   String   @unique
-  customerId    Int
-  customerName  String
-  orderDate     DateTime
-  subtotal      Float
-  status        String   @default("pending")
-  paymentStatus String   @default("unpaid")
-  items         Json
-  notes         String?
-  driverId      Int?
-  deliveryId Int?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             Int      @id @default(autoincrement())
+  orderNumber    String   @unique
+  customerId     Int
+  customerName   String
+  orderDate      DateTime
+  subtotal       Float
+  status         String   @default("pending")
+  paymentStatus  String   @default("unpaid")
+  items          Json
+  notes          String?
+  driverId       Int?
+  deliveryId     Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   delivery   Delivery? @relation(fields: [deliveryId], references: [id])
 
