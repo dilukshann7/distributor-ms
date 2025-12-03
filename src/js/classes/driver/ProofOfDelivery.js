@@ -1,22 +1,35 @@
-import { Driver } from "../../models/Drivers.js";
+import { Driver } from "../../models/Driver.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
+import { Delivery } from "../../models/Delivery.js";
 
 export class ProofOfDelivery {
   constructor(container) {
     this.container = container;
     this.deliveries = [];
     this.getProofDeliveries();
+    window.proofOfDelivery = this;
   }
 
   async getProofDeliveries() {
     try {
       const id = window.location.search.split("id=")[1];
       const response = await Driver.findById(id);
-      console.log(response.data);
       this.deliveries = response.data;
     } catch (error) {
       console.error("Error fetching deliveries:", error);
       this.deliveries = [];
+    }
+  }
+
+  async completeDelivery(deliveryId) {
+    try {
+      await Delivery.update(deliveryId, {
+        status: "completed",
+      });
+      this.getProofDeliveries();
+      this.render();
+    } catch (error) {
+      console.error("Error completing delivery:", error);
     }
   }
 
@@ -30,7 +43,7 @@ export class ProofOfDelivery {
         <div class="space-y-6">
           <div>
             <h3 class="text-2xl font-bold text-gray-900">Proof of Delivery</h3>
-            <p class="text-gray-600 mt-1">Capture signatures and delivery confirmations</p>
+            <p class="text-gray-600 mt-1">Deliveries</p>
           </div>
           <p class="text-gray-600">No deliveries found for this driver.</p>
         </div>
@@ -41,10 +54,9 @@ export class ProofOfDelivery {
       <div class="space-y-6">
         <div>
           <h3 class="driver-title">Proof of Delivery</h3>
-          <p class="driver-subtitle">Capture signatures and delivery confirmations</p>
+          <p class="driver-subtitle">Deliveries</p>
         </div>
 
-        <!-- Delivery Cards -->
         <div class="space-y-4">
           ${this.deliveries.deliveries
             .map(
@@ -121,39 +133,13 @@ export class ProofOfDelivery {
                       )}</div>
                       <p class="font-semibold text-green-900">Delivery Completed</p>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 mt-3">
-                      <div>
-                        <p class="text-xs text-green-700">Signature Captured</p>
-                        <p class="text-sm font-semibold text-green-900">${
-                          delivery.signature
-                        }</p>
-                      </div>
-                      <div>
-                        <p class="text-xs text-green-700">Photo Evidence</p>
-                        <p class="text-sm font-semibold text-green-900">${
-                          delivery.hasPhoto ? "Yes ✓" : "No"
-                        }</p>
-                      </div>
-                    </div>
-                    ${
-                      delivery.notes
-                        ? `<p class="text-sm text-green-800 mt-3"><span class="font-semibold">Notes:</span> ${delivery.notes}</p>`
-                        : ""
-                    }
                   </div>
                 `
                     : `
-                  <!-- Upload Forms -->
                   <div class="space-y-4">
-            
-                    <!-- Delivery Notes -->
-                    <div>
-                      <label class="driver-label-text">Delivery Notes</label>
-                      <textarea class="driver-input" rows="3" placeholder="Add any delivery notes or observations..."></textarea>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button class="driver-btn-primary driver-btn-action w-full">
+                    <button onclick="window.proofOfDelivery.completeDelivery(${
+                      delivery.id
+                    })" class="driver-btn-primary driver-btn-action w-full">
                       <div class="w-5 h-5">${getIconHTML("check")}</div>
                       Complete Delivery
                     </button>
@@ -166,8 +152,6 @@ export class ProofOfDelivery {
             )
             .join("")}
         </div>
-
-        
       </div>
     `;
   }
