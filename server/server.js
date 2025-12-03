@@ -584,6 +584,7 @@ app.put(
   asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const orderData = req.body;
+
     const updatedOrder = await prisma.salesOrder.update({
       where: { id },
       data: orderData,
@@ -1073,6 +1074,23 @@ app.post(
   })
 );
 
+app.put(
+  "/api/deliveries/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const deliveryData = req.body;
+    const updatedDelivery = await prisma.delivery.update({
+      where: { id },
+      data: deliveryData,
+      include: {
+        driver: true,
+        salesOrders: true,
+      },
+    });
+    res.json(updatedDelivery);
+  })
+);
+
 app.get(
   "/api/payments",
   asyncHandler(async (req, res) => {
@@ -1089,10 +1107,35 @@ app.post(
   "/api/payments",
   asyncHandler(async (req, res) => {
     const paymentData = req.body;
-    const newPayment = await prisma.payment.create({
-      data: paymentData,
+
+    const result = await prisma.$transaction(async (prisma) => {
+      const salesOrder = await prisma.salesOrder.findUnique({
+        where: { id: paymentData.salesOrderId },
+      });
+
+      if (!salesOrder) {
+        throw new Error("Sales order not found");
+      }
+
+      if (paymentData.amount !== salesOrder.subtotal) {
+        throw new Error("Payment amount must equal the full order amount");
+      }
+
+      const newPayment = await prisma.payment.create({
+        data: paymentData,
+      });
+
+      await prisma.salesOrder.update({
+        where: { id: paymentData.salesOrderId },
+        data: {
+          paymentStatus: "paid",
+        },
+      });
+
+      return newPayment;
     });
-    res.status(201).json(newPayment);
+
+    res.status(201).json(result);
   })
 );
 
