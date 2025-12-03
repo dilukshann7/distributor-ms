@@ -1,4 +1,3 @@
-// Product/Inventory Class
 import axios from "axios";
 
 export class Product {
