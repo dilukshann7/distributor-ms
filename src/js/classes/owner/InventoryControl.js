@@ -2,7 +2,8 @@ import { Product } from "../../models/Product.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class InventoryControl {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.inventory = [];
   }
 
