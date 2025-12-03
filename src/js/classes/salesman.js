@@ -15,10 +15,10 @@ class SalesmanDashboard {
     this.currentSection = "orders";
     this.sections = {
       orders: new SalesOrders(container),
-      stock: new StockAvailability(),
+      stock: new StockAvailability(container),
       customers: new CustomerAccounts(container),
-      reports: new SalesReports(),
-      returns: new ReturnsAndCancellations(),
+      reports: new SalesReports(container),
+      returns: new ReturnsAndCancellations(container),
     };
     this.notificationPanel = new NotificationPanel(container);
   }

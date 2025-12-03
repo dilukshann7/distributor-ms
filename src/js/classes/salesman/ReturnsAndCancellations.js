@@ -1,5 +1,6 @@
 export class ReturnsAndCancellations {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.returns = [
       {
         id: "RTN-001",
