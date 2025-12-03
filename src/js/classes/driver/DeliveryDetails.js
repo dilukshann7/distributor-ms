@@ -1,4 +1,4 @@
-import { Driver } from "../../models/Drivers.js";
+import { Driver } from "../../models/Driver.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class DeliveryDetails {
@@ -12,8 +12,9 @@ export class DeliveryDetails {
     try {
       const id = window.location.search.split("id=")[1];
       const response = await Driver.findById(id);
-      console.log(response.data);
-      this.deliveries = response.data;
+      this.deliveries = response.data.deliveries.filter(
+        (delivery) => delivery.status === "pending"
+      );
     } catch (error) {
       console.error("Error fetching deliveries:", error);
       this.deliveries = [];
@@ -39,7 +40,6 @@ export class DeliveryDetails {
       <div class="grid gap-4">
         ${this.deliveries.deliveries
           .map((delivery) => {
-            // Concatenate all sales order items
             const items =
               delivery.salesOrders
                 .flatMap((so) => so.items || [])

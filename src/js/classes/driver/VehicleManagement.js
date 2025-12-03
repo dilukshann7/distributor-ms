@@ -1,4 +1,4 @@
-import { Driver } from "../../models/Drivers.js";
+import { Driver } from "../../models/Driver.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class VehicleManagement {

@@ -6,7 +6,7 @@ import { DeliveryDetails } from "./driver/DeliveryDetails.js";
 import { ProofOfDelivery } from "./driver/ProofOfDelivery.js";
 import { PaymentCollection } from "./driver/PaymentCollection.js";
 import { VehicleManagement } from "./driver/VehicleManagement.js";
-import { Driver } from "../models/Drivers.js";
+import { Driver } from "../models/Driver.js";
 
 class DriverDashboard {
   constructor(container) {
@@ -176,11 +176,6 @@ class DriverDashboard {
       licenseNumber: null,
       currentLocation: null,
     };
-  }
-
-  async recordPayment() {
-    await this.sections.payment.recordPayment();
-    this.navigateToSection("payment");
   }
 }
 
