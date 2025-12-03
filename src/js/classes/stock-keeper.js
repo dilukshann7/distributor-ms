@@ -50,7 +50,6 @@ class StockKeeperDashboard {
     ];
     /*html*/
     return `
-      <!-- Sidebar -->
       <aside class="translate-x-0 lg:translate-x-0 fixed lg:relative w-64 h-screen bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
         <img src="${logo}" alt="Logo" class="w-full  h-auto p-4" />
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
@@ -100,11 +99,7 @@ class StockKeeperDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
-    if (section === "inventory") {
-      await sectionInstance.getInventoryItems();
-    } else if (section === "receiving") {
-      await sectionInstance.getShipments();
-    }
+
     return sectionInstance.render();
   }
 
@@ -126,7 +121,6 @@ class StockKeeperDashboard {
       });
     }
 
-    // Attach notification panel event listeners
     window.notificationPanel = this.notificationPanel;
     this.notificationPanel.attachEventListeners();
   }
