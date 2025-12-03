@@ -1,5 +1,6 @@
 export class PaymentVerification {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.payments = [
       {
         id: 1,

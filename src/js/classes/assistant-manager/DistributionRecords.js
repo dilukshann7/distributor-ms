@@ -1,5 +1,6 @@
 export class DistributionRecords {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.distributionData = [
       { date: "Jan 15", deliveries: 12, items: 450 },
       { date: "Jan 16", deliveries: 15, items: 520 },

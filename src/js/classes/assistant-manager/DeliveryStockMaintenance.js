@@ -1,5 +1,6 @@
 export class DeliveryStockMaintenance {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.deliveryStock = [
       {
         id: 1,
