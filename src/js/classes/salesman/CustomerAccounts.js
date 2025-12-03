@@ -6,6 +6,7 @@ export class CustomerAccounts {
     this.container = container;
     this.customers = [];
     this.view = "list";
+    this.getCustomers();
   }
 
   async getCustomers() {
