@@ -12,6 +12,12 @@ class StockKeeperDashboard {
     this.container = container;
     this.currentSection = "inventory";
     this.isSidebarOpen = true;
+    this.sections = {
+      inventory: new InventoryManagement(this.container),
+      receiving: new ReceivingShipment(this.container),
+      reports: new StockReports(this.container),
+      auditing: new StockAuditing(this.container),
+    };
     this.notificationPanel = new NotificationPanel(container);
   }
 
@@ -94,14 +100,6 @@ class StockKeeperDashboard {
   }
 
   async renderSection(section) {
-    if (!this.sections) {
-      this.sections = {
-        inventory: new InventoryManagement(this.container),
-        receiving: new ReceivingShipment(this.container),
-        reports: new StockReports(this.container),
-        auditing: new StockAuditing(),
-      };
-    }
     const sectionInstance = this.sections[section];
     if (section === "inventory") {
       await sectionInstance.getInventoryItems();

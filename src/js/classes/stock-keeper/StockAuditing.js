@@ -1,7 +1,8 @@
 import { getIconHTML } from "../../../assets/icons";
 
 export class StockAuditing {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.audits = [
       {
         id: 1,

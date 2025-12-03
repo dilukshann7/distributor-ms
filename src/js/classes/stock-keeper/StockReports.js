@@ -8,9 +8,6 @@ export class StockReports {
   }
 
   render() {
-    setTimeout(() => {
-      this.container = document.querySelector("#dashboardContent");
-    }, 0);
     return `
       <div class="space-y-6">
         <div>
