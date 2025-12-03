@@ -6,6 +6,7 @@ export class VehicleManagement {
     this.container = container;
     this.vehicleData = null;
     this.driverId = null;
+    this.getVehicleDetails();
   }
 
   async getVehicleDetails() {

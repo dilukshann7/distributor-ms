@@ -5,6 +5,7 @@ export class DeliveryDetails {
   constructor(container) {
     this.container = container;
     this.deliveries = [];
+    this.getDeliveries();
   }
 
   async getDeliveries() {

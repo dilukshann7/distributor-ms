@@ -5,6 +5,7 @@ export class ProofOfDelivery {
   constructor(container) {
     this.container = container;
     this.deliveries = [];
+    this.getProofDeliveries();
   }
 
   async getProofDeliveries() {

@@ -5,6 +5,7 @@ export class PaymentCollection {
   constructor(container) {
     this.container = container;
     this.payments = [];
+    this.getPayments();
   }
 
   async getPayments() {
