@@ -103,10 +103,6 @@ class CashierDashboard {
   async renderSection(section) {
     const sectionInstance = this.sections[section];
 
-    if (section === "sales") {
-      await sectionInstance.getCartItems();
-      await sectionInstance.getSmallOrder();
-    }
     return sectionInstance.render();
   }
 
