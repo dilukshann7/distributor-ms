@@ -1,5 +1,5 @@
 import { SalesOrder } from "../../models/SalesOrder.js";
-import { Driver } from "../../models/Drivers.js";
+import { Driver } from "../../models/Driver.js";
 import { Delivery } from "../../models/Delivery.js";
 
 export class OrderAuthorization {

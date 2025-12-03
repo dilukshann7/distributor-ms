@@ -1,4 +1,4 @@
-import { Driver } from "../../models/Drivers.js";
+import { Driver } from "../../models/Driver.js";
 
 export class DriverManagement {
   constructor(container) {
