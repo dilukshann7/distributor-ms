@@ -36,6 +36,73 @@ model User {
   assistantManagerProfile AssistantManager?
 }
 
+model Driver {
+  id              Int      @id @default(autoincrement())
+  userId          Int      @unique
+  vehicleId       String?
+  vehicleType     String?
+  licenseNumber   String?  @unique
+  currentLocation String?
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries  Delivery[]
+  salesOrders SalesOrder[]
+}
+
+model Manager {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Salesman {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  salesTarget Float?
+  totalSales  Float    @default(0)
+  commission  Float    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StockKeeper {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Cashier {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Supplier {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  companyName  String?
+  supplierType String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Distributor {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AssistantManager {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Product {
   id          Int       @id @default(autoincrement())
   name        String
@@ -144,8 +211,8 @@ model Order {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  shipments Shipment[] // existing
-  invoices  Invoice[] // <-- back-relation for invoices
+  shipments Shipment[]
+  invoices  Invoice[]
 }
 
 model Supply {
@@ -214,73 +281,6 @@ model Customer {
   salesOrders SalesOrder[]
 }
 
-model Driver {
-  id              Int      @id @default(autoincrement())
-  userId          Int      @unique
-  vehicleId       String?
-  vehicleType     String?
-  licenseNumber   String?  @unique
-  currentLocation String?
-
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deliveries  Delivery[]
-  salesOrders SalesOrder[]
-}
-
-model Manager {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @unique
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Salesman {
-  id          Int      @id @default(autoincrement())
-  userId      Int      @unique
-  salesTarget Float?
-  totalSales  Float    @default(0)
-  commission  Float    @default(0)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model StockKeeper {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @unique
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Cashier {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @unique
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Supplier {
-  id           Int      @id @default(autoincrement())
-  userId       Int      @unique
-  companyName  String?
-  supplierType String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Distributor {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @unique
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model AssistantManager {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @unique
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 model SalesInvoice {
   id              Int       @id @default(autoincrement())
   invoiceNumber   String    @unique
@@ -300,6 +300,8 @@ model SalesInvoice {
   salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
 
   delivery Delivery? @relation(fields: [deliveryId], references: [id])
+
+  payments Payment[]
 }
 
 model Cart {
@@ -323,4 +325,17 @@ model SmallOrder {
   paymentMethod String?
 
   cart Cart @relation(fields: [cartId], references: [id])
+}
+
+model Payment {
+  id            Int       @id @default(autoincrement())
+  invoiceId     Int
+  amount        Float
+  paymentDate   DateTime
+  paymentMethod String
+  status        String    @default("completed")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  salesInvoice SalesInvoice @relation(fields: [invoiceId], references: [id])
 }
