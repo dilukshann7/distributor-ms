@@ -96,7 +96,6 @@ class SupplierDashboard {
         <div class="flex items-center gap-6">
           <button id="notificationBtn" class="relative btn-icon">
             ${getIconHTML("bell")}
-            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
 
           <button onclick="window.supplierDashboard.logout()" class="btn-icon">

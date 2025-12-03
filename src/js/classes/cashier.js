@@ -93,7 +93,6 @@ class CashierDashboard {
           <div class="relative">
             <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
               ${getIconHTML("bell")}
-              <span class="cashier-notification-badge">3</span>
             </button>
           </div>
         </div>
