@@ -2,37 +2,37 @@ import axios from "axios";
 
 export class Order {
   static async getAll() {
-    const apiURL = "http://localhost:3000/api/orders";
+    const apiURL = "/api/orders";
 
     return axios.get(apiURL);
   }
 
   static async getDailyOrders() {
-    const apiURL = "http://localhost:3000/api/orders/daily";
+    const apiURL = "/api/orders/daily";
 
     return axios.get(apiURL);
   }
 
   static async getWeeklyOrders() {
-    const apiURL = "http://localhost:3000/api/orders/weekly";
+    const apiURL = "/api/orders/weekly";
 
     return axios.get(apiURL);
   }
 
   static async getMonthlyOrders() {
-    const apiURL = "http://localhost:3000/api/orders/monthly";
+    const apiURL = "/api/orders/monthly";
 
     return axios.get(apiURL);
   }
 
   static async getSummary() {
-    const apiURL = "http://localhost:3000/api/orders/summary";
+    const apiURL = "/api/orders/summary";
 
     return axios.get(apiURL);
   }
 
   static async update(id, orderData) {
-    const apiURL = `http://localhost:3000/api/orders/${id}`;
+    const apiURL = `/api/orders/${id}`;
     return axios.put(apiURL, orderData);
   }
 }

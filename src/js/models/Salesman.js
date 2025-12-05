@@ -11,27 +11,27 @@ import { SalesOrder } from "./SalesOrder";
 
 export class Salesman extends User {
   static async getAll() {
-    const apiURL = "http://localhost:3000/api/salesmen";
+    const apiURL = "/api/salesmen";
     return axios.get(apiURL);
   }
 
   static async findById(id) {
-    const apiURL = `http://localhost:3000/api/salesmen/${id}`;
+    const apiURL = `/api/salesmen/${id}`;
     return axios.get(apiURL);
   }
 
   static async create(salesmanData) {
-    const apiURL = "http://localhost:3000/api/salesmen";
+    const apiURL = "/api/salesmen";
     return axios.post(apiURL, salesmanData);
   }
 
   static async update(id, salesmanData) {
-    const apiURL = `http://localhost:3000/api/salesmen/${id}`;
+    const apiURL = `/api/salesmen/${id}`;
     return axios.put(apiURL, salesmanData);
   }
 
   static async delete(id) {
-    const apiURL = `http://localhost:3000/api/salesmen/${id}`;
+    const apiURL = `/api/salesmen/${id}`;
     return axios.delete(apiURL);
   }
 
