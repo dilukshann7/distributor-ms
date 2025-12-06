@@ -1,46 +1,20 @@
 import { getIconHTML } from "../../../assets/icons/index.js";
+import { Driver } from "../../models/Driver.js";
 
 export class DriverManagement {
   constructor(container) {
     this.container = container;
-    this.drivers = [
-      {
-        id: 1,
-        name: "Ravi Kumar",
-        phone: "+94 71 234 5678",
-        vehicle: "Van - VH-2024",
-        status: "active",
-        currentRoute: "Route A - 5 stops",
-        lastUpdate: "2 mins ago",
-      },
-      {
-        id: 2,
-        name: "Ahmed Hassan",
-        phone: "+94 77 345 6789",
-        vehicle: "Truck - VH-2025",
-        status: "active",
-        currentRoute: "Route B - 8 stops",
-        lastUpdate: "5 mins ago",
-      },
-      {
-        id: 3,
-        name: "Carlos Rodriguez",
-        phone: "+94 76 456 7890",
-        vehicle: "Van - VH-2023",
-        status: "inactive",
-        currentRoute: "Completed",
-        lastUpdate: "30 mins ago",
-      },
-      {
-        id: 4,
-        name: "Maria Santos",
-        phone: "+94 70 567 8901",
-        vehicle: "Truck - VH-2026",
-        status: "active",
-        currentRoute: "Route C - 6 stops",
-        lastUpdate: "1 min ago",
-      },
-    ];
+    this.drivers = [];
+    this.fetchDrivers();
+  }
+
+  async fetchDrivers() {
+    try {
+      const response = await Driver.getAll();
+      this.drivers = response.data;
+    } catch (error) {
+      console.error("Error fetching drivers:", error);
+    }
   }
 
   render() {
@@ -69,7 +43,7 @@ export class DriverManagement {
                     (driver) => `
                   <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4 text-sm font-medium text-gray-900">${
-                      driver.name
+                      driver.user.name
                     }</td>
                     <td class="px-6 py-4 text-sm text-gray-600">
                       <div class="flex items-center gap-2">
@@ -77,19 +51,17 @@ export class DriverManagement {
                           'class="w-5 h-5"',
                           'class="w-4 h-4 text-gray-400"'
                         )}
-                        ${driver.phone}
+                        ${driver.user.phone}
                       </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      driver.vehicle
-                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${`${driver.licenseNumber} - ${driver.vehicleType}`}</td>
                     <td class="px-6 py-4 text-sm text-gray-600">
                       <div class="flex items-center gap-2">
                         ${getIconHTML("map-pin").replace(
                           'class="w-5 h-5"',
                           'class="w-4 h-4 text-amber-500"'
                         )}
-                        ${driver.currentRoute}
+                        ${driver.currentLocation}
                       </div>
                     </td>
                     <td class="px-6 py-4 text-sm">
@@ -99,14 +71,14 @@ export class DriverManagement {
                           : "bg-gray-100 text-gray-800"
                       }">
                         ${
-                          driver.status.charAt(0).toUpperCase() +
-                          driver.status.slice(1)
+                          driver.user.status.charAt(0).toUpperCase() +
+                          driver.user.status.slice(1)
                         }
                       </span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      driver.lastUpdate
-                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${new Date(
+                      driver.user.updatedAt
+                    ).toLocaleString()}</td>
                   </tr>
                 `
                   )
