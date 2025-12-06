@@ -21,6 +21,10 @@ export class OperationsMonitor {
   render() {
     return `
       <div class="owner-section-container">
+        <div>
+          <h2 class="owner-title">Operations Monitor</h2>
+          <p class="owner-subtitle">Monitor operations and tasks</p>
+        </div>
         <div class="owner-card p-6">
           <h3 class="owner-section-title">Today's Tasks</h3>
           <div class="space-y-3">
