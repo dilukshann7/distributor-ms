@@ -4,7 +4,6 @@ import { NotificationPanel } from "../components/NotificationPanel.js";
 import { InventoryManagement } from "./stock-keeper/InventoryManagement.js";
 import { ReceivingShipment } from "./stock-keeper/ReceivingShipment.js";
 import { StockReports } from "./stock-keeper/StockReports.js";
-import { StockAuditing } from "./stock-keeper/StockAuditing.js";
 import { getIconHTML } from "../../assets/icons/index.js";
 
 class StockKeeperDashboard {
@@ -16,7 +15,6 @@ class StockKeeperDashboard {
       inventory: new InventoryManagement(this.container),
       receiving: new ReceivingShipment(this.container),
       reports: new StockReports(this.container),
-      auditing: new StockAuditing(this.container),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
@@ -46,7 +44,6 @@ class StockKeeperDashboard {
       { id: "inventory", label: "Inventory", icon: "package" },
       { id: "receiving", label: "Shipment", icon: "inbox" },
       { id: "reports", label: "Stock Reports", icon: "bar-chart" },
-      { id: "auditing", label: "Stock Auditing", icon: "check-square" },
     ];
     /*html*/
     return `
