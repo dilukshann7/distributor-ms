@@ -37,10 +37,6 @@ export class InventoryControl {
             <h2 class="owner-title">Inventory Control</h2>
             <p class="owner-subtitle">Manage stock levels and product details</p>
           </div>
-          <button class="owner-btn-primary">
-            ${getIconHTML("plus")}
-            Add Product
-          </button>
         </div>
 
         <div class="owner-card">
