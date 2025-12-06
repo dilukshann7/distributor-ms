@@ -22,14 +22,6 @@ export class DeliveryDetails {
   }
 
   render() {
-    if (
-      !this.deliveries ||
-      !this.deliveries.deliveries ||
-      !Array.isArray(this.deliveries.deliveries)
-    ) {
-      return `<p class="text-gray-600">No deliveries found for this driver.</p>`;
-    }
-
     return `
     <div class="space-y-6">
       <div>
@@ -38,7 +30,7 @@ export class DeliveryDetails {
       </div>
 
       <div class="grid gap-4">
-        ${this.deliveries.deliveries
+        ${this.deliveries
           .map((delivery) => {
             const items =
               delivery.salesOrders
