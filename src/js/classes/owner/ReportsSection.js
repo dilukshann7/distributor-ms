@@ -8,56 +8,85 @@ export class ReportsSection {
   render() {
     return `
       <div class="owner-section-container">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="owner-title">Reports & Analytics</h2>
-            <p class="owner-subtitle">Generate and view business reports</p>
-          </div>
-          <div class="flex gap-3">
-            <button class="owner-btn-secondary flex items-center gap-2">
-              ${getIconHTML("filter")}
-              Filter
-            </button>
-            <button class="owner-btn-primary">
-              ${getIconHTML("download")}
-              Export All
-            </button>
-          </div>
+        <div>
+          <h3 class="section-header">Reports & Analytics</h3>
+          <p class="section-subtitle">Generate and view business reports</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          ${this.renderReportCard(
-            "Financial Report",
-            "Income, expenses, and profit analysis",
-            "Today"
-          )}
-          ${this.renderReportCard(
-            "Sales Report",
-            "Salesman performance and targets",
-            "Today"
-          )}
-          ${this.renderReportCard(
-            "Inventory Report",
-            "Stock levels and movements",
-            "Yesterday"
-          )}
-          ${this.renderReportCard(
-            "Employee Report",
-            "Attendance and performance metrics",
-            "2 days ago"
-          )}
-        </div>
-      </div>
-    `;
-  }
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="card-container">
+            <div class="p-6">
+              <h4 class="card-title mb-2">Financial Report</h4>
+              
+              <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Start Date</label>
+                  <input type="date" id="financial-report-start" class="input-field" />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">End Date</label>
+                  <input type="date" id="financial-report-end" class="input-field" />
+                </div>
+              </div>
 
-  renderReportCard(title, description, lastGenerated) {
-    return `
-      <div class="owner-card p-5 cursor-pointer hover:shadow-lg transition-shadow">
-        <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
-        <p class="text-sm text-gray-500 mt-1">${description}</p>
-        <div class="flex items-center justify-between mt-3">
-          <span class="text-sm text-gray-500">Last generated: ${lastGenerated}</span>
+              <div class="grid grid-cols-1 gap-4">
+                <button class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                  ${getIconHTML("download")}
+                  Generate Financial Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-container">
+            <div class="p-6">
+              <h4 class="card-title mb-2">Sales Report</h4>
+              
+              <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Start Date</label>
+                  <input type="date" id="sales-report-start" class="input-field" />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">End Date</label>
+                  <input type="date" id="sales-report-end" class="input-field" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4">
+                <button class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                  ${getIconHTML("download")}
+                  Generate Sales Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-container">
+            <div class="p-6">
+              <h4 class="card-title mb-4">Inventory Report</h4>
+
+              <div class="grid grid-cols-1 gap-4">
+                <button class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                  ${getIconHTML("download")}
+                  Generate Inventory Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-container">
+            <div class="p-6">
+              <h4 class="card-title mb-4">Employee Report</h4>
+
+              <div class="grid grid-cols-1 gap-4">
+                <button class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                  ${getIconHTML("download")}
+                  Generate Employee Report
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `;
