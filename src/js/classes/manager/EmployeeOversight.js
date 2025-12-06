@@ -64,7 +64,17 @@ export class EmployeeOversight {
                 ${this.employees
                   .map((emp) => {
                     // Get the appropriate profile based on role
-                    const profileKey = `${emp.role.toLowerCase()}Profile`;
+                    const roleMap = {
+                      "Driver": "driverProfile",
+                      "Manager": "managerProfile",
+                      "Salesman": "salesmanProfile",
+                      "Stock Keeper": "stockKeeperProfile",
+                      "Cashier": "cashierProfile",
+                      "Supplier": "supplierProfile",
+                      "Distributor": "distributorProfile",
+                      "Assistant Manager": "assistantManagerProfile"
+                    };
+                    const profileKey = roleMap[emp.role];
                     const profile = emp[profileKey];
 
                     // Extract attendance and performance from the profile
