@@ -1,6 +1,7 @@
 import { Product } from "../../models/Product";
 import { getIconHTML } from "../../../assets/icons/index.js";
 import { Report } from "../../models/Report.js";
+import { StockKeeper } from "../../models/StockKeeper.js";
 
 export class StockReports {
   constructor(container) {
@@ -29,7 +30,7 @@ export class StockReports {
 
   async exportPdf() {
     try {
-      await Report.exportStockReport();
+      await StockKeeper.exportStockReport();
       alert("PDF exported successfully");
     } catch (error) {
       console.error("Error exporting PDF:", error);
