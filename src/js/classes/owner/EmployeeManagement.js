@@ -13,11 +13,34 @@ export class EmployeeManagement {
   async getEmployees() {
     try {
       const response = await User.getAll();
-      this.employees = response.data;
+      this.employees = response.data.map((user) => {
+        const profile = this.getProfile(user);
+        return {
+          ...user,
+          salary: profile?.salary || 0,
+          bonus: profile?.bonus || 0,
+          attendance: profile?.attendance || "0",
+          performanceRating: profile?.performanceRating || 0,
+        };
+      });
     } catch (error) {
       console.error("Error fetching employees:", error);
       this.employees = [];
     }
+  }
+
+  getProfile(user) {
+    const profileMap = {
+      Driver: user.driverProfile,
+      Salesman: user.salesmanProfile,
+      "Stock Keeper": user.stockKeeperProfile,
+      Cashier: user.cashierProfile,
+      Distributor: user.distributorProfile,
+      "Assistant Manager": user.assistantManagerProfile,
+      Manager: user.managerProfile,
+      Supplier: user.supplierProfile,
+    };
+    return profileMap[user.role];
   }
 
   render() {
@@ -61,7 +84,6 @@ export class EmployeeManagement {
               <tbody class="owner-table-body">
                 ${this.employees
                   .map(
-                    /*html*/
                     (emp) => `
                   <tr class="owner-table-tr">
                     <td class="owner-table-td font-medium text-gray-900">${
@@ -98,9 +120,6 @@ export class EmployeeManagement {
                       </span>
                     </td>
                     <td class="owner-table-td flex items-center gap-2">
-                      <button class="owner-btn-icon">
-                        ${getIconHTML("eye")}
-                      </button>
                       <button onclick="window.ownerDashboard.sections.employees.showEditFormHandler(${
                         emp.id
                       })" class="owner-btn-icon">
