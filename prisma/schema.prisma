@@ -101,6 +101,8 @@ model Supplier {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   orders Order[]
+
+  invoices Invoice[]
 }
 
 model Distributor {
@@ -269,6 +271,8 @@ model Invoice {
   notes           String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+
+  supplier Supplier @relation(fields: [supplierId], references: [id])
 
   order Order @relation(fields: [purchaseOrderId], references: [id])
 }
