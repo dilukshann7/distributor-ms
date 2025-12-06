@@ -634,8 +634,9 @@ app.post(
     const { role } = userData;
 
     const newUser = await prisma.$transaction(async (prisma) => {
+      const { vehicleId, vehicleType, licenseNumber, salesTarget, companyName, supplierType, ...userFields } = userData;
       const user = await prisma.user.create({
-        data: userData,
+        data: userFields,
       });
 
       switch (role) {
@@ -717,9 +718,10 @@ app.put(
     const { role } = userData;
 
     const updatedUser = await prisma.$transaction(async (prisma) => {
+      const { vehicleId, vehicleType, licenseNumber, salesTarget, companyName, supplierType, attendance, performanceRating, salary, bonus, ...userFields } = userData;
       const user = await prisma.user.update({
         where: { id },
-        data: userData,
+        data: userFields,
       });
 
       switch (role) {
@@ -730,12 +732,20 @@ app.put(
               vehicleId: userData.vehicleId || null,
               vehicleType: userData.vehicleType || null,
               licenseNumber: userData.licenseNumber || null,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
             create: {
               userId: id,
               vehicleId: userData.vehicleId || null,
               vehicleType: userData.vehicleType || null,
               licenseNumber: userData.licenseNumber || null,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
@@ -751,28 +761,56 @@ app.put(
         case "Salesman":
           await prisma.salesman.upsert({
             where: { userId: id },
-            update: { salesTarget: userData.salesTarget || null },
+            update: { 
+              salesTarget: userData.salesTarget || null,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
+            },
             create: {
               userId: id,
               salesTarget: userData.salesTarget || null,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
         case "Stock Keeper":
           await prisma.stockKeeper.upsert({
             where: { userId: id },
-            update: {},
+            update: {
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
+            },
             create: {
               userId: id,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
         case "Cashier":
           await prisma.cashier.upsert({
             where: { userId: id },
-            update: {},
+            update: {
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
+            },
             create: {
               userId: id,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
@@ -793,18 +831,36 @@ app.put(
         case "Distributor":
           await prisma.distributor.upsert({
             where: { userId: id },
-            update: {},
+            update: {
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
+            },
             create: {
               userId: id,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
         case "Assistant Manager":
           await prisma.assistantManager.upsert({
             where: { userId: id },
-            update: {},
+            update: {
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
+            },
             create: {
               userId: id,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
