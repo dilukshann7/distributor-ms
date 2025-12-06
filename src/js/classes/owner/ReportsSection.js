@@ -13,32 +13,9 @@ export class ReportsSection {
           <p class="section-subtitle">Generate and view business reports</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="card-container">
-            <div class="p-6">
-              <h4 class="card-title mb-2">Financial Report</h4>
-              
-              <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Start Date</label>
-                  <input type="date" id="financial-report-start" class="input-field" />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">End Date</label>
-                  <input type="date" id="financial-report-end" class="input-field" />
-                </div>
-              </div>
+        <div class="grid grid-cols-2 gap-6">
 
-              <div class="grid grid-cols-1 gap-4">
-                <button class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                  ${getIconHTML("download")}
-                  Generate Financial Report
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="card-container">
+          <div class="card-container col-span-2">
             <div class="p-6">
               <h4 class="card-title mb-2">Sales Report</h4>
               
