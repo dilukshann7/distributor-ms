@@ -7,6 +7,7 @@ import { ProductCatalog } from "./supplier/ProductCatalog.js";
 import { ShipmentTracking } from "./supplier/ShipmentTracking.js";
 import { InvoicesPayments } from "./supplier/InvoicesPayments.js";
 import { SalesAnalytics } from "./supplier/SalesAnalytics.js";
+import { Supplier } from "../../js/models/Supplier.js";
 
 class SupplierDashboard {
   constructor(container) {
@@ -20,6 +21,7 @@ class SupplierDashboard {
       analytics: new SalesAnalytics(container),
     };
     this.notificationPanel = new NotificationPanel(container);
+    this.supplierName = this.loadSupplier();
   }
 
   async render() {
@@ -39,6 +41,13 @@ class SupplierDashboard {
         </div>
       </div>
     `;
+  }
+
+  async loadSupplier() {
+    const id = window.location.search.split("id=")[1];
+    const response = await Supplier.findById(id);
+    const SupplierName = response.data.companyName;
+    this.supplierName = SupplierName;
   }
 
   renderSidebar() {
@@ -78,7 +87,9 @@ class SupplierDashboard {
         <div class="p-4 border-t border-indigo-600">
           <div class="bg-indigo-600 rounded-lg p-4">
             <p class="text-sm text-indigo-100">Supplier Account</p>
-            <p class="font-semibold text-white mt-1"></p>
+            <p class="font-semibold text-white mt-1">
+              ${this.supplierName}
+            </p>
           </div>
         </div>
       </aside>
