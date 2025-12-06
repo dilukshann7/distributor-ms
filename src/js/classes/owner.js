@@ -92,13 +92,10 @@ class OwnerDashboard {
   renderHeader() {
     return `
       <header class="owner-header">
-        <div class="flex-1 max-w-md">
-          <div class="relative">
-            ${getIconHTML("search")}
-            <input type="text" placeholder="Search..." class="owner-search-input"/>
-          </div>
+        <div>
+          <h2 class="owner-header-title">Owner Dashboard</h2>
+          <p class="owner-header-subtitle">Manage operations and team performance</p>
         </div>
-
         <div class="flex items-center gap-4 ml-8">
           <button id="notificationBtn" class="relative p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
             ${getIconHTML("bell")}
