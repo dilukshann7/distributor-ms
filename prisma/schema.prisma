@@ -15,10 +15,6 @@ model User {
   role              String
   phone             String?
   address           String?
-  salary            Float?
-  bonus             Float?
-  attendance        String?
-  performanceRating Int?
   status            String   @default("active")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
@@ -43,6 +39,10 @@ model Driver {
   vehicleType     String?
   licenseNumber   String?  @unique
   currentLocation String?
+  salary          Float?
+  bonus           Float?
+  attendance      String?
+  performanceRating Int?
 
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   deliveries  Delivery[]
@@ -62,6 +62,10 @@ model Salesman {
   salesTarget Float?
   totalSales  Float    @default(0)
   commission  Float    @default(0)
+  salary      Float?
+  bonus       Float?
+  attendance  String?
+  performanceRating Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -69,6 +73,10 @@ model Salesman {
 model StockKeeper {
   id        Int      @id @default(autoincrement())
   userId    Int      @unique
+  salary    Float?
+  bonus     Float?
+  attendance String?
+  performanceRating Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -76,6 +84,10 @@ model StockKeeper {
 model Cashier {
   id        Int      @id @default(autoincrement())
   userId    Int      @unique
+    salary            Float?
+  bonus             Float?
+  attendance        String?
+  performanceRating Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -87,11 +99,17 @@ model Supplier {
   supplierType String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  orders Order[]
 }
 
 model Distributor {
   id        Int      @id @default(autoincrement())
   userId    Int      @unique
+  salary    Float?
+  bonus     Float?
+  attendance String?
+  performanceRating Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -99,6 +117,10 @@ model Distributor {
 model AssistantManager {
   id        Int      @id @default(autoincrement())
   userId    Int      @unique
+  salary    Float?
+  bonus     Float?
+  attendance String?
+  performanceRating Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -205,15 +227,16 @@ model SalesOrder {
 
 model Order {
   id          Int      @id @default(autoincrement())
-  customerId  Int
   orderDate   DateTime
   status      String   @default("pending")
   totalAmount Float
+  supplierId  Int
   dueDate     DateTime
-  itemIDs     Int[]
   items       Json
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  supplier Supplier @relation(fields: [supplierId], references: [id])
 
   shipments Shipment[]
   invoices  Invoice[]
