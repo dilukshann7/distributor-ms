@@ -121,3 +121,11 @@
 .owner-badge-danger {
   @apply bg-red-100 text-red-700;
 }
+
+.owner-header-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.owner-header-subtitle {
+  @apply text-gray-500 mt-1;
+}
