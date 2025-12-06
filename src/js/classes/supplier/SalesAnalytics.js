@@ -2,6 +2,7 @@ import { Supply } from "../../models/Supply.js";
 import { Order } from "../../models/Order.js";
 import { Report } from "../../models/Report.js";
 import axios from "axios";
+import { Supplier } from "../../models/Supplier.js";
 
 export class SalesAnalytics {
   constructor(container) {
@@ -183,7 +184,7 @@ export class SalesAnalytics {
       return;
     }
 
-    Report.exportSupplierReport(startDate, endDate);
+    Supplier.exportSupplierReport(startDate, endDate);
     alert("PDF exported successfully");
   }
 
