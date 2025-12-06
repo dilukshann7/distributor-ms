@@ -2,10 +2,12 @@ import express from "express";
 import { PrismaClient } from "@prisma/client";
 import "dotenv/config";
 const app = express();
+import cors from "cors";
 
 const prisma = new PrismaClient();
 
 app.use(express.static("dist"));
+app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -634,7 +636,15 @@ app.post(
     const { role } = userData;
 
     const newUser = await prisma.$transaction(async (prisma) => {
-      const { vehicleId, vehicleType, licenseNumber, salesTarget, companyName, supplierType, ...userFields } = userData;
+      const {
+        vehicleId,
+        vehicleType,
+        licenseNumber,
+        salesTarget,
+        companyName,
+        supplierType,
+        ...userFields
+      } = userData;
       const user = await prisma.user.create({
         data: userFields,
       });
@@ -718,7 +728,19 @@ app.put(
     const { role } = userData;
 
     const updatedUser = await prisma.$transaction(async (prisma) => {
-      const { vehicleId, vehicleType, licenseNumber, salesTarget, companyName, supplierType, attendance, performanceRating, salary, bonus, ...userFields } = userData;
+      const {
+        vehicleId,
+        vehicleType,
+        licenseNumber,
+        salesTarget,
+        companyName,
+        supplierType,
+        attendance,
+        performanceRating,
+        salary,
+        bonus,
+        ...userFields
+      } = userData;
       const user = await prisma.user.update({
         where: { id },
         data: userFields,
@@ -761,7 +783,7 @@ app.put(
         case "Salesman":
           await prisma.salesman.upsert({
             where: { userId: id },
-            update: { 
+            update: {
               salesTarget: userData.salesTarget || null,
               attendance: userData.attendance || null,
               performanceRating: userData.performanceRating || null,
