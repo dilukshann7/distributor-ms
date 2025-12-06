@@ -10,4 +10,8 @@ export class Invoice {
 
     return axios.get(apiURL);
   }
+  static async getById(id) {
+    const apiURL = `/api/invoices/${id}`;
+    return axios.get(apiURL);
+  }
 }
