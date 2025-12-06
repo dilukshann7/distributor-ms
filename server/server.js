@@ -643,6 +643,10 @@ app.post(
         salesTarget,
         companyName,
         supplierType,
+        attendance,
+        performanceRating,
+        salary,
+        bonus,
         ...userFields
       } = userData;
       const user = await prisma.user.create({
@@ -657,6 +661,10 @@ app.post(
               vehicleId: userData.vehicleId || null,
               vehicleType: userData.vehicleType || null,
               licenseNumber: userData.licenseNumber || null,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
@@ -672,6 +680,10 @@ app.post(
             data: {
               userId: user.id,
               salesTarget: userData.salesTarget || null,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
@@ -679,6 +691,10 @@ app.post(
           await prisma.stockKeeper.create({
             data: {
               userId: user.id,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
@@ -686,6 +702,10 @@ app.post(
           await prisma.cashier.create({
             data: {
               userId: user.id,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
@@ -702,6 +722,10 @@ app.post(
           await prisma.distributor.create({
             data: {
               userId: user.id,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
@@ -709,6 +733,10 @@ app.post(
           await prisma.assistantManager.create({
             data: {
               userId: user.id,
+              attendance: userData.attendance || null,
+              performanceRating: userData.performanceRating || null,
+              salary: userData.salary || null,
+              bonus: userData.bonus || null,
             },
           });
           break;
