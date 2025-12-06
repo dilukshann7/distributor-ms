@@ -81,3 +81,15 @@
 .manager-nav-item-inactive {
   @apply text-emerald-100 hover:bg-emerald-600;
 }
+
+.manager-label {
+  @apply block text-sm font-semibold text-gray-700;
+}
+
+.manager-btn-outline {
+  @apply px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors;
+}
+
+.manager-badge-gray {
+  @apply bg-gray-100 text-gray-800;
+}
