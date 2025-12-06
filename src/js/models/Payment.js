@@ -12,4 +12,9 @@ export class Payment {
 
     return axios.post(apiURL, payment);
   }
+
+  static async update(paymentId, updates) {
+    const apiURL = `/api/payments/${paymentId}`;
+    return axios.put(apiURL, updates);
+  }
 }

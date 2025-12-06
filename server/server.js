@@ -1139,6 +1139,39 @@ app.post(
   })
 );
 
+app.put(
+  "/api/payments/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const { status } = req.body;
+
+    const result = await prisma.$transaction(async (prisma) => {
+      const payment = await prisma.payment.findUnique({
+        where: { id },
+      });
+
+      if (!payment) {
+        throw new Error("Payment not found");
+      }
+
+      await prisma.salesOrder.update({
+        where: { id: payment.salesOrderId },
+        data: { paymentStatus: status },
+      });
+
+      const updatedPayment = await prisma.payment.update({
+        where: { id },
+        data: { status },
+        include: { salesOrder: true },
+      });
+
+      return updatedPayment;
+    });
+
+    res.json(result);
+  })
+);
+
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: err.message || "Internal Server Error" });

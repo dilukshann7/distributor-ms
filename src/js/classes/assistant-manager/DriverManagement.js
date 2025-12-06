@@ -46,11 +46,11 @@ export class DriverManagement {
   render() {
     return `
       <div class="space-y-6">
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900">Driver Management & Communication</h3>
+          <p class="cashier-subtitle">Manage drivers and maintain communication system</p>
+        </div>
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Driver Management & Communication</h3>
-            <p class="text-gray-600 text-sm mt-1">Manage drivers and maintain communication system</p>
-          </div>
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead class="bg-gray-50 border-b border-gray-200">
@@ -61,7 +61,6 @@ export class DriverManagement {
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Current Route</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
                   <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Last Update</th>
-                  <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -108,9 +107,6 @@ export class DriverManagement {
                     <td class="px-6 py-4 text-sm text-gray-600">${
                       driver.lastUpdate
                     }</td>
-                    <td class="px-6 py-4 text-sm">
-                      <button class="text-blue-600 hover:text-blue-800 font-medium">Message</button>
-                    </td>
                   </tr>
                 `
                   )

@@ -21,11 +21,11 @@ export class DeliveryStockMaintenance {
   render() {
     return `
       <div class="space-y-6">
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900">Delivery & Stock Maintenance</h3>
+          <p class="cashier-subtitle">Maintain stock levels for deliveries and distributions</p>
+        </div>
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
-          <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-900">Delivery & Stock Maintenance</h3>
-            <p class="text-gray-600 text-sm mt-1">Maintain stock levels for deliveries and distributions</p>
-          </div>
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead class="bg-gray-50 border-b border-gray-200">
