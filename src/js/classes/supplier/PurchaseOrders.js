@@ -13,8 +13,9 @@ export class PurchaseOrders {
 
   async getOrders() {
     try {
+      const id = window.location.search.split("id=")[1];
       const response = await Order.getAll();
-      this.orders = response.data;
+      this.orders = response.data.filter((order) => order.supplierId === id);
     } catch (error) {
       console.error("Error fetching orders:", error);
       this.orders = [];

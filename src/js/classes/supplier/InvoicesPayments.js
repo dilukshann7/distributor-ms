@@ -15,8 +15,11 @@ export class InvoicesPayments {
 
   async getInvoices() {
     try {
+      const id = window.location.search.split("id=")[1];
       const response = await Invoice.getAll();
-      this.invoices = response.data;
+      this.invoices = response.data.filter(
+        (invoice) => invoice.supplierId === id
+      );
     } catch (error) {
       console.error("Error fetching invoices:", error);
       this.invoices = [];
@@ -25,8 +28,9 @@ export class InvoicesPayments {
 
   async getOrders() {
     try {
+      const id = window.location.search.split("id=")[1];
       const response = await Order.getAll();
-      this.orders = response.data;
+      this.orders = response.data.filter((order) => order.supplierId === id);
     } catch (error) {
       console.error("Error fetching orders:", error);
       this.orders = [];
@@ -171,11 +175,6 @@ export class InvoicesPayments {
                       .join("")}
                   </select>
                   <p class="text-xs text-gray-500">Select from existing purchase orders</p>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Supplier ID</label>
-                  <input type="number" name="supplierId" required class="input-field" placeholder="e.g. 50">
                 </div>
               </div>
             </div>
@@ -457,7 +456,7 @@ export class InvoicesPayments {
       notes: rawData.notes || null,
 
       purchaseOrderId: parseInt(rawData.purchaseOrderId, 10),
-      supplierId: parseInt(rawData.supplierId, 10),
+      supplierId: parseInt(window.location.search.split("id=")[1], 10),
 
       totalAmount: parseFloat(rawData.totalAmount),
       paidAmount: rawData.paidAmount ? parseFloat(rawData.paidAmount) : null,

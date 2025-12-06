@@ -9,8 +9,11 @@ export class ShipmentTracking {
 
   async getShipments() {
     try {
+      const id = window.location.search.split("id=")[1];
       const response = await Shipment.getAll();
-      this.shipments = response.data;
+      this.shipments = response.data.filter(
+        (shipment) => shipment.supplierId === id
+      );
     } catch (error) {
       console.error("Error fetching shipments:", error);
       this.shipments = [];
