@@ -42,8 +42,6 @@ export class SalesTransaction {
       } else {
         this.smallOrder = null;
       }
-
-      console.log(this.smallOrder);
     } catch (error) {
       console.error("Error fetching small order:", error);
       this.smallOrder = null;
