@@ -1,11 +1,14 @@
 import { Driver } from "../../models/Driver.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 import { Delivery } from "../../models/Delivery.js";
+import { Feedback } from "../../models/Feedback.js";
+import { SalesOrder } from "../../models/SalesOrder.js";
 
 export class ProofOfDelivery {
   constructor(container) {
     this.container = container;
     this.deliveries = [];
+    this.feedbacks = [];
     this.getProofDeliveries();
     window.proofOfDelivery = this;
   }
@@ -27,10 +30,30 @@ export class ProofOfDelivery {
         status: "completed",
         deliveredDate: new Date(),
       });
-      this.getProofDeliveries();
-      this.render();
+      await SalesOrder.update(deliveryId, { status: "delivered" });
+      const comments = document.getElementById(
+        `feedback-${deliveryId}-comments`
+      ).value;
+      if (comments && comments.trim() !== "") {
+        await Feedback.create({
+          deliveryId: deliveryId,
+          comments: comments,
+          customerId: this.deliveries.driverId,
+        });
+      }
+      await this.refresh();
     } catch (error) {
       console.error("Error completing delivery:", error);
+    }
+  }
+
+  async refresh() {
+    await this.getProofDeliveries();
+    const content = this.container.querySelector('.space-y-6');
+    if (content) {
+      content.outerHTML = this.render();
+    } else {
+      this.container.innerHTML = this.render();
     }
   }
 
@@ -137,6 +160,12 @@ export class ProofOfDelivery {
                   </div>
                 `
                     : `
+                    <div class="space-y-4 mb-5">
+                      <input type="text" id="feedback-${
+                        delivery.id
+                      }-comments" placeholder="Comments" class="driver-input w-full" />
+                    </div>
+
                   <div class="space-y-4">
                     <button onclick="window.proofOfDelivery.completeDelivery(${
                       delivery.id

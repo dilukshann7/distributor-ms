@@ -80,6 +80,7 @@ export class PaymentCollection {
 
     try {
       await Payment.create(paymentData);
+      await SalesOrder.update(Number(orderId), { paymentStatus: "paid" });
       await this.getPayments();
       await this.getSalesOrder();
 
