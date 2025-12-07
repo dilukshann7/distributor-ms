@@ -1,13 +1,16 @@
 import { Product } from "../../models/Product.js";
+import { Supplier } from "../../models/Supplier.js";
 
 export class InventoryManagement {
   constructor(container) {
     this.container = container;
     this.inventoryItems = [];
     this.allInventoryItems = [];
+    this.suppliers = [];
     this.view = "list";
     this.editingItem = null;
     this.getInventoryItems();
+    this.getSuppliers();
   }
 
   async getInventoryItems() {
@@ -19,6 +22,16 @@ export class InventoryManagement {
       console.error("Error fetching inventory items:", error);
       this.inventoryItems = [];
       this.allInventoryItems = [];
+    }
+  }
+
+  async getSuppliers() {
+    try {
+      const response = await Supplier.getAll();
+      this.suppliers = response.data;
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+      this.suppliers = [];
     }
   }
 
@@ -168,6 +181,24 @@ export class InventoryManagement {
                 </div>
 
                 <div class="space-y-2">
+                  <label class="sk-label">Category</label>
+                  <input type="text" name="category" required class="sk-input" placeholder="e.g. Electronics">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="sk-label">Supplier <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <select name="supplierId" class="sk-input">
+                    <option value="">Select Supplier</option>
+                    ${this.suppliers
+                      .map(
+                        (supplier) =>
+                          `<option value="${supplier.id}">${supplier.companyName}</option>`
+                      )
+                      .join("")}
+                  </select>
+                </div>
+
+                <div class="space-y-2">
                   <label class="sk-label">Batch Number <span class="text-gray-400 font-normal">(Optional)</span></label>
                   <input type="text" name="batchNumber" class="sk-input" placeholder="e.g. BATCH-001">
                 </div>
@@ -175,6 +206,11 @@ export class InventoryManagement {
                 <div class="space-y-2">
                   <label class="sk-label">Location</label>
                   <input type="text" name="location" required class="sk-input" placeholder="e.g. Warehouse A, Shelf 3">
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="sk-label">Description <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="description" rows="3" class="sk-input" placeholder="Product description"></textarea>
                 </div>
               </div>
             </div>
@@ -201,14 +237,23 @@ export class InventoryManagement {
                   <input type="number" name="maxStock" required min="0" step="1" class="sk-input" placeholder="0">
                 </div>
 
-                <div class="space-y-2 md:col-span-2">
+                <div class="space-y-2">
+                  <label class="sk-label">Price</label>
+                  <input type="number" name="price" required min="0" step="0.01" class="sk-input" placeholder="0.00">
+                </div>
+
+                <div class="space-y-2">
                   <label class="sk-label">Expiry Date <span class="text-gray-400 font-normal">(Optional)</span></label>
                   <input type="date" name="expiryDate" class="sk-input">
                 </div>
 
-                <div class="space-y-2 md:col-span-1">
-                  <label class="sk-label">Price</label>
-                  <input type="number" name="price" required min="0" step="0.01" class="sk-input" placeholder="0.00 ">
+                <div class="space-y-2">
+                  <label class="sk-label">Status</label>
+                  <select name="status" class="sk-input">
+                    <option value="In Stock" selected>In Stock</option>
+                    <option value="Low Stock">Low Stock</option>
+                    <option value="Out of Stock">Out of Stock</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -262,6 +307,26 @@ export class InventoryManagement {
                   }">
                 </div>
                 <div class="space-y-2">
+                  <label class="sk-label">Category</label>
+                  <input type="text" name="category" required class="sk-input" placeholder="e.g. Electronics" value="${
+                    item.category || ""
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="sk-label">Supplier <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <select name="supplierId" class="sk-input">
+                    <option value="">Select Supplier</option>
+                    ${this.suppliers
+                      .map(
+                        (supplier) =>
+                          `<option value="${supplier.id}" ${
+                            item.supplierId === supplier.id ? "selected" : ""
+                          }>${supplier.companyName}</option>`
+                      )
+                      .join("")}
+                  </select>
+                </div>
+                <div class="space-y-2">
                   <label class="sk-label">Batch Number <span class="text-gray-400 font-normal">(Optional)</span></label>
                   <input type="text" name="batchNumber" class="sk-input" placeholder="e.g. BATCH-001" value="${
                     item.batchNumber || ""
@@ -272,6 +337,12 @@ export class InventoryManagement {
                   <input type="text" name="location" required class="sk-input" placeholder="e.g. Warehouse A, Shelf 3" value="${
                     item.location
                   }">
+                </div>
+                <div class="space-y-2 md:col-span-2">
+                  <label class="sk-label">Description <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="description" rows="3" class="sk-input" placeholder="Product description">${
+                    item.description || ""
+                  }</textarea>
                 </div>
               </div>
             </div>
@@ -300,17 +371,35 @@ export class InventoryManagement {
                     item.maxStock
                   }">
                 </div>
-                <div class="space-y-2 md:col-span-2">
-                  <label class="sk-label">Expiry Date <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="date" name="expiryDate" class="sk-input" value="${
-                    item.expiryDate || ""
+                <div class="space-y-2">
+                  <label class="sk-label">Price</label>
+                  <input type="number" name="price" required min="0" step="0.01" class="sk-input" placeholder="0.00" value="${
+                    item.price
                   }">
                 </div>
-                <div class="space-y-2 md:col-span-1">
-                  <label class="sk-label">Price</label>
-                  <input type="number" name="price" required min="0" step="0.01" class="sk-input" placeholder="0.00">
+                <div class="space-y-2">
+                  <label class="sk-label">Expiry Date <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <input type="date" name="expiryDate" class="sk-input" value="${
+                    item.expiryDate
+                      ? new Date(item.expiryDate).toISOString().split("T")[0]
+                      : ""
+                  }">
+                </div>
+                <div class="space-y-2">
+                  <label class="sk-label">Status</label>
+                  <select name="status" class="sk-input">
+                    <option value="In Stock" ${
+                      item.status === "In Stock" ? "selected" : ""
+                    }>In Stock</option>
+                    <option value="Low Stock" ${
+                      item.status === "Low Stock" ? "selected" : ""
+                    }>Low Stock</option>
+                    <option value="Out of Stock" ${
+                      item.status === "Out of Stock" ? "selected" : ""
+                    }>Out of Stock</option>
+                  </select>
+                </div>
               </div>
-            </div>
           </div>
 
           <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
@@ -359,10 +448,14 @@ export class InventoryManagement {
       minStock: parseInt(rawData.minStock, 10),
       maxStock: parseInt(rawData.maxStock, 10),
       price: parseFloat(rawData.price),
+      supplierId: rawData.supplierId
+        ? parseInt(rawData.supplierId, 10)
+        : undefined,
       expiryDate: rawData.expiryDate
         ? new Date(rawData.expiryDate).toISOString()
         : undefined,
       batchNumber: rawData.batchNumber || undefined,
+      description: rawData.description || undefined,
     };
 
     Product.create(itemData)
@@ -386,10 +479,14 @@ export class InventoryManagement {
       minStock: parseInt(rawData.minStock, 10),
       maxStock: parseInt(rawData.maxStock, 10),
       price: parseFloat(rawData.price),
+      supplierId: rawData.supplierId
+        ? parseInt(rawData.supplierId, 10)
+        : undefined,
       expiryDate: rawData.expiryDate
         ? new Date(rawData.expiryDate).toISOString()
         : undefined,
       batchNumber: rawData.batchNumber || undefined,
+      description: rawData.description || undefined,
     };
 
     Product.update(this.editingItem.id, itemData)
