@@ -11,7 +11,6 @@ export class CustomerFeedback {
     try {
       const response = await Feedback.getAll();
       this.feedback = response.data;
-      console.log("Fetched feedback:", this.feedback);
     } catch (error) {
       console.error("Error fetching feedback:", error);
       this.feedback = [];

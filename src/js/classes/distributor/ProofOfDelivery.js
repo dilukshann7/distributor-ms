@@ -11,7 +11,6 @@ export class ProofOfDelivery {
     try {
       const response = await Delivery.getAll();
       this.deliveries = response.data;
-      console.log(this.deliveries);
     } catch (error) {
       console.error("Error fetching deliveries:", error);
       this.deliveries = [];

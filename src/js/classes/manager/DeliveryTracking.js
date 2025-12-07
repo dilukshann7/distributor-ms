@@ -11,7 +11,6 @@ export class DeliveryTracking {
     try {
       const response = await Delivery.getAll();
       this.deliveries = response.data;
-      console.log("Fetched deliveries:", this.deliveries);
     } catch (error) {
       console.error("Error fetching deliveries:", error);
       this.deliveries = [];

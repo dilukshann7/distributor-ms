@@ -10,7 +10,6 @@ export class DeliveryStockMaintenance {
   async getInventoryItems() {
     try {
       const response = await Product.getAll();
-      console.log(response.data);
       this.deliveryStock = response.data;
     } catch (error) {
       console.error("Error fetching inventory items:", error);
