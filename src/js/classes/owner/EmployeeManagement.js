@@ -77,6 +77,7 @@ export class EmployeeManagement {
                   <th class="owner-table-th">Salary</th>
                   <th class="owner-table-th">Bonus</th>
                   <th class="owner-table-th">Attendance</th>
+                  <th class="owner-table-th">Performance Rating</th>
                   <th class="owner-table-th">Status</th>
                   <th class="owner-table-th">Actions</th>
                 </tr>
@@ -100,16 +101,14 @@ export class EmployeeManagement {
                     )}</td>
                     <td class="owner-table-td">
                       <div class="flex items-center gap-2">
-                        <div class="w-32 bg-gray-200 rounded-full h-2">
-                          <div class="bg-green-500 h-2 rounded-full" style="width: ${
-                            emp.attendance
-                          }%"></div>
-                        </div>
                         <span class="text-gray-900 font-medium">${
                           emp.attendance
                         }%</span>
                       </div>
                     </td>
+                    <td class="owner-table-td text-gray-900">${
+                      emp.performanceRating
+                    }</td>
                     <td class="owner-table-td">
                       <span class="owner-badge ${
                         emp.status === "Active"
