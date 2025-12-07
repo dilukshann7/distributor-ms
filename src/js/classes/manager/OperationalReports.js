@@ -1,3 +1,8 @@
+import { getIconHTML } from "../../../assets/icons/index.js";
+import { Product } from "../../models/Product.js";
+import { SalesOrder } from "../../models/SalesOrder.js";
+import { User } from "../../models/User.js";
+
 export class OperationalReports {
   constructor(container) {
     this.container = container;
@@ -12,41 +17,94 @@ export class OperationalReports {
             </div>
           </div>
   
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            ${this.renderReportCard(
-              "Financial Report",
-              "Income, expenses, and profit analysis",
-              "Today"
-            )}
-            ${this.renderReportCard(
-              "Sales Report",
-              "Salesman performance and targets",
-              "Today"
-            )}
-            ${this.renderReportCard(
-              "Inventory Report",
-              "Stock levels and movements",
-              "Yesterday"
-            )}
-            ${this.renderReportCard(
-              "Employee Report",
-              "Attendance and performance metrics",
-              "2 days ago"
-            )}
+          <div class="grid grid-cols-2 gap-6">
+
+          <div class="card-container col-span-2">
+            <div class="p-6">
+              <h4 class="card-title mb-2">Sales Report</h4>
+              
+              <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Start Date</label>
+                  <input type="date" id="sales-report-start" class="input-field" />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">End Date</label>
+                  <input type="date" id="sales-report-end" class="input-field" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4">
+                <button onclick="window.managerDashboard.sections.reports.exportSalesReport()" class="manager-btn-large">
+                  ${getIconHTML("download")}
+                  Generate Sales Report
+                </button>
+              </div>
+            </div>
           </div>
+
+          <div class="card-container">
+            <div class="p-6">
+              <h4 class="card-title mb-4">Inventory Report</h4>
+
+              <div class="grid grid-cols-1 gap-4">
+                <button 
+                  onclick="window.managerDashboard.sections.reports.exportInventoryReport()"
+                  class="manager-btn-large">
+                    ${getIconHTML("download")}
+                    Generate Inventory Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-container">
+            <div class="p-6">
+              <h4 class="card-title mb-4">Employee Report</h4>
+
+              <div class="grid grid-cols-1 gap-4">
+                <button 
+                  onclick="window.managerDashboard.sections.reports.exportEmployeeReport()" 
+                  class="manager-btn-large">
+                    ${getIconHTML("download")}
+                    Generate Employee Report
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         </div>
       `;
   }
 
-  renderReportCard(title, description, lastGenerated) {
-    return `
-        <div class="bg-white rounded-lg shadow p-5 border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow">
-          <h3 class="text-lg font-semibold text-gray-900">${title}</h3>
-          <p class="text-sm text-gray-500 mt-1">${description}</p>
-          <div class="flex items-center justify-between mt-3">
-            <span class="text-sm text-gray-500">Last generated: ${lastGenerated}</span>
-          </div>
-        </div>
-      `;
+  exportEmployeeReport() {
+    User.exportEmployeeReport();
+    alert("PDF exported successfully");
+  }
+
+  exportInventoryReport() {
+    Product.exportInventoryReport();
+    alert("PDF exported successfully");
+  }
+
+  exportSalesReport() {
+    const startDateInput = document.getElementById("sales-report-start").value;
+    const endDateInput = document.getElementById("sales-report-end").value;
+
+    const startDate = new Date(startDateInput);
+    const endDate = new Date(endDateInput);
+
+    if (!startDateInput || !endDateInput) {
+      alert("Please select a start and end date.");
+      return;
+    }
+
+    if (new Date(startDateInput) > new Date(endDateInput)) {
+      alert("Start date must be before end date.");
+      return;
+    }
+
+    SalesOrder.exportSalesReport(startDate, endDate);
+    alert("PDF exported successfully");
   }
 }
