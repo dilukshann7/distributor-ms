@@ -121,12 +121,46 @@ app.delete(
     res.status(204).send();
   })
 );
-
 app.get(
   "/api/customer-feedbacks",
   asyncHandler(async (req, res) => {
-    const feedbacks = await prisma.customerFeedback.findMany();
+    const feedbacks = await prisma.customerFeedback.findMany({
+      include: {
+        customer: true,
+        salesOrder: true,
+      },
+    });
     res.json(feedbacks);
+  })
+);
+
+app.post(
+  "/api/customer-feedbacks",
+  asyncHandler(async (req, res) => {
+    const { deliveryId, comments, rating } = req.body;
+
+    const delivery = await prisma.delivery.findUnique({
+      where: { id: deliveryId },
+      include: { salesOrders: true },
+    });
+
+    if (!delivery || !delivery.salesOrders.length) {
+      return res
+        .status(400)
+        .json({ error: "Delivery not found or has no associated orders" });
+    }
+
+    const customerId = delivery.salesOrders[0].customerId;
+    const orderId = delivery.salesOrders[0].id;
+
+    const newFeedback = await prisma.customerFeedback.create({
+      data: {
+        customerId,
+        orderId,
+        comment: comments,
+      },
+    });
+    res.status(201).json(newFeedback);
   })
 );
 
@@ -1162,9 +1196,15 @@ app.get(
 app.post(
   "/api/deliveries",
   asyncHandler(async (req, res) => {
-    const deliveryData = req.body;
+    const { driverId, vehicleId, ...deliveryData } = req.body;
     const newDelivery = await prisma.delivery.create({
-      data: deliveryData,
+      data: {
+        ...deliveryData,
+        vehicleId: vehicleId || 0,
+        driver: {
+          connect: { id: driverId },
+        },
+      },
       include: {
         driver: true,
         salesOrders: true,
