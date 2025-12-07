@@ -1,4 +1,5 @@
 import { getIconHTML } from "../../assets/icons/index.js";
+import { Task } from "../models/Task.js";
 
 export class NotificationPanel {
   constructor(container, options = {}) {
@@ -159,25 +160,9 @@ export class NotificationPanel {
 
   async markTaskComplete(taskId) {
     try {
-      await fetch(`http://localhost:3000/api/tasks/${taskId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          status: "Completed",
-          completedDate: new Date(),
-        }),
-      });
-
+      Task.update(taskId, { status: "Completed" });
       await this.loadTasks();
       this.toggle();
-      this.toggle();
-
-      // Call custom callback if provided
-      if (this.options.onTaskComplete) {
-        this.options.onTaskComplete(taskId);
-      }
     } catch (error) {
       console.error("Error marking task as complete:", error);
       alert("Error updating task. Please try again.");
