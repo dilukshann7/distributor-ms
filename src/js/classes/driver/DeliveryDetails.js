@@ -101,10 +101,6 @@ export class DeliveryDetails {
                     </div>
                   </div>
                 </div>
-
-                <button class="driver-btn-primary driver-btn-full">
-                  View Details
-                </button>
               </div>
             `;
           })
