@@ -168,15 +168,14 @@ model CustomerFeedback {
   id          Int       @id @default(autoincrement())
   customerId  Int
   orderId     Int
-  rating      Int
   comment     String?
-  category    String?
   status      String    @default("new")
-  response    String?
-  respondedBy Int?
-  respondedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  salesOrder SalesOrder @relation(fields: [orderId], references: [id])
 }
 
 model Delivery {
@@ -225,6 +224,8 @@ model SalesOrder {
   invoices SalesInvoice[]
 
   payments Payment[]
+
+  customerFeedbacks CustomerFeedback[]
 }
 
 model Order {
@@ -310,6 +311,8 @@ model Customer {
   updatedAt      DateTime @updatedAt
 
   salesOrders SalesOrder[]
+
+  customerFeedbacks CustomerFeedback[]
 }
 
 model SalesInvoice {
