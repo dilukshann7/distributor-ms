@@ -41,11 +41,21 @@ export class DeliveryStockMaintenance {
                   .map(
                     (item) => `
                   <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${item.name}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${item.quantity} units</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${item.category}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${item.quantity}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${item.updatedAt}</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${
+                      item.name
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      item.quantity
+                    } units</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      item.category
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${
+                      item.quantity
+                    }</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${new Date(
+                      item.updatedAt
+                    ).toLocaleString()}</td>
                   </tr>
                 `
                   )
