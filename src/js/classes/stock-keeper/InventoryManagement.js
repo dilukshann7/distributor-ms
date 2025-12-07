@@ -201,11 +201,15 @@ export class InventoryManagement {
                   <input type="number" name="maxStock" required min="0" step="1" class="sk-input" placeholder="0">
                 </div>
 
-                <div class="space-y-2 md:col-span-3">
+                <div class="space-y-2 md:col-span-2">
                   <label class="sk-label">Expiry Date <span class="text-gray-400 font-normal">(Optional)</span></label>
                   <input type="date" name="expiryDate" class="sk-input">
                 </div>
 
+                <div class="space-y-2 md:col-span-1">
+                  <label class="sk-label">Price</label>
+                  <input type="number" name="price" required min="0" step="0.01" class="sk-input" placeholder="0.00 ">
+                </div>
               </div>
             </div>
           </div>
@@ -296,12 +300,15 @@ export class InventoryManagement {
                     item.maxStock
                   }">
                 </div>
-                <div class="space-y-2 md:col-span-3">
+                <div class="space-y-2 md:col-span-2">
                   <label class="sk-label">Expiry Date <span class="text-gray-400 font-normal">(Optional)</span></label>
                   <input type="date" name="expiryDate" class="sk-input" value="${
                     item.expiryDate || ""
                   }">
                 </div>
+                <div class="space-y-2 md:col-span-1">
+                  <label class="sk-label">Price</label>
+                  <input type="number" name="price" required min="0" step="0.01" class="sk-input" placeholder="0.00">
               </div>
             </div>
           </div>
@@ -351,6 +358,11 @@ export class InventoryManagement {
       quantity: parseInt(rawData.quantity, 10),
       minStock: parseInt(rawData.minStock, 10),
       maxStock: parseInt(rawData.maxStock, 10),
+      price: parseFloat(rawData.price),
+      expiryDate: rawData.expiryDate
+        ? new Date(rawData.expiryDate).toISOString()
+        : undefined,
+      batchNumber: rawData.batchNumber || undefined,
     };
 
     Product.create(itemData)
@@ -373,6 +385,11 @@ export class InventoryManagement {
       quantity: parseInt(rawData.quantity, 10),
       minStock: parseInt(rawData.minStock, 10),
       maxStock: parseInt(rawData.maxStock, 10),
+      price: parseFloat(rawData.price),
+      expiryDate: rawData.expiryDate
+        ? new Date(rawData.expiryDate).toISOString()
+        : undefined,
+      batchNumber: rawData.batchNumber || undefined,
     };
 
     Product.update(this.editingItem.id, itemData)
