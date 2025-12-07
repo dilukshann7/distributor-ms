@@ -1,6 +1,5 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
-import "../../css/driver-style.css";
 import { NotificationPanel } from "../components/NotificationPanel.js";
 import { DeliveryDetails } from "./driver/DeliveryDetails.js";
 import { ProofOfDelivery } from "./driver/ProofOfDelivery.js";
