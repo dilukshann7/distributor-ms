@@ -198,7 +198,7 @@ export class SalesOrders {
                     <option value="pending" selected>Pending</option>
                     <option value="confirmed">Confirmed</option>
                     <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option value="processing">Processing</option>
                   </select>
                 </div>
 
@@ -354,9 +354,9 @@ export class SalesOrders {
                     <option value="delivered" ${
                       order.status === "delivered" ? "selected" : ""
                     }>Delivered</option>
-                    <option value="cancelled" ${
-                      order.status === "cancelled" ? "selected" : ""
-                    }>Cancelled</option>
+                    <option value="processing" ${
+                      order.status === "processing" ? "selected" : ""
+                    }>Processing</option>
                   </select>
                 </div>
 
@@ -375,15 +375,12 @@ export class SalesOrders {
                 <div class="space-y-2">
                   <label class="sm-label">Payment Status</label>
                   <select name="paymentStatus" class="sm-input">
-                    <option value="pending" ${
-                      order.paymentStatus === "pending" ? "selected" : ""
-                    }>Pending</option>
+                    <option value="unpaid" ${
+                      order.paymentStatus === "unpaid" ? "selected" : ""
+                    }>Unpaid</option>
                     <option value="paid" ${
                       order.paymentStatus === "paid" ? "selected" : ""
                     }>Paid</option>
-                    <option value="failed" ${
-                      order.paymentStatus === "failed" ? "selected" : ""
-                    }>Failed</option>
                     <option value="refunded" ${
                       order.paymentStatus === "refunded" ? "selected" : ""
                     }>Refunded</option>
