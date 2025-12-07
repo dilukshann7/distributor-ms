@@ -1,5 +1,7 @@
 import { getIconHTML } from "../../../assets/icons/index.js";
+import { Product } from "../../models/Product.js";
 import { SalesOrder } from "../../models/SalesOrder.js";
+import { User } from "../../models/User.js";
 
 export class ReportsSection {
   constructor(container) {
@@ -32,7 +34,7 @@ export class ReportsSection {
               </div>
 
               <div class="grid grid-cols-1 gap-4">
-                <button class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                <button onclick="window.ownerDashboard.sections.reports.exportSalesReport()" class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
                   ${getIconHTML("download")}
                   Generate Sales Report
                 </button>
@@ -45,7 +47,8 @@ export class ReportsSection {
               <h4 class="card-title mb-4">Inventory Report</h4>
 
               <div class="grid grid-cols-1 gap-4">
-                <button class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                <button onclick="window.ownerDashboard.sections.reports.exportInventoryReport()"
+                 class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
                   ${getIconHTML("download")}
                   Generate Inventory Report
                 </button>
@@ -58,7 +61,7 @@ export class ReportsSection {
               <h4 class="card-title mb-4">Employee Report</h4>
 
               <div class="grid grid-cols-1 gap-4">
-                <button class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                <button onclick="window.ownerDashboard.sections.reports.exportEmployeeReport()" class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
                   ${getIconHTML("download")}
                   Generate Employee Report
                 </button>
@@ -68,6 +71,16 @@ export class ReportsSection {
         </div>
       </div>
     `;
+  }
+
+  exportEmployeeReport() {
+    User.exportEmployeeReport();
+    alert("PDF exported successfully");
+  }
+
+  exportInventoryReport() {
+    Product.exportInventoryReport();
+    alert("PDF exported successfully");
   }
 
   exportSalesReport() {
