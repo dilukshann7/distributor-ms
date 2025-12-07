@@ -38,7 +38,9 @@ app.get(
 app.get(
   "/api/products",
   asyncHandler(async (req, res) => {
-    const products = await prisma.product.findMany();
+    const products = await prisma.product.findMany({
+      include: { supplier: true },
+    });
     res.json(products);
   })
 );
