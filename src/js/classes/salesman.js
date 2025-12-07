@@ -17,7 +17,6 @@ class SalesmanDashboard {
       stock: new StockAvailability(container),
       customers: new CustomerAccounts(container),
       reports: new SalesReports(container),
-      returns: new ReturnsAndCancellations(container),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
@@ -47,7 +46,6 @@ class SalesmanDashboard {
       { id: "stock", label: "Stock Availability", icon: "package" },
       { id: "customers", label: "Customer Accounts", icon: "users" },
       { id: "reports", label: "Sales Reports", icon: "bar-chart" },
-      { id: "returns", label: "Returns Cancellations", icon: "rotate-ccw" },
     ];
 
     return `
