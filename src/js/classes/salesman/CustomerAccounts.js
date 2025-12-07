@@ -132,7 +132,6 @@ export class CustomerAccounts {
         <form id="addCustomerForm" class="sm-card" onsubmit="$s.customers.submitAddForm(event)">
           <div class="p-8 space-y-8">
             
-            <!-- Customer Information -->
             <div>
               <h4 class="sm-subheader">
                 ${getIconHTML("users").replace(
@@ -198,14 +197,6 @@ export class CustomerAccounts {
                 </div>
 
                 <div class="space-y-2">
-                  <label class="sm-label">VIP Customer</label>
-                  <div class="flex items-center h-[42px]">
-                    <input type="checkbox" name="isVIP" id="isVIP" class="w-5 h-5 text-sky-600 border-gray-300 rounded focus:ring-sky-500">
-                    <label for="isVIP" class="ml-3 text-sm text-gray-700">Mark as VIP customer</label>
-                  </div>
-                </div>
-
-                <div class="space-y-2">
                   <label class="sm-label">Initial Loyalty Points</label>
                   <input type="number" name="loyaltyPoints" min="0" value="0" class="sm-input" placeholder="0">
                 </div>
@@ -249,7 +240,6 @@ export class CustomerAccounts {
       address: formData.get("address") || null,
       businessName: formData.get("businessName") || null,
       customerType: formData.get("customerType") || null,
-      isVIP: formData.get("isVIP") === "on",
       status: formData.get("status"),
       loyaltyPoints: parseInt(formData.get("loyaltyPoints")) || 0,
       totalPurchases: 0,
