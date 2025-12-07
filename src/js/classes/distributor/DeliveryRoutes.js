@@ -19,7 +19,7 @@ export class DeliveryRoutes {
 
   render() {
     const activeRoutes = this.routes.filter(
-      (r) => r.status === "scheduled" || r.status === "in_transit"
+      (r) => r.status === "scheduled" || r.status === "pending"
     );
 
     return `
@@ -67,7 +67,7 @@ export class DeliveryRoutes {
                   <div>
                     <p class="text-xs text-gray-500">Driver</p>
                     <p class="text-sm font-semibold text-gray-900">${
-                      route.driver.name
+                      route.driver.user.name
                     }</p>
                   </div>
                   <div>
