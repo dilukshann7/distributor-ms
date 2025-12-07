@@ -39,6 +39,8 @@ export class Supplier extends User {
 
   static async exportSupplierReport(startDate, endDate) {
     try {
+
+      
       const orderResponse = await SalesOrder.getAll();
       const allOrders = orderResponse.data || [];
 
