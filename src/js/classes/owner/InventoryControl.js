@@ -50,7 +50,6 @@ export class InventoryControl {
                   <th class="owner-table-th">Min Stock</th>
                   <th class="owner-table-th">Price</th>
                   <th class="owner-table-th">Status</th>
-                  <th class="owner-table-th">Actions</th>
                 </tr>
               </thead>
               <tbody class="owner-table-body">
@@ -82,10 +81,6 @@ export class InventoryControl {
                       }">
                         ${item.status}
                       </span>
-                    </td>
-                    <td class="owner-table-td flex items-center gap-2">
-                      <button class="px-3 py-1 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-xs font-medium">Edit</button>
-                      <button class="px-3 py-1 rounded-lg bg-red-600 text-white hover:bg-red-700 text-xs font-medium">Delete</button>
                     </td>
                   </tr>
                 `
