@@ -1,13 +1,16 @@
 import { Product } from "../../models/Product.js";
+import { Supplier } from "../../models/Supplier.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class StockManagement {
   constructor(container) {
     this.container = container;
     this.inventory = [];
+    this.suppliers = [];
     this.view = "list";
     this.editingProduct = null;
     this.getProducts();
+    this.getSuppliers();
   }
 
   async getProducts() {
@@ -17,6 +20,17 @@ export class StockManagement {
     } catch (error) {
       console.error("Error fetching products:", error);
       this.inventory = [];
+    }
+  }
+
+  async getSuppliers() {
+    try {
+      const response = await Supplier.getAll();
+      this.suppliers = response.data;
+      console.log("Suppliers fetched:", this.suppliers);
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+      this.suppliers = [];
     }
   }
 
@@ -121,7 +135,6 @@ export class StockManagement {
         <form id="addProductForm" class="manager-card-overflow" onsubmit="window.managerDashboard.sections.stock.submitAddForm(event)">
           <div class="p-8 space-y-8">
             
-            <!-- Product Information -->
             <div>
               <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                 ${getIconHTML("package").replace(
@@ -149,6 +162,19 @@ export class StockManagement {
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Price (Rs.) <span class="text-red-600">*</span></label>
                   <input type="number" name="price" required step="0.01" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 1500.00">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700">Supplier <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <select name="supplierId" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="">Select Supplier</option>
+                    ${this.suppliers
+                      .map(
+                        (supplier) =>
+                          `<option value="${supplier.id}">${supplier.companyName}</option>`
+                      )
+                      .join("")}
+                  </select>
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
@@ -276,6 +302,21 @@ export class StockManagement {
                   <input type="number" name="price" required step="0.01" min="0" value="${
                     product.price
                   }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 1500.00">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="block text-sm font-semibold text-gray-700">Supplier <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <select name="supplierId" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="">Select Supplier</option>
+                    ${this.suppliers
+                      .map(
+                        (supplier) =>
+                          `<option value="${supplier.id}" ${
+                            product.supplierId === supplier.id ? "selected" : ""
+                          }>${supplier.companyName}</option>`
+                      )
+                      .join("")}
+                  </select>
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
@@ -407,6 +448,9 @@ export class StockManagement {
         ? parseInt(formData.get("maxStock"))
         : null,
       location: formData.get("location") || null,
+      supplierId: formData.get("supplierId")
+        ? parseInt(formData.get("supplierId"))
+        : null,
       batchNumber: formData.get("batchNumber") || null,
       expiryDate: formData.get("expiryDate")
         ? new Date(formData.get("expiryDate"))
@@ -441,6 +485,9 @@ export class StockManagement {
         ? parseInt(formData.get("maxStock"))
         : null,
       location: formData.get("location") || null,
+      supplierId: formData.get("supplierId")
+        ? parseInt(formData.get("supplierId"))
+        : null,
       batchNumber: formData.get("batchNumber") || null,
       expiryDate: formData.get("expiryDate")
         ? new Date(formData.get("expiryDate"))
