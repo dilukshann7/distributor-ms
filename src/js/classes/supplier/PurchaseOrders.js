@@ -1,4 +1,5 @@
 import { Order } from "../../models/Order.js";
+import { Shipment } from "../../models/Shipment.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class PurchaseOrders {
@@ -8,6 +9,7 @@ export class PurchaseOrders {
     this.summary = [];
     this.view = "list";
     this.editingOrder = null;
+    this.convertingOrder = null;
     this.getOrders();
   }
 
@@ -15,7 +17,9 @@ export class PurchaseOrders {
     try {
       const id = window.location.search.split("id=")[1];
       const response = await Order.getAll();
-      this.orders = response.data.filter((order) => order.supplierId === id);
+      this.orders = response.data.filter(
+        (order) => order.supplierId === Number(id)
+      );
     } catch (error) {
       console.error("Error fetching orders:", error);
       this.orders = [];
@@ -25,6 +29,9 @@ export class PurchaseOrders {
   render() {
     if (this.view === "edit") {
       return this.renderEditForm();
+    }
+    if (this.view === "convert") {
+      return this.renderConvertForm();
     }
     return this.renderList();
   }
@@ -88,7 +95,17 @@ export class PurchaseOrders {
                       </span>
                     </td>
                     <td class="table-cell gap-2">
-                    
+                      ${
+                        order.status === "pending"
+                          ? `
+                        <button class="btn-action text-blue-600" onclick="window.supplierDashboard.sections.orders.switchToConvert('${
+                          order.id
+                        }')" title="Convert to Shipment">
+                          ${getIconHTML("truck")}
+                        </button>
+                      `
+                          : ""
+                      }
                       <button class="btn-action text-green-600 edit-order-btn" onclick="window.supplierDashboard.sections.orders.switchToEdit('${
                         order.id
                       }')" title="Edit">
@@ -239,9 +256,16 @@ export class PurchaseOrders {
     this.refresh(this.container);
   }
 
+  switchToConvert(orderId) {
+    this.convertingOrder = this.orders.find((o) => o.id === parseInt(orderId));
+    this.view = "convert";
+    this.refresh(this.container);
+  }
+
   switchToList() {
     this.view = "list";
     this.editingOrder = null;
+    this.convertingOrder = null;
     this.refresh(this.container);
   }
 
@@ -265,6 +289,130 @@ export class PurchaseOrders {
       })
       .catch((error) => {
         console.error("Error updating order:", error);
+      });
+  }
+
+  renderConvertForm() {
+    const order = this.convertingOrder;
+    if (!order) return this.renderList();
+
+    return `
+      <div class="max-w-4xl mx-auto animate-fade-in">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h3 class="section-header">Convert Order to Shipment</h3>
+            <p class="section-subtitle">Confirm order and create shipment</p>
+          </div>
+        </div>
+
+        <form id="convertOrderForm" class="card-container" onsubmit="window.supplierDashboard.sections.orders.submitConvertForm(event)">
+          <div class="p-8 space-y-8">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 class="text-sm font-semibold text-blue-900 mb-2">Order Details</h4>
+              <div class="text-sm text-blue-800 space-y-1">
+                <p><strong>Order ID:</strong> ${order.id}</p>
+                <p><strong>Order Date:</strong> ${
+                  new Date(order.orderDate).toISOString().split("T")[0]
+                }</p>
+                <p><strong>Total Amount:</strong> ${order.totalAmount.toLocaleString(
+                  "en-US",
+                  { style: "currency", currency: "LKR" }
+                )}</p>
+                <p><strong>Items:</strong> ${order.items
+                  .map((i) => `${i.name} (${i.quantity})`)
+                  .join(", ")}</p>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                ${getIconHTML("truck").replace(
+                  'class="w-5 h-5"',
+                  'class="w-5 h-5 text-indigo-600"'
+                )}
+                Shipment Information
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Shipment Number</label>
+                  <input type="text" name="shipmentNumber" required class="input-field" placeholder="e.g. SHP-001">
+                </div>
+                
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Shipment Date</label>
+                  <input type="date" name="shipmentDate" required class="input-field" value="${
+                    new Date().toISOString().split("T")[0]
+                  }">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Expected Delivery Date</label>
+                  <input type="date" name="expectedDeliveryDate" required class="input-field">
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700">Carrier/Transport</label>
+                  <input type="text" name="carrier" required class="input-field" placeholder="e.g. DHL, FedEx">
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                  <label class="text-sm font-medium text-gray-700">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
+                  <textarea name="notes" rows="3" class="input-field" placeholder="Additional notes about the shipment..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
+            <button type="button" onclick="window.supplierDashboard.sections.orders.switchToList()" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit" class="btn-primary flex items-center gap-2">
+              ${getIconHTML("check-circle")}
+              Confirm & Create Shipment
+            </button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  submitConvertForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const order = this.convertingOrder;
+
+    const shipmentData = {
+      shipmentNumber: formData.get("shipmentNumber"),
+      purchaseOrderId: order.id,
+      supplierId: order.supplierId,
+      shipmentDate: new Date(formData.get("shipmentDate")).toISOString(),
+      expectedDeliveryDate: new Date(
+        formData.get("expectedDeliveryDate")
+      ).toISOString(),
+      carrier: formData.get("carrier"),
+      status: "pending",
+      notes: formData.get("notes") || null,
+    };
+
+    Shipment.create(shipmentData)
+      .then(() => {
+        const orderUpdateData = {
+          customerId: order.customerId,
+          orderDate: order.orderDate,
+          dueDate: order.dueDate,
+          totalAmount: order.totalAmount,
+          status: "confirmed",
+        };
+        return Order.update(order.id, orderUpdateData);
+      })
+      .then(() => {
+        this.getOrders().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error converting order to shipment:", error);
+        alert("Failed to create shipment. Please try again.");
       });
   }
 
