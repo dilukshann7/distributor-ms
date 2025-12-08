@@ -208,6 +208,30 @@ app.get(
   })
 );
 
+app.post(
+  "/api/shipments",
+  asyncHandler(async (req, res) => {
+    const shipmentData = req.body;
+    const newShipment = await prisma.shipment.create({
+      data: shipmentData,
+    });
+    res.status(201).json(newShipment);
+  })
+);
+
+app.put(
+  "/api/shipments/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const shipmentData = req.body;
+    const updatedShipment = await prisma.shipment.update({
+      where: { id },
+      data: shipmentData,
+    });
+    res.json(updatedShipment);
+  })
+);
+
 app.get(
   "/api/invoices",
   asyncHandler(async (req, res) => {

@@ -11,4 +11,9 @@ export class Shipment {
 
     return axios.get(apiURL);
   }
+
+  static async update(id, shipmentData) {
+    const apiURL = `/api/shipments/${id}`;
+    return axios.put(apiURL, shipmentData);
+  }
 }
