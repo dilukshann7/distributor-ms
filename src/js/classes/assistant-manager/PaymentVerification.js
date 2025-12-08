@@ -19,7 +19,7 @@ export class PaymentVerification {
 
   async acceptPayment(paymentId) {
     try {
-      const response = await Payment.update(paymentId, { status: "paid" });
+      await Payment.update(paymentId, { status: "paid" });
       await this.fetchPayments();
     } catch (error) {
       console.error("Error verifying payment:", error);
@@ -28,7 +28,7 @@ export class PaymentVerification {
 
   async rejectPayment(paymentId) {
     try {
-      const response = await Payment.update(paymentId, { status: "rejected" });
+      await Payment.update(paymentId, { status: "rejected" });
       await this.fetchPayments();
     } catch (error) {
       console.error("Error rejecting payment:", error);
