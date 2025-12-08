@@ -46,7 +46,7 @@ export class SalesOrder {
       const doc = new jsPDF();
 
       doc.setFontSize(18);
-      doc.text("Supplier Report", 14, 20);
+      doc.text("Supplier/Sales Report", 14, 20);
 
       doc.setFontSize(11);
       doc.text(
@@ -77,8 +77,8 @@ export class SalesOrder {
           order.customerId || "N/A",
           formatDate(order.orderDate),
           order.status || "N/A",
-          formatCurrency(order.totalAmount),
-          order.dueDate ? formatDate(order.dueDate) : "N/A",
+          formatCurrency(order.subtotal),
+          order.orderDate ? formatDate(order.orderDate) : "N/A",
         ]),
         styles: { fontSize: 9 },
         headStyles: { fillColor: [59, 130, 246] }, // Blue color for orders
