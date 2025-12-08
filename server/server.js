@@ -187,6 +187,17 @@ app.put(
   })
 );
 
+app.post(
+  "/api/orders",
+  asyncHandler(async (req, res) => {
+    const orderData = req.body;
+    const newOrder = await prisma.order.create({
+      data: orderData,
+    });
+    res.status(201).json(newOrder);
+  })
+);
+
 app.get(
   "/api/shipments",
   asyncHandler(async (req, res) => {
@@ -254,74 +265,6 @@ app.get(
 
     res.json({
       daily: { orders: totalOrders, revenue: totalRevenue, items: totalItems },
-    });
-  })
-);
-
-app.get(
-  "/api/orders/weekly",
-  asyncHandler(async (req, res) => {
-    const today = new Date();
-    const firstDayOfWeek = new Date(today);
-    firstDayOfWeek.setDate(today.getDate() - today.getDay());
-    const lastDayOfWeek = new Date(firstDayOfWeek);
-    lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 7);
-
-    const orders = await prisma.order.findMany({
-      where: {
-        orderDate: {
-          gte: firstDayOfWeek,
-          lt: lastDayOfWeek,
-        },
-      },
-    });
-
-    const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
-    const totalItems = orders.reduce((sum, o) => {
-      const items = o.items; // already JS array
-      return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
-    }, 0);
-
-    res.json({
-      weekly: { orders: totalOrders, revenue: totalRevenue, items: totalItems },
-    });
-  })
-);
-
-app.get(
-  "/api/orders/monthly",
-  asyncHandler(async (req, res) => {
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); // start of month
-    const firstDayOfNextMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      1
-    );
-
-    const orders = await prisma.order.findMany({
-      where: {
-        orderDate: {
-          gte: firstDayOfMonth,
-          lt: firstDayOfNextMonth,
-        },
-      },
-    });
-
-    const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 0);
-    const totalItems = orders.reduce((sum, o) => {
-      const items = o.items;
-      return sum + items.reduce((n, i) => n + (i.quantity || 0), 0);
-    }, 0);
-
-    res.json({
-      monthly: {
-        orders: totalOrders,
-        revenue: totalRevenue,
-        items: totalItems,
-      },
     });
   })
 );

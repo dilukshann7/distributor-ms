@@ -1,6 +1,11 @@
 import axios from "axios";
 
 export class Order {
+  static async create(orderData) {
+    const apiURL = "/api/orders";
+    return axios.post(apiURL, orderData);
+  }
+
   static async getAll() {
     const apiURL = "/api/orders";
 
