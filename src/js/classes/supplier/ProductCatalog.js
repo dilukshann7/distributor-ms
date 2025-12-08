@@ -7,13 +7,22 @@ export class ProductCatalog {
     this.products = [];
     this.view = "list";
     this.editingProduct = null;
+    this.supplierId = null;
+    this.getSupplierId();
     this.getSupply();
+  }
+
+  getSupplierId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    this.supplierId = urlParams.get('id');
   }
 
   async getSupply() {
     try {
       const response = await Supply.getAll();
-      this.products = response.data;
+      this.products = response.data.filter(product => 
+        product.supplierId === parseInt(this.supplierId, 10)
+      );
     } catch (error) {
       console.error("Error fetching supplies:", error);
       this.products = [];
@@ -316,6 +325,7 @@ export class ProductCatalog {
 
     const productData = {
       ...rawData,
+      supplierId: parseInt(this.supplierId, 10),
       stock: parseInt(rawData.stock, 10),
       price: parseFloat(rawData.price),
     };
@@ -326,6 +336,7 @@ export class ProductCatalog {
       })
       .catch((error) => {
         console.error("Error creating supply:", error);
+        alert("Failed to create supply. Please try again.");
       });
   }
 
@@ -337,6 +348,7 @@ export class ProductCatalog {
 
     const productData = {
       ...rawData,
+      supplierId: parseInt(this.supplierId, 10),
       stock: parseInt(rawData.stock, 10),
       price: parseFloat(rawData.price),
     };
@@ -347,6 +359,7 @@ export class ProductCatalog {
       })
       .catch((error) => {
         console.error("Error updating supply:", error);
+        alert("Failed to update supply. Please try again.");
       });
   }
 
