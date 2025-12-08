@@ -514,6 +514,30 @@ app.get(
   })
 );
 
+app.post(
+  "/api/carts",
+  asyncHandler(async (req, res) => {
+    const cartData = req.body;
+    const newCart = await prisma.cart.create({
+      data: cartData,
+    });
+    res.status(201).json(newCart);
+  })
+);
+
+app.put(
+  "/api/carts/:id",
+  asyncHandler(async (req, res) => {
+    const id = parseInt(req.params.id, 10);
+    const cartData = req.body;
+    const updatedCart = await prisma.cart.update({
+      where: { id },
+      data: cartData,
+    });
+    res.json(updatedCart);
+  })
+);
+
 app.get(
   "/api/small-orders",
   asyncHandler(async (req, res) => {
@@ -523,6 +547,17 @@ app.get(
       },
     });
     res.json(smallOrders);
+  })
+);
+
+app.post(
+  "/api/small-orders",
+  asyncHandler(async (req, res) => {
+    const smallOrderData = req.body;
+    const newSmallOrder = await prisma.smallOrder.create({
+      data: smallOrderData,
+    });
+    res.status(201).json(newSmallOrder);
   })
 );
 
