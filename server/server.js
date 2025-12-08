@@ -250,8 +250,11 @@ app.get(
             stock: "desc",
           },
           take: parseInt(top, 10),
+          include: { supplier: true },
         })
-      : await prisma.supply.findMany();
+      : await prisma.supply.findMany({
+          include: { supplier: true },
+        });
     res.json(supplies);
   })
 );
