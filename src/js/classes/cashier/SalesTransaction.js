@@ -1,32 +1,47 @@
 import { Cart } from "../../models/Cart.js";
 import { smallOrder } from "../../models/SmallOrder.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
+import { Product } from "../../models/Product.js";
 
 export class SalesTransaction {
   constructor(container) {
     this.container = container;
     this.cartItems = [];
-    this.getCartItems();
-    this.getSmallOrder();
+    this.products = [];
+    this.selectedProduct = null;
   }
 
-  async getCartItems() {
+  async initialize() {
+    await this.getSmallOrder();
+    await this.getProducts();
+    return this.render();
+  }
+
+  async getProducts() {
     try {
-      const response = await Cart.getAll();
-      if (response.data && response.data.length > 0) {
-        const cart = response.data[0];
-        this.cartItems = cart.items.map((item) => ({
-          name: item.productName,
-          quantity: item.quantity,
-          price: item.unitPrice,
-          total: item.total,
-        }));
-      } else {
-        this.cartItems = [];
-      }
+      const response = await Product.getAll();
+      this.products = response.data.map((product) => ({
+        name: product.name,
+        price: product.price,
+      }));
+      console.log("Fetched products:", this.products);
     } catch (error) {
-      console.error("Error fetching cart items:", error);
-      this.cartItems = [];
+      console.error("Error fetching products:", error);
+      this.products = [];
+    }
+  }
+
+  async createCart() {
+    try {
+      const cartData = {
+        items: [],
+        totalAmount: 0,
+      };
+      const response = await Cart.create(cartData);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating cart:", error);
+      return null;
     }
   }
 
@@ -56,7 +71,6 @@ export class SalesTransaction {
     return `
       <div class="cashier-section-spacing">
         <div class="cashier-grid-layout">
-          <!-- Add Product Form -->
           <div class="lg:col-span-2 cashier-card">
             <h3 class="cashier-section-title mb-4 flex items-center gap-2">
               Add Product to Sale
@@ -64,16 +78,24 @@ export class SalesTransaction {
             <div class="space-y-4">
               <div>
                 <label class="cashier-label">Product Name</label>
-                <input type="text" placeholder="Enter product name" class="cashier-input" />
+                <select id="productSelect" class="cashier-input">
+                  <option value="" disabled selected>Select a product</option>
+                  ${this.products
+                    .map(
+                      (product) =>
+                        `<option value="${product.name}">${product.name}</option>`
+                    )
+                    .join("")}
+                </select>
               </div>
               <div class="cashier-grid-2col">
                 <div>
                   <label class="cashier-label">Quantity</label>
-                  <input type="number" placeholder="0" class="cashier-input" />
+                  <input id="quantityInput" type="number" placeholder="0" class="cashier-input" min="1" value="1" />
                 </div>
                 <div>
-                  <label class="cashier-label">Price</label>
-                  <input type="number" placeholder="0.00" class="cashier-input" />
+                  <label class="cashier-label">Total Price</label>
+                  <input id="priceInput" type="number" placeholder="0.00" class="cashier-input" value="0.00" readonly />
                 </div>
               </div>
               <button class="cashier-btn-primary cashier-btn-icon">
@@ -83,7 +105,6 @@ export class SalesTransaction {
             </div>
           </div>
 
-          <!-- Cart Summary -->
           <div class="cashier-card-gradient">
             <h3 class="cashier-section-title mb-4">Cart Summary</h3>
             <div class="space-y-3">
@@ -100,13 +121,12 @@ export class SalesTransaction {
                 <span>Rs. ${total.toFixed(2)}</span>
               </div>
               <button class="cashier-btn-primary mt-4">
-                Proceed to Payment
+                Make Payment
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Cart Items -->
         <div class="cashier-card overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="cashier-section-title">Cart Items (${
@@ -151,7 +171,6 @@ export class SalesTransaction {
           </div>
         </div>
 
-        <!-- Payment History -->
         <div class="cashier-card overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="cashier-section-title">Payment History</h3>
@@ -160,7 +179,7 @@ export class SalesTransaction {
             <table class="w-full">
               <thead class="cashier-table-head">
                 <tr>
-                  <th class="cashier-table-header">Method</th>
+                  <th class="cashier-table-header">Order ID</th>
                   <th class="cashier-table-header">Amount</th>
                   <th class="cashier-table-header">Time</th>
                   <th class="cashier-table-header">Status</th>
@@ -173,13 +192,13 @@ export class SalesTransaction {
                         .map(
                           (order) => `
                     <tr class="cashier-table-row">
-                      <td class="cashier-table-cell">${order.paymentMethod}</td>
+                      <td class="cashier-table-cell">${order.cart.id}</td>
                       <td class="cashier-table-cell font-semibold">Rs. ${order.cart.totalAmount.toFixed(
                         2
                       )}</td>
-                      <td class="cashier-table-cell text-gray-600">${
+                      <td class="cashier-table-cell text-gray-600">${new Date(
                         order.createdAt
-                      }</td>
+                      ).toLocaleString()}</td>
                       <td class="cashier-table-cell">
                         <span class="cashier-badge ${
                           order.status === "completed"
@@ -206,5 +225,146 @@ export class SalesTransaction {
         </div>
       </div>
     `;
+  }
+
+  attachEventListeners() {
+    const productSelect = this.container.querySelector("#productSelect");
+    const quantityInput = this.container.querySelector("#quantityInput");
+    const priceInput = this.container.querySelector("#priceInput");
+    const addToCartButton = this.container.querySelector(
+      ".cashier-btn-primary.cashier-btn-icon"
+    );
+    const proceedButton = this.container.querySelector(
+      ".cashier-btn-primary.mt-4"
+    );
+
+    if (productSelect) {
+      productSelect.addEventListener("change", (e) => {
+        const selectedProductName = e.target.value;
+        this.selectedProduct = this.products.find(
+          (p) => p.name === selectedProductName
+        );
+        this.updateTotalPrice(quantityInput, priceInput);
+      });
+    }
+
+    if (quantityInput) {
+      quantityInput.addEventListener("input", () => {
+        this.updateTotalPrice(quantityInput, priceInput);
+      });
+    }
+
+    if (addToCartButton) {
+      addToCartButton.addEventListener("click", async () => {
+        await this.addToCart(productSelect, quantityInput, priceInput);
+      });
+    }
+
+    if (proceedButton) {
+      proceedButton.addEventListener("click", async () => {
+        await this.proceedToPayment();
+      });
+    }
+  }
+
+  updateTotalPrice(quantityInput, priceInput) {
+    if (this.selectedProduct && quantityInput && priceInput) {
+      const quantity = parseInt(quantityInput.value) || 0;
+      const totalPrice = this.selectedProduct.price * quantity;
+      priceInput.value = totalPrice.toFixed(2);
+    }
+  }
+
+  async addToCart(productSelect, quantityInput, priceInput) {
+    if (!this.selectedProduct) {
+      alert("Please select a product");
+      return;
+    }
+
+    const quantity = parseInt(quantityInput.value);
+    if (!quantity || quantity <= 0) {
+      alert("Please enter a valid quantity");
+      return;
+    }
+
+    const total = parseFloat(priceInput.value);
+
+    const existingItem = this.cartItems.find(
+      (item) => item.name === this.selectedProduct.name
+    );
+    if (existingItem) {
+      existingItem.quantity += quantity;
+      existingItem.total = existingItem.price * existingItem.quantity;
+    } else {
+      this.cartItems.push({
+        name: this.selectedProduct.name,
+        quantity: quantity,
+        price: this.selectedProduct.price,
+        total: total,
+      });
+    }
+
+    productSelect.value = "";
+    quantityInput.value = "1";
+    priceInput.value = "0.00";
+    this.selectedProduct = null;
+
+    const contentArea = this.container.querySelector("#dashboardContent > div");
+    if (contentArea) {
+      contentArea.innerHTML = this.render();
+    } else {
+      this.container.innerHTML = this.render();
+    }
+    this.attachEventListeners();
+  }
+
+  async proceedToPayment() {
+    if (this.cartItems.length === 0) {
+      alert("Cart is empty. Please add items before proceeding to payment.");
+      return;
+    }
+
+    try {
+      const subtotal = this.cartItems.reduce(
+        (sum, item) => sum + item.total,
+        0
+      );
+      const tax = subtotal * 0.1;
+      const totalAmount = subtotal + tax;
+
+      const cartData = {
+        items: this.cartItems,
+        totalAmount: totalAmount,
+        status: "active",
+      };
+
+      const cartResponse = await Cart.create(cartData);
+      const createdCart = cartResponse.data;
+
+      const orderNumber = `ORD-${Date.now()}`;
+      const orderData = {
+        orderNumber: orderNumber,
+        cartId: createdCart.id,
+        status: "completed",
+      };
+
+      await smallOrder.create(orderData);
+
+      alert(`Order ${orderNumber} created successfully!`);
+
+      this.cartItems = [];
+      const contentArea = this.container.querySelector(
+        "#dashboardContent > div"
+      );
+      if (contentArea) {
+        contentArea.innerHTML = await this.initialize();
+      } else {
+        this.container.innerHTML = await this.initialize();
+      }
+      this.attachEventListeners();
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      alert("Failed to process payment. Please try again.");
+    }
   }
 }

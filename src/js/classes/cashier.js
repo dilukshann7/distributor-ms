@@ -101,6 +101,16 @@ class CashierDashboard {
   async renderSection(section) {
     const sectionInstance = this.sections[section];
 
+    if (sectionInstance.initialize) {
+      const html = await sectionInstance.initialize();
+      setTimeout(() => {
+        if (sectionInstance.attachEventListeners) {
+          sectionInstance.attachEventListeners();
+        }
+      }, 0);
+      return html;
+    }
+
     return sectionInstance.render();
   }
 
@@ -131,6 +141,11 @@ class CashierDashboard {
     const content = this.container.querySelector("#dashboardContent");
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+
+    const sectionInstance = this.sections[section];
+    if (sectionInstance.attachEventListeners) {
+      sectionInstance.attachEventListeners();
+    }
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
