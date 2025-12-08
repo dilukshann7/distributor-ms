@@ -1,8 +1,9 @@
 import { Payment } from "../../models/Payment.js";
 
 export class PaymentVerification {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.payments = [];
     this.fetchPayments();
     window.addEventListener("load", () => {
@@ -43,7 +44,8 @@ export class PaymentVerification {
       verify.addEventListener("click", async (e) => {
         const paymentId = e.target.dataset.paymentId;
         await this.acceptPayment(paymentId);
-        // refr
+        await this.parentDashboard.navigateToSection("payments");
+        this.attachEventListeners();
       });
     }
 
@@ -64,7 +66,7 @@ export class PaymentVerification {
           <div>
             <h3 class="text-2xl font-bold text-gray-900">Payment Verification Workflow</h3>
             <p class="cashier-subtitle">Verify cash and check payments collected by sales team</p>
-          </div>
+            </div>
           <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
 
           <div class="overflow-x-auto">

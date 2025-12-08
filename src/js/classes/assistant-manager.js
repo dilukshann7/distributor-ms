@@ -12,10 +12,10 @@ class AssistantManagerDashboard {
     this.currentSection = "payments";
     this.isSidebarOpen = true;
     this.sections = {
-      payments: new PaymentVerification(this.container),
-      "delivery-stock": new DeliveryStockMaintenance(this.container),
-      drivers: new DriverManagement(this.container),
-      distribution: new DistributionRecords(this.container),
+      payments: new PaymentVerification(this.container, this),
+      "delivery-stock": new DeliveryStockMaintenance(this.container, this),
+      drivers: new DriverManagement(this.container, this),
+      distribution: new DistributionRecords(this.container, this),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
