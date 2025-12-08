@@ -5,7 +5,9 @@ export class PaymentVerification {
     this.container = container;
     this.payments = [];
     this.fetchPayments();
-    window.paymentVerificationInstance = this;
+    window.addEventListener("load", () => {
+      this.attachEventListeners();
+    });
   }
 
   async fetchPayments() {
@@ -32,6 +34,27 @@ export class PaymentVerification {
       await this.fetchPayments();
     } catch (error) {
       console.error("Error rejecting payment:", error);
+    }
+  }
+
+  async attachEventListeners() {
+    const verify = document.querySelector(".payment-verify-button");
+    if (verify) {
+      verify.addEventListener("click", async (e) => {
+        const paymentId = e.target.dataset.paymentId;
+        await this.acceptPayment(paymentId);
+        // refr
+      });
+    }
+
+    const reject = document.querySelector(".payment-reject-button");
+    if (reject) {
+      reject.addEventListener("click", async (e) => {
+        const paymentId = e.target.dataset.paymentId;
+        await this.rejectPayment(paymentId);
+        this.container.innerHTML = this.render();
+        this.attachEventListeners();
+      });
     }
   }
 
@@ -90,10 +113,10 @@ export class PaymentVerification {
                         payment.salesOrder.paymentStatus === "unpaid"
                           ? `
                         <div class="flex gap-2">
-                          <button onclick="window.paymentVerificationInstance.acceptPayment(${payment.id})" class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition-colors">
+                          <button class="payment-verify-button px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition-colors">
                             Verify
                           </button>
-                          <button onclick="window.paymentVerificationInstance.rejectPayment(${payment.id})" class="px-3 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition-colors">
+                          <button class="payment-reject-button px-3 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition-colors">
                             Reject
                           </button>
                         </div>
