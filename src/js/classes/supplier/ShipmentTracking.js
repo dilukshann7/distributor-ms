@@ -12,7 +12,7 @@ export class ShipmentTracking {
       const id = window.location.search.split("id=")[1];
       const response = await Shipment.getAll();
       this.shipments = response.data.filter(
-        (shipment) => shipment.supplierId === id
+        (shipment) => shipment.supplierId === Number(id)
       );
     } catch (error) {
       console.error("Error fetching shipments:", error);
@@ -59,17 +59,19 @@ export class ShipmentTracking {
                         .join(", ")}
                     </td>
                     <td class="table-cell">${shipment.carrier}</td>
-                    <td class="table-cell">${shipment.expectedDeliveryDate}</td>
+                    <td class="table-cell">${new Date(
+                      shipment.expectedDeliveryDate
+                    ).toLocaleDateString()}</td>
                     <td class="table-cell">
                       <span class="status-badge ${
-                        shipment.status === "delivered"
+                        shipment.status === "received"
                           ? "status-green"
                           : shipment.status === "in-transit"
                           ? "status-blue"
                           : "status-yellow"
                       }">
                         ${
-                          shipment.status === "delivered"
+                          shipment.status === "received"
                             ? "Delivered"
                             : shipment.status === "in-transit"
                             ? "In Transit"
