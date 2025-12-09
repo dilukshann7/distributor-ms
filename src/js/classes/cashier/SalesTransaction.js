@@ -4,17 +4,17 @@ import { getIconHTML } from "../../../assets/icons/index.js";
 import { Product } from "../../models/Product.js";
 
 export class SalesTransaction {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.cartItems = [];
     this.products = [];
     this.selectedProduct = null;
-  }
-
-  async initialize() {
-    await this.getSmallOrder();
-    await this.getProducts();
-    return this.render();
+    this.getSmallOrder();
+    this.getProducts();
+    window.addEventListener("load", () => {
+      this.attachEventListeners();
+    });
   }
 
   async getProducts() {
@@ -60,6 +60,151 @@ export class SalesTransaction {
     } catch (error) {
       console.error("Error fetching small order:", error);
       this.smallOrder = null;
+    }
+  }
+
+  attachEventListeners() {
+    const productSelect = this.container.querySelector("#productSelect");
+    const quantityInput = this.container.querySelector("#quantityInput");
+    const priceInput = this.container.querySelector("#priceInput");
+    const addToCartButton = this.container.querySelector(
+      ".cashier-btn-primary.cashier-btn-icon"
+    );
+    const proceedButton = this.container.querySelector(
+      ".cashier-btn-primary.mt-4"
+    );
+
+    if (productSelect) {
+      productSelect.addEventListener("change", (e) => {
+        const selectedProductName = e.target.value;
+        this.selectedProduct = this.products.find(
+          (p) => p.name === selectedProductName
+        );
+        this.updateTotalPrice(quantityInput, priceInput);
+      });
+    }
+
+    if (quantityInput) {
+      quantityInput.addEventListener("input", () => {
+        this.updateTotalPrice(quantityInput, priceInput);
+      });
+    }
+
+    if (addToCartButton) {
+      addToCartButton.addEventListener("click", async () => {
+        await this.addToCart(productSelect, quantityInput, priceInput);
+        await this.parentDashboard.navigateToSection("sales");
+        this.attachEventListeners();
+      });
+    }
+
+    if (proceedButton) {
+      proceedButton.addEventListener("click", async () => {
+        await this.proceedToPayment();
+        await this.parentDashboard.navigateToSection("sales");
+        this.attachEventListeners();
+      });
+    }
+  }
+
+  updateTotalPrice(quantityInput, priceInput) {
+    if (this.selectedProduct && quantityInput && priceInput) {
+      const quantity = parseInt(quantityInput.value) || 0;
+      const totalPrice = this.selectedProduct.price * quantity;
+      priceInput.value = totalPrice.toFixed(2);
+    }
+  }
+
+  async addToCart(productSelect, quantityInput, priceInput) {
+    if (!this.selectedProduct) {
+      alert("Please select a product");
+      return;
+    }
+
+    const quantity = parseInt(quantityInput.value);
+    if (!quantity || quantity <= 0) {
+      alert("Please enter a valid quantity");
+      return;
+    }
+
+    const total = parseFloat(priceInput.value);
+
+    const existingItem = this.cartItems.find(
+      (item) => item.name === this.selectedProduct.name
+    );
+    if (existingItem) {
+      existingItem.quantity += quantity;
+      existingItem.total = existingItem.price * existingItem.quantity;
+    } else {
+      this.cartItems.push({
+        name: this.selectedProduct.name,
+        quantity: quantity,
+        price: this.selectedProduct.price,
+        total: total,
+      });
+    }
+
+    productSelect.value = "";
+    quantityInput.value = "1";
+    priceInput.value = "0.00";
+    this.selectedProduct = null;
+
+    const contentArea = this.container.querySelector("#dashboardContent > div");
+    if (contentArea) {
+      contentArea.innerHTML = this.render();
+    } else {
+      this.container.innerHTML = this.render();
+    }
+    this.attachEventListeners();
+  }
+
+  async proceedToPayment() {
+    if (this.cartItems.length === 0) {
+      alert("Cart is empty. Please add items before proceeding to payment.");
+      return;
+    }
+
+    try {
+      const subtotal = this.cartItems.reduce(
+        (sum, item) => sum + item.total,
+        0
+      );
+      const tax = subtotal * 0.1;
+      const totalAmount = subtotal + tax;
+
+      const cartData = {
+        items: this.cartItems,
+        totalAmount: totalAmount,
+        status: "active",
+      };
+
+      const cartResponse = await Cart.create(cartData);
+      const createdCart = cartResponse.data;
+
+      const orderNumber = `ORD-${Date.now()}`;
+      const orderData = {
+        orderNumber: orderNumber,
+        cartId: createdCart.id,
+        status: "completed",
+      };
+
+      await smallOrder.create(orderData);
+
+      alert(`Order ${orderNumber} created successfully!`);
+
+      this.cartItems = [];
+      const contentArea = this.container.querySelector(
+        "#dashboardContent > div"
+      );
+      if (contentArea) {
+        contentArea.innerHTML = await this.initialize();
+      } else {
+        this.container.innerHTML = await this.initialize();
+      }
+      this.attachEventListeners();
+    } catch (error) {
+      console.error("Error processing payment:", error);
+      alert("Failed to process payment. Please try again.");
     }
   }
 
@@ -225,146 +370,5 @@ export class SalesTransaction {
         </div>
       </div>
     `;
-  }
-
-  attachEventListeners() {
-    const productSelect = this.container.querySelector("#productSelect");
-    const quantityInput = this.container.querySelector("#quantityInput");
-    const priceInput = this.container.querySelector("#priceInput");
-    const addToCartButton = this.container.querySelector(
-      ".cashier-btn-primary.cashier-btn-icon"
-    );
-    const proceedButton = this.container.querySelector(
-      ".cashier-btn-primary.mt-4"
-    );
-
-    if (productSelect) {
-      productSelect.addEventListener("change", (e) => {
-        const selectedProductName = e.target.value;
-        this.selectedProduct = this.products.find(
-          (p) => p.name === selectedProductName
-        );
-        this.updateTotalPrice(quantityInput, priceInput);
-      });
-    }
-
-    if (quantityInput) {
-      quantityInput.addEventListener("input", () => {
-        this.updateTotalPrice(quantityInput, priceInput);
-      });
-    }
-
-    if (addToCartButton) {
-      addToCartButton.addEventListener("click", async () => {
-        await this.addToCart(productSelect, quantityInput, priceInput);
-      });
-    }
-
-    if (proceedButton) {
-      proceedButton.addEventListener("click", async () => {
-        await this.proceedToPayment();
-      });
-    }
-  }
-
-  updateTotalPrice(quantityInput, priceInput) {
-    if (this.selectedProduct && quantityInput && priceInput) {
-      const quantity = parseInt(quantityInput.value) || 0;
-      const totalPrice = this.selectedProduct.price * quantity;
-      priceInput.value = totalPrice.toFixed(2);
-    }
-  }
-
-  async addToCart(productSelect, quantityInput, priceInput) {
-    if (!this.selectedProduct) {
-      alert("Please select a product");
-      return;
-    }
-
-    const quantity = parseInt(quantityInput.value);
-    if (!quantity || quantity <= 0) {
-      alert("Please enter a valid quantity");
-      return;
-    }
-
-    const total = parseFloat(priceInput.value);
-
-    const existingItem = this.cartItems.find(
-      (item) => item.name === this.selectedProduct.name
-    );
-    if (existingItem) {
-      existingItem.quantity += quantity;
-      existingItem.total = existingItem.price * existingItem.quantity;
-    } else {
-      this.cartItems.push({
-        name: this.selectedProduct.name,
-        quantity: quantity,
-        price: this.selectedProduct.price,
-        total: total,
-      });
-    }
-
-    productSelect.value = "";
-    quantityInput.value = "1";
-    priceInput.value = "0.00";
-    this.selectedProduct = null;
-
-    const contentArea = this.container.querySelector("#dashboardContent > div");
-    if (contentArea) {
-      contentArea.innerHTML = this.render();
-    } else {
-      this.container.innerHTML = this.render();
-    }
-    this.attachEventListeners();
-  }
-
-  async proceedToPayment() {
-    if (this.cartItems.length === 0) {
-      alert("Cart is empty. Please add items before proceeding to payment.");
-      return;
-    }
-
-    try {
-      const subtotal = this.cartItems.reduce(
-        (sum, item) => sum + item.total,
-        0
-      );
-      const tax = subtotal * 0.1;
-      const totalAmount = subtotal + tax;
-
-      const cartData = {
-        items: this.cartItems,
-        totalAmount: totalAmount,
-        status: "active",
-      };
-
-      const cartResponse = await Cart.create(cartData);
-      const createdCart = cartResponse.data;
-
-      const orderNumber = `ORD-${Date.now()}`;
-      const orderData = {
-        orderNumber: orderNumber,
-        cartId: createdCart.id,
-        status: "completed",
-      };
-
-      await smallOrder.create(orderData);
-
-      alert(`Order ${orderNumber} created successfully!`);
-
-      this.cartItems = [];
-      const contentArea = this.container.querySelector(
-        "#dashboardContent > div"
-      );
-      if (contentArea) {
-        contentArea.innerHTML = await this.initialize();
-      } else {
-        this.container.innerHTML = await this.initialize();
-      }
-      this.attachEventListeners();
-    } catch (error) {
-      console.error("Error processing payment:", error);
-      alert("Failed to process payment. Please try again.");
-    }
   }
 }

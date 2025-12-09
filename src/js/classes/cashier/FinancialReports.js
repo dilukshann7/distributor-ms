@@ -1,8 +1,52 @@
 import { smallOrder } from "../../models/SmallOrder";
 
 export class FinancialReports {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
+    window.addEventListener("load", () => {
+      this.attachEventListeners();
+    });
+  }
+
+  attachEventListeners() {
+    const exportBtn = this.container.querySelector("#exportPdfBtn");
+    if (exportBtn) {
+      exportBtn.addEventListener("click", async () => {
+        await this.exportPdf();
+        await this.parentDashboard.navigateToSection("reports");
+        this.attachEventListeners();
+      });
+    }
+  }
+
+  async exportPdf() {
+    const startDateInput = this.container.querySelector("#exportStartDate");
+    const endDateInput = this.container.querySelector("#exportEndDate");
+
+    const startDate = startDateInput?.value;
+    const endDate = endDateInput?.value;
+
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates");
+      return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      alert("Start date must be before end date");
+      return;
+    }
+
+    try {
+      await smallOrder.exportSmallOrderReport(
+        new Date(startDate),
+        new Date(endDate)
+      );
+      alert("PDF exported successfully");
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      alert("Failed to export PDF. Please try again.");
+    }
   }
 
   render() {
@@ -36,43 +80,5 @@ export class FinancialReports {
         </div>
       </div>
     `;
-  }
-
-  attachEventListeners() {
-    const exportBtn = this.container.querySelector("#exportPdfBtn");
-    if (exportBtn) {
-      exportBtn.addEventListener("click", () => {
-        this.exportPdf();
-      });
-    }
-  }
-
-  async exportPdf() {
-    const startDateInput = this.container.querySelector("#exportStartDate");
-    const endDateInput = this.container.querySelector("#exportEndDate");
-
-    const startDate = startDateInput?.value;
-    const endDate = endDateInput?.value;
-
-    if (!startDate || !endDate) {
-      alert("Please select both start and end dates");
-      return;
-    }
-
-    if (new Date(startDate) > new Date(endDate)) {
-      alert("Start date must be before end date");
-      return;
-    }
-
-    try {
-      await smallOrder.exportSmallOrderReport(
-        new Date(startDate),
-        new Date(endDate)
-      );
-      alert("PDF exported successfully");
-    } catch (error) {
-      console.error("Error exporting PDF:", error);
-      alert("Failed to export PDF. Please try again.");
-    }
   }
 }
