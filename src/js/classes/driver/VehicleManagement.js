@@ -20,122 +20,6 @@ export class VehicleManagement {
     }
   }
 
-  render() {
-    if (!this.vehicleData) {
-      return `<p class="text-gray-600">Unable to load vehicle details.</p>`;
-    }
-
-    return `
-      <div class="space-y-6">
-        <div>
-          <h2 class="driver-title mb-2">Vehicle Management</h2>
-          <p class="driver-subtitle">Update and manage your vehicle information</p>
-        </div>
-
-        <div class="driver-panel p-6">
-          <form id="vehicleForm" class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="driver-label-text">
-                  Vehicle ID
-                </label>
-                <input 
-                  type="text" 
-                  id="vehicleId" 
-                  value="${this.vehicleData.vehicleId || ""}" 
-                  class="driver-input"
-                  placeholder="Enter vehicle ID"
-                />
-              </div>
-
-              <div>
-                <label class="driver-label-text">
-                  Vehicle Type
-                </label>
-                <select 
-                  id="vehicleType" 
-                  class="driver-input"
-                >
-                  <option value="">Select vehicle type</option>
-                  <option value="truck" ${
-                    this.vehicleData.vehicleType === "truck" ? "selected" : ""
-                  }>Truck</option>
-                  <option value="van" ${
-                    this.vehicleData.vehicleType === "van" ? "selected" : ""
-                  }>Van</option>
-                  <option value="motorcycle" ${
-                    this.vehicleData.vehicleType === "motorcycle"
-                      ? "selected"
-                      : ""
-                  }>Motorcycle</option>
-                  <option value="car" ${
-                    this.vehicleData.vehicleType === "car" ? "selected" : ""
-                  }>Car</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="driver-label-text">
-                  License Number
-                </label>
-                <input 
-                  type="text" 
-                  id="licenseNumber" 
-                  value="${this.vehicleData.licenseNumber || ""}" 
-                  class="driver-input"
-                  placeholder="Enter license number"
-                />
-              </div>
-
-              <div>
-                <label class="driver-label-text">
-                  Current Location
-                </label>
-                <div class="flex gap-2">
-                  <input 
-                    type="text" 
-                    id="currentLocation" 
-                    value="${this.vehicleData.currentLocation || ""}" 
-                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="Enter current location"
-                  />
-                  <button 
-                    type="button" 
-                    id="gpsBtn"
-                    class="driver-btn-secondary driver-btn-action"
-                    title="Use GPS to get current location"
-                  >
-                    <div class="w-5 h-5">${getIconHTML("map-pin")}</div>
-                    GPS
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex gap-4 pt-4">
-              <button 
-                type="submit" 
-                class="flex-1 driver-btn-primary driver-btn-action"
-              >
-                <div class="w-5 h-5">${getIconHTML("check")}</div>
-                Update Vehicle Details
-              </button>
-              <button 
-                type="button" 
-                id="resetBtn"
-                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-              >
-                Reset
-              </button>
-            </div>
-          </form>
-
-          <div id="messageContainer" class="mt-4"></div>
-        </div>
-      </div>
-    `;
-  }
-
   attachEventListeners() {
     const form = document.getElementById("vehicleForm");
     const resetBtn = document.getElementById("resetBtn");
@@ -312,5 +196,121 @@ export class VehicleManagement {
     setTimeout(() => {
       messageContainer.innerHTML = "";
     }, 5000);
+  }
+
+  render() {
+    if (!this.vehicleData) {
+      return `<p class="text-gray-600">Unable to load vehicle details.</p>`;
+    }
+
+    return `
+      <div class="space-y-6">
+        <div>
+          <h2 class="driver-title mb-2">Vehicle Management</h2>
+          <p class="driver-subtitle">Update and manage your vehicle information</p>
+        </div>
+
+        <div class="driver-panel p-6">
+          <form id="vehicleForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="driver-label-text">
+                  Vehicle ID
+                </label>
+                <input 
+                  type="text" 
+                  id="vehicleId" 
+                  value="${this.vehicleData.vehicleId || ""}" 
+                  class="driver-input"
+                  placeholder="Enter vehicle ID"
+                />
+              </div>
+
+              <div>
+                <label class="driver-label-text">
+                  Vehicle Type
+                </label>
+                <select 
+                  id="vehicleType" 
+                  class="driver-input"
+                >
+                  <option value="">Select vehicle type</option>
+                  <option value="truck" ${
+                    this.vehicleData.vehicleType === "truck" ? "selected" : ""
+                  }>Truck</option>
+                  <option value="van" ${
+                    this.vehicleData.vehicleType === "van" ? "selected" : ""
+                  }>Van</option>
+                  <option value="motorcycle" ${
+                    this.vehicleData.vehicleType === "motorcycle"
+                      ? "selected"
+                      : ""
+                  }>Motorcycle</option>
+                  <option value="car" ${
+                    this.vehicleData.vehicleType === "car" ? "selected" : ""
+                  }>Car</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="driver-label-text">
+                  License Number
+                </label>
+                <input 
+                  type="text" 
+                  id="licenseNumber" 
+                  value="${this.vehicleData.licenseNumber || ""}" 
+                  class="driver-input"
+                  placeholder="Enter license number"
+                />
+              </div>
+
+              <div>
+                <label class="driver-label-text">
+                  Current Location
+                </label>
+                <div class="flex gap-2">
+                  <input 
+                    type="text" 
+                    id="currentLocation" 
+                    value="${this.vehicleData.currentLocation || ""}" 
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Enter current location"
+                  />
+                  <button 
+                    type="button" 
+                    id="gpsBtn"
+                    class="driver-btn-secondary driver-btn-action"
+                    title="Use GPS to get current location"
+                  >
+                    <div class="w-5 h-5">${getIconHTML("map-pin")}</div>
+                    GPS
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-4 pt-4">
+              <button 
+                type="submit" 
+                class="flex-1 driver-btn-primary driver-btn-action"
+              >
+                <div class="w-5 h-5">${getIconHTML("check")}</div>
+                Update Vehicle Details
+              </button>
+              <button 
+                type="button" 
+                id="resetBtn"
+                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+              >
+                Reset
+              </button>
+            </div>
+          </form>
+
+          <div id="messageContainer" class="mt-4"></div>
+        </div>
+      </div>
+    `;
   }
 }
