@@ -26,6 +26,104 @@ export class PurchaseOrders {
     }
   }
 
+  switchToEdit(orderId) {
+    this.editingOrder = this.orders.find((o) => o.id === parseInt(orderId));
+    this.view = "edit";
+    this.refresh(this.container);
+  }
+
+  switchToConvert(orderId) {
+    this.convertingOrder = this.orders.find((o) => o.id === parseInt(orderId));
+    this.view = "convert";
+    this.refresh(this.container);
+  }
+
+  switchToList() {
+    this.view = "list";
+    this.editingOrder = null;
+    this.convertingOrder = null;
+    this.refresh(this.container);
+  }
+
+  submitEditForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const rawData = Object.fromEntries(formData.entries());
+
+    const orderData = {
+      customerId: parseInt(rawData.customerId, 10),
+      orderDate: new Date(rawData.orderDate).toISOString(),
+      dueDate: new Date(rawData.dueDate).toISOString(),
+      totalAmount: parseFloat(rawData.totalAmount),
+      status: rawData.status,
+    };
+
+    Order.update(this.editingOrder.id, orderData)
+      .then(() => {
+        this.getOrders().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error updating order:", error);
+      });
+  }
+
+  submitConvertForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const order = this.convertingOrder;
+
+    const shipmentData = {
+      shipmentNumber: formData.get("shipmentNumber"),
+      purchaseOrderId: order.id,
+      supplierId: order.supplierId,
+      shipmentDate: new Date(formData.get("shipmentDate")).toISOString(),
+      expectedDeliveryDate: new Date(
+        formData.get("expectedDeliveryDate")
+      ).toISOString(),
+      carrier: formData.get("carrier"),
+      status: "pending",
+      notes: formData.get("notes") || null,
+    };
+
+    Shipment.create(shipmentData)
+      .then(() => {
+        const orderUpdateData = {
+          customerId: order.customerId,
+          orderDate: order.orderDate,
+          dueDate: order.dueDate,
+          totalAmount: order.totalAmount,
+          status: "confirmed",
+        };
+        return Order.update(order.id, orderUpdateData);
+      })
+      .then(() => {
+        this.getOrders().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error converting order to shipment:", error);
+        alert("Failed to create shipment. Please try again.");
+      });
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+    }
+  }
+
+  getStatusColor(status) {
+    const statusMap = {
+      pending: "status-yellow",
+      confirmed: "status-blue",
+      shipped: "status-indigo",
+      delivered: "status-green",
+    };
+    return statusMap[status] || "status-gray";
+  }
+
   render() {
     if (this.view === "edit") {
       return this.renderEditForm();
@@ -122,16 +220,6 @@ export class PurchaseOrders {
         </div>
       </div>
     `;
-  }
-
-  getStatusColor(status) {
-    const statusMap = {
-      pending: "status-yellow",
-      confirmed: "status-blue",
-      shipped: "status-indigo",
-      delivered: "status-green",
-    };
-    return statusMap[status] || "status-gray";
   }
 
   renderEditForm() {
@@ -250,48 +338,6 @@ export class PurchaseOrders {
     `;
   }
 
-  switchToEdit(orderId) {
-    this.editingOrder = this.orders.find((o) => o.id === parseInt(orderId));
-    this.view = "edit";
-    this.refresh(this.container);
-  }
-
-  switchToConvert(orderId) {
-    this.convertingOrder = this.orders.find((o) => o.id === parseInt(orderId));
-    this.view = "convert";
-    this.refresh(this.container);
-  }
-
-  switchToList() {
-    this.view = "list";
-    this.editingOrder = null;
-    this.convertingOrder = null;
-    this.refresh(this.container);
-  }
-
-  submitEditForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const rawData = Object.fromEntries(formData.entries());
-
-    const orderData = {
-      customerId: parseInt(rawData.customerId, 10),
-      orderDate: new Date(rawData.orderDate).toISOString(),
-      dueDate: new Date(rawData.dueDate).toISOString(),
-      totalAmount: parseFloat(rawData.totalAmount),
-      status: rawData.status,
-    };
-
-    Order.update(this.editingOrder.id, orderData)
-      .then(() => {
-        this.getOrders().then(() => this.switchToList());
-      })
-      .catch((error) => {
-        console.error("Error updating order:", error);
-      });
-  }
-
   renderConvertForm() {
     const order = this.convertingOrder;
     if (!order) return this.renderList();
@@ -375,51 +421,5 @@ export class PurchaseOrders {
         </form>
       </div>
     `;
-  }
-
-  submitConvertForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const order = this.convertingOrder;
-
-    const shipmentData = {
-      shipmentNumber: formData.get("shipmentNumber"),
-      purchaseOrderId: order.id,
-      supplierId: order.supplierId,
-      shipmentDate: new Date(formData.get("shipmentDate")).toISOString(),
-      expectedDeliveryDate: new Date(
-        formData.get("expectedDeliveryDate")
-      ).toISOString(),
-      carrier: formData.get("carrier"),
-      status: "pending",
-      notes: formData.get("notes") || null,
-    };
-
-    Shipment.create(shipmentData)
-      .then(() => {
-        const orderUpdateData = {
-          customerId: order.customerId,
-          orderDate: order.orderDate,
-          dueDate: order.dueDate,
-          totalAmount: order.totalAmount,
-          status: "confirmed",
-        };
-        return Order.update(order.id, orderUpdateData);
-      })
-      .then(() => {
-        this.getOrders().then(() => this.switchToList());
-      })
-      .catch((error) => {
-        console.error("Error converting order to shipment:", error);
-        alert("Failed to create shipment. Please try again.");
-      });
-  }
-
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
   }
 }

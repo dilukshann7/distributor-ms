@@ -14,18 +14,91 @@ export class ProductCatalog {
 
   getSupplierId() {
     const urlParams = new URLSearchParams(window.location.search);
-    this.supplierId = urlParams.get('id');
+    this.supplierId = urlParams.get("id");
   }
 
   async getSupply() {
     try {
       const response = await Supply.getAll();
-      this.products = response.data.filter(product => 
-        product.supplierId === parseInt(this.supplierId, 10)
+      this.products = response.data.filter(
+        (product) => product.supplierId === parseInt(this.supplierId, 10)
       );
     } catch (error) {
       console.error("Error fetching supplies:", error);
       this.products = [];
+    }
+  }
+
+  switchToAdd() {
+    this.view = "add";
+    this.editingProduct = null;
+    this.refresh(this.container);
+  }
+
+  switchToEdit(productId) {
+    this.editingProduct = this.products.find(
+      (p) => p.id === parseInt(productId)
+    );
+    this.view = "edit";
+    this.refresh(this.container);
+  }
+
+  switchToList() {
+    this.view = "list";
+    this.editingProduct = null;
+    this.refresh(this.container);
+  }
+
+  submitAddForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const rawData = Object.fromEntries(formData.entries());
+
+    const productData = {
+      ...rawData,
+      supplierId: parseInt(this.supplierId, 10),
+      stock: parseInt(rawData.stock, 10),
+      price: parseFloat(rawData.price),
+    };
+
+    Supply.create(productData)
+      .then(() => {
+        this.getSupply().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error creating supply:", error);
+        alert("Failed to create supply. Please try again.");
+      });
+  }
+
+  submitEditForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const rawData = Object.fromEntries(formData.entries());
+
+    const productData = {
+      ...rawData,
+      supplierId: parseInt(this.supplierId, 10),
+      stock: parseInt(rawData.stock, 10),
+      price: parseFloat(rawData.price),
+    };
+
+    Supply.update(this.editingProduct.id, productData)
+      .then(() => {
+        this.getSupply().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error updating supply:", error);
+        alert("Failed to update supply. Please try again.");
+      });
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
     }
   }
 
@@ -295,78 +368,5 @@ export class ProductCatalog {
         </form>
       </div>
     `;
-  }
-
-  switchToAdd() {
-    this.view = "add";
-    this.editingProduct = null;
-    this.refresh(this.container);
-  }
-
-  switchToEdit(productId) {
-    this.editingProduct = this.products.find(
-      (p) => p.id === parseInt(productId)
-    );
-    this.view = "edit";
-    this.refresh(this.container);
-  }
-
-  switchToList() {
-    this.view = "list";
-    this.editingProduct = null;
-    this.refresh(this.container);
-  }
-
-  submitAddForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const rawData = Object.fromEntries(formData.entries());
-
-    const productData = {
-      ...rawData,
-      supplierId: parseInt(this.supplierId, 10),
-      stock: parseInt(rawData.stock, 10),
-      price: parseFloat(rawData.price),
-    };
-
-    Supply.create(productData)
-      .then(() => {
-        this.getSupply().then(() => this.switchToList());
-      })
-      .catch((error) => {
-        console.error("Error creating supply:", error);
-        alert("Failed to create supply. Please try again.");
-      });
-  }
-
-  submitEditForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const rawData = Object.fromEntries(formData.entries());
-
-    const productData = {
-      ...rawData,
-      supplierId: parseInt(this.supplierId, 10),
-      stock: parseInt(rawData.stock, 10),
-      price: parseFloat(rawData.price),
-    };
-
-    Supply.update(this.editingProduct.id, productData)
-      .then(() => {
-        this.getSupply().then(() => this.switchToList());
-      })
-      .catch((error) => {
-        console.error("Error updating supply:", error);
-        alert("Failed to update supply. Please try again.");
-      });
-  }
-
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
   }
 }

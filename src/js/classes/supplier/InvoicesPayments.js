@@ -37,6 +37,64 @@ export class InvoicesPayments {
     }
   }
 
+  async switchToAdd() {
+    this.view = "create";
+    this.viewingInvoice = null;
+    await this.getOrders();
+    this.refresh(this.container);
+  }
+
+  switchToView(invoiceId) {
+    this.viewingInvoice = this.invoices.find(
+      (inv) => inv.id === parseInt(invoiceId)
+    );
+    this.view = "view";
+    this.refresh(this.container);
+  }
+
+  switchToList() {
+    this.view = "list";
+    this.viewingInvoice = null;
+    this.refresh(this.container);
+  }
+
+  submitForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const rawData = Object.fromEntries(formData.entries());
+
+    const invoiceData = {
+      invoiceNumber: rawData.invoiceNumber,
+      status: rawData.status,
+      notes: rawData.notes || null,
+
+      purchaseOrderId: parseInt(rawData.purchaseOrderId, 10),
+      supplierId: parseInt(window.location.search.split("id=")[1], 10),
+
+      totalAmount: parseFloat(rawData.totalAmount),
+      paidAmount: rawData.paidAmount ? parseFloat(rawData.paidAmount) : null,
+
+      invoiceDate: new Date(rawData.invoiceDate),
+      dueDate: new Date(rawData.dueDate),
+    };
+
+    Invoice.create(invoiceData)
+      .then(() => {
+        this.switchToList();
+      })
+      .catch((error) => {
+        console.error("Error creating invoice:", error);
+      });
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+    }
+  }
+
   render() {
     if (this.view === "create") {
       return this.renderCreateForm();
@@ -421,63 +479,5 @@ export class InvoicesPayments {
         </div>
       </div>
     `;
-  }
-
-  async switchToAdd() {
-    this.view = "create";
-    this.viewingInvoice = null;
-    await this.getOrders();
-    this.refresh(this.container);
-  }
-
-  switchToView(invoiceId) {
-    this.viewingInvoice = this.invoices.find(
-      (inv) => inv.id === parseInt(invoiceId)
-    );
-    this.view = "view";
-    this.refresh(this.container);
-  }
-
-  switchToList() {
-    this.view = "list";
-    this.viewingInvoice = null;
-    this.refresh(this.container);
-  }
-
-  submitForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const rawData = Object.fromEntries(formData.entries());
-
-    const invoiceData = {
-      invoiceNumber: rawData.invoiceNumber,
-      status: rawData.status,
-      notes: rawData.notes || null,
-
-      purchaseOrderId: parseInt(rawData.purchaseOrderId, 10),
-      supplierId: parseInt(window.location.search.split("id=")[1], 10),
-
-      totalAmount: parseFloat(rawData.totalAmount),
-      paidAmount: rawData.paidAmount ? parseFloat(rawData.paidAmount) : null,
-
-      invoiceDate: new Date(rawData.invoiceDate),
-      dueDate: new Date(rawData.dueDate),
-    };
-
-    Invoice.create(invoiceData)
-      .then(() => {
-        this.switchToList();
-      })
-      .catch((error) => {
-        console.error("Error creating invoice:", error);
-      });
-  }
-
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
   }
 }
