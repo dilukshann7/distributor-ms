@@ -17,6 +17,19 @@ export class StockTracking {
     }
   }
 
+  getStatusColor(status) {
+    switch (status) {
+      case "ready":
+        return "bg-green-100 text-green-800";
+      case "in-transit":
+        return "bg-blue-100 text-blue-800";
+      case "delayed":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  }
+
   render() {
     return `
       <div class="space-y-6">
@@ -70,18 +83,5 @@ export class StockTracking {
         </div>
       </div>
     `;
-  }
-
-  getStatusColor(status) {
-    switch (status) {
-      case "ready":
-        return "bg-green-100 text-green-800";
-      case "in-transit":
-        return "bg-blue-100 text-blue-800";
-      case "delayed":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
   }
 }

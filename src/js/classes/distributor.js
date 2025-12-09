@@ -42,6 +42,7 @@ class DistributorDashboard {
         </div>
       </div>
     `;
+    this.attachEventListeners();
   }
 
   renderSidebar() {
@@ -55,8 +56,8 @@ class DistributorDashboard {
     ];
 
     return `
-      <div class="lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-orange-700 to-orange-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
-                <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
+      <aside class="lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-orange-700 to-orange-800 text-white flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
+        <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
           ${menuItems
@@ -64,9 +65,7 @@ class DistributorDashboard {
               (item) => `
             <button data-section="${
               item.id
-            }" onclick="window.distributorDashboard.navigateToSection('${
-                item.id
-              }')" class="dist-nav-item ${
+            }" class="dist-nav-item ${
                 this.currentSection === item.id
                   ? "dist-nav-item-active"
                   : "dist-nav-item-inactive"
@@ -78,8 +77,7 @@ class DistributorDashboard {
             )
             .join("")}
         </nav>
-      </div>
-
+      </aside>
     `;
   }
 
@@ -96,7 +94,7 @@ class DistributorDashboard {
             ${getIconHTML("bell")}
           </button>
 
-          <button onclick="window.distributorDashboard.logout()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <button id="logoutBtn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${getIconHTML("log-out")}
           </button>
         </div>
@@ -106,14 +104,29 @@ class DistributorDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
-
     return sectionInstance.render();
   }
 
-  logout() {
-    import("../login.js").then((module) => {
-      module.renderLogin(this.container);
+  attachEventListeners() {
+    const navItems = this.container.querySelectorAll(".dist-nav-item");
+    navItems.forEach((item) => {
+      item.addEventListener("click", (e) => {
+        const section = e.currentTarget.dataset.section;
+        this.navigateToSection(section);
+      });
     });
+
+    const logoutBtn = this.container.querySelector("#logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        import("../login.js").then((module) => {
+          module.renderLogin(this.container);
+        });
+      });
+    }
+
+    window.notificationPanel = this.notificationPanel;
+    this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {
@@ -135,7 +148,5 @@ class DistributorDashboard {
 
 export function renderDistributorDashboard(container) {
   window.distributorDashboard = new DistributorDashboard(container);
-  window.notificationPanel = window.distributorDashboard.notificationPanel;
-  window.distributorDashboard.notificationPanel.attachEventListeners();
-  return window.distributorDashboard.render();
+  window.distributorDashboard.render();
 }
