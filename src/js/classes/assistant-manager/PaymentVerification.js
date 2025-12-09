@@ -19,7 +19,7 @@ export class PaymentVerification {
 
   async acceptPayment(paymentId) {
     try {
-      const response = await Payment.update(paymentId, { status: "paid" });
+      await Payment.update(paymentId, { status: "paid" });
       await this.fetchPayments();
     } catch (error) {
       console.error("Error verifying payment:", error);
@@ -28,7 +28,7 @@ export class PaymentVerification {
 
   async rejectPayment(paymentId) {
     try {
-      const response = await Payment.update(paymentId, { status: "rejected" });
+      await Payment.update(paymentId, { status: "rejected" });
       await this.fetchPayments();
     } catch (error) {
       console.error("Error rejecting payment:", error);
@@ -90,10 +90,12 @@ export class PaymentVerification {
                         payment.salesOrder.paymentStatus === "unpaid"
                           ? `
                         <div class="flex gap-2">
-                          <button onclick="window.paymentVerificationInstance.acceptPayment(${payment.id})" class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition-colors">
+                          <button 
+                            onclick="this.acceptPayment(${payment.id})" 
+                            class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition-colors">
                             Verify
                           </button>
-                          <button onclick="window.paymentVerificationInstance.rejectPayment(${payment.id})" class="px-3 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition-colors">
+                          <button onclick="this.rejectPayment(${payment.id})" class="px-3 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition-colors">
                             Reject
                           </button>
                         </div>
