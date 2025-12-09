@@ -5,6 +5,32 @@ export class SalesReports {
     this.container = container;
   }
 
+  async exportPdf() {
+    const startDateInput = document.querySelector("#exportStartDate");
+    const endDateInput = document.querySelector("#exportEndDate");
+
+    const startDate = startDateInput?.value;
+    const endDate = endDateInput?.value;
+
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates");
+      return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      alert("Start date must be before end date");
+      return;
+    }
+
+    try {
+      await Salesman.exportReport(startDate, endDate);
+      alert("PDF exported successfully");
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      alert("Failed to export PDF. Please try again.");
+    }
+  }
+
   render() {
     return `
       <div class="space-y-6">
@@ -35,31 +61,5 @@ export class SalesReports {
         </div>
       </div>
     `;
-  }
-
-  async exportPdf() {
-    const startDateInput = document.querySelector("#exportStartDate");
-    const endDateInput = document.querySelector("#exportEndDate");
-
-    const startDate = startDateInput?.value;
-    const endDate = endDateInput?.value;
-
-    if (!startDate || !endDate) {
-      alert("Please select both start and end dates");
-      return;
-    }
-
-    if (new Date(startDate) > new Date(endDate)) {
-      alert("Start date must be before end date");
-      return;
-    }
-
-    try {
-      await Salesman.exportReport(startDate, endDate);
-      alert("PDF exported successfully");
-    } catch (error) {
-      console.error("Error exporting PDF:", error);
-      alert("Failed to export PDF. Please try again.");
-    }
   }
 }

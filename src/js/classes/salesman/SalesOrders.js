@@ -46,6 +46,232 @@ export class SalesOrders {
     }
   }
 
+  async showFormHandler() {
+    await this.getProducts();
+    await this.getCustomers();
+    this.view = "add";
+    this.editingOrder = null;
+    this.refresh(this.container);
+  }
+
+  switchToEdit(orderId) {
+    this.editingOrder = this.orders.find((o) => o.id === parseInt(orderId));
+    this.view = "edit";
+    this.refresh(this.container);
+  }
+
+  switchToList() {
+    this.view = "list";
+    this.editingOrder = null;
+    this.refresh(this.container);
+  }
+
+  deleteOrder(orderId) {
+    if (
+      confirm(
+        "Are you sure you want to delete this order? This action cannot be undone."
+      )
+    ) {
+      SalesOrder.delete(orderId)
+        .then(() => {
+          this.getOrders().then(() => this.switchToList());
+        })
+        .catch((error) => {
+          console.error("Error deleting order:", error);
+          alert("Error deleting order. Please try again.");
+        });
+    }
+  }
+
+  calculateTotal() {
+    const rows = this.container.querySelectorAll(".item-row");
+    let total = 0;
+
+    rows.forEach((row) => {
+      const subtotalInput = row.querySelector(".item-subtotal");
+      if (subtotalInput && subtotalInput.value) {
+        const subtotal = parseFloat(
+          subtotalInput.value.replace("Rs. ", "").replace(",", "")
+        );
+        if (!isNaN(subtotal)) {
+          total += subtotal;
+        }
+      }
+    });
+
+    const subtotalInput = this.container.querySelector("#subtotal");
+    if (subtotalInput) {
+      subtotalInput.value = total.toFixed(2);
+    }
+  }
+
+  updateSubtotal(row) {
+    const productSelect = row.querySelector(".product-select");
+    const quantityInput = row.querySelector(".item-quantity");
+    const subtotalInput = row.querySelector(".item-subtotal");
+
+    if (productSelect && quantityInput && subtotalInput) {
+      const selectedOption = productSelect.options[productSelect.selectedIndex];
+      const price = parseFloat(selectedOption.dataset.price || 0);
+      const quantity = parseInt(quantityInput.value || 0);
+      const stock = parseInt(selectedOption.dataset.stock || 0);
+
+      if (quantity > stock && stock > 0) {
+        alert(`Only ${stock} units available in stock!`);
+        quantityInput.value = stock;
+        return;
+      }
+
+      const subtotal = price * quantity;
+      subtotalInput.value = `Rs. ${subtotal.toFixed(2)}`;
+      this.calculateTotal();
+    }
+  }
+
+  addItemRow() {
+    const itemsContainer = this.container.querySelector("#itemsContainer");
+    const rowCount = itemsContainer.querySelectorAll(".item-row").length;
+    const newRow = document.createElement("div");
+    newRow.className =
+      "grid grid-cols-1 md:grid-cols-5 gap-4 item-row sm-card-sub";
+    newRow.innerHTML = `
+      <div class="space-y-2 md:col-span-2">
+        <select name="productId[]" required class="sm-input bg-white product-select" data-row="${rowCount}" onchange="window.salesmanDashboard.sections.orders.updateSubtotal(this.closest('.item-row'))">
+          <option value="">-- Select Product --</option>
+          ${this.products
+            .map(
+              (product) => `
+            <option value="${product.id}" data-name="${
+                product.name
+              }" data-price="${product.price}" data-stock="${product.quantity}">
+              ${product.name} - Rs. ${product.price.toFixed(2)} (Stock: ${
+                product.quantity
+              })
+            </option>
+          `
+            )
+            .join("")}
+        </select>
+      </div>
+      <div class="space-y-2">
+        <input type="number" name="itemQuantity[]" required min="1" class="sm-input bg-white item-quantity" data-row="${rowCount}" placeholder="1" oninput="window.salesmanDashboard.sections.orders.updateSubtotal(this.closest('.item-row'))">
+      </div>
+      <div class="space-y-2">
+        <input type="text" class="sm-input bg-gray-100 item-subtotal" data-row="${rowCount}" readonly placeholder="Rs. 0.00">
+      </div>
+      <div class="space-y-2">
+        <button type="button" class="remove-item-btn sm-btn-danger-light" onclick="window.salesmanDashboard.sections.orders.removeItemRow(this)">
+          ${getIconHTML("trash")}
+          Remove
+        </button>
+      </div>
+    `;
+    itemsContainer.appendChild(newRow);
+  }
+
+  removeItemRow(btn) {
+    const row = btn.closest(".item-row");
+    const itemsContainer = this.container.querySelector("#itemsContainer");
+    if (itemsContainer.querySelectorAll(".item-row").length > 1) {
+      row.remove();
+      this.calculateTotal();
+    } else {
+      alert("At least one item is required");
+    }
+  }
+
+  submitAddForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const productIds = formData.getAll("productId[]");
+    const itemQuantities = formData.getAll("itemQuantity[]");
+
+    const items = productIds
+      .map((productId, index) => {
+        const product = this.products.find((p) => p.id === parseInt(productId));
+        return {
+          name: product?.name || "Unknown",
+          quantity: parseInt(itemQuantities[index], 10),
+        };
+      })
+      .filter((item) => item.quantity > 0);
+
+    if (items.length === 0) {
+      alert("Please add at least one item to the order");
+      return;
+    }
+
+    const customerId = parseInt(formData.get("customerId"));
+    const customer = this.customers.find((c) => c.id === customerId);
+
+    const orderData = {
+      orderNumber: formData.get("orderNumber"),
+      customerName: customer?.name || "Unknown Customer",
+      customerId: customerId,
+      orderDate: new Date(formData.get("orderDate")).toISOString(),
+      status: formData.get("status"),
+      paymentStatus: "unpaid", // default
+      notes: formData.get("notes") || null,
+      items: items,
+      subtotal: parseFloat(formData.get("subtotal")),
+    };
+
+    SalesOrder.create(orderData)
+      .then(() => {
+        this.getOrders().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error creating order:", error);
+        alert("Error creating order. Please try again.");
+      });
+  }
+
+  submitEditForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const orderData = {
+      orderNumber: formData.get("orderNumber"),
+      orderDate: new Date(formData.get("orderDate")).toISOString(),
+      subtotal: parseFloat(formData.get("subtotal")),
+      status: formData.get("status"),
+      paymentStatus: formData.get("paymentStatus"),
+      notes: formData.get("notes") || null,
+    };
+
+    SalesOrder.update(this.editingOrder.id, orderData)
+      .then(() => {
+        this.getOrders().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error updating order:", error);
+        alert("Error updating order. Please try again.");
+      });
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+    }
+  }
+
+  getStatusColor(status) {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "confirmed":
+        return "bg-blue-100 text-blue-800";
+      case "delivered":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  }
+
   render() {
     if (this.view === "add") {
       return this.renderAddForm();
@@ -435,231 +661,5 @@ export class SalesOrders {
         </form>
       </div>
     `;
-  }
-
-  async showFormHandler() {
-    await this.getProducts();
-    await this.getCustomers();
-    this.view = "add";
-    this.editingOrder = null;
-    this.refresh(this.container);
-  }
-
-  switchToEdit(orderId) {
-    this.editingOrder = this.orders.find((o) => o.id === parseInt(orderId));
-    this.view = "edit";
-    this.refresh(this.container);
-  }
-
-  switchToList() {
-    this.view = "list";
-    this.editingOrder = null;
-    this.refresh(this.container);
-  }
-
-  deleteOrder(orderId) {
-    if (
-      confirm(
-        "Are you sure you want to delete this order? This action cannot be undone."
-      )
-    ) {
-      SalesOrder.delete(orderId)
-        .then(() => {
-          this.getOrders().then(() => this.switchToList());
-        })
-        .catch((error) => {
-          console.error("Error deleting order:", error);
-          alert("Error deleting order. Please try again.");
-        });
-    }
-  }
-
-  calculateTotal() {
-    const rows = this.container.querySelectorAll(".item-row");
-    let total = 0;
-
-    rows.forEach((row) => {
-      const subtotalInput = row.querySelector(".item-subtotal");
-      if (subtotalInput && subtotalInput.value) {
-        const subtotal = parseFloat(
-          subtotalInput.value.replace("Rs. ", "").replace(",", "")
-        );
-        if (!isNaN(subtotal)) {
-          total += subtotal;
-        }
-      }
-    });
-
-    const subtotalInput = this.container.querySelector("#subtotal");
-    if (subtotalInput) {
-      subtotalInput.value = total.toFixed(2);
-    }
-  }
-
-  updateSubtotal(row) {
-    const productSelect = row.querySelector(".product-select");
-    const quantityInput = row.querySelector(".item-quantity");
-    const subtotalInput = row.querySelector(".item-subtotal");
-
-    if (productSelect && quantityInput && subtotalInput) {
-      const selectedOption = productSelect.options[productSelect.selectedIndex];
-      const price = parseFloat(selectedOption.dataset.price || 0);
-      const quantity = parseInt(quantityInput.value || 0);
-      const stock = parseInt(selectedOption.dataset.stock || 0);
-
-      if (quantity > stock && stock > 0) {
-        alert(`Only ${stock} units available in stock!`);
-        quantityInput.value = stock;
-        return;
-      }
-
-      const subtotal = price * quantity;
-      subtotalInput.value = `Rs. ${subtotal.toFixed(2)}`;
-      this.calculateTotal();
-    }
-  }
-
-  addItemRow() {
-    const itemsContainer = this.container.querySelector("#itemsContainer");
-    const rowCount = itemsContainer.querySelectorAll(".item-row").length;
-    const newRow = document.createElement("div");
-    newRow.className =
-      "grid grid-cols-1 md:grid-cols-5 gap-4 item-row sm-card-sub";
-    newRow.innerHTML = `
-      <div class="space-y-2 md:col-span-2">
-        <select name="productId[]" required class="sm-input bg-white product-select" data-row="${rowCount}" onchange="window.salesmanDashboard.sections.orders.updateSubtotal(this.closest('.item-row'))">
-          <option value="">-- Select Product --</option>
-          ${this.products
-            .map(
-              (product) => `
-            <option value="${product.id}" data-name="${
-                product.name
-              }" data-price="${product.price}" data-stock="${product.quantity}">
-              ${product.name} - Rs. ${product.price.toFixed(2)} (Stock: ${
-                product.quantity
-              })
-            </option>
-          `
-            )
-            .join("")}
-        </select>
-      </div>
-      <div class="space-y-2">
-        <input type="number" name="itemQuantity[]" required min="1" class="sm-input bg-white item-quantity" data-row="${rowCount}" placeholder="1" oninput="window.salesmanDashboard.sections.orders.updateSubtotal(this.closest('.item-row'))">
-      </div>
-      <div class="space-y-2">
-        <input type="text" class="sm-input bg-gray-100 item-subtotal" data-row="${rowCount}" readonly placeholder="Rs. 0.00">
-      </div>
-      <div class="space-y-2">
-        <button type="button" class="remove-item-btn sm-btn-danger-light" onclick="window.salesmanDashboard.sections.orders.removeItemRow(this)">
-          ${getIconHTML("trash")}
-          Remove
-        </button>
-      </div>
-    `;
-    itemsContainer.appendChild(newRow);
-  }
-
-  removeItemRow(btn) {
-    const row = btn.closest(".item-row");
-    const itemsContainer = this.container.querySelector("#itemsContainer");
-    if (itemsContainer.querySelectorAll(".item-row").length > 1) {
-      row.remove();
-      this.calculateTotal();
-    } else {
-      alert("At least one item is required");
-    }
-  }
-
-  submitAddForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const productIds = formData.getAll("productId[]");
-    const itemQuantities = formData.getAll("itemQuantity[]");
-
-    const items = productIds
-      .map((productId, index) => {
-        const product = this.products.find((p) => p.id === parseInt(productId));
-        return {
-          name: product?.name || "Unknown",
-          quantity: parseInt(itemQuantities[index], 10),
-        };
-      })
-      .filter((item) => item.quantity > 0);
-
-    if (items.length === 0) {
-      alert("Please add at least one item to the order");
-      return;
-    }
-
-    const customerId = parseInt(formData.get("customerId"));
-    const customer = this.customers.find((c) => c.id === customerId);
-
-    const orderData = {
-      orderNumber: formData.get("orderNumber"),
-      customerName: customer?.name || "Unknown Customer",
-      customerId: customerId,
-      orderDate: new Date(formData.get("orderDate")).toISOString(),
-      status: formData.get("status"),
-      paymentStatus: "unpaid", // default
-      notes: formData.get("notes") || null,
-      items: items,
-      subtotal: parseFloat(formData.get("subtotal")),
-    };
-
-    SalesOrder.create(orderData)
-      .then(() => {
-        this.getOrders().then(() => this.switchToList());
-      })
-      .catch((error) => {
-        console.error("Error creating order:", error);
-        alert("Error creating order. Please try again.");
-      });
-  }
-
-  submitEditForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const orderData = {
-      orderNumber: formData.get("orderNumber"),
-      orderDate: new Date(formData.get("orderDate")).toISOString(),
-      subtotal: parseFloat(formData.get("subtotal")),
-      status: formData.get("status"),
-      paymentStatus: formData.get("paymentStatus"),
-      notes: formData.get("notes") || null,
-    };
-
-    SalesOrder.update(this.editingOrder.id, orderData)
-      .then(() => {
-        this.getOrders().then(() => this.switchToList());
-      })
-      .catch((error) => {
-        console.error("Error updating order:", error);
-        alert("Error updating order. Please try again.");
-      });
-  }
-
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
-  }
-
-  getStatusColor(status) {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "confirmed":
-        return "bg-blue-100 text-blue-800";
-      case "delivered":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
   }
 }

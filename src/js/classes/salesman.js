@@ -110,9 +110,13 @@ class SalesmanDashboard {
 
     const sectionInstance = this.sections[section];
 
-    const sectionContent = sectionInstance.render();
+    const sectionContent = await sectionInstance.render();
 
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+
+    if (sectionInstance.attachEventListeners) {
+      sectionInstance.attachEventListeners();
+    }
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
