@@ -6,6 +6,20 @@ export class StockReports {
     this.container = container;
   }
 
+  async exportPdf() {
+    try {
+      await StockKeeper.exportStockReport();
+      alert("PDF exported successfully");
+    } catch (error) {
+      console.error("Error exporting PDF:", error);
+      alert("Failed to export PDF. Please try again.");
+    }
+  }
+
+  attachEventListeners(container) {
+    // No additional event listeners needed, button uses onclick
+  }
+
   render() {
     return `
       <div class="space-y-6">
@@ -24,19 +38,5 @@ export class StockReports {
         </div>
       </div>
     `;
-  }
-
-  async exportPdf() {
-    try {
-      await StockKeeper.exportStockReport();
-      alert("PDF exported successfully");
-    } catch (error) {
-      console.error("Error exporting PDF:", error);
-      alert("Failed to export PDF. Please try again.");
-    }
-  }
-
-  attachEventListeners(container) {
-    // No additional event listeners needed, button uses onclick
   }
 }

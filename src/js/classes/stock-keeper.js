@@ -128,11 +128,9 @@ class StockKeeperDashboard {
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
-    if (section === "receiving") {
-      const receivingShipment = new ReceivingShipment(this.container);
-      await receivingShipment.renderAndAttach(content);
-    } else if (section === "reports") {
-      this.sections.reports.attachEventListeners(content);
+    const sectionInstance = this.sections[section];
+    if (sectionInstance.attachEventListeners) {
+      sectionInstance.attachEventListeners();
     }
 
     const navItems = this.container.querySelectorAll(".nav-item");
