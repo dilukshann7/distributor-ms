@@ -5,39 +5,6 @@ export class FinancialReports {
     this.container = container;
   }
 
-  render() {
-    return `
-      <div class="cashier-section-spacing">
-        <div>
-          <h3 class="text-2xl font-bold text-gray-900">Financial Reports</h3>
-          <p class="cashier-subtitle">View and generate financial reports and analytics</p>
-        </div>
-
-        <div class="cashier-card">
-          <h4 class="text-lg font-semibold text-gray-900 mb-4">Export Reports</h4>
-          <div class="grid grid-cols-1 gap-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div class="space-y-2">
-                <label class="cashier-label">Start Date</label>
-                <input type="date" id="exportStartDate" class="cashier-input" />
-              </div>
-              <div class="space-y-2">
-                <label class="cashier-label">End Date</label>
-                <input type="date" id="exportEndDate" class="cashier-input" />
-              </div>
-            </div>
-            <button id="exportPdfBtn" class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-              </svg>
-              Export to PDF
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
   attachEventListeners() {
     const exportBtn = this.container.querySelector("#exportPdfBtn");
     if (exportBtn) {
@@ -74,5 +41,38 @@ export class FinancialReports {
       console.error("Error exporting PDF:", error);
       alert("Failed to export PDF. Please try again.");
     }
+  }
+
+  render() {
+    return `
+      <div class="cashier-section-spacing">
+        <div>
+          <h3 class="text-2xl font-bold text-gray-900">Financial Reports</h3>
+          <p class="cashier-subtitle">View and generate financial reports and analytics</p>
+        </div>
+
+        <div class="cashier-card">
+          <h4 class="text-lg font-semibold text-gray-900 mb-4">Export Reports</h4>
+          <div class="grid grid-cols-1 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div class="space-y-2">
+                <label class="cashier-label">Start Date</label>
+                <input type="date" id="exportStartDate" class="cashier-input" />
+              </div>
+              <div class="space-y-2">
+                <label class="cashier-label">End Date</label>
+                <input type="date" id="exportEndDate" class="cashier-input" />
+              </div>
+            </div>
+            <button id="exportPdfBtn" class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              Export to PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
   }
 }
