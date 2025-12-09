@@ -5,20 +5,18 @@ import { DeliveryDetails } from "./driver/DeliveryDetails.js";
 import { ProofOfDelivery } from "./driver/ProofOfDelivery.js";
 import { PaymentCollection } from "./driver/PaymentCollection.js";
 import { VehicleManagement } from "./driver/VehicleManagement.js";
-import { Driver } from "../models/Driver.js";
 
 class DriverDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "deliveries";
     this.sections = {
-      deliveries: new DeliveryDetails(this.container),
-      proof: new ProofOfDelivery(this.container),
-      payment: new PaymentCollection(this.container),
-      vehicle: new VehicleManagement(this.container),
+      deliveries: new DeliveryDetails(this.container, this),
+      proof: new ProofOfDelivery(this.container, this),
+      payment: new PaymentCollection(this.container, this),
+      vehicle: new VehicleManagement(this.container, this),
     };
     this.notificationPanel = new NotificationPanel(container);
-    this.sections.deliveries.getDeliveries();
   }
 
   async render() {
@@ -39,15 +37,6 @@ class DriverDashboard {
       </div>
     `;
     this.attachEventListeners();
-
-    if (this.currentSection === "vehicle") {
-      const vehicleSection = new VehicleManagement(this.container);
-      const id = window.location.search.split("id=")[1];
-      const response = await Driver.findById(id);
-      vehicleSection.vehicleData = response.data;
-      vehicleSection.driverId = id;
-      vehicleSection.attachEventListeners();
-    }
   }
 
   renderSidebar() {
@@ -146,15 +135,6 @@ class DriverDashboard {
     const content = this.container.querySelector("#dashboardContent");
     const sectionContent = await this.renderSection(section);
     content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
-
-    if (section === "vehicle") {
-      const vehicleSection = new VehicleManagement(this.container);
-      const id = window.location.search.split("id=")[1];
-      const response = await Driver.findById(id);
-      vehicleSection.vehicleData = response.data;
-      vehicleSection.driverId = id;
-      vehicleSection.attachEventListeners();
-    }
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
