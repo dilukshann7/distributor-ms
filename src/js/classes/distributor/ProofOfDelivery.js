@@ -17,6 +17,13 @@ export class ProofOfDelivery {
     }
   }
 
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+    }
+  }
+
   render() {
     const deliveredDeliveries = this.deliveries.filter(
       (d) => d.status === "completed"
@@ -84,12 +91,5 @@ export class ProofOfDelivery {
       </div>
     </div>
   `;
-  }
-
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
   }
 }
