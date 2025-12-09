@@ -12,8 +12,8 @@ class CashierDashboard {
     this.isSidebarOpen = true;
     this.currentTime = new Date().toLocaleTimeString();
     this.sections = {
-      sales: new SalesTransaction(this.container),
-      reports: new FinancialReports(this.container),
+      sales: new SalesTransaction(this.container, this),
+      reports: new FinancialReports(this.container, this),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
