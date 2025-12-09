@@ -3,13 +3,28 @@ import { SalesOrder } from "../../models/SalesOrder.js";
 import { Payment } from "../../models/Payment.js";
 
 export class PaymentCollection {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.payments = [];
     this.orders = [];
     this.getSalesOrder();
     this.getPayments();
     window.paymentCollection = this;
+    window.addEventListener("load", () => {
+      this.attachEventListeners();
+    });
+  }
+
+  async attachEventListeners() {
+    const recordButton = this.container.querySelector(".driver-btn-action");
+    if (recordButton) {
+      recordButton.addEventListener("click", async () => {
+        await this.recordPayment();
+        await this.parentDashboard.navigateToSection("payment");
+        this.attachEventListeners();
+      });
+    }
   }
 
   async getSalesOrder() {
@@ -140,7 +155,7 @@ export class PaymentCollection {
               </select>
             </div>
           </div>
-          <button onclick="window.paymentCollection.recordPayment()" class="driver-btn-primary driver-btn-action w-full">
+          <button class="driver-btn-primary driver-btn-action w-full">
             <div class="w-5 h-5">${getIconHTML("plus")}</div>
             Record Full Payment
           </button>

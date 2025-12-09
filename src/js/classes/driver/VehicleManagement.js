@@ -2,11 +2,19 @@ import { Driver } from "../../models/Driver.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class VehicleManagement {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.vehicleData = null;
     this.driverId = null;
     this.getVehicleDetails();
+    if (document.readyState === 'complete') {
+      this.attachEventListeners();
+    } else {
+      window.addEventListener("load", () => {
+        this.attachEventListeners();
+      });
+    }
   }
 
   async getVehicleDetails() {
@@ -14,10 +22,174 @@ export class VehicleManagement {
       this.driverId = window.location.search.split("id=")[1];
       const response = await Driver.findById(this.driverId);
       this.vehicleData = response.data;
+      console.log(this.vehicleData);
     } catch (error) {
       console.error("Error fetching vehicle details:", error);
       this.vehicleData = null;
     }
+  }
+
+  attachEventListeners() {
+    const form = document.getElementById("vehicleForm");
+    const resetBtn = document.getElementById("resetBtn");
+    const gpsBtn = document.getElementById("gpsBtn");
+
+    if (form) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await this.handleSubmit();
+        await this.parentDashboard.navigateToSection("vehicle");
+        this.attachEventListeners();
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        this.resetForm();
+      });
+    }
+
+    if (gpsBtn) {
+      gpsBtn.addEventListener("click", () => {
+        this.getCurrentLocation();
+      });
+    }
+  }
+
+  async handleSubmit() {
+    const vehicleId = document.getElementById("vehicleId").value;
+    const vehicleType = document.getElementById("vehicleType").value;
+    const licenseNumber = document.getElementById("licenseNumber").value;
+    const currentLocation = document.getElementById("currentLocation").value;
+
+    const updatedData = {
+      vehicleId: vehicleId || null,
+      vehicleType: vehicleType || null,
+      licenseNumber: licenseNumber || null,
+      currentLocation: currentLocation || null,
+    };
+
+    try {
+      await Driver.update(this.driverId, updatedData);
+      this.showMessage("Vehicle details updated successfully!", "success");
+      await this.getVehicleDetails();
+    } catch (error) {
+      console.error("Error updating vehicle details:", error);
+      this.showMessage(
+        "Failed to update vehicle details. Please try again.",
+        "error"
+      );
+    }
+  }
+
+  resetForm() {
+    document.getElementById("vehicleId").value =
+      this.vehicleData.vehicleId || "";
+    document.getElementById("vehicleType").value =
+      this.vehicleData.vehicleType || "";
+    document.getElementById("licenseNumber").value =
+      this.vehicleData.licenseNumber || "";
+    document.getElementById("currentLocation").value =
+      this.vehicleData.currentLocation || "";
+    this.showMessage("Form reset to original values.", "info");
+  }
+
+  getCurrentLocation() {
+    const gpsBtn = document.getElementById("gpsBtn");
+    const locationInput = document.getElementById("currentLocation");
+
+    if (!navigator.geolocation) {
+      this.showMessage(
+        "Geolocation is not supported by your browser.",
+        "error"
+      );
+      return;
+    }
+
+    gpsBtn.disabled = true;
+    gpsBtn.innerHTML = `
+      <div class="w-5 h-5 animate-spin">${getIconHTML("rotate-ccw")}</div>
+      Getting...
+    `;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+            {
+              headers: {
+                "User-Agent": "DistributorMS/1.0",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch address");
+          }
+
+          const data = await response.json();
+          const address = data.display_name || `${latitude}, ${longitude}`;
+
+          locationInput.value = address.split(",").slice(0, 2).join(",");
+          this.showMessage("Location fetched successfully!", "success");
+        } catch (error) {
+          console.error("Error fetching address:", error);
+
+          locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(
+            6
+          )}`;
+          this.showMessage(
+            "Using coordinates (address lookup unavailable).",
+            "info"
+          );
+        } finally {
+          gpsBtn.disabled = false;
+          gpsBtn.innerHTML = `
+            <div class="w-5 h-5">${getIconHTML("map-pin")}</div>
+            GPS
+          `;
+        }
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+
+        gpsBtn.disabled = false;
+        gpsBtn.innerHTML = `
+          <div class="w-5 h-5">${getIconHTML("map-pin")}</div>
+          GPS
+        `;
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  }
+
+  showMessage(message, type) {
+    const messageContainer = document.getElementById("messageContainer");
+    if (!messageContainer) return;
+
+    const bgColor =
+      type === "success"
+        ? "bg-green-100 border-green-400 text-green-700"
+        : type === "error"
+        ? "bg-red-100 border-red-400 text-red-700"
+        : "bg-blue-100 border-blue-400 text-blue-700";
+
+    messageContainer.innerHTML = `
+      <div class="${bgColor} border px-4 py-3 rounded relative" role="alert">
+        <span class="block sm:inline">${message}</span>
+      </div>
+    `;
+
+    setTimeout(() => {
+      messageContainer.innerHTML = "";
+    }, 5000);
   }
 
   render() {
@@ -134,183 +306,5 @@ export class VehicleManagement {
         </div>
       </div>
     `;
-  }
-
-  attachEventListeners() {
-    const form = document.getElementById("vehicleForm");
-    const resetBtn = document.getElementById("resetBtn");
-    const gpsBtn = document.getElementById("gpsBtn");
-
-    if (form) {
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        await this.handleSubmit();
-      });
-    }
-
-    if (resetBtn) {
-      resetBtn.addEventListener("click", () => {
-        this.resetForm();
-      });
-    }
-
-    if (gpsBtn) {
-      gpsBtn.addEventListener("click", () => {
-        this.getCurrentLocation();
-      });
-    }
-  }
-
-  async handleSubmit() {
-    const vehicleId = document.getElementById("vehicleId").value;
-    const vehicleType = document.getElementById("vehicleType").value;
-    const licenseNumber = document.getElementById("licenseNumber").value;
-    const currentLocation = document.getElementById("currentLocation").value;
-
-    const updatedData = {
-      vehicleId: vehicleId || null,
-      vehicleType: vehicleType || null,
-      licenseNumber: licenseNumber || null,
-      currentLocation: currentLocation || null,
-    };
-
-    try {
-      await Driver.update(this.driverId, updatedData);
-      this.showMessage("Vehicle details updated successfully!", "success");
-      await this.getVehicleDetails();
-    } catch (error) {
-      console.error("Error updating vehicle details:", error);
-      this.showMessage(
-        "Failed to update vehicle details. Please try again.",
-        "error"
-      );
-    }
-  }
-
-  resetForm() {
-    document.getElementById("vehicleId").value =
-      this.vehicleData.vehicleId || "";
-    document.getElementById("vehicleType").value =
-      this.vehicleData.vehicleType || "";
-    document.getElementById("licenseNumber").value =
-      this.vehicleData.licenseNumber || "";
-    document.getElementById("currentLocation").value =
-      this.vehicleData.currentLocation || "";
-    this.showMessage("Form reset to original values.", "info");
-  }
-
-  getCurrentLocation() {
-    const gpsBtn = document.getElementById("gpsBtn");
-    const locationInput = document.getElementById("currentLocation");
-
-    if (!navigator.geolocation) {
-      this.showMessage(
-        "Geolocation is not supported by your browser.",
-        "error"
-      );
-      return;
-    }
-
-    // Disable button and show loading state
-    gpsBtn.disabled = true;
-    gpsBtn.innerHTML = `
-      <div class="w-5 h-5 animate-spin">${getIconHTML("rotate-ccw")}</div>
-      Getting...
-    `;
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
-            {
-              headers: {
-                "User-Agent": "DistributorMS/1.0",
-              },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch address");
-          }
-
-          const data = await response.json();
-          const address = data.display_name || `${latitude}, ${longitude}`;
-
-          locationInput.value = address.split(",").slice(0, 2).join(",");
-          this.showMessage("Location fetched successfully!", "success");
-        } catch (error) {
-          console.error("Error fetching address:", error);
-
-          locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(
-            6
-          )}`;
-          this.showMessage(
-            "Using coordinates (address lookup unavailable).",
-            "info"
-          );
-        } finally {
-          gpsBtn.disabled = false;
-          gpsBtn.innerHTML = `
-            <div class="w-5 h-5">${getIconHTML("map-pin")}</div>
-            GPS
-          `;
-        }
-      },
-      (error) => {
-        console.error("Error getting location:", error);
-        let errorMessage = "Unable to retrieve your location.";
-
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage =
-              "Location access denied. Please enable location permissions.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = "Location information is unavailable.";
-            break;
-          case error.TIMEOUT:
-            errorMessage = "Location request timed out.";
-            break;
-        }
-
-        this.showMessage(errorMessage, "error");
-
-        gpsBtn.disabled = false;
-        gpsBtn.innerHTML = `
-          <div class="w-5 h-5">${getIconHTML("map-pin")}</div>
-          GPS
-        `;
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
-  }
-
-  showMessage(message, type) {
-    const messageContainer = document.getElementById("messageContainer");
-    if (!messageContainer) return;
-
-    const bgColor =
-      type === "success"
-        ? "bg-green-100 border-green-400 text-green-700"
-        : type === "error"
-        ? "bg-red-100 border-red-400 text-red-700"
-        : "bg-blue-100 border-blue-400 text-blue-700";
-
-    messageContainer.innerHTML = `
-      <div class="${bgColor} border px-4 py-3 rounded relative" role="alert">
-        <span class="block sm:inline">${message}</span>
-      </div>
-    `;
-
-    setTimeout(() => {
-      messageContainer.innerHTML = "";
-    }, 5000);
   }
 }

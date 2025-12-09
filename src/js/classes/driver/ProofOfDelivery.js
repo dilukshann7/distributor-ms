@@ -5,12 +5,49 @@ import { Feedback } from "../../models/Feedback.js";
 import { SalesOrder } from "../../models/SalesOrder.js";
 
 export class ProofOfDelivery {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.deliveries = [];
     this.feedbacks = [];
     this.getProofDeliveries();
     window.proofOfDelivery = this;
+    window.addEventListener("load", () => {
+      this.attachEventListeners();
+    });
+  }
+
+  async attachEventListeners() {
+    const completeButtons = this.container.querySelectorAll(
+      ".complete-delivery-btn"
+    );
+
+    completeButtons.forEach((button) => {
+      const deliveryCard = button.closest(".driver-panel");
+      if (deliveryCard) {
+        const feedbackInput = deliveryCard.querySelector('[id^="feedback-"]');
+        if (feedbackInput) {
+          const deliveryId = feedbackInput.id
+            .split("feedback-")[1]
+            .split("-")[0];
+
+          button.addEventListener("click", async () => {
+            button.disabled = true;
+            button.innerHTML = `
+            <div class="w-5 h-5">${getIconHTML("loader")}</div>
+            Processing...
+          `;
+
+            await this.completeDelivery(deliveryId);
+
+            button.disabled = false;
+
+            await this.parentDashboard.navigateToSection("proof");
+            this.attachEventListeners();
+          });
+        }
+      }
+    });
   }
 
   async getProofDeliveries() {
@@ -44,16 +81,6 @@ export class ProofOfDelivery {
       await this.refresh();
     } catch (error) {
       console.error("Error completing delivery:", error);
-    }
-  }
-
-  async refresh() {
-    await this.getProofDeliveries();
-    const content = this.container.querySelector('.space-y-6');
-    if (content) {
-      content.outerHTML = this.render();
-    } else {
-      this.container.innerHTML = this.render();
     }
   }
 
@@ -167,9 +194,7 @@ export class ProofOfDelivery {
                     </div>
 
                   <div class="space-y-4">
-                    <button onclick="window.proofOfDelivery.completeDelivery(${
-                      delivery.id
-                    })" class="driver-btn-primary driver-btn-action w-full">
+                    <button class="driver-btn-primary driver-btn-action complete-delivery-btn w-full">
                       <div class="w-5 h-5">${getIconHTML("check")}</div>
                       Complete Delivery
                     </button>
