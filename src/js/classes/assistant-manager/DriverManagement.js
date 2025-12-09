@@ -2,8 +2,9 @@ import { getIconHTML } from "../../../assets/icons/index.js";
 import { Driver } from "../../models/Driver.js";
 
 export class DriverManagement {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.drivers = [];
     this.fetchDrivers();
   }

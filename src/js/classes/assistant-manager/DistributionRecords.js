@@ -1,8 +1,9 @@
 import { Delivery } from "../../models/Delivery.js";
 
 export class DistributionRecords {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.records = [];
     this.fetchDistributionData();
   }

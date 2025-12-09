@@ -1,8 +1,9 @@
 import { Product } from "../../models/Product";
 
 export class DeliveryStockMaintenance {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.deliveryStock = [];
     this.getInventoryItems();
   }
