@@ -41,19 +41,15 @@ export class ProofOfDelivery {
           customerId: this.deliveries.driverId,
         });
       }
-      await this.refresh();
+      await this.getProofDeliveries();
+      const content = this.container.querySelector(".space-y-6");
+      if (content) {
+        content.outerHTML = this.render();
+      } else {
+        this.container.innerHTML = this.render();
+      }
     } catch (error) {
       console.error("Error completing delivery:", error);
-    }
-  }
-
-  async refresh() {
-    await this.getProofDeliveries();
-    const content = this.container.querySelector('.space-y-6');
-    if (content) {
-      content.outerHTML = this.render();
-    } else {
-      this.container.innerHTML = this.render();
     }
   }
 
