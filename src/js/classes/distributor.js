@@ -15,14 +15,14 @@ class DistributorDashboard {
     this.container = container;
     this.currentSection = "orders";
     this.sections = {
-      orders: new OrderManagement(container),
-      drivers: new DriverManagement(container),
-      stock: new StockTracking(container),
-      routes: new DeliveryRoutes(container),
-      delivery: new ProofOfDelivery(container),
-      authorization: new OrderAuthorization(container),
+      orders: new OrderManagement(this.container, this),
+      drivers: new DriverManagement(this.container, this),
+      stock: new StockTracking(this.container, this),
+      routes: new DeliveryRoutes(this.container, this),
+      delivery: new ProofOfDelivery(this.container, this),
+      authorization: new OrderAuthorization(this.container, this),
     };
-    this.notificationPanel = new NotificationPanel(container);
+    this.notificationPanel = new NotificationPanel(this.container);
   }
 
   async render() {
