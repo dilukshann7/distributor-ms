@@ -5,6 +5,34 @@ export class SalesAnalytics {
     this.container = container;
   }
 
+  exportPdf() {
+    const startDateInput = this.container.querySelector("#exportStartDate");
+    const endDateInput = this.container.querySelector("#exportEndDate");
+
+    const startDate = startDateInput?.value;
+    const endDate = endDateInput?.value;
+
+    if (!startDate || !endDate) {
+      alert("Please select both start and end dates");
+      return;
+    }
+
+    if (new Date(startDate) > new Date(endDate)) {
+      alert("Start date must be before end date");
+      return;
+    }
+
+    Supplier.exportSupplierReport(startDate, endDate);
+    alert("PDF exported successfully");
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+    }
+  }
+
   render() {
     return `
       <div class="space-y-6">
@@ -40,33 +68,5 @@ export class SalesAnalytics {
         </div>
       </div>
     `;
-  }
-
-  exportPdf() {
-    const startDateInput = this.container.querySelector("#exportStartDate");
-    const endDateInput = this.container.querySelector("#exportEndDate");
-
-    const startDate = startDateInput?.value;
-    const endDate = endDateInput?.value;
-
-    if (!startDate || !endDate) {
-      alert("Please select both start and end dates");
-      return;
-    }
-
-    if (new Date(startDate) > new Date(endDate)) {
-      alert("Start date must be before end date");
-      return;
-    }
-
-    Supplier.exportSupplierReport(startDate, endDate);
-    alert("PDF exported successfully");
-  }
-
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
   }
 }
