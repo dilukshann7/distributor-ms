@@ -19,6 +19,63 @@ export class CustomerAccounts {
     }
   }
 
+  showFormHandler() {
+    this.view = "add";
+    this.refresh(this.container);
+  }
+
+  hideFormHandler() {
+    this.view = "list";
+    this.refresh(this.container);
+  }
+
+  submitAddForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const customerData = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      phone: formData.get("phone") || null,
+      address: formData.get("address") || null,
+      businessName: formData.get("businessName") || null,
+      customerType: formData.get("customerType") || null,
+      status: formData.get("status"),
+      loyaltyPoints: parseInt(formData.get("loyaltyPoints")) || 0,
+      totalPurchases: 0,
+      totalSpent: 0,
+    };
+
+    Customer.create(customerData)
+      .then(() => {
+        this.getCustomers().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error creating customer:", error);
+        alert("Error creating customer. Please try again.");
+      });
+  }
+
+  deleteCustomerHandler(customerID) {
+    if (!confirm("Are you sure you want to delete this customer?")) return;
+    Customer.delete(customerID)
+      .then(() => {
+        this.getCustomers().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error removing customer:", error);
+        alert("Error removing customer. Please try again.");
+      });
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+    }
+  }
+
   render() {
     if (this.view === "add") {
       return this.renderAddForm();
@@ -216,62 +273,5 @@ export class CustomerAccounts {
         </form>
       </div>
     `;
-  }
-
-  showFormHandler() {
-    this.view = "add";
-    this.refresh(this.container);
-  }
-
-  hideFormHandler() {
-    this.view = "list";
-    this.refresh(this.container);
-  }
-
-  submitAddForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const customerData = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      phone: formData.get("phone") || null,
-      address: formData.get("address") || null,
-      businessName: formData.get("businessName") || null,
-      customerType: formData.get("customerType") || null,
-      status: formData.get("status"),
-      loyaltyPoints: parseInt(formData.get("loyaltyPoints")) || 0,
-      totalPurchases: 0,
-      totalSpent: 0,
-    };
-
-    Customer.create(customerData)
-      .then(() => {
-        this.getCustomers().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error creating customer:", error);
-        alert("Error creating customer. Please try again.");
-      });
-  }
-
-  deleteCustomerHandler(customerID) {
-    if (!confirm("Are you sure you want to delete this customer?")) return;
-    Customer.delete(customerID)
-      .then(() => {
-        this.getCustomers().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error removing customer:", error);
-        alert("Error removing customer. Please try again.");
-      });
-  }
-
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
   }
 }
