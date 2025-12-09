@@ -56,6 +56,95 @@ export class InventoryManagement {
     }
   }
 
+  switchToAdd() {
+    this.view = "add";
+    this.editingItem = null;
+    this.refresh(this.container);
+  }
+
+  switchToEdit(itemId) {
+    this.editingItem = this.inventoryItems.find(
+      (item) => item.id === parseInt(itemId)
+    );
+    this.view = "edit";
+    this.refresh(this.container);
+  }
+
+  switchToList() {
+    this.view = "list";
+    this.editingItem = null;
+    this.refresh(this.container);
+  }
+
+  submitAddForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const rawData = Object.fromEntries(formData.entries());
+
+    const itemData = {
+      ...rawData,
+      quantity: parseInt(rawData.quantity, 10),
+      minStock: parseInt(rawData.minStock, 10),
+      maxStock: parseInt(rawData.maxStock, 10),
+      price: parseFloat(rawData.price),
+      supplierId: rawData.supplierId
+        ? parseInt(rawData.supplierId, 10)
+        : undefined,
+      expiryDate: rawData.expiryDate
+        ? new Date(rawData.expiryDate).toISOString()
+        : undefined,
+      batchNumber: rawData.batchNumber || undefined,
+      description: rawData.description || undefined,
+    };
+
+    Product.create(itemData)
+      .then(() => {
+        this.getInventoryItems().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error creating item:", error);
+      });
+  }
+
+  submitEditForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const rawData = Object.fromEntries(formData.entries());
+
+    const itemData = {
+      ...rawData,
+      quantity: parseInt(rawData.quantity, 10),
+      minStock: parseInt(rawData.minStock, 10),
+      maxStock: parseInt(rawData.maxStock, 10),
+      price: parseFloat(rawData.price),
+      supplierId: rawData.supplierId
+        ? parseInt(rawData.supplierId, 10)
+        : undefined,
+      expiryDate: rawData.expiryDate
+        ? new Date(rawData.expiryDate).toISOString()
+        : undefined,
+      batchNumber: rawData.batchNumber || undefined,
+      description: rawData.description || undefined,
+    };
+
+    Product.update(this.editingItem.id, itemData)
+      .then(() => {
+        this.getInventoryItems().then(() => this.switchToList());
+      })
+      .catch((error) => {
+        console.error("Error updating item:", error);
+      });
+  }
+
+  refresh(container) {
+    const content = container.querySelector("#dashboardContent");
+    if (content) {
+      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+    }
+  }
+
   render() {
     if (this.view === "add") {
       return this.renderAddForm();
@@ -414,94 +503,5 @@ export class InventoryManagement {
         </form>
       </div>
     `;
-  }
-
-  switchToAdd() {
-    this.view = "add";
-    this.editingItem = null;
-    this.refresh(this.container);
-  }
-
-  switchToEdit(itemId) {
-    this.editingItem = this.inventoryItems.find(
-      (item) => item.id === parseInt(itemId)
-    );
-    this.view = "edit";
-    this.refresh(this.container);
-  }
-
-  switchToList() {
-    this.view = "list";
-    this.editingItem = null;
-    this.refresh(this.container);
-  }
-
-  submitAddForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const rawData = Object.fromEntries(formData.entries());
-
-    const itemData = {
-      ...rawData,
-      quantity: parseInt(rawData.quantity, 10),
-      minStock: parseInt(rawData.minStock, 10),
-      maxStock: parseInt(rawData.maxStock, 10),
-      price: parseFloat(rawData.price),
-      supplierId: rawData.supplierId
-        ? parseInt(rawData.supplierId, 10)
-        : undefined,
-      expiryDate: rawData.expiryDate
-        ? new Date(rawData.expiryDate).toISOString()
-        : undefined,
-      batchNumber: rawData.batchNumber || undefined,
-      description: rawData.description || undefined,
-    };
-
-    Product.create(itemData)
-      .then(() => {
-        this.getInventoryItems().then(() => this.switchToList());
-      })
-      .catch((error) => {
-        console.error("Error creating item:", error);
-      });
-  }
-
-  submitEditForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const rawData = Object.fromEntries(formData.entries());
-
-    const itemData = {
-      ...rawData,
-      quantity: parseInt(rawData.quantity, 10),
-      minStock: parseInt(rawData.minStock, 10),
-      maxStock: parseInt(rawData.maxStock, 10),
-      price: parseFloat(rawData.price),
-      supplierId: rawData.supplierId
-        ? parseInt(rawData.supplierId, 10)
-        : undefined,
-      expiryDate: rawData.expiryDate
-        ? new Date(rawData.expiryDate).toISOString()
-        : undefined,
-      batchNumber: rawData.batchNumber || undefined,
-      description: rawData.description || undefined,
-    };
-
-    Product.update(this.editingItem.id, itemData)
-      .then(() => {
-        this.getInventoryItems().then(() => this.switchToList());
-      })
-      .catch((error) => {
-        console.error("Error updating item:", error);
-      });
-  }
-
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
   }
 }
