@@ -1,8 +1,9 @@
 import { Product } from "../../models/Product.js";
 
 export class StockTracking {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.stockLocations = [];
     this.getInventoryItems();
   }
@@ -14,6 +15,19 @@ export class StockTracking {
     } catch (error) {
       console.error("Error fetching inventory items:", error);
       this.stockLocations = [];
+    }
+  }
+
+  getStatusColor(status) {
+    switch (status) {
+      case "ready":
+        return "bg-green-100 text-green-800";
+      case "in-transit":
+        return "bg-blue-100 text-blue-800";
+      case "delayed":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   }
 
@@ -70,18 +84,5 @@ export class StockTracking {
         </div>
       </div>
     `;
-  }
-
-  getStatusColor(status) {
-    switch (status) {
-      case "ready":
-        return "bg-green-100 text-green-800";
-      case "in-transit":
-        return "bg-blue-100 text-blue-800";
-      case "delayed":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
   }
 }

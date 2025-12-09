@@ -1,8 +1,9 @@
 import { Delivery } from "../../models/Delivery.js";
 
 export class DeliveryRoutes {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.routes = [];
     this.getDeliveryRoutes();
   }

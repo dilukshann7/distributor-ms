@@ -1,8 +1,9 @@
 import { SalesOrder } from "../../models/SalesOrder.js";
 
 export class OrderManagement {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.orders = [];
     this.view = "list";
     this.editingOrder = null;
@@ -19,11 +20,22 @@ export class OrderManagement {
     }
   }
 
-  render() {
-    return this.renderList();
+  getStatusColor(status) {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "authorized":
+        return "bg-blue-100 text-blue-800";
+      case "in-transit":
+        return "bg-purple-100 text-purple-800";
+      case "delivered":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   }
 
-  renderList() {
+  render() {
     return `
       <div class="space-y-6">
         <div class="flex items-center justify-between">
@@ -94,20 +106,5 @@ export class OrderManagement {
         
       </div>
     `;
-  }
-
-  getStatusColor(status) {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "authorized":
-        return "bg-blue-100 text-blue-800";
-      case "in-transit":
-        return "bg-purple-100 text-purple-800";
-      case "delivered":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
   }
 }

@@ -1,8 +1,9 @@
 import { Delivery } from "../../models/Delivery.js";
 
 export class ProofOfDelivery {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.deliveries = [];
     this.getDeliveries();
   }
@@ -84,12 +85,5 @@ export class ProofOfDelivery {
       </div>
     </div>
   `;
-  }
-
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
   }
 }

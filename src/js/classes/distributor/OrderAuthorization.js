@@ -3,8 +3,9 @@ import { Driver } from "../../models/Driver.js";
 import { Delivery } from "../../models/Delivery.js";
 
 export class OrderAuthorization {
-  constructor(container) {
+  constructor(container, parentDashboard) {
     this.container = container;
+    this.parentDashboard = parentDashboard;
     this.pendingOrders = [];
     this.drivers = [];
     this.selectedDrivers = {};
@@ -47,7 +48,6 @@ export class OrderAuthorization {
     }
 
     if (confirm("Approve this order and assign to selected driver?")) {
-      // Find the order and driver details
       const order = this.pendingOrders.find((o) => o.id === parseInt(orderId));
       const driver = this.drivers.find((d) => d.id === parseInt(driverId));
 
@@ -71,14 +71,11 @@ export class OrderAuthorization {
           alert("Error approving order. Please try again.");
         });
 
-      // Generate delivery number
       const deliveryNumber = `DEL-${Date.now()}-${orderId}`;
 
-      // Use customer name and notes for address (or prompt for it)
       const deliveryAddress =
         order.notes || `Delivery for ${order.customerName}`;
 
-      // Set scheduled date (default to tomorrow)
       const scheduledDate = new Date();
       scheduledDate.setDate(scheduledDate.getDate() + 1);
 
@@ -88,14 +85,13 @@ export class OrderAuthorization {
         vehicleId: driver.vehicleId ? parseInt(driver.vehicleId) : 0,
         deliveryAddress: deliveryAddress,
         scheduledDate: scheduledDate.toISOString(),
-        estimatedTime: 60, // Default 60 minutes
+        estimatedTime: 60,
         status: "pending",
         notes: `Order ${order.orderNumber} - ${order.customerName}`,
       };
 
       Delivery.create(deliveryData)
         .then((response) => {
-          // Link the delivery to the sales order
           const deliveryId = response.data.id;
           SalesOrder.update(orderId, { deliveryId: deliveryId })
             .then(() => {
