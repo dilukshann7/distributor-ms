@@ -43,6 +43,102 @@ export class EmployeeManagement {
     return profileMap[user.role];
   }
 
+  showAddFormHandler() {
+    this.view = "add";
+    this.view = "add";
+    this.container.querySelector("#dashboardContent").innerHTML = this.render();
+  }
+
+  showEditFormHandler(employeeId) {
+    this.editingEmployee = this.employees.find((emp) => emp.id === employeeId);
+    this.view = "edit";
+    this.editingEmployee = this.employees.find((emp) => emp.id === employeeId);
+    this.view = "edit";
+    this.container.querySelector("#dashboardContent").innerHTML = this.render();
+  }
+
+  hideFormHandler() {
+    this.view = "list";
+    this.editingEmployee = null;
+    this.view = "list";
+    this.editingEmployee = null;
+    this.container.querySelector("#dashboardContent").innerHTML = this.render();
+  }
+
+  submitAddForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const employeeData = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      phone: formData.get("phone") || null,
+      address: formData.get("address") || null,
+      password: formData.get("password"),
+      role: formData.get("role"),
+      status: formData.get("status"),
+      attendance: formData.get("attendance") || null,
+      performanceRating: Number(formData.get("performanceRating")) || null,
+      salary: Number(formData.get("salary")) || null,
+      bonus: Number(formData.get("bonus")) || null,
+    };
+
+    User.create(employeeData)
+      .then(() => {
+        this.getEmployees().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error creating employee:", error);
+        alert("Error creating employee. Please try again.");
+      });
+  }
+
+  submitEditForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const employeeData = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      phone: formData.get("phone") || null,
+      address: formData.get("address") || null,
+      role: formData.get("role"),
+      status: formData.get("status"),
+      attendance: formData.get("attendance") || null,
+      performanceRating: Number(formData.get("performanceRating")) || null,
+      salary: Number(formData.get("salary")) || null,
+      bonus: Number(formData.get("bonus")) || null,
+    };
+
+    const password = formData.get("password");
+    if (password) {
+      employeeData.password = password;
+    }
+
+    User.update(this.editingEmployee.id, employeeData)
+      .then(() => {
+        this.getEmployees().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error updating employee:", error);
+        alert("Error updating employee. Please try again.");
+      });
+  }
+
+  deleteEmployeeHandler(employeeId) {
+    if (!confirm("Are you sure you want to delete this employee?")) return;
+    User.delete(employeeId)
+      .then(() => {
+        this.getEmployees().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error deleting employee:", error);
+        alert("Error deleting employee. Please try again.");
+      });
+  }
+
   render() {
     if (this.view === "add") {
       return this.renderAddForm();
@@ -245,7 +341,7 @@ export class EmployeeManagement {
                   <label class="owner-label">Bonus <span class="text-gray-400 font-normal">(LKR)</span></label>
                   <input type="number" name="bonus" step="0.01" class="owner-input" placeholder="e.g. 5000">
                 </div>
-              </div>
+              </div>    
             </div>
           </div>
 
@@ -422,103 +518,5 @@ export class EmployeeManagement {
         </form>
       </div>
     `;
-  }
-
-  showAddFormHandler() {
-    this.view = "add";
-    this.refresh();
-  }
-
-  showEditFormHandler(employeeId) {
-    this.editingEmployee = this.employees.find((emp) => emp.id === employeeId);
-    this.view = "edit";
-    this.refresh();
-  }
-
-  hideFormHandler() {
-    this.view = "list";
-    this.editingEmployee = null;
-    this.refresh();
-  }
-
-  submitAddForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const employeeData = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      phone: formData.get("phone") || null,
-      address: formData.get("address") || null,
-      password: formData.get("password"),
-      role: formData.get("role"),
-      status: formData.get("status"),
-      attendance: formData.get("attendance") || null,
-      performanceRating: Number(formData.get("performanceRating")) || null,
-      salary: Number(formData.get("salary")) || null,
-      bonus: Number(formData.get("bonus")) || null,
-    };
-
-    User.create(employeeData)
-      .then(() => {
-        this.getEmployees().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error creating employee:", error);
-        alert("Error creating employee. Please try again.");
-      });
-  }
-
-  submitEditForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const employeeData = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      phone: formData.get("phone") || null,
-      address: formData.get("address") || null,
-      role: formData.get("role"),
-      status: formData.get("status"),
-      attendance: formData.get("attendance") || null,
-      performanceRating: Number(formData.get("performanceRating")) || null,
-      salary: Number(formData.get("salary")) || null,
-      bonus: Number(formData.get("bonus")) || null,
-    };
-
-    const password = formData.get("password");
-    if (password) {
-      employeeData.password = password;
-    }
-
-    User.update(this.editingEmployee.id, employeeData)
-      .then(() => {
-        this.getEmployees().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error updating employee:", error);
-        alert("Error updating employee. Please try again.");
-      });
-  }
-
-  deleteEmployeeHandler(employeeId) {
-    if (!confirm("Are you sure you want to delete this employee?")) return;
-    User.delete(employeeId)
-      .then(() => {
-        this.getEmployees().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error deleting employee:", error);
-        alert("Error deleting employee. Please try again.");
-      });
-  }
-
-  refresh() {
-    const content = this.container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = this.render();
-    }
   }
 }
