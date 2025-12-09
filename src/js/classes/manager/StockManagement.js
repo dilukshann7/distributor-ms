@@ -34,6 +34,120 @@ export class StockManagement {
     }
   }
 
+  showAddFormHandler() {
+    this.view = "add";
+    this.view = "add";
+    this.container.querySelector(
+      "#dashboardContent"
+    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
+  }
+
+  showEditFormHandler(productId) {
+    this.editingProduct = this.inventory.find((p) => p.id === productId);
+    this.view = "edit";
+    this.editingProduct = this.inventory.find((p) => p.id === productId);
+    this.view = "edit";
+    this.container.querySelector(
+      "#dashboardContent"
+    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
+  }
+
+  hideFormHandler() {
+    this.view = "list";
+    this.editingProduct = null;
+    this.view = "list";
+    this.editingProduct = null;
+    this.container.querySelector(
+      "#dashboardContent"
+    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
+  }
+
+  submitAddForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const productData = {
+      name: formData.get("name"),
+      sku: formData.get("sku"),
+      description: formData.get("description") || null,
+      category: formData.get("category"),
+      price: parseFloat(formData.get("price")),
+      quantity: parseInt(formData.get("quantity")),
+      minStock: parseInt(formData.get("minStock")),
+      maxStock: formData.get("maxStock")
+        ? parseInt(formData.get("maxStock"))
+        : null,
+      location: formData.get("location") || null,
+      supplierId: formData.get("supplierId")
+        ? parseInt(formData.get("supplierId"))
+        : null,
+      batchNumber: formData.get("batchNumber") || null,
+      expiryDate: formData.get("expiryDate")
+        ? new Date(formData.get("expiryDate"))
+        : null,
+      status: formData.get("status"),
+    };
+
+    Product.create(productData)
+      .then(() => {
+        this.getProducts().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error creating product:", error);
+        alert("Error creating product. Please try again.");
+      });
+  }
+
+  submitEditForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const productData = {
+      name: formData.get("name"),
+      sku: formData.get("sku"),
+      description: formData.get("description") || null,
+      category: formData.get("category"),
+      price: parseFloat(formData.get("price")),
+      quantity: parseInt(formData.get("quantity")),
+      minStock: parseInt(formData.get("minStock")),
+      maxStock: formData.get("maxStock")
+        ? parseInt(formData.get("maxStock"))
+        : null,
+      location: formData.get("location") || null,
+      supplierId: formData.get("supplierId")
+        ? parseInt(formData.get("supplierId"))
+        : null,
+      batchNumber: formData.get("batchNumber") || null,
+      expiryDate: formData.get("expiryDate")
+        ? new Date(formData.get("expiryDate"))
+        : null,
+      status: formData.get("status"),
+    };
+
+    Product.update(this.editingProduct.id, productData)
+      .then(() => {
+        this.getProducts().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error updating product:", error);
+        alert("Error updating product. Please try again.");
+      });
+  }
+
+  deleteProductHandler(productId) {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+    Product.delete(productId)
+      .then(() => {
+        this.getProducts().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error deleting product:", error);
+        alert("Error deleting product. Please try again.");
+      });
+  }
+
   render() {
     if (this.view === "add") {
       return this.renderAddForm();
@@ -412,115 +526,5 @@ export class StockManagement {
         </form>
       </div>
     `;
-  }
-
-  showAddFormHandler() {
-    this.view = "add";
-    this.refresh();
-  }
-
-  showEditFormHandler(productId) {
-    this.editingProduct = this.inventory.find((p) => p.id === productId);
-    this.view = "edit";
-    this.refresh();
-  }
-
-  hideFormHandler() {
-    this.view = "list";
-    this.editingProduct = null;
-    this.refresh();
-  }
-
-  submitAddForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const productData = {
-      name: formData.get("name"),
-      sku: formData.get("sku"),
-      description: formData.get("description") || null,
-      category: formData.get("category"),
-      price: parseFloat(formData.get("price")),
-      quantity: parseInt(formData.get("quantity")),
-      minStock: parseInt(formData.get("minStock")),
-      maxStock: formData.get("maxStock")
-        ? parseInt(formData.get("maxStock"))
-        : null,
-      location: formData.get("location") || null,
-      supplierId: formData.get("supplierId")
-        ? parseInt(formData.get("supplierId"))
-        : null,
-      batchNumber: formData.get("batchNumber") || null,
-      expiryDate: formData.get("expiryDate")
-        ? new Date(formData.get("expiryDate"))
-        : null,
-      status: formData.get("status"),
-    };
-
-    Product.create(productData)
-      .then(() => {
-        this.getProducts().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error creating product:", error);
-        alert("Error creating product. Please try again.");
-      });
-  }
-
-  submitEditForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const productData = {
-      name: formData.get("name"),
-      sku: formData.get("sku"),
-      description: formData.get("description") || null,
-      category: formData.get("category"),
-      price: parseFloat(formData.get("price")),
-      quantity: parseInt(formData.get("quantity")),
-      minStock: parseInt(formData.get("minStock")),
-      maxStock: formData.get("maxStock")
-        ? parseInt(formData.get("maxStock"))
-        : null,
-      location: formData.get("location") || null,
-      supplierId: formData.get("supplierId")
-        ? parseInt(formData.get("supplierId"))
-        : null,
-      batchNumber: formData.get("batchNumber") || null,
-      expiryDate: formData.get("expiryDate")
-        ? new Date(formData.get("expiryDate"))
-        : null,
-      status: formData.get("status"),
-    };
-
-    Product.update(this.editingProduct.id, productData)
-      .then(() => {
-        this.getProducts().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error updating product:", error);
-        alert("Error updating product. Please try again.");
-      });
-  }
-
-  deleteProductHandler(productId) {
-    if (!confirm("Are you sure you want to delete this product?")) return;
-    Product.delete(productId)
-      .then(() => {
-        this.getProducts().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error deleting product:", error);
-        alert("Error deleting product. Please try again.");
-      });
-  }
-
-  refresh() {
-    const content = this.container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
   }
 }

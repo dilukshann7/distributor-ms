@@ -20,6 +20,206 @@ export class EmployeeOversight {
     }
   }
 
+  getRoleSpecificFieldsHTML(role, values = {}) {
+    if (role === "Driver") {
+      return `
+        <div class="space-y-2">
+          <label class="manager-label">Vehicle ID</label>
+          <input type="text" name="vehicleId" value="${
+            values.vehicleId || ""
+          }" class="w-full manager-input" placeholder="e.g. VEH-001">
+        </div>
+        <div class="space-y-2">
+          <label class="manager-label">Vehicle Type</label>
+          <input type="text" name="vehicleType" value="${
+            values.vehicleType || ""
+          }" class="w-full manager-input" placeholder="e.g. Truck, Van">
+        </div>
+        <div class="space-y-2">
+          <label class="manager-label">License Number</label>
+          <input type="text" name="licenseNumber" value="${
+            values.licenseNumber || ""
+          }" class="w-full manager-input" placeholder="e.g. DL123456">
+        </div>
+      `;
+    } else if (role === "Salesman") {
+      return `
+        <div class="space-y-2">
+          <label class="manager-label">Sales Target</label>
+          <input type="number" name="salesTarget" step="0.01" value="${
+            values.salesTarget || ""
+          }" class="w-full manager-input" placeholder="e.g. 100000">
+        </div>
+      `;
+    } else if (role === "Supplier") {
+      return `
+        <div class="space-y-2">
+          <label class="manager-label">Company Name</label>
+          <input type="text" name="companyName" value="${
+            values.companyName || ""
+          }" class="w-full manager-input" placeholder="e.g. ABC Suppliers Ltd">
+        </div>
+        <div class="space-y-2">
+          <label class="manager-label">Supplier Type</label>
+          <input type="text" name="supplierType" value="${
+            values.supplierType || ""
+          }" class="w-full manager-input" placeholder="e.g. Wholesale, Retail">
+        </div>
+      `;
+    }
+    return "";
+  }
+
+  handleRoleChange(role, formType) {
+    const container = document.getElementById("roleSpecificFields");
+    if (container) {
+      container.innerHTML = this.getRoleSpecificFieldsHTML(role);
+    }
+
+    const employeeFields = document.querySelectorAll(".employee-field");
+    employeeFields.forEach((field) => {
+      if (role === "Supplier") {
+        field.style.display = "none";
+      } else {
+        field.style.display = "block";
+      }
+    });
+  }
+
+  showAddFormHandler() {
+    this.view = "add";
+    this.view = "add";
+    this.container.querySelector(
+      "#dashboardContent"
+    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
+  }
+
+  showEditFormHandler(employeeId) {
+    this.editingEmployee = this.employees.find((emp) => emp.id === employeeId);
+    this.view = "edit";
+    this.editingEmployee = this.employees.find((emp) => emp.id === employeeId);
+    this.view = "edit";
+    this.container.querySelector(
+      "#dashboardContent"
+    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
+  }
+
+  hideFormHandler() {
+    this.view = "list";
+    this.editingEmployee = null;
+    this.view = "list";
+    this.editingEmployee = null;
+    this.container.querySelector(
+      "#dashboardContent"
+    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
+  }
+
+  submitAddForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const role = formData.get("role");
+    const employeeData = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      phone: formData.get("phone") || null,
+      address: formData.get("address") || null,
+      password: formData.get("password"),
+      role: role,
+      status: formData.get("status"),
+    };
+
+    if (role !== "Supplier") {
+      employeeData.attendance = formData.get("attendance") || null;
+      employeeData.performanceRating =
+        Number(formData.get("performanceRating")) || null;
+      employeeData.salary = Number(formData.get("salary")) || null;
+      employeeData.bonus = Number(formData.get("bonus")) || null;
+    }
+
+    if (role === "Driver") {
+      employeeData.vehicleId = formData.get("vehicleId") || null;
+      employeeData.vehicleType = formData.get("vehicleType") || null;
+      employeeData.licenseNumber = formData.get("licenseNumber") || null;
+    } else if (role === "Salesman") {
+      employeeData.salesTarget = Number(formData.get("salesTarget")) || null;
+    } else if (role === "Supplier") {
+      employeeData.companyName = formData.get("companyName") || null;
+      employeeData.supplierType = formData.get("supplierType") || null;
+    }
+
+    User.create(employeeData)
+      .then(() => {
+        this.getEmployees().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error creating employee:", error);
+        alert("Error creating employee. Please try again.");
+      });
+  }
+
+  submitEditForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const role = formData.get("role");
+    const employeeData = {
+      name: formData.get("name"),
+      email: formData.get("email"),
+      phone: formData.get("phone") || null,
+      address: formData.get("address") || null,
+      role: role,
+      status: formData.get("status"),
+    };
+
+    const password = formData.get("password");
+    if (password) {
+      employeeData.password = password;
+    }
+
+    if (role !== "Supplier") {
+      employeeData.attendance = formData.get("attendance") || null;
+      employeeData.performanceRating =
+        Number(formData.get("performanceRating")) || null;
+      employeeData.salary = Number(formData.get("salary")) || null;
+      employeeData.bonus = Number(formData.get("bonus")) || null;
+    }
+
+    if (role === "Driver") {
+      employeeData.vehicleId = formData.get("vehicleId") || null;
+      employeeData.vehicleType = formData.get("vehicleType") || null;
+      employeeData.licenseNumber = formData.get("licenseNumber") || null;
+    } else if (role === "Salesman") {
+      employeeData.salesTarget = Number(formData.get("salesTarget")) || null;
+    } else if (role === "Supplier") {
+      employeeData.companyName = formData.get("companyName") || null;
+      employeeData.supplierType = formData.get("supplierType") || null;
+    }
+
+    User.update(this.editingEmployee.id, employeeData)
+      .then(() => {
+        this.getEmployees().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error updating employee:", error);
+        alert("Error updating employee. Please try again.");
+      });
+  }
+
+  deleteEmployeeHandler(employeeId) {
+    if (!confirm("Are you sure you want to delete this employee?")) return;
+    User.delete(employeeId)
+      .then(() => {
+        this.getEmployees().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error deleting employee:", error);
+        alert("Error deleting employee. Please try again.");
+      });
+  }
+
   render() {
     if (this.view === "add") {
       return this.renderAddForm();
@@ -65,14 +265,14 @@ export class EmployeeOversight {
                   .map((emp) => {
                     // Get the appropriate profile based on role
                     const roleMap = {
-                      "Driver": "driverProfile",
-                      "Manager": "managerProfile",
-                      "Salesman": "salesmanProfile",
+                      Driver: "driverProfile",
+                      Manager: "managerProfile",
+                      Salesman: "salesmanProfile",
                       "Stock Keeper": "stockKeeperProfile",
-                      "Cashier": "cashierProfile",
-                      "Supplier": "supplierProfile",
-                      "Distributor": "distributorProfile",
-                      "Assistant Manager": "assistantManagerProfile"
+                      Cashier: "cashierProfile",
+                      Supplier: "supplierProfile",
+                      Distributor: "distributorProfile",
+                      "Assistant Manager": "assistantManagerProfile",
                     };
                     const profileKey = roleMap[emp.role];
                     const profile = emp[profileKey];
@@ -430,201 +630,5 @@ export class EmployeeOversight {
         </script>
       </div>
     `;
-  }
-
-  getRoleSpecificFieldsHTML(role, values = {}) {
-    if (role === "Driver") {
-      return `
-        <div class="space-y-2">
-          <label class="manager-label">Vehicle ID</label>
-          <input type="text" name="vehicleId" value="${
-            values.vehicleId || ""
-          }" class="w-full manager-input" placeholder="e.g. VEH-001">
-        </div>
-        <div class="space-y-2">
-          <label class="manager-label">Vehicle Type</label>
-          <input type="text" name="vehicleType" value="${
-            values.vehicleType || ""
-          }" class="w-full manager-input" placeholder="e.g. Truck, Van">
-        </div>
-        <div class="space-y-2">
-          <label class="manager-label">License Number</label>
-          <input type="text" name="licenseNumber" value="${
-            values.licenseNumber || ""
-          }" class="w-full manager-input" placeholder="e.g. DL123456">
-        </div>
-      `;
-    } else if (role === "Salesman") {
-      return `
-        <div class="space-y-2">
-          <label class="manager-label">Sales Target</label>
-          <input type="number" name="salesTarget" step="0.01" value="${
-            values.salesTarget || ""
-          }" class="w-full manager-input" placeholder="e.g. 100000">
-        </div>
-      `;
-    } else if (role === "Supplier") {
-      return `
-        <div class="space-y-2">
-          <label class="manager-label">Company Name</label>
-          <input type="text" name="companyName" value="${
-            values.companyName || ""
-          }" class="w-full manager-input" placeholder="e.g. ABC Suppliers Ltd">
-        </div>
-        <div class="space-y-2">
-          <label class="manager-label">Supplier Type</label>
-          <input type="text" name="supplierType" value="${
-            values.supplierType || ""
-          }" class="w-full manager-input" placeholder="e.g. Wholesale, Retail">
-        </div>
-      `;
-    }
-    return "";
-  }
-
-  handleRoleChange(role, formType) {
-    const container = document.getElementById("roleSpecificFields");
-    if (container) {
-      container.innerHTML = this.getRoleSpecificFieldsHTML(role);
-    }
-
-    const employeeFields = document.querySelectorAll(".employee-field");
-    employeeFields.forEach((field) => {
-      if (role === "Supplier") {
-        field.style.display = "none";
-      } else {
-        field.style.display = "block";
-      }
-    });
-  }
-
-  showAddFormHandler() {
-    this.view = "add";
-    this.refresh();
-  }
-
-  showEditFormHandler(employeeId) {
-    this.editingEmployee = this.employees.find((emp) => emp.id === employeeId);
-    this.view = "edit";
-    this.refresh();
-  }
-
-  hideFormHandler() {
-    this.view = "list";
-    this.editingEmployee = null;
-    this.refresh();
-  }
-
-  submitAddForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const role = formData.get("role");
-    const employeeData = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      phone: formData.get("phone") || null,
-      address: formData.get("address") || null,
-      password: formData.get("password"),
-      role: role,
-      status: formData.get("status"),
-    };
-
-    if (role !== "Supplier") {
-      employeeData.attendance = formData.get("attendance") || null;
-      employeeData.performanceRating =
-        Number(formData.get("performanceRating")) || null;
-      employeeData.salary = Number(formData.get("salary")) || null;
-      employeeData.bonus = Number(formData.get("bonus")) || null;
-    }
-
-    if (role === "Driver") {
-      employeeData.vehicleId = formData.get("vehicleId") || null;
-      employeeData.vehicleType = formData.get("vehicleType") || null;
-      employeeData.licenseNumber = formData.get("licenseNumber") || null;
-    } else if (role === "Salesman") {
-      employeeData.salesTarget = Number(formData.get("salesTarget")) || null;
-    } else if (role === "Supplier") {
-      employeeData.companyName = formData.get("companyName") || null;
-      employeeData.supplierType = formData.get("supplierType") || null;
-    }
-
-    User.create(employeeData)
-      .then(() => {
-        this.getEmployees().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error creating employee:", error);
-        alert("Error creating employee. Please try again.");
-      });
-  }
-
-  submitEditForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const role = formData.get("role");
-    const employeeData = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      phone: formData.get("phone") || null,
-      address: formData.get("address") || null,
-      role: role,
-      status: formData.get("status"),
-    };
-
-    const password = formData.get("password");
-    if (password) {
-      employeeData.password = password;
-    }
-
-    if (role !== "Supplier") {
-      employeeData.attendance = formData.get("attendance") || null;
-      employeeData.performanceRating =
-        Number(formData.get("performanceRating")) || null;
-      employeeData.salary = Number(formData.get("salary")) || null;
-      employeeData.bonus = Number(formData.get("bonus")) || null;
-    }
-
-    if (role === "Driver") {
-      employeeData.vehicleId = formData.get("vehicleId") || null;
-      employeeData.vehicleType = formData.get("vehicleType") || null;
-      employeeData.licenseNumber = formData.get("licenseNumber") || null;
-    } else if (role === "Salesman") {
-      employeeData.salesTarget = Number(formData.get("salesTarget")) || null;
-    } else if (role === "Supplier") {
-      employeeData.companyName = formData.get("companyName") || null;
-      employeeData.supplierType = formData.get("supplierType") || null;
-    }
-
-    User.update(this.editingEmployee.id, employeeData)
-      .then(() => {
-        this.getEmployees().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error updating employee:", error);
-        alert("Error updating employee. Please try again.");
-      });
-  }
-
-  deleteEmployeeHandler(employeeId) {
-    if (!confirm("Are you sure you want to delete this employee?")) return;
-    User.delete(employeeId)
-      .then(() => {
-        this.getEmployees().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error deleting employee:", error);
-        alert("Error deleting employee. Please try again.");
-      });
-  }
-
-  refresh() {
-    const content = this.container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
   }
 }

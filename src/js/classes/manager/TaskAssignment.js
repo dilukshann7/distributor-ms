@@ -33,6 +33,132 @@ export class TaskAssignment {
     }
   }
 
+  showAddFormHandler() {
+    this.view = "add";
+    this.view = "add";
+    this.container.querySelector(
+      "#dashboardContent"
+    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
+  }
+
+  showEditFormHandler(taskId) {
+    this.editingTask = this.tasks.find((t) => t.id === taskId);
+    this.view = "edit";
+    this.editingTask = this.tasks.find((t) => t.id === taskId);
+    this.view = "edit";
+    this.container.querySelector(
+      "#dashboardContent"
+    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
+  }
+
+  hideFormHandler() {
+    this.view = "list";
+    this.editingTask = null;
+    this.view = "list";
+    this.editingTask = null;
+    this.container.querySelector(
+      "#dashboardContent"
+    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
+  }
+
+  submitAddForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const taskData = {
+      title: formData.get("title"),
+      description: formData.get("description") || null,
+      assigneeId: parseInt(formData.get("assigneeId")),
+      assignerId: formData.get("assignerId")
+        ? parseInt(formData.get("assignerId"))
+        : null,
+      dueDate: new Date(formData.get("dueDate")),
+      priority: formData.get("priority"),
+      status: formData.get("status"),
+      notes: formData.get("notes") || null,
+    };
+
+    Task.create(taskData)
+      .then(() => {
+        this.getTasks().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error creating task:", error);
+        alert("Error creating task. Please try again.");
+      });
+  }
+
+  submitEditForm(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const taskData = {
+      title: formData.get("title"),
+      description: formData.get("description") || null,
+      assigneeId: parseInt(formData.get("assigneeId")),
+      assignerId: formData.get("assignerId")
+        ? parseInt(formData.get("assignerId"))
+        : null,
+      dueDate: new Date(formData.get("dueDate")),
+      priority: formData.get("priority"),
+      status: formData.get("status"),
+      notes: formData.get("notes") || null,
+    };
+
+    Task.update(this.editingTask.id, taskData)
+      .then(() => {
+        this.getTasks().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error updating task:", error);
+        alert("Error updating task. Please try again.");
+      });
+  }
+
+  deleteTaskHandler(taskId) {
+    if (!confirm("Are you sure you want to delete this task?")) return;
+    Task.delete(taskId)
+      .then(() => {
+        this.getTasks().then(() => this.hideFormHandler());
+      })
+      .catch((error) => {
+        console.error("Error deleting task:", error);
+        alert("Error deleting task. Please try again.");
+      });
+  }
+
+  getStatusIcon(status) {
+    switch (status) {
+      case "Completed":
+        return (
+          '<div class="text-green-600">' +
+          getIconHTML("check-circle") +
+          "</div>"
+        );
+      case "In Progress":
+        return '<div class="text-blue-600">' + getIconHTML("clock") + "</div>";
+      default:
+        return (
+          '<div class="text-yellow-600">' +
+          getIconHTML("alert-circle") +
+          "</div>"
+        );
+    }
+  }
+
+  getPriorityColor(priority) {
+    switch (priority) {
+      case "High":
+        return "manager-badge-red";
+      case "Medium":
+        return "manager-badge-yellow";
+      default:
+        return "manager-badge-green";
+    }
+  }
+
   render() {
     if (this.view === "add") {
       return this.renderAddForm();
@@ -349,127 +475,5 @@ export class TaskAssignment {
         </form>
       </div>
     `;
-  }
-
-  showAddFormHandler() {
-    this.view = "add";
-    this.refresh();
-  }
-
-  showEditFormHandler(taskId) {
-    this.editingTask = this.tasks.find((t) => t.id === taskId);
-    this.view = "edit";
-    this.refresh();
-  }
-
-  hideFormHandler() {
-    this.view = "list";
-    this.editingTask = null;
-    this.refresh();
-  }
-
-  submitAddForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const taskData = {
-      title: formData.get("title"),
-      description: formData.get("description") || null,
-      assigneeId: parseInt(formData.get("assigneeId")),
-      assignerId: formData.get("assignerId")
-        ? parseInt(formData.get("assignerId"))
-        : null,
-      dueDate: new Date(formData.get("dueDate")),
-      priority: formData.get("priority"),
-      status: formData.get("status"),
-      notes: formData.get("notes") || null,
-    };
-
-    Task.create(taskData)
-      .then(() => {
-        this.getTasks().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error creating task:", error);
-        alert("Error creating task. Please try again.");
-      });
-  }
-
-  submitEditForm(e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-
-    const taskData = {
-      title: formData.get("title"),
-      description: formData.get("description") || null,
-      assigneeId: parseInt(formData.get("assigneeId")),
-      assignerId: formData.get("assignerId")
-        ? parseInt(formData.get("assignerId"))
-        : null,
-      dueDate: new Date(formData.get("dueDate")),
-      priority: formData.get("priority"),
-      status: formData.get("status"),
-      notes: formData.get("notes") || null,
-    };
-
-    Task.update(this.editingTask.id, taskData)
-      .then(() => {
-        this.getTasks().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error updating task:", error);
-        alert("Error updating task. Please try again.");
-      });
-  }
-
-  deleteTaskHandler(taskId) {
-    if (!confirm("Are you sure you want to delete this task?")) return;
-    Task.delete(taskId)
-      .then(() => {
-        this.getTasks().then(() => this.hideFormHandler());
-      })
-      .catch((error) => {
-        console.error("Error deleting task:", error);
-        alert("Error deleting task. Please try again.");
-      });
-  }
-
-  refresh() {
-    const content = this.container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
-  }
-
-  getStatusIcon(status) {
-    switch (status) {
-      case "Completed":
-        return (
-          '<div class="text-green-600">' +
-          getIconHTML("check-circle") +
-          "</div>"
-        );
-      case "In Progress":
-        return '<div class="text-blue-600">' + getIconHTML("clock") + "</div>";
-      default:
-        return (
-          '<div class="text-yellow-600">' +
-          getIconHTML("alert-circle") +
-          "</div>"
-        );
-    }
-  }
-
-  getPriorityColor(priority) {
-    switch (priority) {
-      case "High":
-        return "manager-badge-red";
-      case "Medium":
-        return "manager-badge-yellow";
-      default:
-        return "manager-badge-green";
-    }
   }
 }
