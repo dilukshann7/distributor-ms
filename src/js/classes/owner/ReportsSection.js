@@ -8,6 +8,37 @@ export class ReportsSection {
     this.container = container;
   }
 
+  exportEmployeeReport() {
+    User.exportEmployeeReport();
+    alert("PDF exported successfully");
+  }
+
+  exportInventoryReport() {
+    Product.exportInventoryReport();
+    alert("PDF exported successfully");
+  }
+
+  exportSalesReport() {
+    const startDateInput = document.getElementById("sales-report-start").value;
+    const endDateInput = document.getElementById("sales-report-end").value;
+
+    const startDate = new Date(startDateInput);
+    const endDate = new Date(endDateInput);
+
+    if (!startDateInput || !endDateInput) {
+      alert("Please select a start and end date.");
+      return;
+    }
+
+    if (new Date(startDateInput) > new Date(endDateInput)) {
+      alert("Start date must be before end date.");
+      return;
+    }
+
+    SalesOrder.exportSalesReport(startDate, endDate);
+    alert("PDF exported successfully");
+  }
+
   render() {
     return `
       <div class="owner-section-container">
@@ -71,36 +102,5 @@ export class ReportsSection {
         </div>
       </div>
     `;
-  }
-
-  exportEmployeeReport() {
-    User.exportEmployeeReport();
-    alert("PDF exported successfully");
-  }
-
-  exportInventoryReport() {
-    Product.exportInventoryReport();
-    alert("PDF exported successfully");
-  }
-
-  exportSalesReport() {
-    const startDateInput = document.getElementById("sales-report-start").value;
-    const endDateInput = document.getElementById("sales-report-end").value;
-
-    const startDate = new Date(startDateInput);
-    const endDate = new Date(endDateInput);
-
-    if (!startDateInput || !endDateInput) {
-      alert("Please select a start and end date.");
-      return;
-    }
-
-    if (new Date(startDateInput) > new Date(endDateInput)) {
-      alert("Start date must be before end date.");
-      return;
-    }
-
-    SalesOrder.exportSalesReport(startDate, endDate);
-    alert("PDF exported successfully");
   }
 }
