@@ -45,9 +45,7 @@ class CashierDashboard {
     ];
 
     return `
-      <div class="cashier-sidebar ${
-        this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      }">
+      <aside class="-translate-x-full lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-cyan-700 to-cyan-800 text-white transition-transform duration-300 z-30 overflow-y-auto">
         <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
@@ -75,42 +73,29 @@ class CashierDashboard {
             <span>Logout</span>
           </button>
         </div>
-      </div>
+      </aside>
     `;
   }
 
   renderHeader() {
     return `
-      <div class="cashier-header">
+      <header class="cashier-header">
         <div>
           <h2 class="cashier-page-title">Cashier Dashboard</h2>
           <p class="cashier-subtitle">Manage transactions and payments</p>
         </div>
 
         <div class="flex items-center gap-6">
-          <div class="relative">
-            <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-              ${getIconHTML("bell")}
-            </button>
-          </div>
+          <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            ${getIconHTML("bell")}
+          </button>
         </div>
-      </div>
+      </header>
     `;
   }
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
-
-    if (sectionInstance.initialize) {
-      const html = await sectionInstance.initialize();
-      setTimeout(() => {
-        if (sectionInstance.attachEventListeners) {
-          sectionInstance.attachEventListeners();
-        }
-      }, 0);
-      return html;
-    }
-
     return sectionInstance.render();
   }
 
