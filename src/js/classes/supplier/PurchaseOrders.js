@@ -121,13 +121,6 @@ export class PurchaseOrders extends LitElement {
       });
   }
 
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
-  }
-
   getStatusColor(status) {
     const statusMap = {
       pending: "status-yellow",
@@ -149,7 +142,7 @@ export class PurchaseOrders extends LitElement {
   }
 
   renderList() {
-    return `
+    return html`
       <div class="space-y-6">
         <div>
           <h3 class="section-header">Purchase Orders</h3>
@@ -173,61 +166,60 @@ export class PurchaseOrders extends LitElement {
                 </tr>
               </thead>
               <tbody>
-                ${this.orders
-                  .map(
-                    (order) => `
-                  <tr class="table-row">
-                    <td class="table-cell-bold">${order.id}</td>
-                    <td class="table-cell">
-                      ${new Date(order.orderDate).toISOString().split("T")[0]}
-                    </td>
-                    <td class="table-cell-bold">
-                      ${order.items
-                        .map((i) => `${i.name} (${i.quantity})`)
-                        .join(", ")}
-                    </td>
-                    <td class="table-cell">${order.totalAmount.toLocaleString(
-                      "en-US",
-                      {
-                        style: "currency",
-                        currency: "LKR",
-                      }
-                    )}</td>
-                    <td class="table-cell">${
-                      new Date(order.dueDate).toISOString().split("T")[0]
-                    }</td>
-                    <td class="table-cell">
-                      <span class="status-badge ${this.getStatusColor(
-                        order.status
-                      )}">
-                        ${
-                          order.status.charAt(0).toUpperCase() +
-                          order.status.slice(1)
-                        }
-                      </span>
-                    </td>
-                    <td class="table-cell gap-2">
-                      ${
-                        order.status === "pending"
-                          ? `
-                        <button class="btn-action text-blue-600" onclick="window.supplierDashboard.sections.orders.switchToConvert('${
-                          order.id
-                        }')" title="Convert to Shipment">
-                          ${getIconHTML("truck")}
+                ${this.orders.map(
+                  (order) => html`
+                    <tr class="table-row">
+                      <td class="table-cell-bold">${order.id}</td>
+                      <td class="table-cell">
+                        ${new Date(order.orderDate).toISOString().split("T")[0]}
+                      </td>
+                      <td class="table-cell-bold">
+                        ${order.items
+                          .map((i) => `${i.name} (${i.quantity})`)
+                          .join(", ")}
+                      </td>
+                      <td class="table-cell">
+                        ${order.totalAmount.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "LKR",
+                        })}
+                      </td>
+                      <td class="table-cell">
+                        ${new Date(order.dueDate).toISOString().split("T")[0]}
+                      </td>
+                      <td class="table-cell">
+                        <span
+                          class="status-badge ${this.getStatusColor(
+                            order.status
+                          )}"
+                        >
+                          ${order.status.charAt(0).toUpperCase() +
+                          order.status.slice(1)}
+                        </span>
+                      </td>
+                      <td class="table-cell gap-2">
+                        ${order.status === "pending"
+                          ? html`
+                              <button
+                                class="btn-action text-blue-600"
+                                @click=${() => this.switchToConvert(order.id)}
+                                title="Convert to Shipment"
+                              >
+                                <span .innerHTML=${getIconHTML("truck")}></span>
+                              </button>
+                            `
+                          : ""}
+                        <button
+                          class="btn-action text-green-600 edit-order-btn"
+                          @click=${() => this.switchToEdit(order.id)}
+                          title="Edit"
+                        >
+                          <span .innerHTML=${getIconHTML("edit")}></span>
                         </button>
-                      `
-                          : ""
-                      }
-                      <button class="btn-action text-green-600 edit-order-btn" onclick="window.supplierDashboard.sections.orders.switchToEdit('${
-                        order.id
-                      }')" title="Edit">
-                        ${getIconHTML("edit")}
-                      </button>
-                    </td>
-                  </tr>
-                `
-                  )
-                  .join("")}
+                      </td>
+                    </tr>
+                  `
+                )}
               </tbody>
             </table>
           </div>
@@ -240,7 +232,7 @@ export class PurchaseOrders extends LitElement {
     const order = this.editingOrder;
     if (!order) return this.renderList();
 
-    return `
+    return html`
       <div class="max-w-4xl mx-auto animate-fade-in">
         <div class="flex items-center justify-between mb-8">
           <div>
@@ -249,101 +241,169 @@ export class PurchaseOrders extends LitElement {
           </div>
         </div>
 
-        <form id="editOrderForm" class="card-container" onsubmit="window.supplierDashboard.sections.orders.submitEditForm(event)">
+        <form
+          id="editOrderForm"
+          class="card-container"
+          @submit=${this.submitEditForm}
+        >
           <div class="p-8 space-y-8">
             <div>
-              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                ${getIconHTML("shopping-bag").replace(
-                  'class="w-5 h-5"',
-                  'class="w-5 h-5 text-indigo-600"'
-                )}
+              <h4
+                class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+              >
+                <span
+                  class="w-5 h-5 text-indigo-600"
+                  .innerHTML=${getIconHTML("shopping-bag")}
+                ></span>
                 Order Details
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Order ID</label>
-                  <input type="text" class="input-field bg-gray-100" value="${
-                    order.id
-                  }" disabled>
+                  <label class="text-sm font-medium text-gray-700"
+                    >Order ID</label
+                  >
+                  <input
+                    type="text"
+                    class="input-field bg-gray-100"
+                    value="${order.id}"
+                    disabled
+                  />
                 </div>
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Customer ID</label>
-                  <input type="number" name="customerId" required class="input-field" value="${
-                    order.customerId
-                  }">
+                  <label class="text-sm font-medium text-gray-700"
+                    >Customer ID</label
+                  >
+                  <input
+                    type="number"
+                    name="customerId"
+                    required
+                    class="input-field"
+                    value="${order.customerId}"
+                  />
                 </div>
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Order Date</label>
-                  <input type="date" name="orderDate" required class="input-field" value="${
-                    new Date(order.orderDate).toISOString().split("T")[0]
-                  }">
+                  <label class="text-sm font-medium text-gray-700"
+                    >Order Date</label
+                  >
+                  <input
+                    type="date"
+                    name="orderDate"
+                    required
+                    class="input-field"
+                    value="${new Date(order.orderDate)
+                      .toISOString()
+                      .split("T")[0]}"
+                  />
                 </div>
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Due Date</label>
-                  <input type="date" name="dueDate" required class="input-field" value="${
-                    new Date(order.dueDate).toISOString().split("T")[0]
-                  }">
+                  <label class="text-sm font-medium text-gray-700"
+                    >Due Date</label
+                  >
+                  <input
+                    type="date"
+                    name="dueDate"
+                    required
+                    class="input-field"
+                    value="${new Date(order.dueDate)
+                      .toISOString()
+                      .split("T")[0]}"
+                  />
                 </div>
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Total Amount (LKR)</label>
+                  <label class="text-sm font-medium text-gray-700"
+                    >Total Amount (LKR)</label
+                  >
                   <div class="relative">
-                    <input type="number" name="totalAmount" required min="0" step="0.01" class="input-field pl-12" value="${
-                      order.totalAmount
-                    }">
+                    <input
+                      type="number"
+                      name="totalAmount"
+                      required
+                      min="0"
+                      step="0.01"
+                      class="input-field pl-12"
+                      value="${order.totalAmount}"
+                    />
                   </div>
                 </div>
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Status</label>
+                  <label class="text-sm font-medium text-gray-700"
+                    >Status</label
+                  >
                   <select name="status" class="input-field">
-                    <option value="pending" ${
-                      order.status === "pending" ? "selected" : ""
-                    }>Pending</option>
-                    <option value="confirmed" ${
-                      order.status === "confirmed" ? "selected" : ""
-                    }>Confirmed</option>
-                    <option value="shipped" ${
-                      order.status === "shipped" ? "selected" : ""
-                    }>Shipped</option>
-                    <option value="delivered" ${
-                      order.status === "delivered" ? "selected" : ""
-                    }>Delivered</option>
-                    <option value="cancelled" ${
-                      order.status === "cancelled" ? "selected" : ""
-                    }>Cancelled</option>
+                    <option
+                      value="pending"
+                      ?selected=${order.status === "pending"}
+                    >
+                      Pending
+                    </option>
+                    <option
+                      value="confirmed"
+                      ?selected=${order.status === "confirmed"}
+                    >
+                      Confirmed
+                    </option>
+                    <option
+                      value="shipped"
+                      ?selected=${order.status === "shipped"}
+                    >
+                      Shipped
+                    </option>
+                    <option
+                      value="delivered"
+                      ?selected=${order.status === "delivered"}
+                    >
+                      Delivered
+                    </option>
+                    <option
+                      value="cancelled"
+                      ?selected=${order.status === "cancelled"}
+                    >
+                      Cancelled
+                    </option>
                   </select>
                 </div>
               </div>
             </div>
 
             <div class="border-t border-gray-100 pt-8">
-              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                ${getIconHTML("package").replace(
-                  'class="w-5 h-5"',
-                  'class="w-5 h-5 text-indigo-600"'
-                )}
+              <h4
+                class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+              >
+                <span
+                  class="w-5 h-5 text-indigo-600"
+                  .innerHTML=${getIconHTML("package")}
+                ></span>
                 Order Items
               </h4>
               <div class="bg-gray-50 p-4 rounded-lg">
                 <p class="text-sm text-gray-600 mb-2">Current Items:</p>
                 <ul class="list-disc list-inside text-sm text-gray-700">
-                  ${order.items
-                    .map(
-                      (item) =>
-                        `<li>${item.name} - Quantity: ${item.quantity}</li>`
-                    )
-                    .join("")}
+                  ${order.items.map(
+                    (item) => html`<li>
+                      ${item.name} - Quantity: ${item.quantity}
+                    </li>`
+                  )}
                 </ul>
-                <p class="text-xs text-gray-500 mt-2">Note: Item editing not available. Cancel and create a new order if items need to be changed.</p>
+                <p class="text-xs text-gray-500 mt-2">
+                  Note: Item editing not available. Cancel and create a new
+                  order if items need to be changed.
+                </p>
               </div>
             </div>
           </div>
 
-          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" onclick="window.supplierDashboard.sections.orders.switchToList()" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+          <div
+            class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4"
+          >
+            <button
+              type="button"
+              @click=${this.switchToList}
+              class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors"
+            >
               Cancel
             </button>
             <button type="submit" class="btn-primary flex items-center gap-2">
-              ${getIconHTML("check-circle")}
+              <span .innerHTML=${getIconHTML("check-circle")}></span>
               Update Order
             </button>
           </div>
@@ -356,7 +416,7 @@ export class PurchaseOrders extends LitElement {
     const order = this.convertingOrder;
     if (!order) return this.renderList();
 
-    return `
+    return html`
       <div class="max-w-4xl mx-auto animate-fade-in">
         <div class="flex items-center justify-between mb-8">
           <div>
@@ -365,88 +425,136 @@ export class PurchaseOrders extends LitElement {
           </div>
         </div>
 
-        <form id="convertOrderForm" class="card-container" onsubmit="window.supplierDashboard.sections.orders.submitConvertForm(event)">
+        <form
+          id="convertOrderForm"
+          class="card-container"
+          @submit=${this.submitConvertForm}
+        >
           <div class="p-8 space-y-8">
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h4 class="text-sm font-semibold text-blue-900 mb-2">Order Details</h4>
+              <h4 class="text-sm font-semibold text-blue-900 mb-2">
+                Order Details
+              </h4>
               <div class="text-sm text-blue-800 space-y-1">
                 <p><strong>Order ID:</strong> ${order.id}</p>
-                <p><strong>Order Date:</strong> ${
-                  new Date(order.orderDate).toISOString().split("T")[0]
-                }</p>
-                <p><strong>Total Amount:</strong> ${order.totalAmount.toLocaleString(
-                  "en-US",
-                  { style: "currency", currency: "LKR" }
-                )}</p>
-                <p><strong>Items:</strong> ${order.items
-                  .map((i) => `${i.name} (${i.quantity})`)
-                  .join(", ")}</p>
+                <p>
+                  <strong>Order Date:</strong>
+                  ${new Date(order.orderDate).toISOString().split("T")[0]}
+                </p>
+                <p>
+                  <strong>Total Amount:</strong>
+                  ${order.totalAmount.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "LKR",
+                  })}
+                </p>
+                <p>
+                  <strong>Items:</strong>
+                  ${order.items
+                    .map((i) => `${i.name} (${i.quantity})`)
+                    .join(", ")}
+                </p>
               </div>
             </div>
 
             <div>
-              <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                ${getIconHTML("truck").replace(
-                  'class="w-5 h-5"',
-                  'class="w-5 h-5 text-indigo-600"'
-                )}
+              <h4
+                class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+              >
+                <span
+                  class="w-5 h-5 text-indigo-600"
+                  .innerHTML=${getIconHTML("truck")}
+                ></span>
                 Shipment Information
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Shipment Number</label>
-                  <input type="text" name="shipmentNumber" required class="input-field" placeholder="e.g. SHP-001">
-                </div>
-                
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Shipment Date</label>
-                  <input type="date" name="shipmentDate" required class="input-field" value="${
-                    new Date().toISOString().split("T")[0]
-                  }">
-                </div>
-
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Expected Delivery Date</label>
-                  <input type="date" name="expectedDeliveryDate" required class="input-field">
+                  <label class="text-sm font-medium text-gray-700"
+                    >Shipment Number</label
+                  >
+                  <input
+                    type="text"
+                    name="shipmentNumber"
+                    required
+                    class="input-field"
+                    placeholder="e.g. SHP-001"
+                  />
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Carrier/Transport</label>
-                  <input type="text" name="carrier" required class="input-field" placeholder="e.g. DHL, FedEx">
+                  <label class="text-sm font-medium text-gray-700"
+                    >Shipment Date</label
+                  >
+                  <input
+                    type="date"
+                    name="shipmentDate"
+                    required
+                    class="input-field"
+                    value="${new Date().toISOString().split("T")[0]}"
+                  />
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700"
+                    >Expected Delivery Date</label
+                  >
+                  <input
+                    type="date"
+                    name="expectedDeliveryDate"
+                    required
+                    class="input-field"
+                  />
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700"
+                    >Carrier/Transport</label
+                  >
+                  <input
+                    type="text"
+                    name="carrier"
+                    required
+                    class="input-field"
+                    placeholder="e.g. DHL, FedEx"
+                  />
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
-                  <label class="text-sm font-medium text-gray-700">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <textarea name="notes" rows="3" class="input-field" placeholder="Additional notes about the shipment..."></textarea>
+                  <label class="text-sm font-medium text-gray-700"
+                    >Notes
+                    <span class="text-gray-400 font-normal"
+                      >(Optional)</span
+                    ></label
+                  >
+                  <textarea
+                    name="notes"
+                    rows="3"
+                    class="input-field"
+                    placeholder="Additional notes about the shipment..."
+                  ></textarea>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" onclick="window.supplierDashboard.sections.orders.switchToList()" class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors">
+          <div
+            class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4"
+          >
+            <button
+              type="button"
+              @click=${this.switchToList}
+              class="px-6 py-2 text-gray-700 font-medium hover:bg-gray-200 rounded-lg transition-colors"
+            >
               Cancel
             </button>
             <button type="submit" class="btn-primary flex items-center gap-2">
-              ${getIconHTML("check-circle")}
+              <span .innerHTML=${getIconHTML("check-circle")}></span>
               Confirm & Create Shipment
             </button>
           </div>
         </form>
       </div>
     `;
-  }
-
-  updated() {
-    const editForm = this.querySelector("#editOrderForm");
-    const convertForm = this.querySelector("#convertShipmentForm");
-    
-    if (editForm) {
-      editForm.addEventListener("submit", (e) => this.submitEditForm(e));
-    }
-    if (convertForm) {
-      convertForm.addEventListener("submit", (e) => this.submitConvertForm(e));
-    }
   }
 }
 
