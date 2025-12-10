@@ -18,7 +18,7 @@ class SupplierDashboard {
 
   async render() {
     await this.notificationPanel.loadTasks();
-    
+
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -126,12 +126,6 @@ class SupplierDashboard {
     });
   }
 
-  logout() {
-    import("../login.js").then((module) => {
-      module.renderLogin(this.container);
-    });
-  }
-
   attachEventListeners() {
     const navItems = this.container.querySelectorAll(".nav-item");
 
@@ -143,6 +137,7 @@ class SupplierDashboard {
     });
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
+
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
         import("../login.js").then((module) => {
