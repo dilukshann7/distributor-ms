@@ -5,7 +5,6 @@ import { DeliveryDetails } from "./driver/DeliveryDetails.js";
 import { ProofOfDelivery } from "./driver/ProofOfDelivery.js";
 import { PaymentCollection } from "./driver/PaymentCollection.js";
 import { VehicleManagement } from "./driver/VehicleManagement.js";
-import { Driver } from "../models/Driver.js";
 
 class DriverDashboard {
   constructor(container) {
@@ -18,12 +17,12 @@ class DriverDashboard {
       vehicle: new VehicleManagement(this.container),
     };
     this.notificationPanel = new NotificationPanel(container);
-    this.sections.deliveries.getDeliveries();
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
     const sectionContent = await this.renderSection(this.currentSection);
+
     this.container.innerHTML = `
       <div class="driver-dashboard-container">
         ${this.renderSidebar()}
@@ -39,15 +38,6 @@ class DriverDashboard {
       </div>
     `;
     this.attachEventListeners();
-
-    if (this.currentSection === "vehicle") {
-      const vehicleSection = new VehicleManagement(this.container);
-      const id = window.location.search.split("id=")[1];
-      const response = await Driver.findById(id);
-      vehicleSection.vehicleData = response.data;
-      vehicleSection.driverId = id;
-      vehicleSection.attachEventListeners();
-    }
   }
 
   renderSidebar() {
@@ -111,6 +101,7 @@ class DriverDashboard {
 
   attachEventListeners() {
     const navItems = this.container.querySelectorAll(".nav-item");
+
     navItems.forEach((item) => {
       item.addEventListener("click", (e) => {
         const section = e.currentTarget.dataset.section;
@@ -119,18 +110,9 @@ class DriverDashboard {
     });
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
-    const logoutBtnHeader = this.container.querySelector("#logoutBtnHeader");
 
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
-      });
-    }
-
-    if (logoutBtnHeader) {
-      logoutBtnHeader.addEventListener("click", () => {
         import("../login.js").then((module) => {
           module.renderLogin(this.container);
         });
@@ -143,20 +125,17 @@ class DriverDashboard {
 
   async navigateToSection(section) {
     this.currentSection = section;
-    const content = this.container.querySelector("#dashboardContent");
-    const sectionContent = await this.renderSection(section);
-    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
-    if (section === "vehicle") {
-      const vehicleSection = new VehicleManagement(this.container);
-      const id = window.location.search.split("id=")[1];
-      const response = await Driver.findById(id);
-      vehicleSection.vehicleData = response.data;
-      vehicleSection.driverId = id;
-      vehicleSection.attachEventListeners();
-    }
+    const content = this.container.querySelector("#dashboardContent");
+
+    content.innerHTML = `
+      <div class="p-8">
+        ${sectionContent}
+      </div>
+    `;
 
     const navItems = this.container.querySelectorAll(".nav-item");
+
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
         item.className =
@@ -167,18 +146,9 @@ class DriverDashboard {
       }
     });
   }
-
-  getCurrentVehicleData() {
-    return {
-      vehicleId: null,
-      vehicleType: null,
-      licenseNumber: null,
-      currentLocation: null,
-    };
-  }
 }
 
 export async function renderDriverDashboard(container) {
-  window.driverDashboard = new DriverDashboard(container);
-  await window.driverDashboard.render();
+  const dashboard = new DriverDashboard(container);
+  dashboard.render();
 }
