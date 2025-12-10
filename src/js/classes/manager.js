@@ -13,19 +13,18 @@ class ManagerDashboard {
     this.container = container;
     this.currentSection = "overview";
     this.sections = {
-      overview: new EmployeeOversight(this.container),
-      tasks: new TaskAssignment(this.container),
-      reports: new OperationalReports(this.container),
-      stock: new StockManagement(this.container),
-      feedback: new CustomerFeedback(this.container),
-      delivery: new DeliveryTracking(this.container),
+      overview: document.createElement("employee-oversight"),
+      tasks: document.createElement("task-assignment"),
+      reports: document.createElement("operational-reports"),
+      stock: document.createElement("stock-management"),
+      feedback: document.createElement("customer-feedback"),
+      delivery: document.createElement("delivery-tracking"),
     };
     this.notificationPanel = new NotificationPanel(this.container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
 
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
@@ -34,14 +33,13 @@ class ManagerDashboard {
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="flex-1 overflow-auto w-full">
-            <div class="p-8">
-              ${sectionContent}
-            </div>
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -103,9 +101,17 @@ class ManagerDashboard {
   }
 
   async renderSection(section) {
-    const sectionInstance = this.sections[section];
+    return "";
+  }
 
-    return sectionInstance.render();
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
+    
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
+    }
   }
 
   attachEventListeners() {
@@ -128,15 +134,13 @@ class ManagerDashboard {
     }
 
     window.notificationPanel = this.notificationPanel;
+    window.managerDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
-    
-    const content = this.container.querySelector("#dashboardContent");
-    
-    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+    this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".manager-nav-item");
     
