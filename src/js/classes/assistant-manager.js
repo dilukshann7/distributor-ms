@@ -1,6 +1,10 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
+import { DeliveryStockMaintenance } from "./assistant-manager/DeliveryStockMaintenance.js";
+import { DriverManagement } from "./assistant-manager/DriverManagement.js";
+import { DistributionRecords } from "./assistant-manager/DistributionRecords.js";
+import { PaymentVerification } from "./assistant-manager/PaymentVerification.js";
 
 class AssistantManagerDashboard {
   constructor(container) {

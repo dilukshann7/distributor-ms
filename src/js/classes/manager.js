@@ -1,6 +1,12 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
+import { EmployeeOversight } from "./manager/EmployeeOversight.js";
+import { TaskAssignment } from "./manager/TaskAssignment.js";
+import { OperationalReports } from "./manager/OperationalReports.js";
+import { StockManagement } from "./manager/StockManagement.js";
+import { CustomerFeedback } from "./manager/CustomerFeedback.js";
+import { DeliveryTracking } from "./manager/DeliveryTracking.js";
 
 class ManagerDashboard {
   constructor(container) {

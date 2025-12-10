@@ -1,6 +1,12 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
+import { OrderManagement } from "./distributor/OrderManagement.js";
+import { DriverManagementDist } from "./distributor/DriverManagementDist.js";
+import { StockTracking } from "./distributor/StockTracking.js";
+import { DeliveryRoutes } from "./distributor/DeliveryRoutes.js";
+import { ProofOfDelivery } from "./distributor/ProofOfDelivery.js";
+import { OrderAuthorization } from "./distributor/OrderAuthorization.js";
 
 class DistributorDashboard {
   constructor(container) {
@@ -19,7 +25,7 @@ class DistributorDashboard {
 
   async render() {
     await this.notificationPanel.loadTasks();
-    
+
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}

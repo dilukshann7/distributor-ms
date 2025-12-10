@@ -1,6 +1,10 @@
 import { getIconHTML } from "../../assets/icons/index.js";
 import logo from "../../assets/logo-tr.png";
 import { NotificationPanel } from "../components/NotificationPanel.js";
+import { EmployeeManagement } from "./owner/EmployeeManagement.js";
+import { InventoryControl } from "./owner/InventoryControl.js";
+import { OperationsMonitor } from "./owner/OperationsMonitor.js";
+import { ReportsSection } from "./owner/ReportsSection.js";
 
 class OwnerDashboard {
   constructor(container) {
