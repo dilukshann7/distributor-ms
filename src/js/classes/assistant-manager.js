@@ -10,7 +10,6 @@ class AssistantManagerDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "payments";
-    this.isSidebarOpen = true;
     this.sections = {
       payments: new PaymentVerification(this.container),
       "delivery-stock": new DeliveryStockMaintenance(this.container),
@@ -98,6 +97,7 @@ class AssistantManagerDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
+
     return sectionInstance.render();
   }
 
@@ -112,6 +112,7 @@ class AssistantManagerDashboard {
     });
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
+
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
         import("../login.js").then((module) => {
@@ -128,6 +129,7 @@ class AssistantManagerDashboard {
     this.currentSection = section;
 
     const content = this.container.querySelector("#dashboardContent");
+
     content.innerHTML = `
       <div class="p-8">
         ${await this.renderSection(section)}
