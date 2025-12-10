@@ -1,9 +1,6 @@
 import logo from "../../assets/logo-tr.png";
 import "../../css/stock-keeper-style.css";
 import { NotificationPanel } from "../components/NotificationPanel.js";
-import { InventoryManagement } from "./stock-keeper/InventoryManagement.js";
-import { ReceivingShipment } from "./stock-keeper/ReceivingShipment.js";
-import { StockReports } from "./stock-keeper/StockReports.js";
 import { getIconHTML } from "../../assets/icons/index.js";
 
 class StockKeeperDashboard {
@@ -11,16 +8,15 @@ class StockKeeperDashboard {
     this.container = container;
     this.currentSection = "inventory";
     this.sections = {
-      inventory: new InventoryManagement(this.container),
-      receiving: new ReceivingShipment(this.container),
-      reports: new StockReports(this.container),
+      inventory: document.createElement("inventory-management"),
+      receiving: document.createElement("receiving-shipment"),
+      reports: document.createElement("stock-reports"),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
 
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
@@ -28,15 +24,14 @@ class StockKeeperDashboard {
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
-          <main id="dashboardContent" class="flex-1 overflow-auto">
-            <div class="p-8">
-              ${sectionContent}
-            </div>
+          <main id="dashboardContent" class="flex-1 overflow-auto w-full">
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -91,10 +86,14 @@ class StockKeeperDashboard {
     `;
   }
 
-  async renderSection(section) {
-    const sectionInstance = this.sections[section];
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
 
-    return sectionInstance.render();
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
+    }
   }
 
   attachEventListeners() {
@@ -117,19 +116,13 @@ class StockKeeperDashboard {
     }
 
     window.notificationPanel = this.notificationPanel;
+    window.stockKeeperDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
-
-    const content = this.container.querySelector("#dashboardContent");
-
-    content.innerHTML = `
-      <div class="p-8">
-          ${sectionContent}
-      </div>
-    `;
+    this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
