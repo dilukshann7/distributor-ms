@@ -1,10 +1,19 @@
+import { LitElement, html } from "lit";
 import { Delivery } from "../../models/Delivery.js";
 
-export class DeliveryTracking {
-  constructor(container) {
-    this.container = container;
+export class DeliveryTracking extends LitElement {
+  static properties = {
+    deliveries: { type: Array },
+  };
+
+  constructor() {
+    super();
     this.deliveries = [];
     this.getDeliveries();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getDeliveries() {
@@ -18,7 +27,7 @@ export class DeliveryTracking {
   }
 
   render() {
-    return `
+    return html`
       <div class="space-y-6">
         <div>
           <h3 class="manager-header-title">Delivery Tracking</h3>
@@ -39,41 +48,28 @@ export class DeliveryTracking {
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                ${this.deliveries
-                  .map(
-                    (delivery) => `
-                  <tr class="manager-table-row">
-                    <td class="manager-table-td font-medium text-gray-900">${
-                      delivery.deliveryNumber
-                    }</td>
-                    <td class="manager-table-td text-gray-600">${
-                      delivery.driver.user.name
-                    }</td>
-                    <td class="manager-table-td text-gray-900">${
-                      delivery.deliveryAddress
-                    }</td>
-                    <td class="manager-table-td">
-                      <span class="manager-badge ${
-                        delivery.status === "Delivered"
-                          ? "manager-badge-green"
-                          : delivery.status === "In Transit"
-                          ? "manager-badge-blue"
-                          : "manager-badge-yellow"
-                      }">
-                        ${delivery.status}
-                      </span>
-                    </td>
-                    <td class="manager-table-td text-gray-600">${new Date(
-                      delivery.scheduledDate
-                    ).toLocaleString()}</td>
-                    <td class="manager-table-td text-gray-600">${new Date(
-                      delivery.deliveredDate
-                    ).toLocaleString()}</td>
-                    
-                  </tr>
-                `
-                  )
-                  .join("")}
+                ${this.deliveries.map(
+                  (delivery) => html`
+                    <tr class="manager-table-row">
+                      <td class="manager-table-td font-medium text-gray-900">${delivery.deliveryNumber}</td>
+                      <td class="manager-table-td text-gray-600">${delivery.driver.user.name}</td>
+                      <td class="manager-table-td text-gray-900">${delivery.deliveryAddress}</td>
+                      <td class="manager-table-td">
+                        <span class="manager-badge ${
+                          delivery.status === "Delivered"
+                            ? "manager-badge-green"
+                            : delivery.status === "In Transit"
+                            ? "manager-badge-blue"
+                            : "manager-badge-yellow"
+                        }">
+                          ${delivery.status}
+                        </span>
+                      </td>
+                      <td class="manager-table-td text-gray-600">${new Date(delivery.scheduledDate).toLocaleString()}</td>
+                      <td class="manager-table-td text-gray-600">${new Date(delivery.deliveredDate).toLocaleString()}</td>
+                    </tr>
+                  `
+                )}
               </tbody>
             </table>
           </div>
@@ -82,3 +78,5 @@ export class DeliveryTracking {
     `;
   }
 }
+
+customElements.define("delivery-tracking", DeliveryTracking);

@@ -1,10 +1,19 @@
+import { LitElement, html } from "lit";
 import { Feedback } from "../../models/Feedback.js";
 
-export class CustomerFeedback {
-  constructor(container) {
-    this.container = container;
+export class CustomerFeedback extends LitElement {
+  static properties = {
+    feedback: { type: Array },
+  };
+
+  constructor() {
+    super();
     this.feedback = [];
     this.getFeedback();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getFeedback() {
@@ -18,38 +27,32 @@ export class CustomerFeedback {
   }
 
   render() {
-    return `
+    return html`
       <div class="space-y-6">
         <div>
           <h3 class="manager-header-title">Customer Feedback</h3>
           <p class="manager-header-subtitle">Review and respond to customer feedback</p>
         </div>
         <div class="space-y-4">
-          ${this.feedback
-            .map(
-              (item) => `
-            <div class="manager-card">
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-3">
-                    <h4 class="font-semibold text-gray-900">${
-                      item.customer.name
-                    }</h4>
-                    
-                    <span class="text-xs text-gray-500">${new Date(
-                      item.createdAt
-                    ).toLocaleDateString()}</span>
+          ${this.feedback.map(
+            (item) => html`
+              <div class="manager-card">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-3">
+                      <h4 class="font-semibold text-gray-900">${item.customer.name}</h4>
+                      <span class="text-xs text-gray-500">${new Date(item.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p class="text-gray-600 mt-2">${item.comment}</p>
                   </div>
-                  <p class="text-gray-600 mt-2">${item.comment}</p>
-                  
                 </div>
               </div>
-            </div>
-          `
-            )
-            .join("")}
+            `
+          )}
         </div>
       </div>
     `;
   }
 }
+
+customElements.define("customer-feedback", CustomerFeedback);

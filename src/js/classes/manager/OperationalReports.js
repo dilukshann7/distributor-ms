@@ -1,11 +1,18 @@
+import { LitElement, html } from "lit";
 import { getIconHTML } from "../../../assets/icons/index.js";
 import { Product } from "../../models/Product.js";
 import { SalesOrder } from "../../models/SalesOrder.js";
 import { User } from "../../models/User.js";
 
-export class OperationalReports {
-  constructor(container) {
-    this.container = container;
+export class OperationalReports extends LitElement {
+  static properties = {};
+
+  constructor() {
+    super();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   exportEmployeeReport() {
@@ -40,7 +47,7 @@ export class OperationalReports {
   }
 
   render() {
-    return `
+    return html`
         <div class=" space-y-6">
           <div class="flex items-center justify-between">
             <div>
@@ -67,8 +74,8 @@ export class OperationalReports {
               </div>
 
               <div class="grid grid-cols-1 gap-4">
-                <button onclick="window.managerDashboard.sections.reports.exportSalesReport()" class="manager-btn-large">
-                  ${getIconHTML("download")}
+                <button @click=${this.exportSalesReport} class="manager-btn-large">
+                  <div .innerHTML=${getIconHTML("download")}></div>
                   Generate Sales Report
                 </button>
               </div>
@@ -81,9 +88,9 @@ export class OperationalReports {
 
               <div class="grid grid-cols-1 gap-4">
                 <button 
-                  onclick="window.managerDashboard.sections.reports.exportInventoryReport()"
+                  @click=${this.exportInventoryReport}
                   class="manager-btn-large">
-                    ${getIconHTML("download")}
+                    <div .innerHTML=${getIconHTML("download")}></div>
                     Generate Inventory Report
                 </button>
               </div>
@@ -96,9 +103,9 @@ export class OperationalReports {
 
               <div class="grid grid-cols-1 gap-4">
                 <button 
-                  onclick="window.managerDashboard.sections.reports.exportEmployeeReport()" 
+                  @click=${this.exportEmployeeReport} 
                   class="manager-btn-large">
-                    ${getIconHTML("download")}
+                    <div .innerHTML=${getIconHTML("download")}></div>
                     Generate Employee Report
                 </button>
               </div>
@@ -109,3 +116,5 @@ export class OperationalReports {
       `;
   }
 }
+
+customElements.define("operational-reports", OperationalReports);

@@ -1,16 +1,28 @@
+import { LitElement, html } from "lit";
 import { Product } from "../../models/Product.js";
 import { Supplier } from "../../models/Supplier.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
-export class StockManagement {
-  constructor(container) {
-    this.container = container;
+export class StockManagement extends LitElement {
+  static properties = {
+    inventory: { type: Array },
+    suppliers: { type: Array },
+    view: { type: String },
+    editingProduct: { type: Object },
+  };
+
+  constructor() {
+    super();
     this.inventory = [];
     this.suppliers = [];
     this.view = "list";
     this.editingProduct = null;
     this.getProducts();
     this.getSuppliers();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getProducts() {
@@ -36,30 +48,16 @@ export class StockManagement {
 
   showAddFormHandler() {
     this.view = "add";
-    this.view = "add";
-    this.container.querySelector(
-      "#dashboardContent"
-    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
   }
 
   showEditFormHandler(productId) {
     this.editingProduct = this.inventory.find((p) => p.id === productId);
     this.view = "edit";
-    this.editingProduct = this.inventory.find((p) => p.id === productId);
-    this.view = "edit";
-    this.container.querySelector(
-      "#dashboardContent"
-    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
   }
 
   hideFormHandler() {
     this.view = "list";
     this.editingProduct = null;
-    this.view = "list";
-    this.editingProduct = null;
-    this.container.querySelector(
-      "#dashboardContent"
-    ).innerHTML = `<div class="p-8">${this.render()}</div>`;
   }
 
   submitAddForm(e) {
@@ -159,15 +157,15 @@ export class StockManagement {
   }
 
   renderList() {
-    return `
+    return html`
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
             <h3 class="manager-header-title">Stock Management</h3>
             <p class="manager-header-subtitle">Monitor and manage inventory levels</p>
           </div>
-          <button onclick="window.managerDashboard.sections.stock.showAddFormHandler()" class="manager-btn-primary">
-            ${getIconHTML("plus")}
+          <button @click=${this.showAddFormHandler} class="manager-btn-primary">
+            <div .innerHTML=${getIconHTML("plus")}></div>
             Add Product
           </button>
         </div>
@@ -186,21 +184,12 @@ export class StockManagement {
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                ${this.inventory
-                  .map(
-                    /*html*/
-                    (item) => `
+                ${this.inventory.map((item) => html`
                   <tr class="manager-table-row">
-                    <td class="manager-table-td font-medium text-gray-900">${
-                      item.name
-                    }</td>
+                    <td class="manager-table-td font-medium text-gray-900">${item.name}</td>
                     <td class="manager-table-td text-gray-600">${item.sku}</td>
-                    <td class="manager-table-td text-gray-900">${
-                      item.quantity
-                    } units</td>
-                    <td class="manager-table-td text-gray-900">${
-                      item.minStock
-                    } units</td>
+                    <td class="manager-table-td text-gray-900">${item.quantity} units</td>
+                    <td class="manager-table-td text-gray-900">${item.minStock} units</td>
                     <td class="manager-table-td">
                       <span class="manager-badge ${
                         item.status === "In Stock"
@@ -213,21 +202,15 @@ export class StockManagement {
                       </span>
                     </td>
                     <td class="manager-table-td flex gap-2">
-                      <button onclick="window.managerDashboard.sections.stock.showEditFormHandler(${
-                        item.id
-                      })" class="manager-btn-icon-blue">
-                        ${getIconHTML("edit")}
+                      <button @click=${() => this.showEditFormHandler(item.id)} class="manager-btn-icon-blue">
+                        <div .innerHTML=${getIconHTML("edit")}></div>
                       </button>
-                      <button onclick="window.managerDashboard.sections.stock.deleteProductHandler(${
-                        item.id
-                      })" class="manager-btn-icon-red">
-                        ${getIconHTML("trash")}
+                      <button @click=${() => this.deleteProductHandler(item.id)} class="manager-btn-icon-red">
+                        <div .innerHTML=${getIconHTML("trash")}></div>
                       </button>
                     </td>
                   </tr>
-                `
-                  )
-                  .join("")}
+                `)}
               </tbody>
             </table>
           </div>
@@ -237,7 +220,7 @@ export class StockManagement {
   }
 
   renderAddForm() {
-    return `
+    return html`
       <div class="max-w-4xl mx-auto animate-fade-in">
         <div class="flex items-center justify-between mb-8">
           <div>
@@ -246,15 +229,12 @@ export class StockManagement {
           </div>
         </div>
 
-        <form id="addProductForm" class="manager-card-overflow" onsubmit="window.managerDashboard.sections.stock.submitAddForm(event)">
+        <form id="addProductForm" class="manager-card-overflow" @submit=${this.submitAddForm}>
           <div class="p-8 space-y-8">
             
             <div>
               <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                ${getIconHTML("package").replace(
-                  'class="w-5 h-5"',
-                  'class="w-5 h-5 text-emerald-600"'
-                )}
+                <div class="w-5 h-5 text-emerald-600" .innerHTML=${getIconHTML("package")}></div>
                 Product Information
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -282,12 +262,9 @@ export class StockManagement {
                   <label class="block text-sm font-semibold text-gray-700">Supplier <span class="text-gray-400 font-normal">(Optional)</span></label>
                   <select name="supplierId" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                     <option value="">Select Supplier</option>
-                    ${this.suppliers
-                      .map(
-                        (supplier) =>
-                          `<option value="${supplier.id}">${supplier.companyName}</option>`
-                      )
-                      .join("")}
+                    ${this.suppliers.map((supplier) => html`
+                      <option value=${supplier.id}>${supplier.companyName}</option>
+                    `)}
                   </select>
                 </div>
 
@@ -351,11 +328,11 @@ export class StockManagement {
           </div>
 
           <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" onclick="window.managerDashboard.sections.stock.hideFormHandler()" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors">
+            <button type="button" @click=${this.hideFormHandler} class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors">
               Cancel
             </button>
             <button type="submit" class="manager-btn-primary">
-              ${getIconHTML("check-circle")}
+              <div .innerHTML=${getIconHTML("check-circle")}></div>
               Add Product
             </button>
           </div>
@@ -368,7 +345,7 @@ export class StockManagement {
     const product = this.editingProduct;
     if (!product) return this.renderList();
 
-    return `
+    return html`
       <div class="max-w-4xl mx-auto animate-fade-in">
         <div class="flex items-center justify-between mb-8">
           <div>
@@ -377,67 +354,49 @@ export class StockManagement {
           </div>
         </div>
 
-        <form id="editProductForm" class="manager-card-overflow" onsubmit="window.managerDashboard.sections.stock.submitEditForm(event)">
+        <form id="editProductForm" class="manager-card-overflow" @submit=${this.submitEditForm}>
           <div class="p-8 space-y-8">
             
             <!-- Product Information -->
             <div>
               <h4 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                ${getIconHTML("package").replace(
-                  'class="w-5 h-5"',
-                  'class="w-5 h-5 text-emerald-600"'
-                )}
+                <div class="w-5 h-5 text-emerald-600" .innerHTML=${getIconHTML("package")}></div>
                 Product Information
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Product Name <span class="text-red-600">*</span></label>
-                  <input type="text" name="name" required value="${
-                    product.name
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Laptop HP ProBook">
+                  <input type="text" name="name" required .value=${product.name} class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Laptop HP ProBook">
                 </div>
                 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">SKU <span class="text-red-600">*</span></label>
-                  <input type="text" name="sku" required value="${
-                    product.sku
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. SKU-001">
+                  <input type="text" name="sku" required .value=${product.sku} class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. SKU-001">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Category <span class="text-red-600">*</span></label>
-                  <input type="text" name="category" required value="${
-                    product.category || ""
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Electronics">
+                  <input type="text" name="category" required .value=${product.category || ""} class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Electronics">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Price (Rs.) <span class="text-red-600">*</span></label>
-                  <input type="number" name="price" required step="0.01" min="0" value="${
-                    product.price
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 1500.00">
+                  <input type="number" name="price" required step="0.01" min="0" .value=${product.price} class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 1500.00">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Supplier <span class="text-gray-400 font-normal">(Optional)</span></label>
                   <select name="supplierId" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                     <option value="">Select Supplier</option>
-                    ${this.suppliers
-                      .map(
-                        (supplier) =>
-                          `<option value="${supplier.id}" ${
-                            product.supplierId === supplier.id ? "selected" : ""
-                          }>${supplier.companyName}</option>`
-                      )
-                      .join("")}
+                    ${this.suppliers.map((supplier) => html`
+                      <option value=${supplier.id} ?selected=${product.supplierId === supplier.id}>${supplier.companyName}</option>
+                    `)}
                   </select>
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
                   <label class="block text-sm font-semibold text-gray-700">Description <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <textarea name="description" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Product description">${
-                    product.description || ""
-                  }</textarea>
+                  <textarea name="description" rows="3" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Product description">${product.description || ""}</textarea>
                 </div>
               </div>
             </div>
@@ -454,60 +413,40 @@ export class StockManagement {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Quantity <span class="text-red-600">*</span></label>
-                  <input type="number" name="quantity" required min="0" value="${
-                    product.quantity
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 100">
+                  <input type="number" name="quantity" required min="0" .value=${product.quantity} class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 100">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Min Stock <span class="text-red-600">*</span></label>
-                  <input type="number" name="minStock" required min="0" value="${
-                    product.minStock
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 10">
+                  <input type="number" name="minStock" required min="0" .value=${product.minStock} class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 10">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Max Stock <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="number" name="maxStock" min="0" value="${
-                    product.maxStock || ""
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 1000">
+                  <input type="number" name="maxStock" min="0" .value=${product.maxStock || ""} class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. 1000">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Location <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="text" name="location" value="${
-                    product.location || ""
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Warehouse A">
+                  <input type="text" name="location" .value=${product.location || ""} class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. Warehouse A">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Batch Number <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="text" name="batchNumber" value="${
-                    product.batchNumber || ""
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. BATCH-2024-001">
+                  <input type="text" name="batchNumber" .value=${product.batchNumber || ""} class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g. BATCH-2024-001">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Expiry Date <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <input type="date" name="expiryDate" value="${
-                    product.expiryDate
-                      ? new Date(product.expiryDate).toISOString().split("T")[0]
-                      : ""
-                  }" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                  <input type="date" name="expiryDate" .value=${product.expiryDate ? new Date(product.expiryDate).toISOString().split("T")[0] : ""} class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
                 </div>
 
                 <div class="space-y-2">
                   <label class="block text-sm font-semibold text-gray-700">Status</label>
                   <select name="status" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
-                    <option value="In Stock" ${
-                      product.status === "In Stock" ? "selected" : ""
-                    }>In Stock</option>
-                    <option value="Low Stock" ${
-                      product.status === "Low Stock" ? "selected" : ""
-                    }>Low Stock</option>
-                    <option value="Out of Stock" ${
-                      product.status === "Out of Stock" ? "selected" : ""
-                    }>Out of Stock</option>
+                    <option value="In Stock" ?selected=${product.status === "In Stock"}>In Stock</option>
+                    <option value="Low Stock" ?selected=${product.status === "Low Stock"}>Low Stock</option>
+                    <option value="Out of Stock" ?selected=${product.status === "Out of Stock"}>Out of Stock</option>
                   </select>
                 </div>
               </div>
@@ -515,11 +454,11 @@ export class StockManagement {
           </div>
 
           <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" onclick="window.managerDashboard.sections.stock.hideFormHandler()" class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors">
+            <button type="button" @click=${this.hideFormHandler} class="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors">
               Cancel
             </button>
             <button type="submit" class="manager-btn-primary">
-              ${getIconHTML("check-circle")}
+              <div .innerHTML=${getIconHTML("check-circle")}></div>
               Update Product
             </button>
           </div>
@@ -528,3 +467,5 @@ export class StockManagement {
     `;
   }
 }
+
+customElements.define("stock-management", StockManagement);
