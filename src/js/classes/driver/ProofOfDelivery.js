@@ -170,4 +170,4 @@ export class ProofOfDelivery extends LitElement {
   }
 }
 
-customElements.define("proof-of-delivery", ProofOfDelivery);
+customElements.define("proof-of-delivery-driver", ProofOfDelivery);
