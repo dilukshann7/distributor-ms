@@ -1,13 +1,11 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
-import "../../css/supplier-style.css";
 import { NotificationPanel } from "../components/NotificationPanel.js";
 import { PurchaseOrders } from "./supplier/PurchaseOrders.js";
 import { ProductCatalog } from "./supplier/ProductCatalog.js";
 import { ShipmentTracking } from "./supplier/ShipmentTracking.js";
 import { InvoicesPayments } from "./supplier/InvoicesPayments.js";
 import { SalesAnalytics } from "./supplier/SalesAnalytics.js";
-import { Supplier } from "../../js/models/Supplier.js";
 
 class SupplierDashboard {
   constructor(container) {
@@ -21,7 +19,6 @@ class SupplierDashboard {
       analytics: new SalesAnalytics(container),
     };
     this.notificationPanel = new NotificationPanel(container);
-    this.supplierName = this.loadSupplier();
   }
 
   async render() {
@@ -41,13 +38,6 @@ class SupplierDashboard {
         </div>
       </div>
     `;
-  }
-
-  async loadSupplier() {
-    const id = window.location.search.split("id=")[1];
-    const response = await Supplier.findById(id);
-    const SupplierName = response.data.companyName;
-    this.supplierName = SupplierName;
   }
 
   renderSidebar() {
@@ -119,36 +109,34 @@ class SupplierDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
-
     return sectionInstance.render();
   }
 
-  async navigateToSection(section) {
-    this.currentSection = section;
-    const content = this.container.querySelector("#dashboardContent");
-    const sectionContent = await this.renderSection(section);
-    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+  attachEventListeners() {
+    const navItems = this.container.querySelectorAll(".nav-item");
 
-    const buttons = this.container.querySelectorAll(".nav-item");
-    buttons.forEach((btn) => {
-      if (btn.dataset.section === section) {
-        btn.className = "nav-item nav-item-active";
-      } else {
-        btn.className = "nav-item nav-item-inactive";
-      }
+    navItems.forEach((item) => {
+      item.addEventListener("click", (e) => {
+        const section = e.currentTarget.dataset.section;
+        this.navigateToSection(section);
+      });
     });
-  }
 
-  logout() {
-    import("../login.js").then((module) => {
-      module.renderLogin(this.container);
-    });
+    const logoutBtn = this.container.querySelector("#logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        import("../login.js").then((module) => {
+          module.renderLogin(this.container);
+        });
+      });
+    }
+
+    window.notificationPanel = this.notificationPanel;
+    this.notificationPanel.attachEventListeners();
   }
 }
 
 export async function renderSupplierDashboard(container) {
-  window.supplierDashboard = new SupplierDashboard(container);
-  window.notificationPanel = window.supplierDashboard.notificationPanel;
-  window.supplierDashboard.notificationPanel.attachEventListeners();
-  await window.supplierDashboard.render();
+  const dashboard = new SupplierDashboard(container);
+  dashboard.render();
 }
