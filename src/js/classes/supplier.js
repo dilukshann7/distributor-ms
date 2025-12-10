@@ -1,6 +1,11 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
+import { PurchaseOrders } from "./supplier/PurchaseOrders.js";
+import { ProductCatalog } from "./supplier/ProductCatalog.js";
+import { ShipmentTracking } from "./supplier/ShipmentTracking.js";
+import { InvoicesPayments } from "./supplier/InvoicesPayments.js";
+import { SalesAnalytics } from "./supplier/SalesAnalytics.js";
 
 class SupplierDashboard {
   constructor(container) {
