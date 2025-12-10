@@ -1,15 +1,27 @@
+import { LitElement, html } from "lit";
 import { Supply } from "../../models/Supply.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
-export class ProductCatalog {
-  constructor(container) {
-    this.container = container;
+export class ProductCatalog extends LitElement {
+  static properties = {
+    products: { type: Array },
+    view: { type: String },
+    editingProduct: { type: Object },
+    supplierId: { type: String },
+  };
+
+  constructor() {
+    super();
     this.products = [];
     this.view = "list";
     this.editingProduct = null;
     this.supplierId = null;
     this.getSupplierId();
     this.getSupply();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   getSupplierId() {
@@ -23,6 +35,7 @@ export class ProductCatalog {
       this.products = response.data.filter(
         (product) => product.supplierId === parseInt(this.supplierId, 10)
       );
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching supplies:", error);
       this.products = [];
@@ -32,7 +45,7 @@ export class ProductCatalog {
   switchToAdd() {
     this.view = "add";
     this.editingProduct = null;
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   switchToEdit(productId) {
@@ -40,13 +53,13 @@ export class ProductCatalog {
       (p) => p.id === parseInt(productId)
     );
     this.view = "edit";
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   switchToList() {
     this.view = "list";
     this.editingProduct = null;
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   submitAddForm(e) {
@@ -369,4 +382,18 @@ export class ProductCatalog {
       </div>
     `;
   }
+
+  updated() {
+    const addForm = this.querySelector("#addProductForm");
+    const editForm = this.querySelector("#editProductForm");
+    
+    if (addForm) {
+      addForm.addEventListener("submit", (e) => this.submitAddForm(e));
+    }
+    if (editForm) {
+      editForm.addEventListener("submit", (e) => this.submitEditForm(e));
+    }
+  }
 }
+
+customElements.define("product-catalog", ProductCatalog);

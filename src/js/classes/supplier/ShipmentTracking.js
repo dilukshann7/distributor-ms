@@ -1,10 +1,19 @@
+import { LitElement, html } from "lit";
 import { Shipment } from "../../models/Shipment.js";
 
-export class ShipmentTracking {
-  constructor(container) {
-    this.container = container;
+export class ShipmentTracking extends LitElement {
+  static properties = {
+    shipments: { type: Array },
+  };
+
+  constructor() {
+    super();
     this.shipments = [];
     this.getShipments();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getShipments() {
@@ -14,6 +23,7 @@ export class ShipmentTracking {
       this.shipments = response.data.filter(
         (shipment) => shipment.supplierId === Number(id)
       );
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching shipments:", error);
       this.shipments = [];
@@ -21,7 +31,7 @@ export class ShipmentTracking {
   }
 
   render() {
-    return `
+    return html`
       <div class="space-y-6">
         <div>
           <h3 class="section-header">Shipment Tracking</h3>
@@ -47,7 +57,7 @@ export class ShipmentTracking {
               <tbody>
                 ${this.shipments
                   .map(
-                    (shipment) => `
+                    (shipment) => html`
                   <tr class="table-row">
                     <td class="table-cell-bold">${shipment.id}</td>
                     <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${
@@ -82,8 +92,7 @@ export class ShipmentTracking {
                     
                   </tr>
                 `
-                  )
-                  .join("")}
+                  )}
               </tbody>
             </table>
           </div>
@@ -92,3 +101,5 @@ export class ShipmentTracking {
     `;
   }
 }
+
+customElements.define("shipment-tracking", ShipmentTracking);
