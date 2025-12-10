@@ -1,15 +1,26 @@
+import { LitElement, html } from "lit";
 import { SalesOrder } from "../../models/SalesOrder.js";
 import { Driver } from "../../models/Driver.js";
 import { Delivery } from "../../models/Delivery.js";
 
-export class OrderAuthorization {
-  constructor(container) {
-    this.container = container;
+export class OrderAuthorization extends LitElement {
+  static properties = {
+    pendingOrders: { type: Array },
+    drivers: { type: Array },
+    selectedDrivers: { type: Object },
+  };
+
+  constructor() {
+    super();
     this.pendingOrders = [];
     this.drivers = [];
     this.selectedDrivers = {};
     this.getPendingOrders();
     this.getDrivers();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getPendingOrders() {
@@ -18,6 +29,7 @@ export class OrderAuthorization {
       this.pendingOrders = response.data.filter(
         (order) => order.status === "pending"
       );
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching sales orders:", error);
       this.pendingOrders = [];
@@ -28,6 +40,7 @@ export class OrderAuthorization {
     try {
       const response = await Driver.getAll();
       this.drivers = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching drivers:", error);
       this.drivers = [];
@@ -36,6 +49,7 @@ export class OrderAuthorization {
 
   selectDriver(orderId, driverId) {
     this.selectedDrivers[orderId] = driverId;
+    this.requestUpdate();
   }
 
   async approveOrder(orderId) {
@@ -237,12 +251,12 @@ export class OrderAuthorization {
                 </div>
               </div>
             `
-                    )
-                    .join("")
-            }
+                    )}
           </div>
         </div>
       </div>
     `;
   }
 }
+
+customElements.define("order-authorization", OrderAuthorization);

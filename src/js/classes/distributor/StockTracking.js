@@ -1,16 +1,26 @@
+import { LitElement, html } from "lit";
 import { Product } from "../../models/Product.js";
 
-export class StockTracking {
-  constructor(container) {
-    this.container = container;
+export class StockTracking extends LitElement {
+  static properties = {
+    stockLocations: { type: Array },
+  };
+
+  constructor() {
+    super();
     this.stockLocations = [];
     this.getInventoryItems();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getInventoryItems() {
     try {
       const response = await Product.getAll();
       this.stockLocations = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching inventory items:", error);
       this.stockLocations = [];
@@ -31,7 +41,7 @@ export class StockTracking {
   }
 
   render() {
-    return `
+    return html`
       <div class="space-y-6">
         <div>
           <h3 class="text-2xl font-bold text-gray-800">Stock Location Tracking</h3>
@@ -55,28 +65,26 @@ export class StockTracking {
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                ${this.stockLocations
-                  .map(
-                    (item) => `
-                  <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="dist-table-td font-semibold text-gray-800">${
-                      item.id
-                    }</td>
-                    <td class="dist-table-td text-gray-700">${item.name}</td>
-                    <td class="dist-table-td text-gray-700">${
-                      item.quantity
-                    } units</td>
-                    <td class="dist-table-td text-gray-700 flex items-center gap-2">
-                      <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                      ${item.location}
-                    </td>
-                    <td class="dist-table-td text-gray-600 text-sm">${new Date(
-                      item.updatedAt
-                    ).toLocaleDateString()}</td>
-                  </tr>
-                `
-                  )
-                  .join("")}
+                ${this.stockLocations.map(
+                  (item) => html`
+                    <tr class="hover:bg-gray-50 transition-colors">
+                      <td class="dist-table-td font-semibold text-gray-800">
+                        ${item.id}
+                      </td>
+                      <td class="dist-table-td text-gray-700">${item.name}</td>
+                      <td class="dist-table-td text-gray-700">
+                        ${item.quantity} units
+                      </td>
+                      <td class="dist-table-td text-gray-700 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        ${item.location}
+                      </td>
+                      <td class="dist-table-td text-gray-600 text-sm">
+                        ${new Date(item.updatedAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  `
+                )}
               </tbody>
             </table>
           </div>
@@ -85,3 +93,5 @@ export class StockTracking {
     `;
   }
 }
+
+customElements.define("stock-tracking", StockTracking);
