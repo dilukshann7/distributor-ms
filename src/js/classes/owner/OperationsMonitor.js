@@ -1,11 +1,19 @@
+import { LitElement, html } from "lit";
 import { Task } from "../../models/Task.js";
-import { getIconHTML } from "../../../assets/icons/index.js";
 
-export class OperationsMonitor {
-  constructor(container) {
-    this.container = container;
+export class OperationsMonitor extends LitElement {
+  static properties = {
+    tasks: { type: Array },
+  };
+
+  constructor() {
+    super();
     this.tasks = [];
     this.getTasks();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getTasks() {
@@ -19,7 +27,7 @@ export class OperationsMonitor {
   }
 
   render() {
-    return `
+    return html`
       <div class="owner-section-container">
         <div>
           <h2 class="owner-title">Operations Monitor</h2>
@@ -28,20 +36,14 @@ export class OperationsMonitor {
         <div class="owner-card p-6">
           <h3 class="owner-section-title">Today's Tasks</h3>
           <div class="space-y-3">
-            ${this.tasks
-              .map(
-                (task) => `
+            ${this.tasks.map((task) => html`
               <div class="flex items-center justify-between p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                 <div class="flex-1">
                   <p class="font-medium text-gray-900">${task.title}</p>
-                  <p class="text-sm text-gray-500 mt-1">Assigned to: ${
-                    task.assignee.name
-                  }</p>
+                  <p class="text-sm text-gray-500 mt-1">Assigned to: ${task.assignee.name}</p>
                 </div>
                 <div class="flex items-center gap-4">
-                  <span class="text-sm text-gray-500">${new Date(
-                    task.dueDate
-                  ).toLocaleDateString()}</span>
+                  <span class="text-sm text-gray-500">${new Date(task.dueDate).toLocaleDateString()}</span>
                   <span class="owner-badge ${
                     task.status === "Completed"
                       ? "owner-badge-success"
@@ -53,12 +55,12 @@ export class OperationsMonitor {
                   </span>
                 </div>
               </div>
-            `
-              )
-              .join("")}
+            `)}
           </div>
         </div>
       </div>
     `;
   }
 }
+
+customElements.define("operations-monitor", OperationsMonitor);
