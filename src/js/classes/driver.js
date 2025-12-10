@@ -89,7 +89,6 @@ class DriverDashboard {
 
   renderCurrentSection() {
     const content = this.container.querySelector("#dashboardContent .driver-section-container");
-    if (!content) return;
 
     content.innerHTML = "";
 
