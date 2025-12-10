@@ -1,16 +1,29 @@
+import { LitElement, html } from "lit";
 import { Order } from "../../models/Order.js";
 import { Shipment } from "../../models/Shipment.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
-export class PurchaseOrders {
-  constructor(container) {
-    this.container = container;
+export class PurchaseOrders extends LitElement {
+  static properties = {
+    orders: { type: Array },
+    summary: { type: Array },
+    view: { type: String },
+    editingOrder: { type: Object },
+    convertingOrder: { type: Object },
+  };
+
+  constructor() {
+    super();
     this.orders = [];
     this.summary = [];
     this.view = "list";
     this.editingOrder = null;
     this.convertingOrder = null;
     this.getOrders();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getOrders() {
@@ -20,6 +33,7 @@ export class PurchaseOrders {
       this.orders = response.data.filter(
         (order) => order.supplierId === Number(id)
       );
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching orders:", error);
       this.orders = [];
@@ -29,20 +43,20 @@ export class PurchaseOrders {
   switchToEdit(orderId) {
     this.editingOrder = this.orders.find((o) => o.id === parseInt(orderId));
     this.view = "edit";
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   switchToConvert(orderId) {
     this.convertingOrder = this.orders.find((o) => o.id === parseInt(orderId));
     this.view = "convert";
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   switchToList() {
     this.view = "list";
     this.editingOrder = null;
     this.convertingOrder = null;
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   submitEditForm(e) {
@@ -422,4 +436,18 @@ export class PurchaseOrders {
       </div>
     `;
   }
+
+  updated() {
+    const editForm = this.querySelector("#editOrderForm");
+    const convertForm = this.querySelector("#convertShipmentForm");
+    
+    if (editForm) {
+      editForm.addEventListener("submit", (e) => this.submitEditForm(e));
+    }
+    if (convertForm) {
+      convertForm.addEventListener("submit", (e) => this.submitConvertForm(e));
+    }
+  }
 }
+
+customElements.define("purchase-orders", PurchaseOrders);

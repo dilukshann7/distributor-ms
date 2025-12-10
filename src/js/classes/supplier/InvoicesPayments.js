@@ -1,16 +1,28 @@
+import { LitElement, html } from "lit";
 import { Invoice } from "../../models/Invoice.js";
 import { Order } from "../../models/Order.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
-export class InvoicesPayments {
-  constructor(container) {
-    this.container = container;
+export class InvoicesPayments extends LitElement {
+  static properties = {
+    invoices: { type: Array },
+    orders: { type: Array },
+    view: { type: String },
+    viewingInvoice: { type: Object },
+  };
+
+  constructor() {
+    super();
     this.invoices = [];
     this.orders = [];
     this.view = "list";
     this.viewingInvoice = null;
     this.getInvoices();
     this.getOrders();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getInvoices() {
@@ -20,6 +32,7 @@ export class InvoicesPayments {
       this.invoices = response.data.filter(
         (invoice) => invoice.supplierId === id
       );
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching invoices:", error);
       this.invoices = [];
@@ -31,6 +44,7 @@ export class InvoicesPayments {
       const id = window.location.search.split("id=")[1];
       const response = await Order.getAll();
       this.orders = response.data.filter((order) => order.supplierId === id);
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching orders:", error);
       this.orders = [];
@@ -41,7 +55,7 @@ export class InvoicesPayments {
     this.view = "create";
     this.viewingInvoice = null;
     await this.getOrders();
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   switchToView(invoiceId) {
@@ -49,13 +63,13 @@ export class InvoicesPayments {
       (inv) => inv.id === parseInt(invoiceId)
     );
     this.view = "view";
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   switchToList() {
     this.view = "list";
     this.viewingInvoice = null;
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   submitForm(e) {
@@ -88,10 +102,10 @@ export class InvoicesPayments {
       });
   }
 
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+  updated() {
+    const createForm = this.querySelector("#createInvoiceForm");
+    if (createForm) {
+      createForm.addEventListener("submit", (e) => this.submitForm(e));
     }
   }
 
@@ -481,3 +495,5 @@ export class InvoicesPayments {
     `;
   }
 }
+
+customElements.define("invoices-payments", InvoicesPayments);

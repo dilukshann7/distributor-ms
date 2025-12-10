@@ -1,43 +1,38 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
-import { PurchaseOrders } from "./supplier/PurchaseOrders.js";
-import { ProductCatalog } from "./supplier/ProductCatalog.js";
-import { ShipmentTracking } from "./supplier/ShipmentTracking.js";
-import { InvoicesPayments } from "./supplier/InvoicesPayments.js";
-import { SalesAnalytics } from "./supplier/SalesAnalytics.js";
 
 class SupplierDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "orders";
     this.sections = {
-      orders: new PurchaseOrders(container),
-      products: new ProductCatalog(container),
-      shipments: new ShipmentTracking(container),
-      invoices: new InvoicesPayments(container),
-      analytics: new SalesAnalytics(container),
+      orders: document.createElement("purchase-orders"),
+      products: document.createElement("product-catalog"),
+      shipments: document.createElement("shipment-tracking"),
+      invoices: document.createElement("invoices-payments"),
+      analytics: document.createElement("sales-analytics"),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
+    
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
-          <main id="dashboardContent" class="flex-1 overflow-auto">
-            <div class="p-8">
-              ${sectionContent}
-            </div>
+          <main id="dashboardContent" class="flex-1 overflow-auto w-full">
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
+    this.attachEventListeners();
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -107,9 +102,34 @@ class SupplierDashboard {
     `;
   }
 
-  async renderSection(section) {
-    const sectionInstance = this.sections[section];
-    return sectionInstance.render();
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
+
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
+    }
+  }
+
+  async navigateToSection(section) {
+    this.currentSection = section;
+    this.renderCurrentSection();
+
+    const navItems = this.container.querySelectorAll(".nav-item");
+    navItems.forEach((item) => {
+      if (item.dataset.section === section) {
+        item.className = "nav-item nav-item-active";
+      } else {
+        item.className = "nav-item nav-item-inactive";
+      }
+    });
+  }
+
+  logout() {
+    import("../login.js").then((module) => {
+      module.renderLogin(this.container);
+    });
   }
 
   attachEventListeners() {
@@ -132,6 +152,7 @@ class SupplierDashboard {
     }
 
     window.notificationPanel = this.notificationPanel;
+    window.supplierDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 }
