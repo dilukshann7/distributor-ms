@@ -1,12 +1,20 @@
+import { LitElement, html } from "lit";
 import { Product } from "../../models/Product.js";
-import { getIconHTML } from "../../../assets/icons/index.js";
 
-export class InventoryControl {
-  constructor(container) {
-    this.container = container;
+export class InventoryControl extends LitElement {
+  static properties = {
+    inventory: { type: Array },
+  };
+
+  constructor() {
+    super();
     this.inventory = [];
     this.getInventory();
     this.getProducts();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getInventory() {
@@ -30,7 +38,7 @@ export class InventoryControl {
   }
 
   render() {
-    return `
+    return html`
       <div class="owner-section-container">
         <div class="flex items-center justify-between">
           <div>
@@ -53,24 +61,13 @@ export class InventoryControl {
                 </tr>
               </thead>
               <tbody class="owner-table-body">
-                ${this.inventory
-                  .map(
-                    (item) => `
+                ${this.inventory.map((item) => html`
                   <tr class="owner-table-tr">
-                    <td class="owner-table-td font-medium text-gray-900">${
-                      item.name
-                    }</td>
+                    <td class="owner-table-td font-medium text-gray-900">${item.name}</td>
                     <td class="owner-table-td text-gray-500">${item.sku}</td>
-                    <td class="owner-table-td text-gray-900">${
-                      item.quantity
-                    } units</td>
-                    <td class="owner-table-td text-gray-900">${
-                      item.minStock
-                    } units</td>
-                    <td class="owner-table-td text-gray-900">${item.price.toLocaleString(
-                      "en-US",
-                      { style: "currency", currency: "LKR" }
-                    )}</td>
+                    <td class="owner-table-td text-gray-900">${item.quantity} units</td>
+                    <td class="owner-table-td text-gray-900">${item.minStock} units</td>
+                    <td class="owner-table-td text-gray-900">${item.price.toLocaleString("en-US", { style: "currency", currency: "LKR" })}</td>
                     <td class="owner-table-td">
                       <span class="owner-badge ${
                         item.status === "In Stock"
@@ -83,9 +80,7 @@ export class InventoryControl {
                       </span>
                     </td>
                   </tr>
-                `
-                  )
-                  .join("")}
+                `)}
               </tbody>
             </table>
           </div>
@@ -94,3 +89,5 @@ export class InventoryControl {
     `;
   }
 }
+
+customElements.define("inventory-control", InventoryControl);

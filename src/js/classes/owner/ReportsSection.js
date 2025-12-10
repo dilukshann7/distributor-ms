@@ -1,11 +1,16 @@
+import { LitElement, html } from "lit";
 import { getIconHTML } from "../../../assets/icons/index.js";
 import { Product } from "../../models/Product.js";
 import { SalesOrder } from "../../models/SalesOrder.js";
 import { User } from "../../models/User.js";
 
-export class ReportsSection {
-  constructor(container) {
-    this.container = container;
+export class ReportsSection extends LitElement {
+  constructor() {
+    super();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   exportEmployeeReport() {
@@ -40,7 +45,7 @@ export class ReportsSection {
   }
 
   render() {
-    return `
+    return html`
       <div class="owner-section-container">
         <div>
           <h3 class="section-header">Reports & Analytics</h3>
@@ -65,8 +70,8 @@ export class ReportsSection {
               </div>
 
               <div class="grid grid-cols-1 gap-4">
-                <button onclick="window.ownerDashboard.sections.reports.exportSalesReport()" class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                  ${getIconHTML("download")}
+                <button @click=${this.exportSalesReport} class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                  <div .innerHTML=${getIconHTML("download")}></div>
                   Generate Sales Report
                 </button>
               </div>
@@ -78,9 +83,9 @@ export class ReportsSection {
               <h4 class="card-title mb-4">Inventory Report</h4>
 
               <div class="grid grid-cols-1 gap-4">
-                <button onclick="window.ownerDashboard.sections.reports.exportInventoryReport()"
+                <button @click=${this.exportInventoryReport}
                  class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                  ${getIconHTML("download")}
+                  <div .innerHTML=${getIconHTML("download")}></div>
                   Generate Inventory Report
                 </button>
               </div>
@@ -92,8 +97,8 @@ export class ReportsSection {
               <h4 class="card-title mb-4">Employee Report</h4>
 
               <div class="grid grid-cols-1 gap-4">
-                <button onclick="window.ownerDashboard.sections.reports.exportEmployeeReport()" class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                  ${getIconHTML("download")}
+                <button @click=${this.exportEmployeeReport} class="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                  <div .innerHTML=${getIconHTML("download")}></div>
                   Generate Employee Report
                 </button>
               </div>
@@ -104,3 +109,5 @@ export class ReportsSection {
     `;
   }
 }
+
+customElements.define("reports-section", ReportsSection);
