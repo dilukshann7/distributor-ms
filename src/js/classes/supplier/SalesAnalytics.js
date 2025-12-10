@@ -1,5 +1,6 @@
 import { LitElement, html } from "lit";
 import { Supplier } from "../../models/Supplier.js";
+import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class SalesAnalytics extends LitElement {
   static properties = {
@@ -50,10 +51,12 @@ export class SalesAnalytics extends LitElement {
         <div class="card-container">
           <div class="p-6">
             <h4 class="card-title mb-4">Export Analytics</h4>
-            
+
             <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700">Start Date</label>
+                <label class="text-sm font-medium text-gray-700"
+                  >Start Date</label
+                >
                 <input
                   type="date"
                   id="exportStartDate"
@@ -63,7 +66,9 @@ export class SalesAnalytics extends LitElement {
                 />
               </div>
               <div class="space-y-2">
-                <label class="text-sm font-medium text-gray-700">End Date</label>
+                <label class="text-sm font-medium text-gray-700"
+                  >End Date</label
+                >
                 <input
                   type="date"
                   id="exportEndDate"
@@ -79,9 +84,7 @@ export class SalesAnalytics extends LitElement {
                 @click=${this.exportPdf}
                 class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
               >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-                </svg>
+                <span .innerHTML=${getIconHTML("document")}></span>
                 Export to PDF
               </button>
             </div>

@@ -1,5 +1,6 @@
 import { LitElement, html } from "lit";
 import { smallOrder } from "../../models/SmallOrder";
+import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class FinancialReports extends LitElement {
   static properties = {
@@ -90,19 +91,7 @@ export class FinancialReports extends LitElement {
               class="flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
               @click=${this.exportPdf}
             >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                />
-              </svg>
+              <span .innerHTML=${getIconHTML("document")}></span>
               Export to PDF
             </button>
           </div>
