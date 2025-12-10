@@ -132,9 +132,11 @@ class AssistantManagerDashboard {
 
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
-        item.className = "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all bg-white text-amber-700 font-semibold shadow-lg";
+        item.className =
+          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all bg-white text-amber-700 font-semibold shadow-lg";
       } else {
-        item.className = "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-amber-100 hover:bg-amber-600";
+        item.className =
+          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-amber-100 hover:bg-amber-600";
       }
     });
   }
