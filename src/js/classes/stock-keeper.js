@@ -107,6 +107,7 @@ class StockKeeperDashboard {
     });
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
+    
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
         import("../login.js").then((module) => {
