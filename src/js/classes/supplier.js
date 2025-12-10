@@ -57,11 +57,7 @@ class SupplierDashboard {
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${
-              item.id
-            }" onclick="window.supplierDashboard.navigateToSection('${
-                item.id
-              }')" class="nav-item ${
+            <button data-section="${item.id}" class="nav-item ${
                 this.currentSection === item.id
                   ? "nav-item-active"
                   : "nav-item-inactive"
@@ -99,7 +95,7 @@ class SupplierDashboard {
             ${getIconHTML("bell")}
           </button>
 
-          <button onclick="window.supplierDashboard.logout()" class="btn-icon">
+          <button id="logoutBtn" class="btn-icon">
             ${getIconHTML("log-out")}
           </button>
         </div>
