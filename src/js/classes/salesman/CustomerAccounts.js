@@ -335,7 +335,8 @@ export class CustomerAccounts extends LitElement {
               Cancel
             </button>
             <button type="submit" class="sm-btn-primary">
-              ${getIconHTML("check-circle")} Add Customer
+              <span .innerHTML=${getIconHTML("check-circle")}></span>
+              Add Customer
             </button>
           </div>
         </form>

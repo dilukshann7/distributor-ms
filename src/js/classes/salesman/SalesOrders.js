@@ -517,7 +517,8 @@ export class SalesOrders extends LitElement {
                           class="sm-btn-danger-light"
                           @click=${() => this.removeItemRow(index)}
                         >
-                          ${getIconHTML("trash")} Remove
+                          <span .innerHTML=${getIconHTML("trash")}></span>
+                          Remove
                         </button>
                       </div>
                     </div>
@@ -529,7 +530,7 @@ export class SalesOrders extends LitElement {
                 @click=${this.addItemRow}
                 class="sm-btn-secondary-accent mt-4"
               >
-                ${getIconHTML("plus")} Add Another Item
+                <span .innerHTML=${getIconHTML("plus")}></span> Add Another Item
               </button>
             </div>
           </div>
@@ -545,7 +546,8 @@ export class SalesOrders extends LitElement {
               Cancel
             </button>
             <button type="submit" class="sm-btn-primary">
-              ${getIconHTML("check-circle")} Create Order
+              <span .innerHTML=${getIconHTML("check-circle")}></span> Create
+              Order
             </button>
           </div>
         </form>
@@ -750,7 +752,8 @@ ${order.notes || ""}</textarea
               Cancel
             </button>
             <button type="submit" class="sm-btn-primary">
-              ${getIconHTML("check-circle")} Update Order
+              <span .innerHTML=${getIconHTML("check-circle")}></span> Update
+              Order
             </button>
           </div>
         </form>
