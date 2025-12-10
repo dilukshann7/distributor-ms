@@ -1,12 +1,6 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
-import { EmployeeOversight } from "./manager/EmployeeOversight.js";
-import { TaskAssignment } from "./manager/TaskAssignment.js";
-import { OperationalReports } from "./manager/OperationalReports.js";
-import { StockManagement } from "./manager/StockManagement.js";
-import { CustomerFeedback } from "./manager/CustomerFeedback.js";
-import { DeliveryTracking } from "./manager/DeliveryTracking.js";
 
 class ManagerDashboard {
   constructor(container) {
@@ -107,7 +101,7 @@ class ManagerDashboard {
   renderCurrentSection() {
     const content = this.container.querySelector("#dashboardContent div");
     content.innerHTML = "";
-    
+
     const sectionComponent = this.sections[this.currentSection];
     if (sectionComponent) {
       content.appendChild(sectionComponent);
@@ -116,7 +110,7 @@ class ManagerDashboard {
 
   attachEventListeners() {
     const navItems = this.container.querySelectorAll(".manager-nav-item");
-    
+
     navItems.forEach((item) => {
       item.addEventListener("click", (e) => {
         const section = e.currentTarget.dataset.section;
@@ -143,7 +137,7 @@ class ManagerDashboard {
     this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".manager-nav-item");
-    
+
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
         item.className = "manager-nav-item manager-nav-item-active";
