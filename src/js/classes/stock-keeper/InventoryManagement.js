@@ -1,6 +1,7 @@
 import { LitElement, html } from "lit";
 import { Product } from "../../models/Product.js";
 import { Supplier } from "../../models/Supplier.js";
+import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class InventoryManagement extends LitElement {
   static properties = {
@@ -165,19 +166,7 @@ export class InventoryManagement extends LitElement {
             <p class="sk-text-muted">Add, edit, and manage inventory items</p>
           </div>
           <button @click=${this.switchToAdd} class="sk-btn-primary px-4">
-            <svg
-              class="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
+            <span .innerHTML=${getIconHTML("plus")}></span>
             Add Item
           </button>
         </div>
@@ -186,19 +175,10 @@ export class InventoryManagement extends LitElement {
           <div
             class="mb-6 flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg"
           >
-            <svg
-              class="w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+            <span
+              class="text-gray-400"
+              .innerHTML=${getIconHTML("search")}
+            ></span>
             <input
               @input=${this.handleSearch}
               type="text"
@@ -258,34 +238,20 @@ export class InventoryManagement extends LitElement {
                             class="sk-btn-icon-blue"
                             title="Edit"
                           >
-                            <svg
-                              class="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                              />
-                            </svg>
+                            <span
+                              .innerHTML=${getIconHTML("edit").replace(
+                                "w-5 h-5",
+                                "w-4 h-4"
+                              )}
+                            ></span>
                           </button>
                           <button class="sk-btn-icon-red" title="Delete">
-                            <svg
-                              class="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
+                            <span
+                              .innerHTML=${getIconHTML("trash").replace(
+                                "w-5 h-5",
+                                "w-4 h-4"
+                              )}
+                            ></span>
                           </button>
                         </div>
                       </td>
@@ -314,19 +280,10 @@ export class InventoryManagement extends LitElement {
           <div class="p-8 space-y-8">
             <div>
               <h4 class="sk-subheader">
-                <svg
-                  class="w-5 h-5 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                  />
-                </svg>
+                <span
+                  class="text-purple-600"
+                  .innerHTML=${getIconHTML("package")}
+                ></span>
                 Basic Information
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -427,19 +384,10 @@ export class InventoryManagement extends LitElement {
 
             <div class="border-t border-gray-100 pt-8">
               <h4 class="sk-subheader">
-                <svg
-                  class="w-5 h-5 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                  />
-                </svg>
+                <span
+                  class="text-purple-600"
+                  .innerHTML=${getIconHTML("trend-up")}
+                ></span>
                 Stock Information
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -527,19 +475,7 @@ export class InventoryManagement extends LitElement {
                 Cancel
               </button>
               <button type="submit" class="sk-btn-primary">
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <span .innerHTML=${getIconHTML("check-circle")}></span>
                 Save Item
               </button>
             </div>
@@ -566,19 +502,10 @@ export class InventoryManagement extends LitElement {
           <div class="p-8 space-y-8">
             <div>
               <h4 class="sk-subheader">
-                <svg
-                  class="w-5 h-5 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                  />
-                </svg>
+                <span
+                  class="text-purple-600"
+                  .innerHTML=${getIconHTML("package")}
+                ></span>
                 Basic Information
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -683,19 +610,10 @@ ${item.description || ""}</textarea
 
             <div class="border-t border-gray-100 pt-8">
               <h4 class="sk-subheader">
-                <svg
-                  class="w-5 h-5 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                  />
-                </svg>
+                <span
+                  class="text-purple-600"
+                  .innerHTML=${getIconHTML("trend-up")}
+                ></span>
                 Stock Information
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -804,19 +722,7 @@ ${item.description || ""}</textarea
                 Cancel
               </button>
               <button type="submit" class="sk-btn-primary">
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <span .innerHTML=${getIconHTML("check-circle")}></span>
                 Update Item
               </button>
             </div>

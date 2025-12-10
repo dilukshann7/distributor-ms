@@ -2,6 +2,7 @@ import { LitElement, html } from "lit";
 import { SalesOrder } from "../../models/SalesOrder.js";
 import { Driver } from "../../models/Driver.js";
 import { Delivery } from "../../models/Delivery.js";
+import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class OrderAuthorization extends LitElement {
   static properties = {
@@ -227,38 +228,16 @@ export class OrderAuthorization extends LitElement {
                           class="approve-order-btn flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                           @click=${() => this.approveOrder(order.id)}
                         >
-                          <svg
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
+                          <span
+                            .innerHTML=${getIconHTML("check-circle")}
+                          ></span>
                           Approve & Assign
                         </button>
                         <button
                           class="reject-order-btn flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
                           @click=${() => this.rejectOrder(order.id)}
                         >
-                          <svg
-                            class="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
+                          <span .innerHTML=${getIconHTML("x")}></span>
                           Reject
                         </button>
                       </div>
