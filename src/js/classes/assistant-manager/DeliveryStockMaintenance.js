@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { Product } from "../../models/Product";
+import { Product } from "../../models/Product.js";
 
 export class DeliveryStockMaintenance extends LitElement {
   static properties = {

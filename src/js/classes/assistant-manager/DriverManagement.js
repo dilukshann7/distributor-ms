@@ -80,7 +80,7 @@ export class DriverManagement extends LitElement {
                   (driver) => html`
                     <tr class="hover:bg-gray-50 transition-colors">
                       <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                        ${driver.user.name}
+                        ${driver.user?.name || "Unknown"}
                       </td>
                       <td class="px-6 py-4 text-sm text-gray-600">
                         <div class="flex items-center gap-2">
@@ -90,7 +90,7 @@ export class DriverManagement extends LitElement {
                               'class="w-4 h-4 text-gray-400"'
                             )}
                           ></span>
-                          ${driver.user.phone}
+                          ${driver.user?.phone || "N/A"}
                         </div>
                       </td>
                       <td class="px-6 py-4 text-sm text-gray-600">
@@ -104,7 +104,7 @@ export class DriverManagement extends LitElement {
                               'class="w-4 h-4 text-amber-500"'
                             )}
                           ></span>
-                          ${driver.currentLocation}
+                          ${driver.currentLocation || "Unknown"}
                         </div>
                       </td>
                       <td class="px-6 py-4 text-sm">
@@ -114,12 +114,17 @@ export class DriverManagement extends LitElement {
                             ? "bg-green-100 text-green-800"
                             : "bg-gray-100 text-gray-800"}"
                         >
-                          ${driver.user.status.charAt(0).toUpperCase() +
-                          driver.user.status.slice(1)}
+                          ${(
+                            driver.user?.status ||
+                            driver.status ||
+                            "unknown"
+                          ).toUpperCase()}
                         </span>
                       </td>
                       <td class="px-6 py-4 text-sm text-gray-600">
-                        ${new Date(driver.user.updatedAt).toLocaleString()}
+                        ${driver.user?.updatedAt
+                          ? new Date(driver.user.updatedAt).toLocaleString()
+                          : "N/A"}
                       </td>
                     </tr>
                   `
