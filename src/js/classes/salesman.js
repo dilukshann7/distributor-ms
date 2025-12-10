@@ -1,27 +1,22 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
-import { SalesOrders } from "./salesman/SalesOrders.js";
-import { StockAvailability } from "./salesman/StockAvailability.js";
-import { CustomerAccounts } from "./salesman/CustomerAccounts.js";
-import { SalesReports } from "./salesman/SalesReports.js";
 
 class SalesmanDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "orders";
     this.sections = {
-      orders: new SalesOrders(container),
-      stock: new StockAvailability(container),
-      customers: new CustomerAccounts(container),
-      reports: new SalesReports(container),
+      orders: document.createElement("sales-orders"),
+      stock: document.createElement("stock-availability"),
+      customers: document.createElement("customer-accounts"),
+      reports: document.createElement("sales-reports"),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
 
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
@@ -29,14 +24,14 @@ class SalesmanDashboard {
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
-          <main id="dashboardContent" class="flex-1 overflow-auto">
-            <div class="p-8">
-              ${sectionContent}
-            </div>
+          <main id="dashboardContent" class="flex-1 overflow-auto w-full">
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
+    this.attachEventListeners();
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -99,10 +94,14 @@ class SalesmanDashboard {
     `;
   }
 
-  async renderSection(section) {
-    const sectionInstance = this.sections[section];
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
 
-    return sectionInstance.render();
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
+    }
   }
 
   attachEventListeners() {
@@ -125,19 +124,19 @@ class SalesmanDashboard {
     }
 
     window.notificationPanel = this.notificationPanel;
+    window.salesmanDashboard = this;
     this.notificationPanel.attachEventListeners();
+  }
+
+  logout() {
+    import("../login.js").then((module) => {
+      module.renderLogin(this.container);
+    });
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
-
-    const content = this.container.querySelector("#dashboardContent");
-
-    content.innerHTML = `
-      <div class="p-8">
-        ${sectionContent}
-      </div>
-    `;
+    this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".nav-item");
 

@@ -1,18 +1,29 @@
+import { LitElement, html } from "lit";
 import { Customer } from "../../models/Customer.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
-export class CustomerAccounts {
-  constructor(container) {
-    this.container = container;
+export class CustomerAccounts extends LitElement {
+  static properties = {
+    customers: { type: Array },
+    view: { type: String },
+  };
+
+  constructor() {
+    super();
     this.customers = [];
     this.view = "list";
     this.getCustomers();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getCustomers() {
     try {
       const response = await Customer.getAll();
       this.customers = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching customers:", error);
       this.customers = [];
@@ -21,12 +32,12 @@ export class CustomerAccounts {
 
   showFormHandler() {
     this.view = "add";
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   hideFormHandler() {
     this.view = "list";
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   submitAddForm(e) {
@@ -69,10 +80,10 @@ export class CustomerAccounts {
       });
   }
 
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+  updated() {
+    const addForm = this.querySelector("#addCustomerForm");
+    if (addForm) {
+      addForm.addEventListener("submit", (e) => this.submitAddForm(e));
     }
   }
 
@@ -84,15 +95,15 @@ export class CustomerAccounts {
   }
 
   renderList() {
-    return `
+    return html`
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="sm-header-title">Customer Accounts</h2>
             <p class="sm-text-muted">Manage customer information and purchase history</p>
           </div>
-          <button onclick="$s.customers.showFormHandler()" class="sm-btn-primary">
-            ${getIconHTML("plus")}
+          <button @click=${this.showFormHandler} class="sm-btn-primary">
+            <span .innerHTML=${getIconHTML("plus")}></span>
             Add Customer
           </button>
         </div>
@@ -275,3 +286,5 @@ export class CustomerAccounts {
     `;
   }
 }
+
+customElements.define("customer-accounts", CustomerAccounts);

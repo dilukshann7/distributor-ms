@@ -1,11 +1,20 @@
+import { LitElement, html } from "lit";
 import { SalesOrder } from "../../models/SalesOrder.js";
 import { Product } from "../../models/Product.js";
 import { Customer } from "../../models/Customer.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
-export class SalesOrders {
-  constructor(container) {
-    this.container = container;
+export class SalesOrders extends LitElement {
+  static properties = {
+    orders: { type: Array },
+    products: { type: Array },
+    customers: { type: Array },
+    view: { type: String },
+    editingOrder: { type: Object },
+  };
+
+  constructor() {
+    super();
     this.orders = [];
     this.products = [];
     this.customers = [];
@@ -16,10 +25,15 @@ export class SalesOrders {
     this.getCustomers();
   }
 
+  createRenderRoot() {
+    return this;
+  }
+
   async getOrders() {
     try {
       const response = await SalesOrder.getAll();
       this.orders = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching sales orders:", error);
       this.orders = [];
@@ -30,6 +44,7 @@ export class SalesOrders {
     try {
       const response = await Product.getAll();
       this.products = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching products:", error);
       this.products = [];
@@ -40,6 +55,7 @@ export class SalesOrders {
     try {
       const response = await Customer.getAll();
       this.customers = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching customers:", error);
       this.customers = [];
@@ -51,19 +67,19 @@ export class SalesOrders {
     await this.getCustomers();
     this.view = "add";
     this.editingOrder = null;
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   switchToEdit(orderId) {
     this.editingOrder = this.orders.find((o) => o.id === parseInt(orderId));
     this.view = "edit";
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   switchToList() {
     this.view = "list";
     this.editingOrder = null;
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   deleteOrder(orderId) {
@@ -83,8 +99,12 @@ export class SalesOrders {
     }
   }
 
+  refresh() {
+    this.requestUpdate();
+  }
+
   calculateTotal() {
-    const rows = this.container.querySelectorAll(".item-row");
+    const rows = this.querySelectorAll(".item-row");
     let total = 0;
 
     rows.forEach((row) => {
@@ -99,7 +119,7 @@ export class SalesOrders {
       }
     });
 
-    const subtotalInput = this.container.querySelector("#subtotal");
+    const subtotalInput = this.querySelector("#subtotal");
     if (subtotalInput) {
       subtotalInput.value = total.toFixed(2);
     }
@@ -129,14 +149,14 @@ export class SalesOrders {
   }
 
   addItemRow() {
-    const itemsContainer = this.container.querySelector("#itemsContainer");
+    const itemsContainer = this.querySelector("#itemsContainer");
     const rowCount = itemsContainer.querySelectorAll(".item-row").length;
     const newRow = document.createElement("div");
     newRow.className =
       "grid grid-cols-1 md:grid-cols-5 gap-4 item-row sm-card-sub";
     newRow.innerHTML = `
       <div class="space-y-2 md:col-span-2">
-        <select name="productId[]" required class="sm-input bg-white product-select" data-row="${rowCount}" onchange="window.salesmanDashboard.sections.orders.updateSubtotal(this.closest('.item-row'))">
+        <select name="productId[]" required class="sm-input bg-white product-select" data-row="${rowCount}">
           <option value="">-- Select Product --</option>
           ${this.products
             .map(
@@ -154,24 +174,33 @@ export class SalesOrders {
         </select>
       </div>
       <div class="space-y-2">
-        <input type="number" name="itemQuantity[]" required min="1" class="sm-input bg-white item-quantity" data-row="${rowCount}" placeholder="1" oninput="window.salesmanDashboard.sections.orders.updateSubtotal(this.closest('.item-row'))">
+        <input type="number" name="itemQuantity[]" required min="1" class="sm-input bg-white item-quantity" data-row="${rowCount}" placeholder="1">
       </div>
       <div class="space-y-2">
         <input type="text" class="sm-input bg-gray-100 item-subtotal" data-row="${rowCount}" readonly placeholder="Rs. 0.00">
       </div>
       <div class="space-y-2">
-        <button type="button" class="remove-item-btn sm-btn-danger-light" onclick="window.salesmanDashboard.sections.orders.removeItemRow(this)">
+        <button type="button" class="remove-item-btn sm-btn-danger-light">
           ${getIconHTML("trash")}
           Remove
         </button>
       </div>
     `;
+    
+    const select = newRow.querySelector(".product-select");
+    const quantityInput = newRow.querySelector(".item-quantity");
+    const removeBtn = newRow.querySelector(".remove-item-btn");
+    
+    select.addEventListener("change", () => this.updateSubtotal(newRow));
+    quantityInput.addEventListener("input", () => this.updateSubtotal(newRow));
+    removeBtn.addEventListener("click", () => this.removeItemRow(removeBtn));
+    
     itemsContainer.appendChild(newRow);
   }
 
   removeItemRow(btn) {
     const row = btn.closest(".item-row");
-    const itemsContainer = this.container.querySelector("#itemsContainer");
+    const itemsContainer = this.querySelector("#itemsContainer");
     if (itemsContainer.querySelectorAll(".item-row").length > 1) {
       row.remove();
       this.calculateTotal();
@@ -252,11 +281,36 @@ export class SalesOrders {
       });
   }
 
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+  updated() {
+    // Re-attach event listeners after render
+    const addForm = this.querySelector("#addOrderForm");
+    const editForm = this.querySelector("#editOrderForm");
+    const addItemBtn = this.querySelector("#addItemBtn");
+    
+    if (addForm) {
+      addForm.addEventListener("submit", (e) => this.submitAddForm(e));
     }
+    if (editForm) {
+      editForm.addEventListener("submit", (e) => this.submitEditForm(e));
+    }
+    if (addItemBtn) {
+      addItemBtn.addEventListener("click", () => this.addItemRow());
+    }
+    
+    // Attach existing item row listeners
+    const selects = this.querySelectorAll(".product-select");
+    const quantities = this.querySelectorAll(".item-quantity");
+    const removeBtns = this.querySelectorAll(".remove-item-btn");
+    
+    selects.forEach(select => {
+      select.addEventListener("change", () => this.updateSubtotal(select.closest(".item-row")));
+    });
+    quantities.forEach(input => {
+      input.addEventListener("input", () => this.updateSubtotal(input.closest(".item-row")));
+    });
+    removeBtns.forEach(btn => {
+      btn.addEventListener("click", () => this.removeItemRow(btn));
+    });
   }
 
   getStatusColor(status) {
@@ -283,15 +337,15 @@ export class SalesOrders {
   }
 
   renderList() {
-    return `
+    return html`
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="sm-header-title">Sales Orders</h2>
             <p class="sm-text-muted">Create and manage customer sales orders</p>
           </div>
-          <button onclick="window.salesmanDashboard.sections.orders.showFormHandler()" class="sm-btn-primary">
-            ${getIconHTML("plus")}
+          <button @click=${this.showFormHandler} class="sm-btn-primary">
+            <span .innerHTML=${getIconHTML("plus")}></span>
             New Order
           </button>
         </div>
@@ -312,7 +366,7 @@ export class SalesOrders {
             <tbody class="divide-y divide-gray-200">
               ${this.orders
                 .map(
-                  (order) => `
+                  (order) => html`
                 <tr class="sm-table-row">
                   <td class="sm-table-cell-main">${order.id}</td>
                   <td class="sm-table-cell">${order.customerName}</td>
@@ -663,3 +717,5 @@ export class SalesOrders {
     `;
   }
 }
+
+customElements.define("sales-orders", SalesOrders);
