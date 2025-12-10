@@ -1,16 +1,31 @@
+import { LitElement, html } from "lit";
 import { Product } from "../../models/Product.js";
 import { Supplier } from "../../models/Supplier.js";
 
-export class InventoryManagement {
-  constructor(container) {
-    this.container = container;
+export class InventoryManagement extends LitElement {
+  static properties = {
+    inventoryItems: { type: Array },
+    allInventoryItems: { type: Array },
+    suppliers: { type: Array },
+    view: { type: String },
+    editingItem: { type: Object },
+    searchTerm: { type: String },
+  };
+
+  constructor() {
+    super();
     this.inventoryItems = [];
     this.allInventoryItems = [];
     this.suppliers = [];
     this.view = "list";
     this.editingItem = null;
+    this.searchTerm = "";
     this.getInventoryItems();
     this.getSuppliers();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getInventoryItems() {
@@ -18,6 +33,7 @@ export class InventoryManagement {
       const response = await Product.getAll();
       this.allInventoryItems = response.data;
       this.inventoryItems = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching inventory items:", error);
       this.inventoryItems = [];
@@ -29,37 +45,29 @@ export class InventoryManagement {
     try {
       const response = await Supplier.getAll();
       this.suppliers = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching suppliers:", error);
       this.suppliers = [];
     }
   }
 
-  async handleSearch() {
-    try {
-      const searchInput = document.getElementById("searchInput");
-      const searchTerm = searchInput.value.toLowerCase();
-      this.inventoryItems = this.allInventoryItems.filter((item) => {
-        return (
-          item.name.toLowerCase().includes(searchTerm) ||
-          item.sku.toLowerCase().includes(searchTerm)
-        );
-      });
-      this.refresh(this.container);
-
-      const newSearchInput = document.getElementById("searchInput");
-      newSearchInput.focus();
-      newSearchInput.value = searchTerm;
-      newSearchInput.setSelectionRange(searchTerm.length, searchTerm.length);
-    } catch (error) {
-      console.error("Error searching inventory items:", error);
-    }
+  handleSearch(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    this.searchTerm = searchTerm;
+    this.inventoryItems = this.allInventoryItems.filter((item) => {
+      return (
+        item.name.toLowerCase().includes(searchTerm) ||
+        item.sku.toLowerCase().includes(searchTerm)
+      );
+    });
+    this.requestUpdate();
   }
 
   switchToAdd() {
     this.view = "add";
     this.editingItem = null;
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   switchToEdit(itemId) {
@@ -67,13 +75,13 @@ export class InventoryManagement {
       (item) => item.id === parseInt(itemId)
     );
     this.view = "edit";
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   switchToList() {
     this.view = "list";
     this.editingItem = null;
-    this.refresh(this.container);
+    this.requestUpdate();
   }
 
   submitAddForm(e) {
@@ -138,10 +146,15 @@ export class InventoryManagement {
       });
   }
 
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
+  updated() {
+    const addForm = this.querySelector("#addItemForm");
+    const editForm = this.querySelector("#editItemForm");
+    
+    if (addForm) {
+      addForm.addEventListener("submit", (e) => this.submitAddForm(e));
+    }
+    if (editForm) {
+      editForm.addEventListener("submit", (e) => this.submitEditForm(e));
     }
   }
 
@@ -156,14 +169,14 @@ export class InventoryManagement {
   }
 
   renderList() {
-    return `
+    return html`
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
             <h3 class="sk-header-title">Inventory Management</h3>
             <p class="sk-text-muted">Add, edit, and manage inventory items</p>
           </div>
-          <button onclick="window.stockKeeperDashboard.sections.inventory.switchToAdd()" class="sk-btn-primary px-4">
+          <button @click=${this.switchToAdd} class="sk-btn-primary px-4">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Add Item
           </button>
@@ -172,7 +185,7 @@ export class InventoryManagement {
         <div class="bg-white rounded-lg border border-gray-200 p-6">
           <div class="mb-6 flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg">
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            <input oninput="window.stockKeeperDashboard.sections.inventory.handleSearch()" type="text" placeholder="Search by name or SKU..." class="bg-transparent flex-1 outline-none text-gray-700" id="searchInput" />
+            <input @input=${this.handleSearch} type="text" placeholder="Search by name or SKU..." class="bg-transparent flex-1 outline-none text-gray-700" id="searchInput" .value=${this.searchTerm} />
           </div>
 
           <div class="overflow-x-auto">
@@ -505,3 +518,5 @@ export class InventoryManagement {
     `;
   }
 }
+
+customElements.define("inventory-management", InventoryManagement);

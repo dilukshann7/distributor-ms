@@ -1,12 +1,23 @@
+import { LitElement, html } from "lit";
 import { Shipment } from "../../models/Shipment.js";
 import { Order } from "../../models/Order.js";
 import { Supplier } from "../../models/Supplier.js";
 import { Supply } from "../../models/Supply.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
-export class ReceivingShipment {
-  constructor(container) {
-    this.container = container;
+export class ReceivingShipment extends LitElement {
+  static properties = {
+    shipments: { type: Object },
+    orders: { type: Array },
+    activeTab: { type: String },
+    view: { type: String },
+    editingShipment: { type: Object },
+    suppliers: { type: Array },
+    products: { type: Array },
+  };
+
+  constructor() {
+    super();
     this.shipments = { in_transit: [], received: [] };
     this.orders = [];
     this.activeTab = "pending";
@@ -20,20 +31,27 @@ export class ReceivingShipment {
     this.loadSupply();
   }
 
+  createRenderRoot() {
+    return this;
+  }
+
   async getOrders() {
     try {
       const response = await Order.getAll();
       this.orders =
         response.data.filter((order) => order.status === "pending") || [];
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching orders:", error);
       this.orders = [];
     }
   }
+
   async loadSuppliers() {
     try {
       const response = await Supplier.getAll();
       this.suppliers = response.data || [];
+      this.requestUpdate();
     } catch (error) {
       console.error("Error loading suppliers:", error);
       this.suppliers = [];
@@ -44,6 +62,7 @@ export class ReceivingShipment {
     try {
       const response = await Supply.getAll();
       this.products = response.data || [];
+      this.requestUpdate();
     } catch (error) {
       console.error("Error loading products:", error);
       this.products = [];
@@ -59,41 +78,31 @@ export class ReceivingShipment {
         ),
         received: response.data.filter((s) => s.status === "received"),
       };
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching shipments:", error);
       this.shipments = { in_transit: [], received: [] };
     }
   }
 
-  // Attach click listeners to tab buttons within a root element
-  attachTabListeners(root) {
-    const buttons = root.querySelectorAll(".tab-btn");
-    const container = root.querySelector("#shipmentsContainer");
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        this.activeTab = btn.dataset.tab;
-
-        // render shipments into the local container
-        container.innerHTML = this.renderShipments(this.activeTab);
-
-        buttons.forEach((b) =>
-          b.classList.remove(
-            "text-purple-600",
-            "border-b-2",
-            "border-purple-600"
-          )
-        );
-        btn.classList.add("text-purple-600", "border-b-2", "border-purple-600");
-      });
-    });
+  handleTabClick(tab) {
+    this.activeTab = tab;
+    this.requestUpdate();
   }
 
-  async renderAndAttach(container) {
-    await this.getShipments();
-    await this.getOrders();
-    container.innerHTML = this.render();
-    if (this.view === "list") {
-      this.attachTabListeners(container);
+  updated() {
+    const addForm = this.querySelector("#addShipmentForm");
+    const supplierSelect = this.querySelector("#supplierSelect");
+    const addItemBtn = this.querySelector("#addItemBtn");
+    
+    if (addForm) {
+      addForm.addEventListener("submit", (e) => this.submitAddForm(e));
+    }
+    if (supplierSelect) {
+      supplierSelect.addEventListener("change", () => this.onSupplierChange());
+    }
+    if (addItemBtn) {
+      addItemBtn.addEventListener("click", () => this.addItemRow());
     }
   }
 
@@ -605,3 +614,5 @@ export class ReceivingShipment {
     `;
   }
 }
+
+customElements.define("receiving-shipment", ReceivingShipment);
