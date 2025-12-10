@@ -1,15 +1,17 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
-import { DeliveryDetails } from "./driver/DeliveryDetails.js";
-import { ProofOfDelivery } from "./driver/ProofOfDelivery.js";
-import { PaymentCollection } from "./driver/PaymentCollection.js";
-import { VehicleManagement } from "./driver/VehicleManagement.js";
 
 class DriverDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "deliveries";
+    this.sections = {
+      deliveries: document.createElement("delivery-details"),
+      proof: document.createElement("proof-of-delivery-driver"),
+      payment: document.createElement("payment-collection"),
+      vehicle: document.createElement("vehicle-management"),
+    };
     this.notificationPanel = new NotificationPanel(container);
   }
 
@@ -23,14 +25,13 @@ class DriverDashboard {
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="driver-content-area">
-            <div class="driver-section-container">
-            </div>
+            <div class="driver-section-container"></div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
-    this.renderSection(this.currentSection);
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -86,30 +87,15 @@ class DriverDashboard {
     `;
   }
 
-  renderSection(section) {
+  renderCurrentSection() {
     const content = this.container.querySelector("#dashboardContent .driver-section-container");
     if (!content) return;
 
     content.innerHTML = "";
 
-    let component;
-    switch (section) {
-      case "deliveries":
-        component = document.createElement("delivery-details");
-        break;
-      case "proof":
-        component = document.createElement("proof-of-delivery");
-        break;
-      case "payment":
-        component = document.createElement("payment-collection");
-        break;
-      case "vehicle":
-        component = document.createElement("vehicle-management");
-        break;
-    }
-
-    if (component) {
-      content.appendChild(component);
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
     }
   }
 
@@ -134,22 +120,27 @@ class DriverDashboard {
     }
 
     window.notificationPanel = this.notificationPanel;
+    window.driverDashboard = this;
     this.notificationPanel.attachEventListeners();
+  }
+
+  logout() {
+    import("../login.js").then((module) => {
+      module.renderLogin(this.container);
+    });
   }
 
   navigateToSection(section) {
     this.currentSection = section;
-    this.renderSection(section);
+    this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".nav-item");
 
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
-        item.classList.remove("driver-nav-item-inactive");
-        item.classList.add("driver-nav-item-active");
+        item.className = "nav-item driver-nav-item driver-nav-item-active";
       } else {
-        item.classList.remove("driver-nav-item-active");
-        item.classList.add("driver-nav-item-inactive");
+        item.className = "nav-item driver-nav-item driver-nav-item-inactive";
       }
     });
   }
