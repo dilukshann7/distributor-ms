@@ -1,16 +1,26 @@
+import { LitElement, html } from "lit";
 import { Driver } from "../../models/Driver.js";
 
-export class DriverManagement {
-  constructor(container) {
-    this.container = container;
+export class DriverManagement extends LitElement {
+  static properties = {
+    drivers: { type: Array },
+  };
+
+  constructor() {
+    super();
     this.drivers = [];
     this.getDrivers();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getDrivers() {
     try {
       const response = await Driver.getAll();
       this.drivers = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching drivers:", error);
       this.drivers = [];
@@ -18,7 +28,7 @@ export class DriverManagement {
   }
 
   render() {
-    return `
+    return html`
     <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
@@ -76,8 +86,7 @@ export class DriverManagement {
                     
                   </tr>
                 `
-                  )
-                  .join("")}
+                  )}
               </tbody>
             </table>
           </div>
@@ -87,3 +96,5 @@ export class DriverManagement {
     `;
   }
 }
+
+customElements.define("driver-management-dist", DriverManagement);

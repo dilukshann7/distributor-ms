@@ -1,46 +1,39 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
-import { OrderManagement } from "./distributor/OrderManagement.js";
-import { DriverManagement } from "./distributor/DriverManagement.js";
-import { StockTracking } from "./distributor/StockTracking.js";
-import { DeliveryRoutes } from "./distributor/DeliveryRoutes.js";
-import { ProofOfDelivery } from "./distributor/ProofOfDelivery.js";
-import { OrderAuthorization } from "./distributor/OrderAuthorization.js";
 
 class DistributorDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "orders";
     this.sections = {
-      orders: new OrderManagement(container),
-      drivers: new DriverManagement(container),
-      stock: new StockTracking(container),
-      routes: new DeliveryRoutes(container),
-      delivery: new ProofOfDelivery(container),
-      authorization: new OrderAuthorization(container),
+      orders: document.createElement("order-management"),
+      drivers: document.createElement("driver-management-dist"),
+      stock: document.createElement("stock-tracking"),
+      routes: document.createElement("delivery-routes"),
+      delivery: document.createElement("proof-of-delivery"),
+      authorization: document.createElement("order-authorization"),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
+    
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
-          <main id="dashboardContent" class="flex-1 overflow-auto">
-            <div class="p-8">
-              ${sectionContent}
-            </div>
+          <main id="dashboardContent" class="flex-1 overflow-auto w-full">
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -98,10 +91,14 @@ class DistributorDashboard {
     `;
   }
 
-  async renderSection(section) {
-    const sectionInstance = this.sections[section];
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
 
-    return sectionInstance.render();
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
+    }
   }
 
   attachEventListeners() {
@@ -125,19 +122,13 @@ class DistributorDashboard {
     }
 
     window.notificationPanel = this.notificationPanel;
+    window.distributorDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
-
-    const content = this.container.querySelector("#dashboardContent");
-
-    content.innerHTML = `
-      <div class="p-8">
-        ${sectionContent}
-      </div>
-    `;
+    this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".dist-nav-item");
 

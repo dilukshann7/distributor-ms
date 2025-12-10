@@ -1,18 +1,30 @@
+import { LitElement, html } from "lit";
 import { SalesOrder } from "../../models/SalesOrder.js";
 
-export class OrderManagement {
-  constructor(container) {
-    this.container = container;
+export class OrderManagement extends LitElement {
+  static properties = {
+    orders: { type: Array },
+    view: { type: String },
+    editingOrder: { type: Object },
+  };
+
+  constructor() {
+    super();
     this.orders = [];
     this.view = "list";
     this.editingOrder = null;
     this.getOrders();
   }
 
+  createRenderRoot() {
+    return this;
+  }
+
   async getOrders() {
     try {
       const response = await SalesOrder.getAll();
       this.orders = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching sales orders:", error);
       this.orders = [];
@@ -39,7 +51,7 @@ export class OrderManagement {
   }
 
   renderList() {
-    return `
+    return html`
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
@@ -101,8 +113,7 @@ export class OrderManagement {
                   
                 </tr>
               `
-                )
-                .join("")}
+                )}
             </tbody>
           </table>
         </div>
@@ -111,3 +122,5 @@ export class OrderManagement {
     `;
   }
 }
+
+customElements.define("order-management", OrderManagement);

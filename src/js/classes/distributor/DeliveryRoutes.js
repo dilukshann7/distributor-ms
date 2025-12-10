@@ -1,16 +1,26 @@
+import { LitElement, html } from "lit";
 import { Delivery } from "../../models/Delivery.js";
 
-export class DeliveryRoutes {
-  constructor(container) {
-    this.container = container;
+export class DeliveryRoutes extends LitElement {
+  static properties = {
+    routes: { type: Array },
+  };
+
+  constructor() {
+    super();
     this.routes = [];
     this.getDeliveryRoutes();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getDeliveryRoutes() {
     try {
       const response = await Delivery.getAll();
       this.routes = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching delivery routes:", error);
       this.routes = [];
@@ -22,7 +32,7 @@ export class DeliveryRoutes {
       (r) => r.status === "scheduled" || r.status === "pending"
     );
 
-    return `
+    return html`
       <div class="space-y-6">
         <div>
           <h3 class="text-2xl font-bold text-gray-900">Delivery Routes</h3>
@@ -113,10 +123,11 @@ export class DeliveryRoutes {
               </div>
             </div>
           `
-            )
-            .join("")}
+            )}
         </div>
       </div>
     `;
   }
 }
+
+customElements.define("delivery-routes", DeliveryRoutes);
