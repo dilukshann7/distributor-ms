@@ -10,18 +10,11 @@ class DriverDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "deliveries";
-    this.sections = {
-      deliveries: new DeliveryDetails(this.container),
-      proof: new ProofOfDelivery(this.container),
-      payment: new PaymentCollection(this.container),
-      vehicle: new VehicleManagement(this.container),
-    };
     this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
 
     this.container.innerHTML = `
       <div class="driver-dashboard-container">
@@ -31,13 +24,13 @@ class DriverDashboard {
           ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="driver-content-area">
             <div class="driver-section-container">
-              ${sectionContent}
             </div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
+    this.renderSection(this.currentSection);
   }
 
   renderSidebar() {
@@ -93,10 +86,31 @@ class DriverDashboard {
     `;
   }
 
-  async renderSection(section) {
-    const sectionInstance = this.sections[section];
+  renderSection(section) {
+    const content = this.container.querySelector("#dashboardContent .driver-section-container");
+    if (!content) return;
 
-    return sectionInstance.render();
+    content.innerHTML = "";
+
+    let component;
+    switch (section) {
+      case "deliveries":
+        component = document.createElement("delivery-details");
+        break;
+      case "proof":
+        component = document.createElement("proof-of-delivery");
+        break;
+      case "payment":
+        component = document.createElement("payment-collection");
+        break;
+      case "vehicle":
+        component = document.createElement("vehicle-management");
+        break;
+    }
+
+    if (component) {
+      content.appendChild(component);
+    }
   }
 
   attachEventListeners() {
@@ -123,26 +137,19 @@ class DriverDashboard {
     this.notificationPanel.attachEventListeners();
   }
 
-  async navigateToSection(section) {
+  navigateToSection(section) {
     this.currentSection = section;
-
-    const content = this.container.querySelector("#dashboardContent");
-
-    content.innerHTML = `
-      <div class="p-8">
-        ${sectionContent}
-      </div>
-    `;
+    this.renderSection(section);
 
     const navItems = this.container.querySelectorAll(".nav-item");
 
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all bg-white text-green-700 font-medium shadow-lg";
+        item.classList.remove("driver-nav-item-inactive");
+        item.classList.add("driver-nav-item-active");
       } else {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-green-100 hover:bg-green-600";
+        item.classList.remove("driver-nav-item-active");
+        item.classList.add("driver-nav-item-inactive");
       }
     });
   }
