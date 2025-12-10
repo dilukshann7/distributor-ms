@@ -11,6 +11,7 @@ export class SalesOrders extends LitElement {
     customers: { type: Array },
     view: { type: String },
     editingOrder: { type: Object },
+    tempItems: { type: Array },
   };
 
   constructor() {
@@ -20,6 +21,7 @@ export class SalesOrders extends LitElement {
     this.customers = [];
     this.view = "list";
     this.editingOrder = null;
+    this.tempItems = [];
     this.getOrders();
     this.getProducts();
     this.getCustomers();
@@ -67,6 +69,7 @@ export class SalesOrders extends LitElement {
     await this.getCustomers();
     this.view = "add";
     this.editingOrder = null;
+    this.tempItems = [{ productId: "", quantity: 1, price: 0, stock: 0 }];
     this.requestUpdate();
   }
 
@@ -79,6 +82,7 @@ export class SalesOrders extends LitElement {
   switchToList() {
     this.view = "list";
     this.editingOrder = null;
+    this.tempItems = [];
     this.requestUpdate();
   }
 
@@ -103,107 +107,61 @@ export class SalesOrders extends LitElement {
     this.requestUpdate();
   }
 
-  calculateTotal() {
-    const rows = this.querySelectorAll(".item-row");
-    let total = 0;
-
-    rows.forEach((row) => {
-      const subtotalInput = row.querySelector(".item-subtotal");
-      if (subtotalInput && subtotalInput.value) {
-        const subtotal = parseFloat(
-          subtotalInput.value.replace("Rs. ", "").replace(",", "")
-        );
-        if (!isNaN(subtotal)) {
-          total += subtotal;
-        }
-      }
-    });
-
-    const subtotalInput = this.querySelector("#subtotal");
-    if (subtotalInput) {
-      subtotalInput.value = total.toFixed(2);
-    }
+  get calculatedTotal() {
+    return this.tempItems.reduce((sum, item) => {
+      return sum + (item.price || 0) * (item.quantity || 0);
+    }, 0);
   }
 
-  updateSubtotal(row) {
-    const productSelect = row.querySelector(".product-select");
-    const quantityInput = row.querySelector(".item-quantity");
-    const subtotalInput = row.querySelector(".item-subtotal");
+  handleItemProductChange(index, productId) {
+    const product = this.products.find((p) => p.id == productId);
+    const newItems = [...this.tempItems];
 
-    if (productSelect && quantityInput && subtotalInput) {
-      const selectedOption = productSelect.options[productSelect.selectedIndex];
-      const price = parseFloat(selectedOption.dataset.price || 0);
-      const quantity = parseInt(quantityInput.value || 0);
-      const stock = parseInt(selectedOption.dataset.stock || 0);
-
-      if (quantity > stock && stock > 0) {
-        alert(`Only ${stock} units available in stock!`);
-        quantityInput.value = stock;
-        return;
-      }
-
-      const subtotal = price * quantity;
-      subtotalInput.value = `Rs. ${subtotal.toFixed(2)}`;
-      this.calculateTotal();
+    if (product) {
+      newItems[index] = {
+        ...newItems[index],
+        productId: productId,
+        price: product.price,
+        stock: product.quantity,
+        name: product.name,
+      };
+    } else {
+      newItems[index] = {
+        ...newItems[index],
+        productId: "",
+        price: 0,
+        stock: 0,
+        name: "",
+      };
     }
+
+    this.tempItems = newItems;
+  }
+
+  handleItemQuantityChange(index, quantity) {
+    const val = parseInt(quantity) || 0;
+    const newItems = [...this.tempItems];
+    const item = newItems[index];
+
+    if (item.stock > 0 && val > item.stock) {
+      alert(`Only ${item.stock} units available in stock!`);
+      newItems[index].quantity = item.stock;
+    } else {
+      newItems[index].quantity = val;
+    }
+    this.tempItems = newItems;
   }
 
   addItemRow() {
-    const itemsContainer = this.querySelector("#itemsContainer");
-    const rowCount = itemsContainer.querySelectorAll(".item-row").length;
-    const newRow = document.createElement("div");
-    newRow.className =
-      "grid grid-cols-1 md:grid-cols-5 gap-4 item-row sm-card-sub";
-    newRow.innerHTML = `
-      <div class="space-y-2 md:col-span-2">
-        <select name="productId[]" required class="sm-input bg-white product-select" data-row="${rowCount}">
-          <option value="">-- Select Product --</option>
-          ${this.products
-            .map(
-              (product) => `
-            <option value="${product.id}" data-name="${
-                product.name
-              }" data-price="${product.price}" data-stock="${product.quantity}">
-              ${product.name} - Rs. ${product.price.toFixed(2)} (Stock: ${
-                product.quantity
-              })
-            </option>
-          `
-            )
-            .join("")}
-        </select>
-      </div>
-      <div class="space-y-2">
-        <input type="number" name="itemQuantity[]" required min="1" class="sm-input bg-white item-quantity" data-row="${rowCount}" placeholder="1">
-      </div>
-      <div class="space-y-2">
-        <input type="text" class="sm-input bg-gray-100 item-subtotal" data-row="${rowCount}" readonly placeholder="Rs. 0.00">
-      </div>
-      <div class="space-y-2">
-        <button type="button" class="remove-item-btn sm-btn-danger-light">
-          ${getIconHTML("trash")}
-          Remove
-        </button>
-      </div>
-    `;
-    
-    const select = newRow.querySelector(".product-select");
-    const quantityInput = newRow.querySelector(".item-quantity");
-    const removeBtn = newRow.querySelector(".remove-item-btn");
-    
-    select.addEventListener("change", () => this.updateSubtotal(newRow));
-    quantityInput.addEventListener("input", () => this.updateSubtotal(newRow));
-    removeBtn.addEventListener("click", () => this.removeItemRow(removeBtn));
-    
-    itemsContainer.appendChild(newRow);
+    this.tempItems = [
+      ...this.tempItems,
+      { productId: "", quantity: 1, price: 0, stock: 0 },
+    ];
   }
 
-  removeItemRow(btn) {
-    const row = btn.closest(".item-row");
-    const itemsContainer = this.querySelector("#itemsContainer");
-    if (itemsContainer.querySelectorAll(".item-row").length > 1) {
-      row.remove();
-      this.calculateTotal();
+  removeItemRow(index) {
+    if (this.tempItems.length > 1) {
+      this.tempItems = this.tempItems.filter((_, i) => i !== index);
     } else {
       alert("At least one item is required");
     }
@@ -214,21 +172,19 @@ export class SalesOrders extends LitElement {
     const form = e.target;
     const formData = new FormData(form);
 
-    const productIds = formData.getAll("productId[]");
-    const itemQuantities = formData.getAll("itemQuantity[]");
-
-    const items = productIds
-      .map((productId, index) => {
-        const product = this.products.find((p) => p.id === parseInt(productId));
-        return {
-          name: product?.name || "Unknown",
-          quantity: parseInt(itemQuantities[index], 10),
-        };
-      })
-      .filter((item) => item.quantity > 0);
+    const items = this.tempItems
+      .filter((item) => item.productId && item.quantity > 0)
+      .map((item) => ({
+        name:
+          item.name ||
+          this.products.find((p) => p.id == item.productId)?.name ||
+          "Unknown",
+        quantity: item.quantity,
+        productId: item.productId,
+      }));
 
     if (items.length === 0) {
-      alert("Please add at least one item to the order");
+      alert("Please add at least one valid item to the order");
       return;
     }
 
@@ -241,10 +197,10 @@ export class SalesOrders extends LitElement {
       customerId: customerId,
       orderDate: new Date(formData.get("orderDate")).toISOString(),
       status: formData.get("status"),
-      paymentStatus: "unpaid", // default
+      paymentStatus: "unpaid",
       notes: formData.get("notes") || null,
       items: items,
-      subtotal: parseFloat(formData.get("subtotal")),
+      subtotal: this.calculatedTotal,
     };
 
     SalesOrder.create(orderData)
@@ -279,38 +235,6 @@ export class SalesOrders extends LitElement {
         console.error("Error updating order:", error);
         alert("Error updating order. Please try again.");
       });
-  }
-
-  updated() {
-    // Re-attach event listeners after render
-    const addForm = this.querySelector("#addOrderForm");
-    const editForm = this.querySelector("#editOrderForm");
-    const addItemBtn = this.querySelector("#addItemBtn");
-    
-    if (addForm) {
-      addForm.addEventListener("submit", (e) => this.submitAddForm(e));
-    }
-    if (editForm) {
-      editForm.addEventListener("submit", (e) => this.submitEditForm(e));
-    }
-    if (addItemBtn) {
-      addItemBtn.addEventListener("click", () => this.addItemRow());
-    }
-    
-    // Attach existing item row listeners
-    const selects = this.querySelectorAll(".product-select");
-    const quantities = this.querySelectorAll(".item-quantity");
-    const removeBtns = this.querySelectorAll(".remove-item-btn");
-    
-    selects.forEach(select => {
-      select.addEventListener("change", () => this.updateSubtotal(select.closest(".item-row")));
-    });
-    quantities.forEach(input => {
-      input.addEventListener("input", () => this.updateSubtotal(input.closest(".item-row")));
-    });
-    removeBtns.forEach(btn => {
-      btn.addEventListener("click", () => this.removeItemRow(btn));
-    });
   }
 
   getStatusColor(status) {
@@ -364,51 +288,53 @@ export class SalesOrders extends LitElement {
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-              ${this.orders
-                .map(
-                  (order) => html`
-                <tr class="sm-table-row">
-                  <td class="sm-table-cell-main">${order.id}</td>
-                  <td class="sm-table-cell">${order.customerName}</td>
-                  <td class="sm-table-cell">${new Date(
-                    order.orderDate
-                  ).toLocaleDateString()}</td>
-                  <td class="sm-table-cell">${
-                    order.items
-                      ?.filter((item) => item && item.name)
-                      .map(
-                        (item) =>
-                          `${item.name}${
-                            item.quantity ? ` (x${item.quantity})` : ""
-                          }`
-                      )
-                      .join(", ") || "No items"
-                  }</td>
-                  <td class="sm-table-cell font-semibold text-gray-900">Rs. ${order.subtotal.toLocaleString()}</td>
-                  <td class="px-6 py-4">
-                    <span class="sm-badge ${this.getStatusColor(order.status)}">
-                      ${
-                        order.status.charAt(0).toUpperCase() +
-                        order.status.slice(1)
-                      }
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 flex gap-2">
-                    <button class="sm-btn-icon-blue" onclick="window.salesmanDashboard.sections.orders.switchToEdit('${
-                      order.id
-                    }')">
-                      ${getIconHTML("edit")}
-                    </button>
-                    <button class="sm-btn-icon-red" onclick="window.salesmanDashboard.sections.orders.deleteOrder('${
-                      order.id
-                    }')">
-                      ${getIconHTML("trash")}
-                    </button>
-                  </td>
-                </tr>
-              `
-                )
-                .join("")}
+              ${this.orders.map(
+                (order) => html`
+                  <tr class="sm-table-row">
+                    <td class="sm-table-cell-main">${order.id}</td>
+                    <td class="sm-table-cell">${order.customerName}</td>
+                    <td class="sm-table-cell">
+                      ${new Date(order.orderDate).toLocaleDateString()}
+                    </td>
+                    <td class="sm-table-cell">
+                      ${order.items
+                        ?.filter((item) => item && item.name)
+                        .map(
+                          (item) =>
+                            `${item.name}${
+                              item.quantity ? ` (x${item.quantity})` : ""
+                            }`
+                        )
+                        .join(", ") || "No items"}
+                    </td>
+                    <td class="sm-table-cell font-semibold text-gray-900">
+                      Rs. ${order.subtotal.toLocaleString()}
+                    </td>
+                    <td class="px-6 py-4">
+                      <span
+                        class="sm-badge ${this.getStatusColor(order.status)}"
+                      >
+                        ${order.status.charAt(0).toUpperCase() +
+                        order.status.slice(1)}
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 flex gap-2">
+                      <button
+                        class="sm-btn-icon-blue"
+                        @click=${() => this.switchToEdit(order.id)}
+                      >
+                        ${getIconHTML("edit")}
+                      </button>
+                      <button
+                        class="sm-btn-icon-red"
+                        @click=${() => this.deleteOrder(order.id)}
+                      >
+                        ${getIconHTML("trash")}
+                      </button>
+                    </td>
+                  </tr>
+                `
+              )}
             </tbody>
           </table>
         </div>
@@ -417,7 +343,7 @@ export class SalesOrders extends LitElement {
   }
 
   renderAddForm() {
-    return `
+    return html`
       <div class="max-w-5xl mx-auto animate-fade-in">
         <div class="flex items-center justify-between mb-8">
           <div>
@@ -426,50 +352,65 @@ export class SalesOrders extends LitElement {
           </div>
         </div>
 
-        <form id="addOrderForm" class="sm-card" onsubmit="window.salesmanDashboard.sections.orders.submitAddForm(event)">
+        <form id="addOrderForm" class="sm-card" @submit=${this.submitAddForm}>
           <div class="p-8 space-y-8">
-            
             <div>
               <h4 class="sm-subheader">
-                ${getIconHTML("shopping-cart").replace(
-                  'class="w-5 h-5"',
-                  'class="w-5 h-5 text-sky-600"'
-                )}
+                <span
+                  class="w-5 h-5 text-sky-600 block mr-2"
+                  .innerHTML=${getIconHTML("shopping-cart")}
+                ></span>
                 Order Details
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                   <label class="sm-label">Order Number</label>
-                  <input type="text" name="orderNumber" required class="sm-input" placeholder="e.g. ORD-2024-001">
+                  <input
+                    type="text"
+                    name="orderNumber"
+                    required
+                    class="sm-input"
+                    placeholder="e.g. ORD-2024-001"
+                  />
                 </div>
-                
+
                 <div class="space-y-2">
                   <label class="sm-label">Customer</label>
                   <select name="customerId" required class="sm-input">
                     <option value="">-- Select Customer --</option>
-                    ${this.customers
-                      .map(
-                        (customer) => `
-                      <option value="${customer.id}" data-name="${customer.name}">
-                        ${customer.name}
-                      </option>
-                    `
-                      )
-                      .join("")}
+                    ${this.customers.map(
+                      (customer) => html`
+                        <option value="${customer.id}">${customer.name}</option>
+                      `
+                    )}
                   </select>
                 </div>
 
                 <div class="space-y-2">
                   <label class="sm-label">Order Date</label>
-                  <input type="date" name="orderDate" required class="sm-input">
+                  <input
+                    type="date"
+                    name="orderDate"
+                    required
+                    class="sm-input"
+                  />
                 </div>
 
                 <div class="space-y-2">
                   <label class="sm-label">Total Amount (LKR)</label>
                   <div class="relative">
-                    <input type="number" id="subtotal" name="subtotal" required min="0" step="0.01" class="sm-input pl-12" placeholder="0.00" readonly>
+                    <input
+                      type="text"
+                      id="subtotal"
+                      name="subtotal"
+                      class="sm-input pl-12"
+                      .value=${this.calculatedTotal.toFixed(2)}
+                      readonly
+                    />
                   </div>
-                  <p class="text-xs text-gray-500">Calculated automatically from items</p>
+                  <p class="text-xs text-gray-500">
+                    Calculated automatically from items
+                  </p>
                 </div>
 
                 <div class="space-y-2">
@@ -491,74 +432,120 @@ export class SalesOrders extends LitElement {
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
-                  <label class="sm-label">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <textarea name="notes" rows="3" class="sm-input" placeholder="Enter order notes or special instructions..."></textarea>
+                  <label class="sm-label"
+                    >Notes
+                    <span class="text-gray-400 font-normal"
+                      >(Optional)</span
+                    ></label
+                  >
+                  <textarea
+                    name="notes"
+                    rows="3"
+                    class="sm-input"
+                    placeholder="Enter order notes or special instructions..."
+                  ></textarea>
                 </div>
               </div>
             </div>
 
             <div class="border-t border-gray-100 pt-8">
               <h4 class="sm-subheader">
-                ${getIconHTML("package").replace(
-                  'class="w-5 h-5"',
-                  'class="w-5 h-5 text-sky-600"'
-                )}
+                <span
+                  class="w-5 h-5 text-sky-600 block mr-2"
+                  .innerHTML=${getIconHTML("package")}
+                ></span>
                 Order Items
               </h4>
               <div class="space-y-4" id="itemsContainer">
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 item-row sm-card-sub">
-                  <div class="space-y-2 md:col-span-2">
-                    <label class="block sm-label">Product</label>
-                    <select name="productId[]" required class="sm-input bg-white product-select" data-row="0" onchange="window.salesmanDashboard.sections.orders.updateSubtotal(this.closest('.item-row'))">
-                      <option value="">-- Select Product --</option>
-                      ${this.products
-                        .map(
-                          (product) => `
-                        <option value="${product.id}" data-name="${
-                            product.name
-                          }" data-price="${product.price}" data-stock="${
-                            product.quantity
-                          }">
-                          ${product.name} - Rs. ${product.price.toFixed(
-                            2
-                          )} (Stock: ${product.quantity})
-                        </option>
-                      `
-                        )
-                        .join("")}
-                    </select>
-                  </div>
-                  <div class="space-y-2">
-                    <label class="block sm-label">Quantity</label>
-                    <input type="number" name="itemQuantity[]" required min="1" class="sm-input bg-white item-quantity" data-row="0" placeholder="1" oninput="window.salesmanDashboard.sections.orders.updateSubtotal(this.closest('.item-row'))">
-                  </div>
-                  <div class="space-y-2">
-                    <label class="block sm-label">Subtotal</label>
-                    <input type="text" class="sm-input bg-gray-100 item-subtotal" data-row="0" readonly placeholder="Rs. 0.00">
-                  </div>
-                  <div class="space-y-2">
-                    <label class="block sm-label">Action</label>
-                    <button type="button" class="remove-item-btn sm-btn-danger-light" onclick="window.salesmanDashboard.sections.orders.removeItemRow(this)">
-                      ${getIconHTML("trash")}
-                      Remove
-                    </button>
-                  </div>
-                </div>
+                ${this.tempItems.map(
+                  (item, index) => html`
+                    <div
+                      class="grid grid-cols-1 md:grid-cols-5 gap-4 item-row sm-card-sub"
+                    >
+                      <div class="space-y-2 md:col-span-2">
+                        <label class="block sm-label">Product</label>
+                        <select
+                          required
+                          class="sm-input bg-white"
+                          @change=${(e) =>
+                            this.handleItemProductChange(index, e.target.value)}
+                          .value=${item.productId}
+                        >
+                          <option value="">-- Select Product --</option>
+                          ${this.products.map(
+                            (product) => html`
+                              <option value="${product.id}">
+                                ${product.name} - Rs.
+                                ${product.price.toFixed(2)} (Stock:
+                                ${product.quantity})
+                              </option>
+                            `
+                          )}
+                        </select>
+                      </div>
+                      <div class="space-y-2">
+                        <label class="block sm-label">Quantity</label>
+                        <input
+                          type="number"
+                          required
+                          min="1"
+                          class="sm-input bg-white"
+                          placeholder="1"
+                          @input=${(e) =>
+                            this.handleItemQuantityChange(
+                              index,
+                              e.target.value
+                            )}
+                          .value=${item.quantity}
+                        />
+                      </div>
+                      <div class="space-y-2">
+                        <label class="block sm-label">Subtotal</label>
+                        <input
+                          type="text"
+                          class="sm-input bg-gray-100"
+                          readonly
+                          .value=${`Rs. ${(
+                            (item.price || 0) * (item.quantity || 0)
+                          ).toFixed(2)}`}
+                        />
+                      </div>
+                      <div class="space-y-2">
+                        <label class="block sm-label">Action</label>
+                        <button
+                          type="button"
+                          class="sm-btn-danger-light"
+                          @click=${() => this.removeItemRow(index)}
+                        >
+                          ${getIconHTML("trash")} Remove
+                        </button>
+                      </div>
+                    </div>
+                  `
+                )}
               </div>
-              <button type="button" onclick="window.salesmanDashboard.sections.orders.addItemRow()" class="sm-btn-secondary-accent">
-                ${getIconHTML("plus")}
-                Add Another Item
+              <button
+                type="button"
+                @click=${this.addItemRow}
+                class="sm-btn-secondary-accent mt-4"
+              >
+                ${getIconHTML("plus")} Add Another Item
               </button>
             </div>
           </div>
 
-          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" onclick="window.salesmanDashboard.sections.orders.switchToList()" class="sm-btn-secondary">
+          <div
+            class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4"
+          >
+            <button
+              type="button"
+              @click=${this.switchToList}
+              class="sm-btn-secondary"
+            >
               Cancel
             </button>
             <button type="submit" class="sm-btn-primary">
-              ${getIconHTML("check-circle")}
-              Create Order
+              ${getIconHTML("check-circle")} Create Order
             </button>
           </div>
         </form>
@@ -570,7 +557,7 @@ export class SalesOrders extends LitElement {
     const order = this.editingOrder;
     if (!order) return this.renderList();
 
-    return `
+    return html`
       <div class="max-w-5xl mx-auto animate-fade-in">
         <div class="flex items-center justify-between mb-8">
           <div>
@@ -579,137 +566,191 @@ export class SalesOrders extends LitElement {
           </div>
         </div>
 
-        <form id="editOrderForm" class="sm-card" onsubmit="window.salesmanDashboard.sections.orders.submitEditForm(event)">
+        <form id="editOrderForm" class="sm-card" @submit=${this.submitEditForm}>
           <div class="p-8 space-y-8">
-            
             <div>
               <h4 class="sm-subheader">
-                ${getIconHTML("shopping-cart").replace(
-                  'class="w-5 h-5"',
-                  'class="w-5 h-5 text-sky-600"'
-                )}
+                <span
+                  class="w-5 h-5 text-sky-600 block mr-2"
+                  .innerHTML=${getIconHTML("shopping-cart")}
+                ></span>
                 Order Details
               </h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                   <label class="sm-label">Order Number</label>
-                  <input type="text" name="orderNumber" required class="sm-input" value="${
-                    order.orderNumber || ""
-                  }">
+                  <input
+                    type="text"
+                    name="orderNumber"
+                    required
+                    class="sm-input"
+                    value="${order.orderNumber || ""}"
+                  />
                 </div>
-                
+
                 <div class="space-y-2">
                   <label class="sm-label">Customer Name</label>
-                  <input type="text" name="customerName" required class="sm-input bg-gray-100" value="${
-                    order.customerName || ""
-                  }" readonly>
-                  <p class="text-xs text-gray-500">Customer cannot be changed</p>
+                  <input
+                    type="text"
+                    name="customerName"
+                    required
+                    class="sm-input bg-gray-100"
+                    value="${order.customerName || ""}"
+                    readonly
+                  />
+                  <p class="text-xs text-gray-500">
+                    Customer cannot be changed
+                  </p>
                 </div>
 
                 <div class="space-y-2">
                   <label class="sm-label">Order Date</label>
-                  <input type="date" name="orderDate" required class="sm-input" value="${
-                    order.orderDate ? order.orderDate.split("T")[0] : ""
-                  }">
+                  <input
+                    type="date"
+                    name="orderDate"
+                    required
+                    class="sm-input"
+                    value="${order.orderDate
+                      ? order.orderDate.split("T")[0]
+                      : ""}"
+                  />
                 </div>
 
                 <div class="space-y-2">
                   <label class="sm-label">Total Amount (LKR)</label>
                   <div class="relative">
-                    <input type="number" name="subtotal" required min="0" step="0.01" class="sm-input pl-12" value="${
-                      order.subtotal || 0
-                    }">
+                    <input
+                      type="number"
+                      name="subtotal"
+                      required
+                      min="0"
+                      step="0.01"
+                      class="sm-input pl-12"
+                      value="${order.subtotal || 0}"
+                    />
                   </div>
                 </div>
 
                 <div class="space-y-2">
                   <label class="sm-label">Status</label>
                   <select name="status" class="sm-input">
-                    <option value="pending" ${
-                      order.status === "pending" ? "selected" : ""
-                    }>Pending</option>
-                    <option value="confirmed" ${
-                      order.status === "confirmed" ? "selected" : ""
-                    }>Confirmed</option>
-                    <option value="delivered" ${
-                      order.status === "delivered" ? "selected" : ""
-                    }>Delivered</option>
-                    <option value="processing" ${
-                      order.status === "processing" ? "selected" : ""
-                    }>Processing</option>
+                    <option
+                      value="pending"
+                      ?selected=${order.status === "pending"}
+                    >
+                      Pending
+                    </option>
+                    <option
+                      value="confirmed"
+                      ?selected=${order.status === "confirmed"}
+                    >
+                      Confirmed
+                    </option>
+                    <option
+                      value="delivered"
+                      ?selected=${order.status === "delivered"}
+                    >
+                      Delivered
+                    </option>
+                    <option
+                      value="processing"
+                      ?selected=${order.status === "processing"}
+                    >
+                      Processing
+                    </option>
                   </select>
                 </div>
 
                 <div class="space-y-2">
                   <label class="sm-label">Authorized</label>
                   <select name="authorized" class="sm-input">
-                    <option value="false" ${
-                      !order.authorized ? "selected" : ""
-                    }>No</option>
-                    <option value="true" ${
-                      order.authorized ? "selected" : ""
-                    }>Yes</option>
+                    <option value="false" ?selected=${!order.authorized}>
+                      No
+                    </option>
+                    <option value="true" ?selected=${order.authorized}>
+                      Yes
+                    </option>
                   </select>
                 </div>
 
                 <div class="space-y-2">
                   <label class="sm-label">Payment Status</label>
                   <select name="paymentStatus" class="sm-input">
-                    <option value="unpaid" ${
-                      order.paymentStatus === "unpaid" ? "selected" : ""
-                    }>Unpaid</option>
-                    <option value="paid" ${
-                      order.paymentStatus === "paid" ? "selected" : ""
-                    }>Paid</option>
-                    <option value="refunded" ${
-                      order.paymentStatus === "refunded" ? "selected" : ""
-                    }>Refunded</option>
+                    <option
+                      value="unpaid"
+                      ?selected=${order.paymentStatus === "unpaid"}
+                    >
+                      Unpaid
+                    </option>
+                    <option
+                      value="paid"
+                      ?selected=${order.paymentStatus === "paid"}
+                    >
+                      Paid
+                    </option>
+                    <option
+                      value="refunded"
+                      ?selected=${order.paymentStatus === "refunded"}
+                    >
+                      Refunded
+                    </option>
                   </select>
                 </div>
 
                 <div class="space-y-2 md:col-span-2">
-                  <label class="sm-label">Notes <span class="text-gray-400 font-normal">(Optional)</span></label>
-                  <textarea name="notes" rows="3" class="sm-input">${
-                    order.notes || ""
-                  }</textarea>
+                  <label class="sm-label"
+                    >Notes
+                    <span class="text-gray-400 font-normal"
+                      >(Optional)</span
+                    ></label
+                  >
+                  <textarea name="notes" rows="3" class="sm-input">
+${order.notes || ""}</textarea
+                  >
                 </div>
               </div>
             </div>
 
             <div class="border-t border-gray-100 pt-8">
               <h4 class="sm-subheader">
-                ${getIconHTML("package").replace(
-                  'class="w-5 h-5"',
-                  'class="w-5 h-5 text-sky-600"'
-                )}
+                <span
+                  class="w-5 h-5 text-sky-600 block mr-2"
+                  .innerHTML=${getIconHTML("package")}
+                ></span>
                 Order Items
               </h4>
               <div class="sm-card-sub">
                 <p class="text-sm text-gray-600 mb-2">Current Items:</p>
                 <ul class="list-disc list-inside text-sm text-gray-700">
-                  ${
-                    order.items
-                      ? order.items
-                          .map(
-                            (item) =>
-                              `<li>${item.name} - Quantity: ${item.quantity}</li>`
-                          )
-                          .join("")
-                      : "<li>No items</li>"
-                  }
+                  ${order.items
+                    ? order.items.map(
+                        (item) =>
+                          html`<li>
+                            ${item.name} - Quantity: ${item.quantity}
+                          </li>`
+                      )
+                    : html`<li>No items</li>`}
                 </ul>
-                <p class="text-xs text-gray-500 mt-2">Note: Item editing not available. Cancel and create a new order if items need to be changed.</p>
+                <p class="text-xs text-gray-500 mt-2">
+                  Note: Item editing not available. Cancel and create a new
+                  order if items need to be changed.
+                </p>
               </div>
             </div>
           </div>
 
-          <div class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4">
-            <button type="button" onclick="window.salesmanDashboard.sections.orders.switchToList()" class="sm-btn-secondary">
+          <div
+            class="bg-gray-50 px-8 py-6 border-t border-gray-200 flex items-center justify-end gap-4"
+          >
+            <button
+              type="button"
+              @click=${this.switchToList}
+              class="sm-btn-secondary"
+            >
               Cancel
             </button>
             <button type="submit" class="sm-btn-primary">
-              ${getIconHTML("check-circle")}
-              Update Order
+              ${getIconHTML("check-circle")} Update Order
             </button>
           </div>
         </form>

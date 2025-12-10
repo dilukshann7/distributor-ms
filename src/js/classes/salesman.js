@@ -55,11 +55,7 @@ class SalesmanDashboard {
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${
-              item.id
-            }" onclick="window.salesmanDashboard.navigateToSection('${
-                item.id
-              }')" class="nav-item sm-nav-item ${
+            <button data-section="${item.id}" class="nav-item sm-nav-item ${
                 this.currentSection === item.id
                   ? "sm-nav-item-active"
                   : "sm-nav-item-inactive"
@@ -90,7 +86,7 @@ class SalesmanDashboard {
             <span class="absolute top-1 right-1 w-2 h-2 bg-sky-600 rounded-full"></span>
           </button>
 
-          <button onclick="window.salesmanDashboard.logout()" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <button id="logoutBtn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${getIconHTML("log-out")}
           </button>
         </div>
