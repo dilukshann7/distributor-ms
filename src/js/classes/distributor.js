@@ -1,6 +1,4 @@
 import logo from "../../assets/logo-tr.png";
-import "../../css/distributor-style.css";
-import "../../css/supplier-style.css";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
 import { OrderManagement } from "./distributor/OrderManagement.js";
@@ -63,9 +61,7 @@ class DistributorDashboard {
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${
-              item.id
-            }" class="dist-nav-item ${
+            <button data-section="${item.id}" class="dist-nav-item ${
                 this.currentSection === item.id
                   ? "dist-nav-item-active"
                   : "dist-nav-item-inactive"
@@ -104,11 +100,13 @@ class DistributorDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
+
     return sectionInstance.render();
   }
 
   attachEventListeners() {
     const navItems = this.container.querySelectorAll(".dist-nav-item");
+
     navItems.forEach((item) => {
       item.addEventListener("click", (e) => {
         const section = e.currentTarget.dataset.section;
@@ -117,6 +115,7 @@ class DistributorDashboard {
     });
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
+
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
         import("../login.js").then((module) => {
@@ -131,11 +130,17 @@ class DistributorDashboard {
 
   async navigateToSection(section) {
     this.currentSection = section;
+
     const content = this.container.querySelector("#dashboardContent");
-    const sectionContent = await this.renderSection(section);
-    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+
+    content.innerHTML = `
+      <div class="p-8">
+        ${sectionContent}
+      </div>
+    `;
 
     const navItems = this.container.querySelectorAll(".dist-nav-item");
+
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
         item.className = "dist-nav-item dist-nav-item-active";
@@ -147,6 +152,6 @@ class DistributorDashboard {
 }
 
 export function renderDistributorDashboard(container) {
-  window.distributorDashboard = new DistributorDashboard(container);
-  window.distributorDashboard.render();
+  const dashboard = new DistributorDashboard(container);
+  dashboard.render();
 }
