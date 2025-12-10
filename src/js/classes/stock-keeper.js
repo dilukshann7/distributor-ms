@@ -10,7 +10,6 @@ class StockKeeperDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "inventory";
-    this.isSidebarOpen = true;
     this.sections = {
       inventory: new InventoryManagement(this.container),
       receiving: new ReceivingShipment(this.container),
@@ -22,6 +21,7 @@ class StockKeeperDashboard {
   async render() {
     await this.notificationPanel.loadTasks();
     const sectionContent = await this.renderSection(this.currentSection);
+
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -45,7 +45,6 @@ class StockKeeperDashboard {
       { id: "receiving", label: "Shipment", icon: "inbox" },
       { id: "reports", label: "Stock Reports", icon: "bar-chart" },
     ];
-    /*html*/
     return `
       <aside class="translate-x-0 lg:translate-x-0 fixed lg:relative w-64 h-screen bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
         <img src="${logo}" alt="Logo" class="w-full  h-auto p-4" />
@@ -65,8 +64,6 @@ class StockKeeperDashboard {
             )
             .join("")}
         </nav>
-
-        
       </aside>
     `;
   }
@@ -102,6 +99,7 @@ class StockKeeperDashboard {
 
   attachEventListeners() {
     const navItems = this.container.querySelectorAll(".nav-item");
+
     navItems.forEach((item) => {
       item.addEventListener("click", (e) => {
         const section = e.currentTarget.dataset.section;
@@ -124,14 +122,14 @@ class StockKeeperDashboard {
 
   async navigateToSection(section) {
     this.currentSection = section;
-    const content = this.container.querySelector("#dashboardContent");
-    const sectionContent = await this.renderSection(section);
-    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
 
-    const sectionInstance = this.sections[section];
-    if (sectionInstance.attachEventListeners) {
-      sectionInstance.attachEventListeners();
-    }
+    const content = this.container.querySelector("#dashboardContent");
+
+    content.innerHTML = `
+      <div class="p-8">
+          ${sectionContent}
+      </div>
+    `;
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -145,6 +143,6 @@ class StockKeeperDashboard {
 }
 
 export async function renderStockKeeperDashboard(container) {
-  window.stockKeeperDashboard = new StockKeeperDashboard(container);
-  await window.stockKeeperDashboard.render();
+  const dashboard = new StockKeeperDashboard(container);
+  dashboard.render();
 }
