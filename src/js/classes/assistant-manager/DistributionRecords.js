@@ -86,7 +86,7 @@ export class DistributionRecords extends LitElement {
                         ${record.deliveryNumber}
                       </td>
                       <td class="px-6 py-4 text-sm text-gray-600">
-                        ${record.salesOrders
+                        ${(record.salesOrders || [])
                           .map((order) => order.items)
                           .flat()
                           .map((item) => item.name + " - " + item.quantity)

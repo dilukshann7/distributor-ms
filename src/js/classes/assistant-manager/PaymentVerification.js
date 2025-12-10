@@ -109,7 +109,7 @@ export class PaymentVerification extends LitElement {
                         $${payment.amount.toLocaleString()}
                       </td>
                       <td class="px-6 py-4 text-sm text-gray-600">
-                        ${payment.salesOrder.customerName}
+                        ${payment.salesOrder?.customerName || "N/A"}
                       </td>
                       <td class="px-6 py-4 text-sm text-gray-600">
                         ${new Date(payment.paymentDate).toLocaleDateString()}
@@ -117,18 +117,20 @@ export class PaymentVerification extends LitElement {
                       <td class="px-6 py-4">
                         <span
                           class="px-3 py-1 rounded-full text-xs font-medium ${payment
-                            .salesOrder.paymentStatus === "paid"
+                            .salesOrder?.paymentStatus === "paid"
                             ? "bg-green-100 text-green-800"
                             : "bg-yellow-100 text-yellow-800"}"
                         >
-                          ${payment.salesOrder.paymentStatus
-                            .charAt(0)
-                            .toUpperCase() +
-                          payment.salesOrder.paymentStatus.slice(1)}
+                          ${payment.salesOrder?.paymentStatus
+                            ? payment.salesOrder.paymentStatus
+                                .charAt(0)
+                                .toUpperCase() +
+                              payment.salesOrder.paymentStatus.slice(1)
+                            : "Unknown"}
                         </span>
                       </td>
                       <td class="px-6 py-4">
-                        ${payment.salesOrder.paymentStatus === "unpaid"
+                        ${payment.salesOrder?.paymentStatus === "unpaid"
                           ? html`
                               <div class="flex gap-2">
                                 <button
