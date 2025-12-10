@@ -2,7 +2,7 @@ import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
 import { OrderManagement } from "./distributor/OrderManagement.js";
-import { DriverManagementDist } from "./distributor/DriverManagementDist.js";
+import { DriverManagement } from "./distributor/DriverManagement.js";
 import { StockTracking } from "./distributor/StockTracking.js";
 import { DeliveryRoutes } from "./distributor/DeliveryRoutes.js";
 import { ProofOfDelivery } from "./distributor/ProofOfDelivery.js";
