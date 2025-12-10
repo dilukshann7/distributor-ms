@@ -1,5 +1,4 @@
 import logo from "../../assets/logo-tr.png";
-import "../../css/cashier-style.css";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
 import { SalesTransaction } from "./cashier/SalesTransaction.js";
