@@ -2,6 +2,9 @@ import logo from "../../assets/logo-tr.png";
 import "../../css/stock-keeper-style.css";
 import { NotificationPanel } from "../components/NotificationPanel.js";
 import { getIconHTML } from "../../assets/icons/index.js";
+import { InventoryManagement } from "./stock-keeper/InventoryManagement.js";
+import { ReceivingShipment } from "./stock-keeper/ReceivingShipment.js";
+import { StockReports } from "./stock-keeper/StockReports.js";
 
 class StockKeeperDashboard {
   constructor(container) {
@@ -107,7 +110,7 @@ class StockKeeperDashboard {
     });
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
-    
+
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
         import("../login.js").then((module) => {

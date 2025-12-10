@@ -1,6 +1,8 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
+import { FinancialReports } from "./cashier/FinancialReports.js";
+import { SalesTransaction } from "./cashier/SalesTransaction.js";
 
 class CashierDashboard {
   constructor(container) {
@@ -15,7 +17,7 @@ class CashierDashboard {
 
   async render() {
     await this.notificationPanel.loadTasks();
-    
+
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
