@@ -94,10 +94,6 @@ class ManagerDashboard {
     `;
   }
 
-  async renderSection(section) {
-    return "";
-  }
-
   renderCurrentSection() {
     const content = this.container.querySelector("#dashboardContent div");
     content.innerHTML = "";
