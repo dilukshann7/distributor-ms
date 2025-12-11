@@ -40,8 +40,6 @@ export class SalesTransaction extends LitElement {
     }
   }
 
-
-
   async getSmallOrder() {
     try {
       const response = await smallOrder.getAll();
@@ -352,7 +350,7 @@ export class SalesTransaction extends LitElement {
                       >
                         No payment history available
                       </td>
-                    </tr>`}
+                    </tr> `}
               </tbody>
             </table>
           </div>
