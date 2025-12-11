@@ -2,32 +2,9 @@
   "version": 2,
   "buildCommand": "prisma generate && npm run build",
   "outputDirectory": "dist",
-  "builds": [
-    {
-      "src": "server/Server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "server/Server.js"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "dist/assets/$1"
-    },
-    {
-      "src": "/(.*\\.js)",
-      "dest": "dist/$1"
-    },
-    {
-      "src": "/(.*\\.css)",
-      "dest": "dist/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "dist/index.html"
-    }
+
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/Server.js" },
+    { "source": "/(.*)", "destination": "/dist/index.html" }
   ]
 }
