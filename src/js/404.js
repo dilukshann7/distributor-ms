@@ -19,16 +19,12 @@ export function render404(container) {
         
         <div class="text-center">
           <h1 class="text-6xl font-black text-white mb-2 drop-shadow-lg">
-            Dhenne Homba Revert Venna
+            404
           </h1>
           <p class="text-xl text-white/80 font-medium mb-6">
             Got your ass that was tryna sneak into other peoples profiles... 
           </p>
-          <button onclick="window.history.back()" 
-            class="px-8 py-3 bg-white text-slate-900 rounded-xl font-bold hover:bg-slate-100 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center gap-2 mx-auto">
-            ${getIconHTML("arrow-right")}
-            <span>Go Back</span>
-          </button>
+          
         </div>
       </div>
     </div>
