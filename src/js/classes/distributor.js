@@ -7,6 +7,7 @@ import { StockTracking } from "./distributor/StockTracking.js";
 import { DeliveryRoutes } from "./distributor/DeliveryRoutes.js";
 import { ProofOfDelivery } from "./distributor/ProofOfDelivery.js";
 import { OrderAuthorization } from "./distributor/OrderAuthorization.js";
+import { User } from "../models/User.js";
 
 class DistributorDashboard {
   constructor(container) {
@@ -121,8 +122,8 @@ class DistributorDashboard {
 
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
+        User.logout().then(() => {
+          navigateTo("/");
         });
       });
     }

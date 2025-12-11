@@ -5,6 +5,7 @@ import { SalesOrders } from "./salesman/SalesOrders.js";
 import { StockAvailability } from "./salesman/StockAvailability.js";
 import { CustomerAccounts } from "./salesman/CustomerAccounts.js";
 import { SalesReports } from "./salesman/SalesReports.js";
+import { User } from "../models/User.js";
 
 class SalesmanDashboard {
   constructor(container) {
@@ -117,9 +118,7 @@ class SalesmanDashboard {
     const logoutBtn = this.container.querySelector("#logoutBtn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+        User.logout();
       });
     }
 

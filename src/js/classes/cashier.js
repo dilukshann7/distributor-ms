@@ -3,6 +3,7 @@ import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
 import { FinancialReports } from "./cashier/FinancialReports.js";
 import { SalesTransaction } from "./cashier/SalesTransaction.js";
+import { User } from "../models/User.js";
 
 class CashierDashboard {
   constructor(container) {
@@ -112,9 +113,7 @@ class CashierDashboard {
     const logoutBtn = this.container.querySelector("#logoutBtn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+        User.logout();
       });
     }
 

@@ -7,6 +7,7 @@ import { OperationalReports } from "./manager/OperationalReports.js";
 import { StockManagement } from "./manager/StockManagement.js";
 import { CustomerFeedback } from "./manager/CustomerFeedback.js";
 import { DeliveryTracking } from "./manager/DeliveryTracking.js";
+import { User } from "../models/User.js";
 
 class ManagerDashboard {
   constructor(container) {
@@ -122,10 +123,8 @@ class ManagerDashboard {
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
     if (logoutBtn) {
-      logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+      logoutBtn.addEventListener("click", async () => {
+        User.logout();
       });
     }
 

@@ -5,6 +5,7 @@ import { getIconHTML } from "../../assets/icons/index.js";
 import { InventoryManagement } from "./stock-keeper/InventoryManagement.js";
 import { ReceivingShipment } from "./stock-keeper/ReceivingShipment.js";
 import { StockReports } from "./stock-keeper/StockReports.js";
+import { User } from "../models/User.js";
 
 class StockKeeperDashboard {
   constructor(container) {
@@ -113,9 +114,7 @@ class StockKeeperDashboard {
 
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+        User.logout();
       });
     }
 
