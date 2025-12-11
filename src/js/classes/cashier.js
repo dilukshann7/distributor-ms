@@ -1,41 +1,38 @@
 import logo from "../../assets/logo-tr.png";
-import "../../css/cashier-style.css";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
-import { SalesTransaction } from "./cashier/SalesTransaction.js";
 import { FinancialReports } from "./cashier/FinancialReports.js";
+import { SalesTransaction } from "./cashier/SalesTransaction.js";
+import { User } from "../models/User.js";
 
 class CashierDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "sales";
-    this.isSidebarOpen = true;
-    this.currentTime = new Date().toLocaleTimeString();
     this.sections = {
-      sales: new SalesTransaction(this.container),
-      reports: new FinancialReports(this.container),
+      sales: document.createElement("sales-transaction"),
+      reports: document.createElement("financial-reports"),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
+
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
-          <main id="dashboardContent" class="flex-1 overflow-auto">
-            <div class="p-8">
-              ${sectionContent}
-            </div>
+          <main id="dashboardContent" class="flex-1 overflow-auto w-full">
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -45,9 +42,7 @@ class CashierDashboard {
     ];
 
     return `
-      <div class="cashier-sidebar ${
-        this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      }">
+      <aside class="-translate-x-full lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-cyan-700 to-cyan-800 text-white transition-transform duration-300 z-30 overflow-y-auto">
         <img src="${logo}" alt="Logo" class="w-full invert h-auto p-4" />
 
         <nav class="flex-1 overflow-y-auto p-4 space-y-2">
@@ -75,43 +70,35 @@ class CashierDashboard {
             <span>Logout</span>
           </button>
         </div>
-      </div>
+      </aside>
     `;
   }
 
   renderHeader() {
     return `
-      <div class="cashier-header">
+      <header class="cashier-header">
         <div>
           <h2 class="cashier-page-title">Cashier Dashboard</h2>
           <p class="cashier-subtitle">Manage transactions and payments</p>
         </div>
 
         <div class="flex items-center gap-6">
-          <div class="relative">
-            <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-              ${getIconHTML("bell")}
-            </button>
-          </div>
+          <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            ${getIconHTML("bell")}
+          </button>
         </div>
-      </div>
+      </header>
     `;
   }
 
-  async renderSection(section) {
-    const sectionInstance = this.sections[section];
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
 
-    if (sectionInstance.initialize) {
-      const html = await sectionInstance.initialize();
-      setTimeout(() => {
-        if (sectionInstance.attachEventListeners) {
-          sectionInstance.attachEventListeners();
-        }
-      }, 0);
-      return html;
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
     }
-
-    return sectionInstance.render();
   }
 
   attachEventListeners() {
@@ -126,26 +113,18 @@ class CashierDashboard {
     const logoutBtn = this.container.querySelector("#logoutBtn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+        User.logout();
       });
     }
 
     window.notificationPanel = this.notificationPanel;
+    window.cashierDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
-    const content = this.container.querySelector("#dashboardContent");
-    const sectionContent = await this.renderSection(section);
-    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
-
-    const sectionInstance = this.sections[section];
-    if (sectionInstance.attachEventListeners) {
-      sectionInstance.attachEventListeners();
-    }
+    this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {

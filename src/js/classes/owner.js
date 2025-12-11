@@ -1,7 +1,7 @@
 import { getIconHTML } from "../../assets/icons/index.js";
 import logo from "../../assets/logo-tr.png";
-import "../../css/owner-style.css";
 import { NotificationPanel } from "../components/NotificationPanel.js";
+import { User } from "../models/User.js";
 import { EmployeeManagement } from "./owner/EmployeeManagement.js";
 import { InventoryControl } from "./owner/InventoryControl.js";
 import { OperationsMonitor } from "./owner/OperationsMonitor.js";
@@ -12,10 +12,10 @@ class OwnerDashboard {
     this.container = container;
     this.currentSection = "employees";
     this.sections = {
-      employees: new EmployeeManagement(this.container),
-      inventory: new InventoryControl(this.container),
-      operations: new OperationsMonitor(this.container),
-      reports: new ReportsSection(this.container),
+      employees: document.createElement("employee-management"),
+      inventory: document.createElement("inventory-control"),
+      operations: document.createElement("operations-monitor"),
+      reports: document.createElement("reports-section"),
     };
     window.ownerDashboard = this;
     this.notificationPanel = new NotificationPanel(this.container);
@@ -30,17 +30,13 @@ class OwnerDashboard {
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="owner-content-area">
-            <div class="p-8 text-center text-gray-500">Loading...</div>
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
-
-    // Load initial section content
-    const content = this.container.querySelector("#dashboardContent");
-    const html = await this.renderSection(this.currentSection);
-    content.innerHTML = html;
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -70,7 +66,7 @@ class OwnerDashboard {
                   ? "owner-nav-item-active"
                   : "owner-nav-item-inactive"
               }">
-              ${this.getIcon(item.icon)}
+              ${getIconHTML(item.icon)}
               <span class="text-sm font-medium">${item.label}</span>
             </button>
           `
@@ -81,7 +77,7 @@ class OwnerDashboard {
         <div class="p-4 border-t border-gray-200 space-y-2">
 
           <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-            ${this.getIcon("log-out")}
+            ${getIconHTML("log-out")}
             <span class="text-sm font-medium">Logout</span>
           </button>
         </div>
@@ -105,10 +101,14 @@ class OwnerDashboard {
     `;
   }
 
-  async renderSection(section) {
-    const sectionInstance = this.sections[section];
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
 
-    return sectionInstance.render();
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
+    }
   }
 
   attachEventListeners() {
@@ -123,9 +123,7 @@ class OwnerDashboard {
     const logoutBtn = this.container.querySelector("#logoutBtn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+        User.logout();
       });
     }
 
@@ -135,34 +133,20 @@ class OwnerDashboard {
 
   async navigateToSection(section) {
     this.currentSection = section;
-    const content = this.container.querySelector("#dashboardContent");
-
-    // Show loading state
-    content.innerHTML =
-      '<div class="p-8 text-center text-gray-500">Loading...</div>';
-
-    // Load and render section
-    const html = await this.renderSection(section);
-    content.innerHTML = html;
+    this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-blue-600 text-white";
+        item.className = "nav-item owner-nav-item owner-nav-item-active";
       } else {
-        item.className =
-          "nav-item w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-gray-700 hover:bg-gray-100";
+        item.className = "nav-item owner-nav-item owner-nav-item-inactive";
       }
     });
   }
-
-  getIcon(name) {
-    return getIconHTML(name);
-  }
 }
 
-export async function renderOwnerDashboard(container) {
+export function renderOwnerDashboard(container) {
   const dashboard = new OwnerDashboard(container);
-  await dashboard.render();
+  return dashboard.render();
 }

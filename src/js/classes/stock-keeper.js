@@ -1,42 +1,41 @@
 import logo from "../../assets/logo-tr.png";
 import "../../css/stock-keeper-style.css";
 import { NotificationPanel } from "../components/NotificationPanel.js";
+import { getIconHTML } from "../../assets/icons/index.js";
 import { InventoryManagement } from "./stock-keeper/InventoryManagement.js";
 import { ReceivingShipment } from "./stock-keeper/ReceivingShipment.js";
 import { StockReports } from "./stock-keeper/StockReports.js";
-import { getIconHTML } from "../../assets/icons/index.js";
+import { User } from "../models/User.js";
 
 class StockKeeperDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "inventory";
-    this.isSidebarOpen = true;
     this.sections = {
-      inventory: new InventoryManagement(this.container),
-      receiving: new ReceivingShipment(this.container),
-      reports: new StockReports(this.container),
+      inventory: document.createElement("inventory-management"),
+      receiving: document.createElement("receiving-shipment"),
+      reports: document.createElement("stock-reports"),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
+
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
-          <main id="dashboardContent" class="flex-1 overflow-auto">
-            <div class="p-8">
-              ${sectionContent}
-            </div>
+          <main id="dashboardContent" class="flex-1 overflow-auto w-full">
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -45,7 +44,6 @@ class StockKeeperDashboard {
       { id: "receiving", label: "Shipment", icon: "inbox" },
       { id: "reports", label: "Stock Reports", icon: "bar-chart" },
     ];
-    /*html*/
     return `
       <aside class="translate-x-0 lg:translate-x-0 fixed lg:relative w-64 h-screen bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
         <img src="${logo}" alt="Logo" class="w-full  h-auto p-4" />
@@ -65,8 +63,6 @@ class StockKeeperDashboard {
             )
             .join("")}
         </nav>
-
-        
       </aside>
     `;
   }
@@ -94,14 +90,19 @@ class StockKeeperDashboard {
     `;
   }
 
-  async renderSection(section) {
-    const sectionInstance = this.sections[section];
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
 
-    return sectionInstance.render();
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
+    }
   }
 
   attachEventListeners() {
     const navItems = this.container.querySelectorAll(".nav-item");
+
     navItems.forEach((item) => {
       item.addEventListener("click", (e) => {
         const section = e.currentTarget.dataset.section;
@@ -110,30 +111,21 @@ class StockKeeperDashboard {
     });
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
+
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+        User.logout();
       });
     }
 
     window.notificationPanel = this.notificationPanel;
+    window.stockKeeperDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
-    const content = this.container.querySelector("#dashboardContent");
-    const sectionContent = await this.renderSection(section);
-    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
-
-    if (section === "receiving") {
-      const receivingShipment = new ReceivingShipment(this.container);
-      await receivingShipment.renderAndAttach(content);
-    } else if (section === "reports") {
-      this.sections.reports.attachEventListeners(content);
-    }
+    this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".nav-item");
     navItems.forEach((item) => {
@@ -147,6 +139,6 @@ class StockKeeperDashboard {
 }
 
 export async function renderStockKeeperDashboard(container) {
-  window.stockKeeperDashboard = new StockKeeperDashboard(container);
-  await window.stockKeeperDashboard.render();
+  const dashboard = new StockKeeperDashboard(container);
+  dashboard.render();
 }

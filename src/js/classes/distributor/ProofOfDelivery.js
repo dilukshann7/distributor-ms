@@ -1,16 +1,26 @@
+import { LitElement, html } from "lit";
 import { Delivery } from "../../models/Delivery.js";
 
-export class ProofOfDelivery {
-  constructor(container) {
-    this.container = container;
+export class ProofOfDelivery extends LitElement {
+  static properties = {
+    deliveries: { type: Array },
+  };
+
+  constructor() {
+    super();
     this.deliveries = [];
     this.getDeliveries();
+  }
+
+  createRenderRoot() {
+    return this;
   }
 
   async getDeliveries() {
     try {
       const response = await Delivery.getAll();
       this.deliveries = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching deliveries:", error);
       this.deliveries = [];
@@ -22,7 +32,7 @@ export class ProofOfDelivery {
       (d) => d.status === "completed"
     );
 
-    return `
+    return html`
     <div class="space-y-6">
       <div>
         <h3 class="text-2xl font-bold text-gray-900">Proof of Delivery</h3>
@@ -76,8 +86,7 @@ export class ProofOfDelivery {
                   </td>
                 </tr>
               `
-                )
-                .join("")}
+                )}
             </tbody>
           </table>
         </div>
@@ -85,11 +94,6 @@ export class ProofOfDelivery {
     </div>
   `;
   }
-
-  refresh(container) {
-    const content = container.querySelector("#dashboardContent");
-    if (content) {
-      content.innerHTML = `<div class="p-8">${this.render()}</div>`;
-    }
-  }
 }
+
+customElements.define("proof-of-delivery", ProofOfDelivery);

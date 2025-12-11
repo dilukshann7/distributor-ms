@@ -26,13 +26,16 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
+    "@quixo3/prisma-session-store": "^3.1.13",
     "axios": "^1.13.1",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-session": "^1.18.2",
     "jspdf": "^3.0.4",
     "jspdf-autotable": "^5.0.2",
+    "lit": "^3.3.1",
     "prisma": "^6.19.0"
   }
 }

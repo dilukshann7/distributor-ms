@@ -1,53 +1,44 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
-import "../../css/supplier-style.css";
 import { NotificationPanel } from "../components/NotificationPanel.js";
 import { PurchaseOrders } from "./supplier/PurchaseOrders.js";
 import { ProductCatalog } from "./supplier/ProductCatalog.js";
 import { ShipmentTracking } from "./supplier/ShipmentTracking.js";
 import { InvoicesPayments } from "./supplier/InvoicesPayments.js";
 import { SalesAnalytics } from "./supplier/SalesAnalytics.js";
-import { Supplier } from "../../js/models/Supplier.js";
+import { User } from "../models/User.js";
 
 class SupplierDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "orders";
     this.sections = {
-      orders: new PurchaseOrders(container),
-      products: new ProductCatalog(container),
-      shipments: new ShipmentTracking(container),
-      invoices: new InvoicesPayments(container),
-      analytics: new SalesAnalytics(container),
+      orders: document.createElement("purchase-orders"),
+      products: document.createElement("product-catalog"),
+      shipments: document.createElement("shipment-tracking"),
+      invoices: document.createElement("invoices-payments"),
+      analytics: document.createElement("sales-analytics"),
     };
     this.notificationPanel = new NotificationPanel(container);
-    this.supplierName = this.loadSupplier();
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
+
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
-          <main id="dashboardContent" class="flex-1 overflow-auto">
-            <div class="p-8">
-              ${sectionContent}
-            </div>
+          <main id="dashboardContent" class="flex-1 overflow-auto w-full">
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
-  }
-
-  async loadSupplier() {
-    const id = window.location.search.split("id=")[1];
-    const response = await Supplier.findById(id);
-    const SupplierName = response.data.companyName;
-    this.supplierName = SupplierName;
+    this.attachEventListeners();
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -67,11 +58,7 @@ class SupplierDashboard {
           ${menuItems
             .map(
               (item) => `
-            <button data-section="${
-              item.id
-            }" onclick="window.supplierDashboard.navigateToSection('${
-                item.id
-              }')" class="nav-item ${
+            <button data-section="${item.id}" class="nav-item ${
                 this.currentSection === item.id
                   ? "nav-item-active"
                   : "nav-item-inactive"
@@ -83,15 +70,6 @@ class SupplierDashboard {
             )
             .join("")}
         </nav>
-
-        <div class="p-4 border-t border-indigo-600">
-          <div class="bg-indigo-600 rounded-lg p-4">
-            <p class="text-sm text-indigo-100">Supplier Account</p>
-            <p class="font-semibold text-white mt-1">
-              ${this.supplierName}
-            </p>
-          </div>
-        </div>
       </aside>
     `;
   }
@@ -109,7 +87,7 @@ class SupplierDashboard {
             ${getIconHTML("bell")}
           </button>
 
-          <button onclick="window.supplierDashboard.logout()" class="btn-icon">
+          <button id="logoutBtn" class="btn-icon">
             ${getIconHTML("log-out")}
           </button>
         </div>
@@ -117,38 +95,55 @@ class SupplierDashboard {
     `;
   }
 
-  async renderSection(section) {
-    const sectionInstance = this.sections[section];
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
 
-    return sectionInstance.render();
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
+    }
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
-    const content = this.container.querySelector("#dashboardContent");
-    const sectionContent = await this.renderSection(section);
-    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+    this.renderCurrentSection();
 
-    const buttons = this.container.querySelectorAll(".nav-item");
-    buttons.forEach((btn) => {
-      if (btn.dataset.section === section) {
-        btn.className = "nav-item nav-item-active";
+    const navItems = this.container.querySelectorAll(".nav-item");
+    navItems.forEach((item) => {
+      if (item.dataset.section === section) {
+        item.className = "nav-item nav-item-active";
       } else {
-        btn.className = "nav-item nav-item-inactive";
+        item.className = "nav-item nav-item-inactive";
       }
     });
   }
 
-  logout() {
-    import("../login.js").then((module) => {
-      module.renderLogin(this.container);
+  attachEventListeners() {
+    const navItems = this.container.querySelectorAll(".nav-item");
+
+    navItems.forEach((item) => {
+      item.addEventListener("click", (e) => {
+        const section = e.currentTarget.dataset.section;
+        this.navigateToSection(section);
+      });
     });
+
+    const logoutBtn = this.container.querySelector("#logoutBtn");
+
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", () => {
+        User.logout();
+      });
+    }
+
+    window.notificationPanel = this.notificationPanel;
+    window.supplierDashboard = this;
+    this.notificationPanel.attachEventListeners();
   }
 }
 
 export async function renderSupplierDashboard(container) {
-  window.supplierDashboard = new SupplierDashboard(container);
-  window.notificationPanel = window.supplierDashboard.notificationPanel;
-  window.supplierDashboard.notificationPanel.attachEventListeners();
-  await window.supplierDashboard.render();
+  const dashboard = new SupplierDashboard(container);
+  dashboard.render();
 }

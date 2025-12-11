@@ -7,26 +7,26 @@ import { OperationalReports } from "./manager/OperationalReports.js";
 import { StockManagement } from "./manager/StockManagement.js";
 import { CustomerFeedback } from "./manager/CustomerFeedback.js";
 import { DeliveryTracking } from "./manager/DeliveryTracking.js";
+import { User } from "../models/User.js";
 
 class ManagerDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "overview";
     this.sections = {
-      overview: new EmployeeOversight(this.container),
-      tasks: new TaskAssignment(this.container),
-      reports: new OperationalReports(this.container),
-      stock: new StockManagement(this.container),
-      feedback: new CustomerFeedback(this.container),
-      delivery: new DeliveryTracking(this.container),
+      overview: document.createElement("employee-oversight"),
+      tasks: document.createElement("task-assignment"),
+      reports: document.createElement("operational-reports"),
+      stock: document.createElement("stock-management"),
+      feedback: document.createElement("customer-feedback"),
+      delivery: document.createElement("delivery-tracking"),
     };
-    window.managerDashboard = this;
     this.notificationPanel = new NotificationPanel(this.container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
+
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -34,14 +34,13 @@ class ManagerDashboard {
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
           <main id="dashboardContent" class="flex-1 overflow-auto w-full">
-            <div class="p-8">
-              ${sectionContent}
-            </div>
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -55,9 +54,7 @@ class ManagerDashboard {
     ];
 
     return `
-      <aside class="${
-        this.isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-emerald-700 to-emerald-900 text-white transition-transform duration-300 z-30 overflow-y-auto">
+      <aside class="-translate-x-full lg:translate-x-0 fixed lg:relative w-64 h-screen bg-gradient-to-b from-emerald-700 to-emerald-900 text-white transition-transform duration-300 z-30 overflow-y-auto">
         <div class="p-6">
           <div class="flex items-center gap-3 invert">
             <img src="${logo}" alt="Logo" class="" />
@@ -73,7 +70,7 @@ class ManagerDashboard {
                   ? "manager-nav-item-active"
                   : "manager-nav-item-inactive"
               }">
-              ${this.getIcon(item.icon)}
+              ${getIconHTML(item.icon)}
               <span>${item.label}</span>
             </button>
           `
@@ -94,24 +91,29 @@ class ManagerDashboard {
 
         <div class="flex items-center gap-6">
           <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-            ${this.getIcon("bell")}
+            ${getIconHTML("bell")}
           </button>
           <button id="logoutBtn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-            ${this.getIcon("log-out")}
+            ${getIconHTML("log-out")}
           </button>
         </div>
       </header>
     `;
   }
 
-  async renderSection(section) {
-    const sectionInstance = this.sections[section];
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
 
-    return sectionInstance.render();
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
+    }
   }
 
   attachEventListeners() {
     const navItems = this.container.querySelectorAll(".manager-nav-item");
+
     navItems.forEach((item) => {
       item.addEventListener("click", (e) => {
         const section = e.currentTarget.dataset.section;
@@ -121,24 +123,22 @@ class ManagerDashboard {
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
     if (logoutBtn) {
-      logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+      logoutBtn.addEventListener("click", async () => {
+        User.logout();
       });
     }
 
     window.notificationPanel = this.notificationPanel;
+    window.managerDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
-    const content = this.container.querySelector("#dashboardContent");
-    const sectionContent = await this.renderSection(section);
-    content.innerHTML = `<div class="p-8">${sectionContent}</div>`;
+    this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".manager-nav-item");
+
     navItems.forEach((item) => {
       if (item.dataset.section === section) {
         item.className = "manager-nav-item manager-nav-item-active";
@@ -146,10 +146,6 @@ class ManagerDashboard {
         item.className = "manager-nav-item manager-nav-item-inactive";
       }
     });
-  }
-
-  getIcon(name) {
-    return getIconHTML(name);
   }
 }
 

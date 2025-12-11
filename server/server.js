@@ -1,3 +1,4 @@
+import { createSessionMiddleware } from "./SessionHandling.js";
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import "dotenv/config";
@@ -9,12 +10,146 @@ const prisma = new PrismaClient();
 app.use(express.static("dist"));
 app.use(cors());
 app.use(express.json());
-
-const PORT = process.env.PORT || 3000;
+app.use(express.urlencoded({ extended: true }));
+app.set("trust proxy", 1);
+app.use(createSessionMiddleware());
 
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
+
+const isAuth = (req, res, next) => {
+  if (!req.session.isAuth) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+};
+
+app.post(
+  "/api/login",
+  asyncHandler(async (req, res) => {
+    const { email, password } = req.body || {};
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password required" });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        driverProfile: true,
+        managerProfile: true,
+        salesmanProfile: true,
+        stockKeeperProfile: true,
+        cashierProfile: true,
+        supplierProfile: true,
+        distributorProfile: true,
+        assistantManagerProfile: true,
+        ownerProfile: true,
+      },
+    });
+
+    if (!user || user.password !== password) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    let userId;
+
+    switch (user.role) {
+      case "driver":
+        userId = user.driverProfile.id;
+        break;
+      case "supplier":
+        userId = user.supplierProfile.id;
+        break;
+      case "manager":
+        userId = user.managerProfile.id;
+        break;
+      case "salesman":
+        userId = user.salesmanProfile.id;
+        break;
+      case "stock_keeper":
+        userId = user.stockKeeperProfile.id;
+        break;
+      case "cashier":
+        userId = user.cashierProfile.id;
+        break;
+      case "distributor":
+        userId = user.distributorProfile.id;
+        break;
+      case "assistant_manager":
+        userId = user.assistantManagerProfile.id;
+        break;
+      case "owner":
+        userId = user.ownerProfile.id;
+        break;
+    }
+
+    const mapRoleToPath = (role) => {
+      switch (role) {
+        case "driver":
+          return "/driver";
+        case "supplier":
+          return "/supplier";
+        case "manager":
+          return "/manager";
+        case "salesman":
+          return "/salesman";
+        case "stock_keeper":
+          return "/stock-keeper";
+        case "cashier":
+          return "/cashier";
+        case "distributor":
+          return "/distributor";
+        case "assistant_manager":
+          return "/assistant-manager";
+        case "owner":
+          return "/owner";
+        default:
+          return "/";
+      }
+    };
+
+    req.session.isAuth = true;
+    req.session.userId = userId;
+    req.session.userRole = user.role;
+    req.session.userEmail = user.email;
+
+    const basePath = mapRoleToPath(user.role);
+    const redirectUrl = ["/driver", "/supplier"].includes(basePath)
+      ? `${basePath}?id=${userId}`
+      : basePath;
+
+    return res.redirect(redirectUrl);
+  })
+);
+
+const PORT = process.env.PORT || 3000;
+
+app.get("/api/check-auth", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  if (req.session.isAuth) {
+    return res.json({
+      isAuth: true,
+      user: {
+        id: req.session.userId,
+        role: req.session.userRole,
+        email: req.session.userEmail,
+      },
+    });
+  }
+  res.json({ isAuth: false });
+});
+
+app.post("/api/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ error: "Logout failed" });
+    }
+    res.clearCookie("connect.sid");
+    res.redirect("/");
+  });
+});
 
 app.get(
   "/api/users",
@@ -29,6 +164,7 @@ app.get(
         supplierProfile: true,
         distributorProfile: true,
         assistantManagerProfile: true,
+        ownerProfile: true,
       },
     });
     res.json(users);
@@ -123,6 +259,7 @@ app.delete(
     res.status(204).send();
   })
 );
+
 app.get(
   "/api/customer-feedbacks",
   asyncHandler(async (req, res) => {
@@ -1320,6 +1457,9 @@ app.put(
 );
 
 app.use((err, req, res, next) => {
+  if (res.headersSent) {
+    return next(err);
+  }
   console.error(err);
   res.status(500).json({ error: err.message || "Internal Server Error" });
 });

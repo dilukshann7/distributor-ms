@@ -114,4 +114,10 @@ export class User {
       throw error;
     }
   }
+
+  static async logout() {
+    const apiURL = "/api/logout";
+    await axios.post(apiURL);
+    window.location.href = "/";
+  }
 }

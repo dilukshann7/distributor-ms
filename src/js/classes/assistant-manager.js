@@ -1,21 +1,21 @@
 import logo from "../../assets/logo-tr.png";
 import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
-import { PaymentVerification } from "./assistant-manager/PaymentVerification.js";
 import { DeliveryStockMaintenance } from "./assistant-manager/DeliveryStockMaintenance.js";
 import { DriverManagement } from "./assistant-manager/DriverManagement.js";
 import { DistributionRecords } from "./assistant-manager/DistributionRecords.js";
+import { PaymentVerification } from "./assistant-manager/PaymentVerification.js";
+import { User } from "../models/User.js";
 
 class AssistantManagerDashboard {
   constructor(container) {
     this.container = container;
     this.currentSection = "payments";
-    this.isSidebarOpen = true;
     this.sections = {
-      payments: new PaymentVerification(this.container),
-      "delivery-stock": new DeliveryStockMaintenance(this.container),
-      drivers: new DriverManagement(this.container),
-      distribution: new DistributionRecords(this.container),
+      payments: document.createElement("payment-verification"),
+      "delivery-stock": document.createElement("delivery-stock-maintenance"),
+      drivers: document.createElement("driver-management"),
+      distribution: document.createElement("distribution-records"),
     };
     this.notificationPanel = new NotificationPanel(container);
   }
@@ -23,22 +23,20 @@ class AssistantManagerDashboard {
   async render() {
     await this.notificationPanel.loadTasks();
     const sectionContent = await this.renderSection(this.currentSection);
-
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
         <div class="flex-1 flex flex-col overflow-hidden">
           ${this.renderHeader()}
           ${this.notificationPanel.renderPanel()}
-          <main id="dashboardContent" class="flex-1 overflow-auto">
-            <div class="p-8">
-              ${sectionContent}
-            </div>
+          <main id="dashboardContent" class="flex-1 overflow-auto w-full">
+            <div class="p-8"></div>
           </main>
         </div>
       </div>
     `;
     this.attachEventListeners();
+    this.renderCurrentSection();
   }
 
   renderSidebar() {
@@ -98,6 +96,7 @@ class AssistantManagerDashboard {
 
   async renderSection(section) {
     const sectionInstance = this.sections[section];
+
     return sectionInstance.render();
   }
 
@@ -112,27 +111,24 @@ class AssistantManagerDashboard {
     });
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
+
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+        User.logout();
       });
     }
 
     window.notificationPanel = this.notificationPanel;
+    window.assistantManagerDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
-
     const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = `
-      <div class="p-8">
-        ${await this.renderSection(section)}
-      </div>
-    `;
+    content.innerHTML = `<div class="p-8">${await this.renderSection(
+      section
+    )}</div>`;
 
     const navItems = this.container.querySelectorAll(".nav-item");
 

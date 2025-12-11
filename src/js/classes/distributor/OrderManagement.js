@@ -1,21 +1,48 @@
+import { LitElement, html } from "lit";
 import { SalesOrder } from "../../models/SalesOrder.js";
 
-export class OrderManagement {
-  constructor(container) {
-    this.container = container;
+export class OrderManagement extends LitElement {
+  static properties = {
+    orders: { type: Array },
+    view: { type: String },
+    editingOrder: { type: Object },
+  };
+
+  constructor() {
+    super();
     this.orders = [];
     this.view = "list";
     this.editingOrder = null;
     this.getOrders();
   }
 
+  createRenderRoot() {
+    return this;
+  }
+
   async getOrders() {
     try {
       const response = await SalesOrder.getAll();
       this.orders = response.data;
+      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching sales orders:", error);
       this.orders = [];
+    }
+  }
+
+  getStatusColor(status) {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "authorized":
+        return "bg-blue-100 text-blue-800";
+      case "in-transit":
+        return "bg-purple-100 text-purple-800";
+      case "delivered":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   }
 
@@ -24,7 +51,7 @@ export class OrderManagement {
   }
 
   renderList() {
-    return `
+    return html`
       <div class="space-y-6">
         <div class="flex items-center justify-between">
           <div>
@@ -86,8 +113,7 @@ export class OrderManagement {
                   
                 </tr>
               `
-                )
-                .join("")}
+                )}
             </tbody>
           </table>
         </div>
@@ -95,19 +121,6 @@ export class OrderManagement {
       </div>
     `;
   }
-
-  getStatusColor(status) {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "authorized":
-        return "bg-blue-100 text-blue-800";
-      case "in-transit":
-        return "bg-purple-100 text-purple-800";
-      case "delivered":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  }
 }
+
+customElements.define("order-management", OrderManagement);
