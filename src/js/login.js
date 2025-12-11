@@ -1,37 +1,6 @@
 import logo from "../assets/logo-tr.png";
 import { getIconHTML } from "../assets/icons/index.js";
-
-export const credentials = {
-  owner: { email: "owner@dbms.com", password: "owner", role: "owner" },
-  manager: { email: "manager@dbms.com", password: "manager", role: "manager" },
-  "assistant-manager": {
-    email: "asst@dbms.com",
-    password: "assistant",
-    role: "assistant-manager",
-  },
-  "stock-keeper": {
-    email: "stock@dbms.com",
-    password: "stock",
-    role: "stock-keeper",
-  },
-  cashier: { email: "cashier@dbms.com", password: "cashier", role: "cashier" },
-  supplier: {
-    email: "supplier@dbms.com",
-    password: "supplier",
-    role: "supplier",
-  },
-  distributor: {
-    email: "distributor@dbms.com",
-    password: "distributor",
-    role: "distributor",
-  },
-  salesman: {
-    email: "salesman@dbms.com",
-    password: "salesman",
-    role: "salesman",
-  },
-  driver: { email: "driver@dbms.com", password: "driver", role: "driver" },
-};
+import { navigateTo } from "./middleware/router.js";
 
 export function renderLogin(container) {
   container.innerHTML = `
@@ -44,7 +13,6 @@ export function renderLogin(container) {
       </div>
 
       <div class="w-full max-w-6xl flex items-center justify-center gap-12 relative z-10">
-        
 
         <div class="w-full max-w-md">
           <div class="bg-white/10 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 border border-white/30">
@@ -59,14 +27,14 @@ export function renderLogin(container) {
               <p class="text-white/80">Enter your credentials to access your account</p>
             </div>
 
-            <form id="loginForm" class="space-y-6">
+            <form method="post" action="/api/login" id="loginForm" class="space-y-6">
               <div class="space-y-2">
                 <label class="block text-sm font-semibold text-white/90">Email Address</label>
                 <div class="relative">
                   <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/60">
                     ${getIconHTML("at-symbol")}
                   </div>
-                  <input id="email" type="email" placeholder="you@example.com"
+                  <input id="email" name="email" type="email" placeholder="you@example.com"
                     class="w-full pl-12 pr-4 py-3.5 bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/40 outline-none transition-all text-white placeholder-white/50" required />
                 </div>
               </div>
@@ -80,7 +48,7 @@ export function renderLogin(container) {
                   <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/60">
                     ${getIconHTML("lock-closed")}
                   </div>
-                  <input id="password" type="password" placeholder="Enter your password"
+                  <input id="password" name="password" type="password" placeholder="Enter your password"
                     class="w-full pl-12 pr-4 py-3.5 bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-xl focus:ring-2 focus:ring-white/50 focus:border-white/40 outline-none transition-all text-white placeholder-white/50" required />
                 </div>
               </div>
@@ -105,168 +73,8 @@ export function renderLogin(container) {
               </button>
             </form>
           </div>
-
-          <div class="mt-6 bg-white/10 backdrop-blur-2xl rounded-2xl p-6 border border-white/30 shadow-lg">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-white font-bold text-sm flex items-center gap-2">
-                <span class="text-white/80">
-                  ${getIconHTML("info").replace("w-5 h-5", "w-4 h-4")}
-                </span>
-                Demo Credentials
-              </h3>
-              <button id="toggleCredentials" class="text-xs text-white/80 hover:text-white font-medium flex items-center gap-1">
-                <span>Show</span>
-                <span id="toggleCredentialsIcon">${getIconHTML(
-                  "chevron-down"
-                ).replace("w-5 h-5", "w-4 h-4")}</span>
-              </button>
-            </div>
-            <div id="credentialsList" class="hidden space-y-2 max-h-64 overflow-y-auto">
-              ${Object.entries(credentials)
-                .map(
-                  ([r, c]) =>
-                    `<div class="flex items-center justify-between text-xs p-3 bg-white/10 backdrop-blur-sm rounded-lg hover:bg-white/20 transition-colors cursor-pointer group border border-white/20" onclick="document.querySelector('#email').value='${
-                      c.email
-                    }';document.querySelector('#password').value='${
-                      c.password
-                    }';">
-                      <span class="font-semibold text-white capitalize">${r.replace(
-                        "-",
-                        " "
-                      )}</span>
-                      <div class="flex items-center gap-2">
-                        <span class="text-white/70">${c.email}</span>
-                        <span class="text-white/50">•</span>
-                        <span class="text-white/70">${c.password}</span>
-                        <span class="text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                          ${getIconHTML("chevron-right").replace(
-                            "w-5 h-5",
-                            "w-4 h-4"
-                          )}
-                        </span>
-                      </div>
-                    </div>`
-                )
-                .join("")}
-            </div>
-          </div>
         </div>
       </div>
     </div>
   `;
-
-  const form = container.querySelector("#loginForm");
-  const emailInput = container.querySelector("#email");
-  const passwordInput = container.querySelector("#password");
-  const errorDiv = container.querySelector("#error");
-  const errorText = container.querySelector("#errorText");
-  const loginBtn = container.querySelector("#loginBtn");
-  const loginBtnText = container.querySelector("#loginBtnText");
-  const loginBtnIcon = container.querySelector("#loginBtnIcon");
-  const loginBtnSpinner = container.querySelector("#loginBtnSpinner");
-  const togglePassword = container.querySelector("#togglePassword");
-  const toggleCredentials = container.querySelector("#toggleCredentials");
-  const credentialsList = container.querySelector("#credentialsList");
-
-  togglePassword.addEventListener("click", () => {
-    const type = passwordInput.type === "password" ? "text" : "password";
-    passwordInput.type = type;
-    togglePassword.textContent = type === "password" ? "Show" : "Hide";
-  });
-
-  toggleCredentials.addEventListener("click", () => {
-    credentialsList.classList.toggle("hidden");
-    const isHidden = credentialsList.classList.contains("hidden");
-    toggleCredentials.querySelector("span").textContent = isHidden
-      ? "Show"
-      : "Hide";
-    toggleCredentials.querySelector(
-      "#toggleCredentialsIcon > svg"
-    ).style.transform = isHidden ? "" : "rotate(180deg)";
-  });
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    errorDiv.classList.add("hidden");
-    loginBtn.disabled = true;
-    loginBtnText.textContent = "Signing in...";
-    loginBtnIcon.classList.add("hidden");
-    loginBtnSpinner.classList.remove("hidden");
-
-    setTimeout(() => {
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
-
-      const user = Object.values(credentials).find(
-        (cred) => cred.email === email && cred.password === password
-      );
-
-      if (user) {
-        loginBtnText.textContent = "Success!";
-        loginBtnSpinner.classList.add("hidden");
-        loginBtnIcon.classList.remove("hidden");
-        setTimeout(() => {
-          renderDashboard(container, user.role);
-        }, 500);
-      } else {
-        errorText.textContent = "Invalid email or password. Please try again.";
-        errorDiv.classList.remove("hidden");
-        loginBtn.disabled = false;
-        loginBtnText.textContent = "Sign In";
-        loginBtnSpinner.classList.add("hidden");
-        loginBtnIcon.classList.remove("hidden");
-      }
-    }, 800);
-  });
-}
-
-export async function renderDashboard(container, role) {
-  if (role === "owner") {
-    const module = await import("./classes/owner.js");
-    await module.renderOwnerDashboard(container);
-  } else if (role === "manager") {
-    import("./classes/manager.js").then((module) => {
-      module.renderManagerDashboard(container);
-    });
-  } else if (role === "assistant-manager") {
-    import("./classes/assistant-manager.js").then((module) => {
-      module.renderAssistantManagerDashboard(container);
-    });
-  } else if (role === "stock-keeper") {
-    import("./classes/stock-keeper.js").then((module) => {
-      module.renderStockKeeperDashboard(container);
-    });
-  } else if (role === "cashier") {
-    import("./classes/cashier.js").then((module) => {
-      module.renderCashierDashboard(container);
-    });
-  } else if (role === "supplier") {
-    import("./classes/supplier.js").then((module) => {
-      module.renderSupplierDashboard(container);
-    });
-  } else if (role === "distributor") {
-    import("./classes/distributor.js").then((module) => {
-      module.renderDistributorDashboard(container);
-    });
-  } else if (role === "salesman") {
-    import("./classes/salesman.js").then((module) => {
-      module.renderSalesmanDashboard(container);
-    });
-  } else if (role === "driver") {
-    import("./classes/driver.js").then((module) => {
-      module.renderDriverDashboard(container);
-    });
-  } else {
-    container.innerHTML = `
-      <div class="text-center text-white">
-        <h2 class="text-3xl font-bold mb-4">Welcome, ${role.toUpperCase()}</h2>
-        <p class="text-gray-300 mb-6">You are now logged in as <strong>${role}</strong>.</p>
-        <button id="logoutBtn" class="px-6 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition">Logout</button>
-      </div>
-    `;
-
-    container
-      .querySelector("#logoutBtn")
-      .addEventListener("click", () => renderLogin(container));
-  }
 }
