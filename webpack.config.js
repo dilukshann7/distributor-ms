@@ -1,7 +1,6 @@
 const path = require("path");
 const htmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const babelLoader = require("babel-loader");
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === "production";
