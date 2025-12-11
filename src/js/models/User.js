@@ -117,7 +117,6 @@ export class User {
 
   static async logout() {
     const apiURL = "/api/logout";
-    await axios.post(apiURL);
-    window.location.href = "/";
+    return axios.post(apiURL);
   }
 }

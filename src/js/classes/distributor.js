@@ -122,9 +122,7 @@ class DistributorDashboard {
 
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        User.logout().then(() => {
-          navigateTo("/");
-        });
+        User.logout()
       });
     }
 
