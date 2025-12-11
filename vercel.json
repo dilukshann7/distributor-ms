@@ -4,22 +4,30 @@
   "outputDirectory": "dist",
   "builds": [
     {
-      "src": "./server/Server.js",
+      "src": "server/Server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/server/Server.js"
+      "dest": "server/Server.js"
     },
     {
-      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
-      "dest": "/$1"
+      "src": "/assets/(.*)",
+      "dest": "dist/assets/$1"
+    },
+    {
+      "src": "/(.*\\.js)",
+      "dest": "dist/$1"
+    },
+    {
+      "src": "/(.*\\.css)",
+      "dest": "dist/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "dist/index.html"
     }
   ]
 }

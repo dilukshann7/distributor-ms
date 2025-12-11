@@ -6,8 +6,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack serve",
-    "server": "node ./server/server.js",
-    "postinstall": "prisma generate"
+    "server": "node ./server/server.js"
   },
   "author": "Dilukshan Niranjan",
   "license": "MIT",
