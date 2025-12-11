@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack serve",
-    "server": "nodemon ./server/server.js"
+    "server": "node ./server/server.js"
   },
   "author": "Dilukshan Niranjan",
   "license": "MIT",
