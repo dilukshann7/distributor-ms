@@ -66,7 +66,6 @@ export class OrderAuthorization extends LitElement {
     }
 
     if (confirm("Approve this order and assign to selected driver?")) {
-      // Find the order and driver details
       const order = this.pendingOrders.find((o) => o.id === parseInt(orderId));
       const driver = this.drivers.find((d) => d.id === parseInt(driverId));
 
@@ -84,14 +83,11 @@ export class OrderAuthorization extends LitElement {
         await SalesOrder.update(orderId, orderData);
         delete this.selectedDrivers[orderId];
 
-        // Generate delivery number
         const deliveryNumber = `DEL-${Date.now()}-${orderId}`;
 
-        // Use customer name and notes for address (or prompt for it)
         const deliveryAddress =
           order.notes || `Delivery for ${order.customerName}`;
 
-        // Set scheduled date (default to tomorrow)
         const scheduledDate = new Date();
         scheduledDate.setDate(scheduledDate.getDate() + 1);
 
