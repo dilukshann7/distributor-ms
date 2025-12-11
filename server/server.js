@@ -45,6 +45,7 @@ app.post(
         supplierProfile: true,
         distributorProfile: true,
         assistantManagerProfile: true,
+        ownerProfile: true,
       },
     });
 
@@ -79,6 +80,9 @@ app.post(
       case "assistant_manager":
         userId = user.assistantManagerProfile.id;
         break;
+      case "owner":
+        userId = user.ownerProfile.id;
+        break;
     }
 
     const mapRoleToPath = (role) => {
@@ -99,6 +103,8 @@ app.post(
           return "/distributor";
         case "assistant_manager":
           return "/assistant-manager";
+        case "owner":
+          return "/owner";
         default:
           return "/";
       }
@@ -141,7 +147,7 @@ app.post("/api/logout", (req, res) => {
       return res.status(500).json({ error: "Logout failed" });
     }
     res.clearCookie("connect.sid");
-    res.json({ message: "Logged out successfully" });
+    res.redirect("/");
   });
 });
 
@@ -158,6 +164,7 @@ app.get(
         supplierProfile: true,
         distributorProfile: true,
         assistantManagerProfile: true,
+        ownerProfile: true,
       },
     });
     res.json(users);
