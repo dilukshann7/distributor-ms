@@ -18,13 +18,6 @@ const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-const isAuth = (req, res, next) => {
-  if (!req.session.isAuth) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  next();
-};
-
 app.post(
   "/api/login",
   asyncHandler(async (req, res) => {
