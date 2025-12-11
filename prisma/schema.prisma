@@ -9,7 +9,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Session Details
+// Secure Session Details 
 model Session {
   id        String   @id
   sid       String   @unique
