@@ -4,3 +4,4 @@ dist/
 .idea/
 .vscode/
 /src/generated/prisma
+.vercel
