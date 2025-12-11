@@ -69,15 +69,6 @@ class SupplierDashboard {
             )
             .join("")}
         </nav>
-
-        <div class="p-4 border-t border-indigo-600">
-          <div class="bg-indigo-600 rounded-lg p-4">
-            <p class="text-sm text-indigo-100">Supplier Account</p>
-            <p class="font-semibold text-white mt-1">
-              ${this.supplierName}
-            </p>
-          </div>
-        </div>
       </aside>
     `;
   }
