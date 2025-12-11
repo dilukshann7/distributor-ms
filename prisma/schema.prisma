@@ -29,6 +29,7 @@ model User {
   assignedTasks Task[] @relation("AssignedTasks")
   createdTasks  Task[] @relation("CreatedTasks")
 
+  ownerProfile            Owner?
   driverProfile           Driver?
   managerProfile          Manager?
   salesmanProfile         Salesman?
@@ -37,6 +38,13 @@ model User {
   supplierProfile         Supplier?
   distributorProfile      Distributor?
   assistantManagerProfile AssistantManager?
+}
+
+model Owner {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Driver {
