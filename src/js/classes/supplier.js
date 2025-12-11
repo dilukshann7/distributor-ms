@@ -6,6 +6,7 @@ import { ProductCatalog } from "./supplier/ProductCatalog.js";
 import { ShipmentTracking } from "./supplier/ShipmentTracking.js";
 import { InvoicesPayments } from "./supplier/InvoicesPayments.js";
 import { SalesAnalytics } from "./supplier/SalesAnalytics.js";
+import { User } from "../models/User.js";
 
 class SupplierDashboard {
   constructor(container) {
@@ -132,9 +133,7 @@ class SupplierDashboard {
 
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+        User.logout();
       });
     }
 

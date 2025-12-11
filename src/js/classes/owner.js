@@ -1,6 +1,7 @@
 import { getIconHTML } from "../../assets/icons/index.js";
 import logo from "../../assets/logo-tr.png";
 import { NotificationPanel } from "../components/NotificationPanel.js";
+import { User } from "../models/User.js";
 import { EmployeeManagement } from "./owner/EmployeeManagement.js";
 import { InventoryControl } from "./owner/InventoryControl.js";
 import { OperationsMonitor } from "./owner/OperationsMonitor.js";
@@ -122,9 +123,7 @@ class OwnerDashboard {
     const logoutBtn = this.container.querySelector("#logoutBtn");
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+        User.logout();
       });
     }
 

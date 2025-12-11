@@ -5,6 +5,7 @@ import { DeliveryDetails } from "./driver/DeliveryDetails.js";
 import { ProofOfDelivery } from "./driver/ProofOfDelivery.js";
 import { PaymentCollection } from "./driver/PaymentCollection.js";
 import { VehicleManagement } from "./driver/VehicleManagement.js";
+import { User } from "../models/User.js";
 
 class DriverDashboard {
   constructor(container) {
@@ -118,8 +119,8 @@ class DriverDashboard {
 
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
+        User.logout().then(() => {
+          navigateTo("/");
         });
       });
     }
@@ -127,12 +128,6 @@ class DriverDashboard {
     window.notificationPanel = this.notificationPanel;
     window.driverDashboard = this;
     this.notificationPanel.attachEventListeners();
-  }
-
-  logout() {
-    import("../login.js").then((module) => {
-      module.renderLogin(this.container);
-    });
   }
 
   navigateToSection(section) {

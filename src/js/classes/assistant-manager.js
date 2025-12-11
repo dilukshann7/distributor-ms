@@ -5,6 +5,7 @@ import { DeliveryStockMaintenance } from "./assistant-manager/DeliveryStockMaint
 import { DriverManagement } from "./assistant-manager/DriverManagement.js";
 import { DistributionRecords } from "./assistant-manager/DistributionRecords.js";
 import { PaymentVerification } from "./assistant-manager/PaymentVerification.js";
+import { User } from "../models/User.js";
 
 class AssistantManagerDashboard {
   constructor(container) {
@@ -117,9 +118,7 @@ class AssistantManagerDashboard {
 
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        import("../login.js").then((module) => {
-          module.renderLogin(this.container);
-        });
+        User.logout();
       });
     }
 
