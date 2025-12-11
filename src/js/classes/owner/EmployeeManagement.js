@@ -54,6 +54,72 @@ export class EmployeeManagement extends LitElement {
     return profileMap[user.role];
   }
 
+  getRoleSpecificFieldsHTML(role, values = {}) {
+    if (role === "Driver") {
+      return `
+        <div class="space-y-2">
+          <label class="owner-label">Vehicle ID</label>
+          <input type="text" name="vehicleId" value="${
+            values.vehicleId || ""
+          }" class="owner-input" placeholder="e.g. VEH-001">
+        </div>
+        <div class="space-y-2">
+          <label class="owner-label">Vehicle Type</label>
+          <input type="text" name="vehicleType" value="${
+            values.vehicleType || ""
+          }" class="owner-input" placeholder="e.g. Truck, Van">
+        </div>
+        <div class="space-y-2">
+          <label class="owner-label">License Number</label>
+          <input type="text" name="licenseNumber" value="${
+            values.licenseNumber || ""
+          }" class="owner-input" placeholder="e.g. DL123456">
+        </div>
+      `;
+    } else if (role === "Salesman") {
+      return `
+        <div class="space-y-2">
+          <label class="owner-label">Sales Target</label>
+          <input type="number" name="salesTarget" step="0.01" value="${
+            values.salesTarget || ""
+          }" class="owner-input" placeholder="e.g. 100000">
+        </div>
+      `;
+    } else if (role === "Supplier") {
+      return `
+        <div class="space-y-2">
+          <label class="owner-label">Company Name</label>
+          <input type="text" name="companyName" value="${
+            values.companyName || ""
+          }" class="owner-input" placeholder="e.g. ABC Suppliers Ltd">
+        </div>
+        <div class="space-y-2">
+          <label class="owner-label">Supplier Type</label>
+          <input type="text" name="supplierType" value="${
+            values.supplierType || ""
+          }" class="owner-input" placeholder="e.g. Wholesale, Retail">
+        </div>
+      `;
+    }
+    return "";
+  }
+
+  handleRoleChange(role, formType) {
+    const container = document.getElementById("roleSpecificFields");
+    if (container) {
+      container.innerHTML = this.getRoleSpecificFieldsHTML(role);
+    }
+
+    const employeeFields = document.querySelectorAll(".employee-field");
+    employeeFields.forEach((field) => {
+      if (role === "Supplier") {
+        field.style.display = "none";
+      } else {
+        field.style.display = "block";
+      }
+    });
+  }
+
   showAddFormHandler() {
     this.view = "add";
   }
@@ -73,19 +139,35 @@ export class EmployeeManagement extends LitElement {
     const form = e.target;
     const formData = new FormData(form);
 
+    const role = formData.get("role");
     const employeeData = {
       name: formData.get("name"),
       email: formData.get("email"),
       phone: formData.get("phone") || null,
       address: formData.get("address") || null,
       password: formData.get("password"),
-      role: formData.get("role"),
+      role: role,
       status: formData.get("status"),
-      attendance: formData.get("attendance") || null,
-      performanceRating: Number(formData.get("performanceRating")) || null,
-      salary: Number(formData.get("salary")) || null,
-      bonus: Number(formData.get("bonus")) || null,
     };
+
+    if (role !== "Supplier") {
+      employeeData.attendance = formData.get("attendance") || null;
+      employeeData.performanceRating =
+        Number(formData.get("performanceRating")) || null;
+      employeeData.salary = Number(formData.get("salary")) || null;
+      employeeData.bonus = Number(formData.get("bonus")) || null;
+    }
+
+    if (role === "Driver") {
+      employeeData.vehicleId = formData.get("vehicleId") || null;
+      employeeData.vehicleType = formData.get("vehicleType") || null;
+      employeeData.licenseNumber = formData.get("licenseNumber") || null;
+    } else if (role === "Salesman") {
+      employeeData.salesTarget = Number(formData.get("salesTarget")) || null;
+    } else if (role === "Supplier") {
+      employeeData.companyName = formData.get("companyName") || null;
+      employeeData.supplierType = formData.get("supplierType") || null;
+    }
 
     User.create(employeeData)
       .then(() => {
@@ -102,22 +184,38 @@ export class EmployeeManagement extends LitElement {
     const form = e.target;
     const formData = new FormData(form);
 
+    const role = formData.get("role");
     const employeeData = {
       name: formData.get("name"),
       email: formData.get("email"),
       phone: formData.get("phone") || null,
       address: formData.get("address") || null,
-      role: formData.get("role"),
+      role: role,
       status: formData.get("status"),
-      attendance: formData.get("attendance") || null,
-      performanceRating: Number(formData.get("performanceRating")) || null,
-      salary: Number(formData.get("salary")) || null,
-      bonus: Number(formData.get("bonus")) || null,
     };
 
     const password = formData.get("password");
     if (password) {
       employeeData.password = password;
+    }
+
+    if (role !== "Supplier") {
+      employeeData.attendance = formData.get("attendance") || null;
+      employeeData.performanceRating =
+        Number(formData.get("performanceRating")) || null;
+      employeeData.salary = Number(formData.get("salary")) || null;
+      employeeData.bonus = Number(formData.get("bonus")) || null;
+    }
+
+    if (role === "Driver") {
+      employeeData.vehicleId = formData.get("vehicleId") || null;
+      employeeData.vehicleType = formData.get("vehicleType") || null;
+      employeeData.licenseNumber = formData.get("licenseNumber") || null;
+    } else if (role === "Salesman") {
+      employeeData.salesTarget = Number(formData.get("salesTarget")) || null;
+    } else if (role === "Supplier") {
+      employeeData.companyName = formData.get("companyName") || null;
+      employeeData.supplierType = formData.get("supplierType") || null;
     }
 
     User.update(this.editingEmployee.id, employeeData)
@@ -271,7 +369,7 @@ export class EmployeeManagement extends LitElement {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                   <label class="owner-label">Role <span class="text-red-600">*</span></label>
-                  <select name="role" required class="owner-input">
+                  <select name="role" required class="owner-input" @change=${(e) => this.handleRoleChange(e.target.value, 'add')}>
                     <option value="" disabled selected>Select role</option>
                     <option value="Salesman">Salesman</option>
                     <option value="Driver">Driver</option>
@@ -293,26 +391,28 @@ export class EmployeeManagement extends LitElement {
                   </select>
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-2 employee-field">
                   <label class="owner-label">Attendance <span class="text-gray-400 font-normal">(Days)</span></label>
                   <input type="text" name="attendance" class="owner-input" placeholder="e.g. 22/30">
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-2 employee-field">
                   <label class="owner-label">Performance Rating</label>
                   <input type="number" name="performanceRating" class="owner-input" placeholder="e.g. 5">
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-2 employee-field">
                   <label class="owner-label">Salary <span class="text-gray-400 font-normal">(LKR)</span></label>
                   <input type="number" name="salary" step="0.01" class="owner-input" placeholder="e.g. 50000">
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-2 employee-field">
                   <label class="owner-label">Bonus <span class="text-gray-400 font-normal">(LKR)</span></label>
                   <input type="number" name="bonus" step="0.01" class="owner-input" placeholder="e.g. 5000">
                 </div>
-              </div>    
+              </div>
+
+              <div id="roleSpecificFields" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6"></div>
             </div>
           </div>
 
@@ -333,6 +433,10 @@ export class EmployeeManagement extends LitElement {
   renderEditForm() {
     const emp = this.editingEmployee;
     if (!emp) return this.renderList();
+
+    const driverProfile = emp.driverProfile || {};
+    const salesmanProfile = emp.salesmanProfile || {};
+    const supplierProfile = emp.supplierProfile || {};
 
     return html`
       <div class="owner-form-container">
@@ -387,7 +491,7 @@ export class EmployeeManagement extends LitElement {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                   <label class="owner-label">Role <span class="text-red-600">*</span></label>
-                  <select name="role" required class="owner-input">
+                  <select name="role" required class="owner-input" @change=${(e) => this.handleRoleChange(e.target.value, 'edit')}>
                     <option value="Salesman" ?selected=${emp.role === "Salesman"}>Salesman</option>
                     <option value="Driver" ?selected=${emp.role === "Driver"}>Driver</option>
                     <option value="Stock Keeper" ?selected=${emp.role === "Stock Keeper"}>Stock Keeper</option>
@@ -408,26 +512,35 @@ export class EmployeeManagement extends LitElement {
                   </select>
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-2 employee-field">
                   <label class="owner-label">Attendance <span class="text-gray-400 font-normal">(Days)</span></label>
                   <input type="text" name="attendance" .value=${emp.attendance || ""} class="owner-input" placeholder="e.g. 22/30">
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-2 employee-field">
                   <label class="owner-label">Performance Rating</label>
                   <input type="number" name="performanceRating" .value=${emp.performanceRating || ""} class="owner-input" placeholder="e.g. 5">
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-2 employee-field">
                   <label class="owner-label">Salary <span class="text-gray-400 font-normal">(LKR)</span></label>
                   <input type="number" name="salary" step="0.01" .value=${emp.salary || ""} class="owner-input" placeholder="e.g. 50000">
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-2 employee-field">
                   <label class="owner-label">Bonus <span class="text-gray-400 font-normal">(LKR)</span></label>
                   <input type="number" name="bonus" step="0.01" .value=${emp.bonus || ""} class="owner-input" placeholder="e.g. 5000">
                 </div>
-              </div>    
+              </div>
+
+              <div id="roleSpecificFields" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6" .innerHTML=${this.getRoleSpecificFieldsHTML(emp.role, {
+                vehicleId: driverProfile.vehicleId,
+                vehicleType: driverProfile.vehicleType,
+                licenseNumber: driverProfile.licenseNumber,
+                salesTarget: salesmanProfile.salesTarget,
+                companyName: supplierProfile.companyName,
+                supplierType: supplierProfile.supplierType,
+              })}></div>
             </div>
           </div>
 
