@@ -18,6 +18,13 @@ const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
+const isAuth = (req, res, next) => {
+  if (!req.session.isAuth) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  next();
+};
+
 app.post(
   "/api/login",
   asyncHandler(async (req, res) => {
@@ -97,6 +104,11 @@ app.post(
       }
     };
 
+    req.session.isAuth = true;
+    req.session.userId = userId;
+    req.session.userRole = user.role;
+    req.session.userEmail = user.email;
+
     const basePath = mapRoleToPath(user.role);
     const redirectUrl = ["/driver", "/supplier"].includes(basePath)
       ? `${basePath}?id=${userId}`
@@ -107,6 +119,31 @@ app.post(
 );
 
 const PORT = process.env.PORT || 3000;
+
+app.get("/api/check-auth", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  if (req.session.isAuth) {
+    return res.json({
+      isAuth: true,
+      user: {
+        id: req.session.userId,
+        role: req.session.userRole,
+        email: req.session.userEmail,
+      },
+    });
+  }
+  res.json({ isAuth: false });
+});
+
+app.post("/api/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ error: "Logout failed" });
+    }
+    res.clearCookie("connect.sid");
+    res.json({ message: "Logged out successfully" });
+  });
+});
 
 app.get(
   "/api/users",
