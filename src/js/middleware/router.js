@@ -27,8 +27,15 @@ const routes = {
 export async function router() {
   const path = window.location.pathname;
   const container = document.getElementById("app");
+  const response = await fetch("/api/check-auth");
+  const data = await response.json();
 
   if (path === "/") {
+    if (data.isAuth === true) {
+      const userRole = data.user.role;
+      navigateTo(`/${userRole}`);
+      return;
+    }
     renderLogin(container);
     return;
   }
