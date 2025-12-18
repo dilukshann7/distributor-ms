@@ -2,8 +2,6 @@ import { createSessionMiddleware } from "./SessionHandling.js";
 import express from "express";
 import "dotenv/config";
 import cors from "cors";
-
-// Import route modules
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js";
@@ -19,7 +17,6 @@ import analyticsRoutes from "./routes/analytics.routes.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
 app.use(express.static("dist"));
 app.use(cors());
 app.use(express.json());
@@ -27,7 +24,6 @@ app.use(express.urlencoded({ extended: true }));
 app.set("trust proxy", 1);
 app.use(createSessionMiddleware());
 
-// Mount routes
 app.use("/api", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
@@ -40,7 +36,6 @@ app.use("/api", supplyRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api", analyticsRoutes);
 
-// Error handling middleware
 app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
@@ -49,7 +44,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || "Internal Server Error" });
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
