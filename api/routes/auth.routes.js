@@ -39,7 +39,7 @@ router.post(
 
     let userId;
 
-    switch (user.role) {
+    switch (user.role.toLowerCase()) {
       case "driver":
         userId = user.driverProfile.id;
         break;
