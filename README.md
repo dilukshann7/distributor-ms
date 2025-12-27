@@ -1,227 +1,166 @@
-# Distribution Management System
+# ADP Namasinghe Distribution Management System
 
-A comprehensive web-based distribution management system for ADP Namasinghe Distribution, built with modern JavaScript, Webpack, and Tailwind CSS. This application provides role-based access control for managing various aspects of distribution operations including inventory, sales, suppliers, and logistics.
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
+![Express](https://img.shields.io/badge/express-v5.0-blue)
+![Prisma](https://img.shields.io/badge/prisma-v6.0-indigo)
 
-## 📋 Table of Contents
+> **Academic Project:** This system was developed as the final year project for the first year of the **BSc (Hons) in Software Engineering** at **NIBM**.
 
-- [Features](#features)
-- [User Roles](#user-roles)
-- [Technologies](#technologies)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Development](#development)
-- [Build](#build)
-- [Configuration](#configuration)
-- [Demo Credentials](#demo-credentials)
-- [License](#license)
-- [Author](#author)
+A comprehensive **Distribution Management System** designed to streamline operations for ADP Namasinghe. This full-stack application manages the entire supply chain workflow, including inventory tracking, order processing, delivery management, employee oversight, and financial reporting.
 
-## ✨ Features
+## Key Features
 
-- **Role-Based Access Control**: Nine distinct user roles with customized dashboards
-- **Responsive Design**: Built with Tailwind CSS for mobile-first responsive layouts
-- **Modern Build System**: Webpack-powered bundling with hot module replacement
-- **Modular Architecture**: Dynamic imports for efficient code splitting
-- **Authentication System**: Secure login with role-based routing
-- **Asset Management**: Optimized handling of images and static resources
-- **Development Server**: Live reload development environment
+- **Role-Based Access Control (RBAC):** Secure login and distinct dashboards for various roles:
+  - **Management:** Owner, Manager, Assistant Manager
+  - **Operations:** Distributor, Salesman, Cashier
+  - **Logistics & Supply:** Stock Keeper, Driver, Supplier
+- **Inventory & Stock Management:** Real-time tracking of stock levels, receiving shipments, and stock availability reports.
+- **Order Management:** Complete lifecycle management from order authorization to processing and invoicing.
+- **Logistics & Delivery:** Delivery route planning, driver management, and proof of delivery tracking.
+- **Financials:** Invoicing, payment collection, supplier payments, and sales reports.
+- **Employee Management:** Employee oversight, task assignment, and performance monitoring.
+- **Analytics & Reporting:** Detailed analytics for sales, operations, and customer feedback with PDF export capabilities.
 
-## 👥 User Roles
+## Technical Architecture
 
-The system supports nine different user roles, each with specific permissions and dashboard views:
+This project follows a **Monolithic Architecture** with a clear separation of concerns between the frontend view layer and backend API services.
 
-1. **Owner** - Full system access and oversight
-2. **Manager** - Overall operations management
-3. **Assistant Manager** - Supporting management operations
-4. **Stock Keeper** - Inventory and stock management
-5. **Cashier** - Point of sale and transactions
-6. **Supplier** - Supplier portal and order management
-7. **Distributor** - Distribution oversight and logistics
-8. **Salesman** - Sales operations and customer management
-9. **Driver** - Delivery and transportation management
+### Backend (Node.js & Express)
 
-## 🛠 Technologies
+- **API Design:** RESTful API architecture serving JSON data to the client.
+- **Database Access:** Uses **Prisma ORM** for type-safe database queries against a relational database (PostgreSQL).
+- **Session Management:** Implements stateful sessions using `express-session` backed by a database store (`@quixo3/prisma-session-store`) for persistence across server restarts.
+- **Routing:** Modularized route handlers (e.g., `auth.routes.js`, `order.routes.js`) to organize API logic.
 
-- **Frontend Framework**: Vanilla JavaScript (ES6+)
-- **Build Tool**: Webpack 5
-- **Styling**: Tailwind CSS 3.4
-- **HTTP Client**: Axios
-- **CSS Processing**: PostCSS with preset-env
-- **Development Server**: Webpack Dev Server
+### Frontend (Vanilla JS & Lit)
 
-## 📦 Prerequisites
+- **Single Page Application (SPA):** Uses a custom client-side router (`router.js`) using the History API to manage navigation without page reloads.
+- **Component-Based:** Utilizes **Lit** libraries for lightweight, efficient web components.
+- **Styling:** Styled with **Tailwind CSS** for a responsive and modern design system.
+- **Dynamic Rendering:** Dashboards and views are lazily loaded based on the authenticated user's role.
 
-Before running this project, ensure you have the following installed:
+### Security & Data
 
-- **Node.js** (v14.0.0 or higher recommended)
-- **npm** (v6.0.0 or higher)
+- **Authentication:** Session-based authentication flow.
+- **Authorization:** Middleware checks verify user roles before granting access to specific API endpoints and frontend routes.
+- **Data Integrity:** Foreign key constraints and transaction management ensure data consistency across complex supply chain operations.
 
-## 🚀 Installation
+## Tech Stack
 
-1. Clone the repository:
+**Backend:**
 
-```bash
-git clone <repository-url>
-cd distributor-ms
-```
+- **Runtime:** Node.js
+- **Framework:** Express.js (v5)
+- **ORM:** Prisma
+- **Session Store:** Prisma Session Store
 
-2. Install dependencies:
+**Frontend:**
 
-```bash
-npm install
-```
+- **Core:** HTML5, JavaScript (ES6+)
+- **UI Framework:** Tailwind CSS
+- **Component Library:** Lit
+- **Build Tool:** Webpack
 
-## 💻 Usage
+**Utilities:**
 
-### Development Mode
+- **PDF Generation:** jsPDF & jsPDF-AutoTable
+- **HTTP Client:** Axios
 
-Start the development server with hot reload:
-
-```bash
-npm run dev
-```
-
-The application will automatically open in your default browser at `http://localhost:8080`.
-
-### Production Build
-
-Build the project for production:
-
-```bash
-npm run build
-```
-
-The optimized files will be generated in the `dist/` directory.
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 distributor-ms/
-├── src/
-│   ├── assets/          # Static assets (images, icons, etc.)
-│   ├── css/             # Stylesheets
-│   │   └── style.css    # Main stylesheet (Tailwind imports)
-│   ├── js/              # JavaScript modules
-│   │   ├── classes/     # Role-specific dashboard modules
-│   │   │   ├── owner.js
-│   │   │   ├── manager.js
-│   │   │   ├── assistant-manager.js
-│   │   │   ├── stock-keeper.js
-│   │   │   ├── cashier.js
-│   │   │   ├── supplier.js
-│   │   │   ├── distributor.js
-│   │   │   ├── salesman.js
-│   │   │   └── driver.js
-│   │   └── login.js     # Authentication logic
-│   ├── index.html       # HTML template
-│   └── index.js         # Application entry point
-├── dist/                # Production build output
-├── webpack.config.js    # Webpack configuration
-├── tailwind.config.js   # Tailwind CSS configuration
-├── postcss.config.js    # PostCSS configuration
-├── package.json         # Project dependencies
-└── README.md           # Project documentation
+├── api/                # Backend Application
+│   ├── routes/         # REST API Route Definitions
+│   ├── utils/          # Backend Utilities (Async handlers, etc.)
+│   └── server.js       # Entry point & Express configuration
+├── src/                # Frontend Application
+│   ├── assets/         # Static Assets (Images, Icons)
+│   ├── css/            # Tailwind imports & Custom styles
+│   ├── js/             # Client-side Logic
+│   │   ├── classes/    # Business Logic & Dashboard Renderers
+│   │   ├── components/ # Reusable UI Components
+│   │   ├── middleware/ # Client-side Router
+│   │   ├── models/     # Data Models
+│   │   └── index.js    # Frontend Entry Point
+│   └── index.html      # Main HTML Template
+├── prisma/             # Database Schema & Migrations
+└── ...config files     # Configuration (Tailwind, Webpack, etc.)
 ```
 
-## 🔧 Development
+## Installation & Setup
 
-### Code Structure
+1.  **Clone the Repository:**
 
-The application uses a modular architecture with dynamic imports for code splitting:
+    ```bash
+    git clone https://github.com/dilukshann7/distributor-ms.git
+    cd distributor-ms
+    ```
 
-- **Entry Point**: `src/index.js` initializes the app and renders the login screen
-- **Authentication**: `src/js/login.js` handles user authentication and role-based routing
-- **Role Dashboards**: Each role has a dedicated module in `src/js/classes/`
-- **Styling**: Tailwind CSS utility classes with custom configurations
+2.  **Install Dependencies:**
 
-### Adding New Features
+    ```bash
+    npm install
+    ```
 
-1. Create new modules in the appropriate directory
-2. Import and integrate into the main application flow
-3. Update routing in `login.js` if adding new roles
-4. Test in development mode before building
+3.  **Environment Configuration:**
+    Create a `.env` file in the root directory and configure your environment variables:
 
-### Webpack Configuration
+    ```env
+    DATABASE_URL="postgresql://user:password@localhost:5432/distributor_db"
+    SESSION_SECRET="your_secure_random_string"
+    PORT=3000
+    ```
 
-The project includes a comprehensive Webpack setup:
+4.  **Database Setup:**
+    Apply Prisma migrations to create the database schema:
 
-- **Entry**: `./src/index.js`
-- **Output**: `dist/bundle.js`
-- **Dev Server**: Port 8080 with hot reload
-- **Loaders**: CSS, PostCSS, Asset handling
-- **Plugins**: HTML generation, CSS extraction
+    ```bash
+    npx prisma migrate dev
+    ```
 
-## 🏗 Build
+5.  **Build Frontend:**
+    Compile the frontend assets using Webpack:
 
-The build process includes:
+    ```bash
+    npm run build
+    ```
 
-- JavaScript bundling and minification
-- CSS extraction and optimization
-- Asset optimization and copying
-- HTML template generation
+6.  **Run the Server:**
+    Start the application:
+    ```bash
+    npm run server
+    ```
+    _For development with hot-reloading:_
+    ```bash
+    npm run dev
+    ```
 
-Build artifacts are placed in the `dist/` directory and are ready for deployment.
+## API Endpoints Overview
 
-## ⚙️ Configuration
+The API is structured under `/api` with the following main resources:
 
-### Tailwind CSS
+- **Auth:** `/api/auth` (Login, Logout, Session Check)
+- **Core Entities:** `/api/users`, `/api/products`, `/api/orders`
+- **Operations:** `/api/deliveries`, `/api/tasks`, `/api/supplies`
+- **Finance:** `/api/payments`, `/api/analytics`
 
-Configure Tailwind in `tailwind.config.js`:
+## Contributing
 
-- Content paths for class detection
-- Theme customization
-- Plugin configuration
+Contributions are welcome! Please follow these steps:
 
-### PostCSS
+1.  Fork the repository.
+2.  Create a feature branch (`git checkout -b feature/AmazingFeature`).
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  Push to the branch (`git push origin feature/AmazingFeature`).
+5.  Open a Pull Request.
 
-PostCSS processes CSS with:
+## License
 
-- Tailwind CSS directives
-- Modern CSS feature support via preset-env
-
-### Webpack Dev Server
-
-Development server settings in `webpack.config.js`:
-
-- Port: 8080
-- Hot reload enabled
-- Automatic browser opening
-- History API fallback for SPA routing
-
-## 🔐 Demo Credentials
-
-The system includes demo credentials for testing all user roles:
-
-| Role              | Email                | Password    |
-| ----------------- | -------------------- | ----------- |
-| Owner             | owner@dbms.com       | owner       |
-| Manager           | manager@dbms.com     | manager     |
-| Assistant Manager | asst@dbms.com        | assistant   |
-| Stock Keeper      | stock@dbms.com       | stock       |
-| Cashier           | cashier@dbms.com     | cashier     |
-| Supplier          | supplier@dbms.com    | supplier    |
-| Distributor       | distributor@dbms.com | distributor |
-| Salesman          | salesman@dbms.com    | salesman    |
-| Driver            | driver@dbms.com      | driver      |
-
-⚠️ **Note**: These are demo credentials for development/testing purposes only. Replace with proper authentication in production.
-
-## 📝 License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-## 👨‍💻 Author
-
-**Dilukshan Niranjan**
+This project is licensed under the MIT License - see the `package.json` file for details.
 
 ---
 
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
-
----
-
-**Built with ❤️ for ADP Namasinghe Distribution**
+**Author:** Dilukshan Niranjan

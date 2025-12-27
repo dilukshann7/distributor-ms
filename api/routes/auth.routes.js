@@ -119,7 +119,7 @@ router.get("/check-auth", (req, res) => {
       isAuth: true,
       user: {
         id: req.session.userId,
-        role: req.session.userRole.toLowerCase(),
+        role: req.session.userRole.toLowerCase().replace(" ", "-"),
         email: req.session.userEmail,
       },
     });
