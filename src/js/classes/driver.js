@@ -17,6 +17,7 @@ class DriverDashboard {
       payment: document.createElement("payment-collection"),
       vehicle: document.createElement("vehicle-management"),
     };
+    window.driverDashboard = this;
     this.notificationPanel = new NotificationPanel(container);
   }
 
@@ -84,7 +85,7 @@ class DriverDashboard {
             ${getIconHTML("bell")}
           </button>
 
-          <button id="logoutBtnHeader" class="driver-header-btn">
+          <button id="logoutBtn" class="driver-header-btn">
             ${getIconHTML("log-out")}
           </button>
         </div>
@@ -119,12 +120,11 @@ class DriverDashboard {
 
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        User.logout()
+        User.logout();
       });
     }
 
     window.notificationPanel = this.notificationPanel;
-    window.driverDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 
@@ -146,5 +146,5 @@ class DriverDashboard {
 
 export async function renderDriverDashboard(container) {
   const dashboard = new DriverDashboard(container);
-  dashboard.render();
+  return dashboard.render();
 }

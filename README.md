@@ -161,6 +161,9 @@ Contributions are welcome! Please follow these steps:
 
 This project is licensed under the MIT License - see the `package.json` file for details.
 
----
+## Authors
 
-**Author:** Dilukshan Niranjan
+- Dilukshan Niranjan
+- Melisha Devaraj
+- Pabodhini Tharaka Perera
+- Anjana Dulan Wijerathna

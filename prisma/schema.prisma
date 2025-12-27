@@ -3,6 +3,7 @@ generator client {
   binaryTargets = ["native", "rhel-openssl-1.0.x", "debian-openssl-3.0.x"]
 }
 
+// https://chatgpt.com/share/694fdca9-4874-800c-937f-2e300993719b
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
