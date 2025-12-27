@@ -17,12 +17,12 @@ class AssistantManagerDashboard {
       drivers: document.createElement("driver-management"),
       distribution: document.createElement("distribution-records"),
     };
+    window.assistantManagerDashboard = this;
     this.notificationPanel = new NotificationPanel(container);
   }
 
   async render() {
     await this.notificationPanel.loadTasks();
-    const sectionContent = await this.renderSection(this.currentSection);
     this.container.innerHTML = `
       <div class="flex h-screen bg-gray-50">
         ${this.renderSidebar()}
@@ -37,6 +37,15 @@ class AssistantManagerDashboard {
     `;
     this.attachEventListeners();
     this.renderCurrentSection();
+  }
+
+  renderCurrentSection() {
+    const content = this.container.querySelector("#dashboardContent div");
+    content.innerHTML = "";
+    const sectionComponent = this.sections[this.currentSection];
+    if (sectionComponent) {
+      content.appendChild(sectionComponent);
+    }
   }
 
   renderSidebar() {
@@ -119,16 +128,12 @@ class AssistantManagerDashboard {
     }
 
     window.notificationPanel = this.notificationPanel;
-    window.assistantManagerDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 
   async navigateToSection(section) {
     this.currentSection = section;
-    const content = this.container.querySelector("#dashboardContent");
-    content.innerHTML = `<div class="p-8">${await this.renderSection(
-      section
-    )}</div>`;
+    this.renderCurrentSection();
 
     const navItems = this.container.querySelectorAll(".nav-item");
 
@@ -144,5 +149,5 @@ class AssistantManagerDashboard {
 
 export function renderAssistantManagerDashboard(container) {
   const dashboard = new AssistantManagerDashboard(container);
-  dashboard.render();
+  return dashboard.render();
 }
