@@ -70,7 +70,7 @@ router.post(
     }
 
     const mapRoleToPath = (role) => {
-      switch (role) {
+      switch (role.toLowerCase()) {
         case "driver":
           return "/driver";
         case "supplier":
@@ -119,7 +119,7 @@ router.get("/check-auth", (req, res) => {
       isAuth: true,
       user: {
         id: req.session.userId,
-        role: req.session.userRole,
+        role: req.session.userRole.toLowerCase(),
         email: req.session.userEmail,
       },
     });

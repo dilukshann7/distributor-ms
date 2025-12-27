@@ -27,12 +27,12 @@ app.use(createSessionMiddleware());
 app.use("/api", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
-app.use("/api", orderRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/api", employeeRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/deliveries", deliveryRoutes);
 app.use("/api/payments", paymentRoutes);
-app.use("/api", supplyRoutes);
+app.use("/api/supplies", supplyRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api", analyticsRoutes);
 
