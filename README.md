@@ -93,7 +93,7 @@ This project is licensed under the MIT License - see the `package.json` file for
 
 ## Authors
 
+- Anjana Dulan Wijerathna
 - Dilukshan Niranjan
 - Melisha Devaraj
 - Pabodhini Tharaka Perera
-- Anjana Dulan Wijerathna
