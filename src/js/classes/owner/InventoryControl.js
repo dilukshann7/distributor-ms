@@ -43,7 +43,9 @@ export class InventoryControl extends LitElement {
         <div class="flex items-center justify-between">
           <div>
             <h2 class="owner-title">Inventory Control</h2>
-            <p class="owner-subtitle">Manage stock levels and product details</p>
+            <p class="owner-subtitle">
+              Manage stock levels and product details
+            </p>
           </div>
         </div>
 
@@ -61,26 +63,39 @@ export class InventoryControl extends LitElement {
                 </tr>
               </thead>
               <tbody class="owner-table-body">
-                ${this.inventory.map((item) => html`
-                  <tr class="owner-table-tr">
-                    <td class="owner-table-td font-medium text-gray-900">${item.name}</td>
-                    <td class="owner-table-td text-gray-500">${item.sku}</td>
-                    <td class="owner-table-td text-gray-900">${item.quantity} units</td>
-                    <td class="owner-table-td text-gray-900">${item.minStock} units</td>
-                    <td class="owner-table-td text-gray-900">${item.price.toLocaleString("en-US", { style: "currency", currency: "LKR" })}</td>
-                    <td class="owner-table-td">
-                      <span class="owner-badge ${
-                        item.status === "In Stock"
-                          ? "owner-badge-success"
-                          : item.status === "Low Stock"
-                          ? "owner-badge-warning"
-                          : "owner-badge-danger"
-                      }">
-                        ${item.status}
-                      </span>
-                    </td>
-                  </tr>
-                `)}
+                ${this.inventory.map(
+                  (item) => html`
+                    <tr class="owner-table-tr">
+                      <td class="owner-table-td font-medium text-gray-900">
+                        ${item.name}
+                      </td>
+                      <td class="owner-table-td text-gray-500">${item.sku}</td>
+                      <td class="owner-table-td text-gray-900">
+                        ${item.quantity} units
+                      </td>
+                      <td class="owner-table-td text-gray-900">
+                        ${item.minStock} units
+                      </td>
+                      <td class="owner-table-td text-gray-900">
+                        ${item.price.toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "LKR",
+                        })}
+                      </td>
+                      <td class="owner-table-td">
+                        <span
+                          class="owner-badge ${item.status === "In Stock"
+                            ? "owner-badge-success"
+                            : item.status === "Low Stock"
+                            ? "owner-badge-warning"
+                            : "owner-badge-danger"}"
+                        >
+                          ${item.status}
+                        </span>
+                      </td>
+                    </tr>
+                  `
+                )}
               </tbody>
             </table>
           </div>

@@ -23,6 +23,7 @@ class OwnerDashboard {
 
   async render() {
     await this.notificationPanel.loadTasks();
+    
     this.container.innerHTML = `
       <div class="owner-dashboard-container">
         ${this.renderSidebar()}
