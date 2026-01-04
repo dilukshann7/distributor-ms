@@ -85,11 +85,13 @@ export class StockTracking extends LitElement {
                       <td
                         class="dist-table-td text-gray-700 flex items-center gap-2"
                       >
-                        <svg
-                          class="w-4 h-4 text-orange-500"
-                        <span class="text-orange-500" .innerHTML=${getIconHTML(
-                          "map-pin"
-                        ).replace("w-5 h-5", "w-4 h-4")}></span>
+                        <span
+                          class="text-orange-500"
+                          .innerHTML=${getIconHTML("map-pin").replace(
+                            "w-5 h-5",
+                            "w-4 h-4"
+                          )}
+                        ></span>
                         ${item.location}
                       </td>
                       <td class="dist-table-td text-gray-600 text-sm">

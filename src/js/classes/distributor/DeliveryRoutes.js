@@ -20,7 +20,6 @@ export class DeliveryRoutes extends LitElement {
     try {
       const response = await Delivery.getAll();
       this.routes = response.data;
-      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching delivery routes:", error);
       this.routes = [];
@@ -40,9 +39,8 @@ export class DeliveryRoutes extends LitElement {
         </div>
 
         <div class="space-y-4">
-          ${activeRoutes
-            .map(
-              (route) => `
+          ${activeRoutes.map(
+            (route) => `
             <div class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 ${
               route.status === "in_transit"
                 ? "border-blue-600"
@@ -123,7 +121,7 @@ export class DeliveryRoutes extends LitElement {
               </div>
             </div>
           `
-            )}
+          )}
         </div>
       </div>
     `;

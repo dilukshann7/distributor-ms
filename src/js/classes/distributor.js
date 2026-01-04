@@ -21,7 +21,8 @@ class DistributorDashboard {
       delivery: document.createElement("proof-of-delivery"),
       authorization: document.createElement("order-authorization"),
     };
-    this.notificationPanel = new NotificationPanel(container);
+    window.distributorDashboard = this;
+    this.notificationPanel = new NotificationPanel(this.container);
   }
 
   async render() {
@@ -122,12 +123,11 @@ class DistributorDashboard {
 
     if (logoutBtn) {
       logoutBtn.addEventListener("click", () => {
-        User.logout()
+        User.logout();
       });
     }
 
     window.notificationPanel = this.notificationPanel;
-    window.distributorDashboard = this;
     this.notificationPanel.attachEventListeners();
   }
 
@@ -149,5 +149,5 @@ class DistributorDashboard {
 
 export function renderDistributorDashboard(container) {
   const dashboard = new DistributorDashboard(container);
-  dashboard.render();
+  return dashboard.render();
 }

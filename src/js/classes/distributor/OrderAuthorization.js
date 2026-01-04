@@ -30,7 +30,6 @@ export class OrderAuthorization extends LitElement {
       this.pendingOrders = response.data.filter(
         (order) => order.status === "pending"
       );
-      this.requestUpdate();
     } catch (error) {
       console.error("Error fetching sales orders:", error);
       this.pendingOrders = [];
