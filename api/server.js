@@ -12,7 +12,10 @@ import deliveryRoutes from "./routes/delivery.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import supplyRoutes from "./routes/supply.routes.js";
 import taskRoutes from "./routes/task.routes.js";
+import salesOrderRoutes from "./routes/salesorder.route.js";
+import cartRoutes from "./routes/carts.route.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
+import smallOrderRoutes from "./routes/smallorder.route.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +38,9 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/supplies", supplyRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api", analyticsRoutes);
+app.use("/api/sales-orders", salesOrderRoutes);
+app.use("/api/carts", cartRoutes);
+app.use("/api/small-orders", smallOrderRoutes);
 
 app.use((err, req, res, next) => {
   if (res.headersSent) {
