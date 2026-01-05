@@ -141,7 +141,7 @@ export class SalesTransaction extends LitElement {
       const cartData = {
         items: this.cartItems,
         totalAmount: totalAmount,
-        status: "active",
+        status: "processed",
       };
 
       const cartResponse = await Cart.create(cartData);

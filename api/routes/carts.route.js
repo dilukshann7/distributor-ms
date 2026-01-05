@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
  * Get all carts
  */
 router.get(
-  "/carts",
+  "/",
   asyncHandler(async (req, res) => {
     const carts = await prisma.cart.findMany();
     res.json(carts);
@@ -22,7 +22,7 @@ router.get(
  * Create a new cart
  */
 router.post(
-  "/carts",
+  "/",
   asyncHandler(async (req, res) => {
     const cartData = req.body;
     const newCart = await prisma.cart.create({
@@ -37,7 +37,7 @@ router.post(
  * Update a cart
  */
 router.put(
-  "/carts/:id",
+  "/:id",
   asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const cartData = req.body;
