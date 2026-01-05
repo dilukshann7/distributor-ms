@@ -20,4 +20,16 @@ router.post(
   })
 );
 
+router.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const smallOrders = await prisma.smallOrder.findMany({
+      include: {
+        cart: true,
+      },
+    });
+    res.json(smallOrders);
+  })
+);
+
 export default router;
