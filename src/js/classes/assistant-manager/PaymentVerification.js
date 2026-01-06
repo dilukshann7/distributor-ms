@@ -28,7 +28,7 @@ export class PaymentVerification extends LitElement {
 
   async acceptPayment(paymentId) {
     try {
-      await Payment.update(paymentId, { status: "paid" });
+      await Payment.update(paymentId, { status: "verified" });
       await this.fetchPayments();
       this.requestUpdate();
     } catch (error) {
@@ -97,54 +97,59 @@ export class PaymentVerification extends LitElement {
                 </tr>
               </thead>
               <tbody>
-                ${this.payments
-                  .map(
-                    (payment) => `
-                  <tr class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-4 text-sm font-medium text-gray-800">${
-                      payment.paymentMethod
-                    }</td>
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-800">$${payment.amount.toLocaleString()}</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${
-                      payment.salesOrder.customerName
-                    }</td>
-                    <td class="px-6 py-4 text-sm text-gray-600">${new Date(
-                      payment.paymentDate
-                    ).toLocaleDateString()}</td>
-                    <td class="px-6 py-4">
-                      <span class="px-3 py-1 rounded-full text-xs font-medium ${
-                        payment.salesOrder.paymentStatus === "paid"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }">
-                        ${
-                          payment.salesOrder.paymentStatus
+                ${this.payments.map(
+                  (payment) => html`
+                    <tr
+                      class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                    >
+                      <td class="px-6 py-4 text-sm font-medium text-gray-800">
+                        ${payment.paymentMethod}
+                      </td>
+                      <td class="px-6 py-4 text-sm font-semibold text-gray-800">
+                        $${payment.amount.toLocaleString()}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-gray-600">
+                        ${payment.salesOrder.customerName}
+                      </td>
+                      <td class="px-6 py-4 text-sm text-gray-600">
+                        ${new Date(payment.paymentDate).toLocaleDateString()}
+                      </td>
+                      <td class="px-6 py-4">
+                        <span
+                          class="px-3 py-1 rounded-full text-xs font-medium ${payment
+                            .salesOrder.paymentStatus === "unpaid"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-green-100 text-green-800"}"
+                        >
+                          ${payment.salesOrder.paymentStatus
                             .charAt(0)
                             .toUpperCase() +
-                          payment.salesOrder.paymentStatus.slice(1)
-                        }
-                      </span>
-                    </td>
-                    <td class="px-6 py-4">
-                      ${
-                        payment.salesOrder.paymentStatus === "unpaid"
-                          ? `
-                        <div class="flex gap-2">
-                          <button onclick="window.paymentVerificationInstance.acceptPayment(${payment.id})" class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition-colors">
-                            Verify
-                          </button>
-                          <button onclick="window.paymentVerificationInstance.rejectPayment(${payment.id})" class="px-3 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition-colors">
-                            Reject
-                          </button>
-                        </div>
-                      `
-                          : ""
-                      }
-                    </td>
-                  </tr>
-                `
-                  )
-                  .join("")}
+                          payment.salesOrder.paymentStatus.slice(1)}
+                        </span>
+                      </td>
+                      <td class="px-6 py-4">
+                        ${payment.salesOrder.paymentStatus === "paid"
+                          ? html`
+                              <div class="flex gap-2">
+                                <button
+                                  @click=${() => this.acceptPayment(payment.id)}
+                                  class="px-3 py-1 bg-green-100 text-green-700 rounded text-xs font-medium hover:bg-green-200 transition-colors"
+                                >
+                                  Verify
+                                </button>
+                                <button
+                                  @click=${() => this.rejectPayment(payment.id)}
+                                  class="px-3 py-1 bg-red-100 text-red-700 rounded text-xs font-medium hover:bg-red-200 transition-colors"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            `
+                          : ""}
+                      </td>
+                    </tr>
+                  `
+                )}
               </tbody>
             </table>
           </div>
