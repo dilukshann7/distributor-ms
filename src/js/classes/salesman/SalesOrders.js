@@ -323,13 +323,25 @@ export class SalesOrders extends LitElement {
                         class="sm-btn-icon-blue"
                         @click=${() => this.switchToEdit(order.id)}
                       >
-                        ${getIconHTML("edit")}
+                        <span
+                          class="text-blue-500"
+                          .innerHTML=${getIconHTML("edit").replace(
+                            "w-5 h-5",
+                            "w-4 h-4"
+                          )}
+                        ></span>
                       </button>
                       <button
                         class="sm-btn-icon-red"
                         @click=${() => this.deleteOrder(order.id)}
                       >
-                        ${getIconHTML("trash")}
+                        <span
+                          class="text-red-700"
+                          .innerHTML=${getIconHTML("trash").replace(
+                            "w-5 h-5",
+                            "w-4 h-4"
+                          )}
+                        ></span>
                       </button>
                     </td>
                   </tr>
