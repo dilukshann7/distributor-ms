@@ -56,7 +56,9 @@ export class OrderManagement extends LitElement {
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-2xl font-bold text-gray-800">Order Management</h3>
-            <p class="text-gray-600 mt-1">Manage and track all distribution orders</p>
+            <p class="text-gray-600 mt-1">
+              Manage and track all distribution orders
+            </p>
           </div>
         </div>
 
@@ -73,51 +75,46 @@ export class OrderManagement extends LitElement {
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
-              ${this.orders
-                .map(
-                  (order) => `
-                <tr class="hover:bg-gray-50 transition-colors">
-                  <td class="dist-table-td font-semibold text-gray-800">${
-                    order.orderNumber
-                  }</td>
-                  <td class="dist-table-td text-gray-700">${
-                    order.customerName
-                  }</td>
-                  <td class="dist-table-td text-gray-700">${
-                    order.items
-                      ?.filter((item) => item && item.name)
-                      .map(
-                        (item) =>
-                          `${item.name}${
-                            item.quantity ? ` (x${item.quantity})` : ""
-                          }`
-                      )
-                      .join(", ") || "No items"
-                  }</td>                  
-                  <td class="dist-table-td font-semibold text-gray-800">Rs. ${
-                    order.subtotal
-                  }</td>
-                  <td class="dist-table-td">
-                    <span class="dist-badge ${this.getStatusColor(
-                      order.status
-                    )}">
-                      ${
-                        order.status.charAt(0).toUpperCase() +
-                        order.status.slice(1).replace("-", " ")
-                      }
-                    </span>
-                  </td>
-                  <td class="dist-table-td text-gray-600">${new Date(
-                    order.orderDate
-                  ).toLocaleDateString()}</td>
-                  
-                </tr>
-              `
-                )}
+              ${this.orders.map(
+                (order) => html`
+                  <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="dist-table-td font-semibold text-gray-800">
+                      ${order.orderNumber}
+                    </td>
+                    <td class="dist-table-td text-gray-700">
+                      ${order.customerName}
+                    </td>
+                    <td class="dist-table-td text-gray-700">
+                      ${order.items
+                        ?.filter((item) => item && item.name)
+                        .map(
+                          (item) =>
+                            `${item.name}${
+                              item.quantity ? ` (x${item.quantity})` : ""
+                            }`
+                        )
+                        .join(", ") || "No items"}
+                    </td>
+                    <td class="dist-table-td font-semibold text-gray-800">
+                      Rs. ${order.subtotal}
+                    </td>
+                    <td class="dist-table-td">
+                      <span
+                        class="dist-badge ${this.getStatusColor(order.status)}"
+                      >
+                        ${order.status.charAt(0).toUpperCase() +
+                        order.status.slice(1).replace("-", " ")}
+                      </span>
+                    </td>
+                    <td class="dist-table-td text-gray-600">
+                      ${new Date(order.orderDate).toLocaleDateString()}
+                    </td>
+                  </tr>
+                `
+              )}
             </tbody>
           </table>
         </div>
-        
       </div>
     `;
   }
