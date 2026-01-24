@@ -1,6 +1,10 @@
 import axios from "axios";
-import autoTable from "jspdf-autotable";
-import jsPDF from "jspdf";
+import {
+  preparePdfDoc,
+  exportTable,
+  addFooter,
+  addSummarySection,
+} from "../utils/pdfReportTemplate.js";
 import { formatDate, formatCurrency } from "../utils/reportUtils.js";
 
 export class smallOrder {
@@ -28,17 +32,7 @@ export class smallOrder {
         return orderDate >= start && orderDate <= end;
       });
 
-      const doc = new jsPDF();
-
-      doc.setFontSize(18);
-      doc.text("Small Order Report", 14, 20);
-
-      doc.setFontSize(11);
-      doc.text(
-        `Date Range: ${formatDate(startDate)} - ${formatDate(endDate)}`,
-        14,
-        28
-      );
+      const doc = preparePdfDoc("Small Order Report", new Date());
 
       const totalOrders = filteredOrders.length;
       const totalAmount = filteredOrders.reduce(
@@ -46,23 +40,52 @@ export class smallOrder {
         0
       );
 
-      doc.setFontSize(10);
-      doc.text(`Total Orders: ${totalOrders}`, 14, 36);
-      doc.text(`Total Revenue: ${formatCurrency(totalAmount)}`, 14, 42);
+      // Summary Section
+      let yPos = 40;
+      yPos = addSummarySection(
+        doc,
+        "Sales Summary",
+        [
+          { label: "Total Orders", value: totalOrders.toString() },
+          { label: "Total Revenue", value: formatCurrency(totalAmount) },
+          {
+            label: "Date Range",
+            value: `${formatDate(startDate)} - ${formatDate(endDate)}`,
+          },
+        ],
+        yPos
+      );
 
-      autoTable(doc, {
-        startY: 50,
-        head: [["Order Number", "Order ID", "Items", "Amount", "Date"]],
-        body: filteredOrders.map((order) => [
+      // Detailed Table
+      doc.setFontSize(14);
+      doc.text("Order Details", 14, yPos + 5);
+
+      exportTable(
+        doc,
+        ["Order Number", "Order ID", "Items", "Amount", "Date"],
+        filteredOrders.map((order) => [
           order.orderNumber || "N/A",
           order.id,
           order.cart.items.map((item) => item.productName).join(", "),
           formatCurrency(order.cart?.totalAmount || 0),
           formatDate(new Date(order.createdAt)),
         ]),
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [6, 182, 212] },
-      });
+        {
+          startY: yPos + 10,
+          fontSize: 9,
+          headColor: [6, 182, 212], // Cyan
+          columnStyles: {
+            0: { cellWidth: 30 },
+            1: { cellWidth: 20 },
+            2: { cellWidth: "auto" },
+            3: { cellWidth: 30, halign: "right" },
+            4: { cellWidth: 30, halign: "center" },
+          },
+        }
+      );
+
+      // Add Footer
+      addFooter(doc);
 
       doc.save(
         `small_order_report_${formatDate(startDate)}_to_${formatDate(

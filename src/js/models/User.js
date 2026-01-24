@@ -1,6 +1,10 @@
 import axios from "axios";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import {
+  preparePdfDoc,
+  exportTable,
+  addFooter,
+  addSummarySection,
+} from "../utils/pdfReportTemplate.js";
 import { formatDate } from "../utils/reportUtils.js";
 
 export class User {
@@ -49,13 +53,28 @@ export class User {
       const response = await User.getAll();
       const users = response.data || [];
 
-      const doc = new jsPDF();
+      const doc = preparePdfDoc("Employee Report", new Date());
 
-      doc.setFontSize(18);
-      doc.text("Employee Report", 14, 20);
+      const totalEmployees = users.length;
+      const activeEmployees = users.filter(
+        (u) => u.status === "Active" || u.status === "active"
+      ).length; // Assuming status values
 
-      doc.setFontSize(11);
-      doc.text(`Date: ${formatDate(new Date())}`, 14, 28);
+      // Summary
+      let yPos = 40;
+      yPos = addSummarySection(
+        doc,
+        "Workforce Overview",
+        [
+          { label: "Total Employees", value: totalEmployees.toString() },
+          { label: "Active Status", value: activeEmployees.toString() },
+        ],
+        yPos
+      );
+
+      // Detailed Table
+      doc.setFontSize(14);
+      doc.text("Employee Roster", 14, yPos + 5);
 
       const tableData = users.map((user) => {
         const profile = User.getProfileData(user);
@@ -72,41 +91,38 @@ export class User {
         ];
       });
 
-      autoTable(doc, {
-        startY: 36,
-        head: [
-          [
-            "Name",
-            "Email",
-            "Role",
-            "Performance",
-            "Salary",
-            "Bonus",
-            "Status",
-            "Phone",
-          ],
+      exportTable(
+        doc,
+        [
+          "Name",
+          "Email",
+          "Role",
+          "Performance",
+          "Salary",
+          "Bonus",
+          "Status",
+          "Phone",
         ],
-        body: tableData,
-        headStyles: {
-          fillColor: [41, 128, 185],
-          textColor: 255,
-          fontStyle: "bold",
-        },
-        styles: {
+        tableData,
+        {
+          startY: yPos + 10,
           fontSize: 9,
-          cellPadding: 3,
-        },
-        columnStyles: {
-          0: { cellWidth: 25 },
-          1: { cellWidth: 40 },
-          2: { cellWidth: 25 },
-          3: { cellWidth: 20 },
-          4: { cellWidth: 18 },
-          5: { cellWidth: 18 },
-          6: { cellWidth: 18 },
-          7: { cellWidth: 25 },
-        },
-      });
+          headColor: [41, 128, 185],
+          columnStyles: {
+            0: { cellWidth: 25 },
+            1: { cellWidth: 40 },
+            2: { cellWidth: 25 },
+            3: { cellWidth: 20 },
+            4: { cellWidth: 18 },
+            5: { cellWidth: 18 },
+            6: { cellWidth: 18 },
+            7: { cellWidth: 25 },
+          },
+        }
+      );
+
+      // Add Footer
+      addFooter(doc);
 
       doc.save(`employee_report_${formatDate(new Date())}.pdf`);
     } catch (error) {

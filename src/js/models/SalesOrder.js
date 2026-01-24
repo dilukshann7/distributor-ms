@@ -1,6 +1,10 @@
 import axios from "axios";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import {
+  preparePdfDoc,
+  exportTable,
+  addFooter,
+  addSummarySection,
+} from "../utils/pdfReportTemplate.js";
 import {
   formatCurrency,
   formatDate,
@@ -43,46 +47,68 @@ export class SalesOrder {
         endDate
       );
 
-      const doc = new jsPDF();
-
-      doc.setFontSize(18);
-      doc.text("Supplier/Sales Report", 14, 20);
-
-      doc.setFontSize(11);
-      doc.text(
-        `Date Range: ${formatDate(startDate)} - ${formatDate(endDate)}`,
-        14,
-        28
-      );
+      const doc = preparePdfDoc("Sales Order Report", new Date());
 
       const totalOrders = filteredOrders.length;
+      const totalValue = filteredOrders.reduce(
+        (sum, order) => sum + parseFloat(order.subtotal || 0),
+        0
+      );
 
-      doc.setFontSize(10);
-      doc.text(`Total Orders: ${totalOrders}`, 14, 36);
-
-      autoTable(doc, {
-        startY: 50,
-        head: [
-          [
-            "Order ID",
-            "Customer ID",
-            "Date",
-            "Status",
-            "Total Amount",
-            "Due Date",
-          ],
+      // Summary Section
+      let yPos = 40;
+      yPos = addSummarySection(
+        doc,
+        "Sales Overview",
+        [
+          { label: "Total Orders", value: totalOrders.toString() },
+          { label: "Total Revenue", value: formatCurrency(totalValue) },
+          {
+            label: "Date Range",
+            value: `${formatDate(startDate)} - ${formatDate(endDate)}`,
+          },
         ],
-        body: filteredOrders.map((order) => [
-          order.id || "N/A",
-          order.customerId || "N/A",
+        yPos
+      );
+
+      // Detailed Table
+      doc.setFontSize(14);
+      doc.text("Order Details", 14, yPos + 5);
+
+      exportTable(
+        doc,
+        [
+          "Order ID",
+          "Customer ID",
+          "Date",
+          "Status",
+          "Total Amount",
+          "Due Date",
+        ],
+        filteredOrders.map((order) => [
+          order.id,
+          order.customerId,
           formatDate(order.orderDate),
-          order.status || "N/A",
+          order.status,
           formatCurrency(order.subtotal),
           order.orderDate ? formatDate(order.orderDate) : "N/A",
         ]),
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [59, 130, 246] }, // Blue color for orders
-      });
+        {
+          startY: yPos + 10,
+          headColor: [59, 130, 246], // Blue
+          columnStyles: {
+            0: { cellWidth: 25 },
+            1: { cellWidth: 30 },
+            2: { cellWidth: 30, halign: "center" },
+            3: { cellWidth: 30, halign: "center" },
+            4: { cellWidth: 30, halign: "right" },
+            5: { cellWidth: 30, halign: "center" },
+          },
+        }
+      );
+
+      // Add Footer
+      addFooter(doc);
 
       doc.save(`sales-orders-${startDate}-to-${endDate}.pdf`);
     } catch (error) {

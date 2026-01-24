@@ -1,9 +1,13 @@
 import axios from "axios";
 import { User } from "./User";
+import {
+  preparePdfDoc,
+  exportTable,
+  addFooter,
+  addSummarySection,
+} from "../utils/pdfReportTemplate.js";
 import { Product } from "./Product";
 import { formatCurrency, formatDate } from "../utils/reportUtils";
-import jsPDF from "jspdf";
-import { autoTable } from "jspdf-autotable";
 
 export class StockKeeper extends User {
   static async getAll() {
@@ -36,13 +40,7 @@ export class StockKeeper extends User {
       const productResponse = await Product.getAll();
       const allProducts = productResponse.data || [];
 
-      const doc = new jsPDF();
-
-      doc.setFontSize(18);
-      doc.text("Stock Report", 14, 20);
-
-      doc.setFontSize(11);
-      doc.text(`Generated on: ${formatDate(new Date().toISOString())}`, 14, 28);
+      const doc = preparePdfDoc("Inventory Status Report", new Date());
 
       const totalProducts = allProducts.length;
       const totalStockValue = allProducts.reduce(
@@ -55,42 +53,60 @@ export class StockKeeper extends User {
         (product) => product.quantity <= product.minStock
       ).length;
 
-      doc.setFontSize(10);
-      doc.text(`Total Products: ${totalProducts}`, 14, 36);
-      doc.text(`Total Stock Value: ${formatCurrency(totalStockValue)}`, 14, 42);
-      doc.text(`Low Stock Items: ${lowStockItems}`, 14, 48);
+      const outOfStockItems = allProducts.filter(
+        (product) => product.quantity === 0
+      ).length;
 
-      autoTable(doc, {
-        startY: 56,
-        head: [
-          [
-            "Product ID",
-            "Name",
-            "SKU",
-            "Category",
-            "Quantity",
-            "Price",
-            "Min Stock",
-            "Max Stock",
-            "Location",
-            "Status",
-          ],
+      // Summary
+      let yPos = 40;
+      yPos = addSummarySection(
+        doc,
+        "Inventory Overview",
+        [
+          { label: "Total SKUs", value: totalProducts.toString() },
+          {
+            label: "Total Stock Value",
+            value: formatCurrency(totalStockValue),
+          },
+          { label: "Low Stock Items", value: lowStockItems.toString() },
+          { label: "Out of Stock", value: outOfStockItems.toString() },
         ],
-        body: allProducts.map((product) => [
-          product.id || "N/A",
+        yPos
+      );
+
+      // Stock Table
+      doc.setFontSize(14);
+      doc.text("Stock Details", 14, yPos + 5);
+
+      exportTable(
+        doc,
+        ["Product", "SKU", "Category", "Qty", "Price", "Status", "Location"],
+        allProducts.map((product) => [
           product.name || "N/A",
           product.sku || "N/A",
           product.category || "N/A",
           product.quantity || 0,
           formatCurrency(product.price),
-          product.minStock || 0,
-          product.maxStock || 0,
-          product.location || "N/A",
           product.status || "N/A",
+          product.location || "N/A",
         ]),
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [147, 51, 234] },
-      });
+        {
+          startY: yPos + 10,
+          headColor: [147, 51, 234], // Purple
+          columnStyles: {
+            0: { cellWidth: 40 },
+            1: { cellWidth: 25 },
+            2: { cellWidth: 30 },
+            3: { cellWidth: 15, halign: "center" },
+            4: { cellWidth: 25, halign: "right" },
+            5: { cellWidth: 25, halign: "center" },
+            6: { cellWidth: 25 },
+          },
+        }
+      );
+
+      // Add Footer
+      addFooter(doc);
 
       const timestamp = new Date().toISOString().split("T")[0];
       doc.save(`stock-report-${timestamp}.pdf`);

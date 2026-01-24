@@ -5,8 +5,12 @@ import {
   formatDate,
   formatCurrency,
 } from "../utils/reportUtils";
-import jsPDF from "jspdf";
-import { autoTable } from "jspdf-autotable";
+import {
+  preparePdfDoc,
+  exportTable,
+  addFooter,
+  addSummarySection,
+} from "../utils/pdfReportTemplate.js";
 import { SalesOrder } from "./SalesOrder";
 
 export class Salesman extends User {
@@ -46,17 +50,7 @@ export class Salesman extends User {
         endDate
       );
 
-      const doc = new jsPDF();
-
-      doc.setFontSize(18);
-      doc.text("Sales Report", 14, 20);
-
-      doc.setFontSize(11);
-      doc.text(
-        `Date Range: ${formatDate(startDate)} - ${formatDate(endDate)}`,
-        14,
-        28
-      );
+      const doc = preparePdfDoc("Sales Report", new Date());
 
       const totalOrders = filteredOrders.length;
       const subtotal = filteredOrders.reduce(
@@ -64,28 +58,59 @@ export class Salesman extends User {
         0
       );
 
-      doc.setFontSize(10);
-      doc.text(`Total Orders: ${totalOrders}`, 14, 36);
-      doc.text(`Total Sales Amount: ${formatCurrency(subtotal)}`, 14, 42);
+      const averageOrderValue = totalOrders > 0 ? subtotal / totalOrders : 0;
 
-      autoTable(doc, {
-        startY: 50,
-        head: [
-          ["Order ID", "Customer Name", "Date", "Status", "Subtotal", "Items"],
+      // Add Summary Section
+      let yPos = 40;
+      yPos = addSummarySection(
+        doc,
+        "Performance Overview",
+        [
+          { label: "Total Orders", value: totalOrders.toString() },
+          { label: "Total Sales", value: formatCurrency(subtotal) },
+          {
+            label: "Avg Order Value",
+            value: formatCurrency(averageOrderValue),
+          },
         ],
-        body: filteredOrders.map((order) => [
+        yPos
+      );
+
+      // Detailed Table
+      doc.setFontSize(14);
+      doc.text("Detailed Sales Data", 14, yPos + 5);
+
+      exportTable(
+        doc,
+        ["Order ID", "Customer Name", "Date", "Status", "Items", "Subtotal"],
+        filteredOrders.map((order) => [
           order.id || "N/A",
           order.customerName || "N/A",
           formatDate(order.orderDate),
           order.status || "N/A",
+          order.items
+            ? order.items
+                .map((element) => `${element.name} (${element.quantity})`)
+                .join(", ")
+            : "N/A",
           formatCurrency(order.subtotal),
-          `${order.items
-            .map((element) => element.name + " x " + element.quantity)
-            .join(", ")}`,
         ]),
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [14, 165, 233] },
-      });
+        {
+          startY: yPos + 10,
+          headColor: [14, 165, 233], // Sky blue
+          columnStyles: {
+            0: { cellWidth: 20 },
+            1: { cellWidth: 35 },
+            2: { cellWidth: 25, halign: "center" },
+            3: { cellWidth: 25, halign: "center" },
+            4: { cellWidth: "auto" },
+            5: { cellWidth: 30, halign: "right" },
+          },
+        }
+      );
+
+      // Add Footer
+      addFooter(doc);
 
       doc.save(`sales-report-${startDate}-to-${endDate}.pdf`);
     } catch (error) {
