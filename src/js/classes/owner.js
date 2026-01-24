@@ -23,7 +23,7 @@ class OwnerDashboard {
 
   async render() {
     await this.notificationPanel.loadTasks();
-    
+
     this.container.innerHTML = `
       <div class="owner-dashboard-container">
         ${this.renderSidebar()}
@@ -123,8 +123,11 @@ class OwnerDashboard {
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
     if (logoutBtn) {
-      logoutBtn.addEventListener("click", () => {
-        User.logout();
+      logoutBtn.addEventListener("click", async () => {
+        await User.logout();
+        import("../login.js").then((module) => {
+          module.renderLogin(this.container);
+        });
       });
     }
 

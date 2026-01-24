@@ -112,8 +112,11 @@ class CashierDashboard {
 
     const logoutBtn = this.container.querySelector("#logoutBtn");
     if (logoutBtn) {
-      logoutBtn.addEventListener("click", () => {
-        User.logout();
+      logoutBtn.addEventListener("click", async () => {
+        await User.logout();
+        import("../login.js").then((module) => {
+          module.renderLogin(this.container);
+        });
       });
     }
 
