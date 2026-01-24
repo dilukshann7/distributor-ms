@@ -66,14 +66,14 @@ class ManagerDashboard {
             .map(
               (item) => `
             <button data-section="${item.id}" class="manager-nav-item ${
-                this.currentSection === item.id
-                  ? "manager-nav-item-active"
-                  : "manager-nav-item-inactive"
-              }">
+              this.currentSection === item.id
+                ? "manager-nav-item-active"
+                : "manager-nav-item-inactive"
+            }">
               ${getIconHTML(item.icon)}
               <span>${item.label}</span>
             </button>
-          `
+          `,
             )
             .join("")}
         </nav>
