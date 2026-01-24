@@ -51,11 +51,17 @@ export class VehicleManagement extends LitElement {
 
     try {
       await Driver.update(this.driverId, updatedData);
-      this.message = { text: "Vehicle details updated successfully!", type: "success" };
+      this.message = {
+        text: "Vehicle details updated successfully!",
+        type: "success",
+      };
       await this.getVehicleDetails();
     } catch (error) {
       console.error("Error updating vehicle details:", error);
-      this.message = { text: "Failed to update vehicle details. Please try again.", type: "error" };
+      this.message = {
+        text: "Failed to update vehicle details. Please try again.",
+        type: "error",
+      };
     }
   }
 
@@ -66,7 +72,10 @@ export class VehicleManagement extends LitElement {
 
   getCurrentLocation() {
     if (!navigator.geolocation) {
-      this.message = { text: "Geolocation is not supported by your browser.", type: "error" };
+      this.message = {
+        text: "Geolocation is not supported by your browser.",
+        type: "error",
+      };
       return;
     }
 
@@ -93,13 +102,25 @@ export class VehicleManagement extends LitElement {
           const data = await response.json();
           const address = data.display_name || `${latitude}, ${longitude}`;
 
-          this.vehicleData = { ...this.vehicleData, currentLocation: address.split(",").slice(0, 2).join(",") };
-          this.message = { text: "Location fetched successfully!", type: "success" };
+          this.vehicleData = {
+            ...this.vehicleData,
+            currentLocation: address.split(",").slice(0, 2).join(","),
+          };
+          this.message = {
+            text: "Location fetched successfully!",
+            type: "success",
+          };
         } catch (error) {
           console.error("Error fetching address:", error);
 
-          this.vehicleData = { ...this.vehicleData, currentLocation: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` };
-          this.message = { text: "Using coordinates (address lookup unavailable).", type: "info" };
+          this.vehicleData = {
+            ...this.vehicleData,
+            currentLocation: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+          };
+          this.message = {
+            text: "Using coordinates (address lookup unavailable).",
+            type: "info",
+          };
         } finally {
           this.isLoadingGPS = false;
         }
@@ -162,7 +183,9 @@ export class VehicleManagement extends LitElement {
       <div class="space-y-6">
         <div>
           <h2 class="driver-title mb-2">Vehicle Management</h2>
-          <p class="driver-subtitle">Update and manage your vehicle information</p>
+          <p class="driver-subtitle">
+            Update and manage your vehicle information
+          </p>
         </div>
 
         <div class="driver-panel p-6">
@@ -170,10 +193,10 @@ export class VehicleManagement extends LitElement {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="driver-label-text">Vehicle ID</label>
-                <input 
-                  type="text" 
-                  name="vehicleId" 
-                  .value=${this.vehicleData.vehicleId || ""} 
+                <input
+                  type="text"
+                  name="vehicleId"
+                  .value=${this.vehicleData.vehicleId || ""}
                   class="driver-input"
                   placeholder="Enter vehicle ID"
                 />
@@ -181,21 +204,45 @@ export class VehicleManagement extends LitElement {
 
               <div>
                 <label class="driver-label-text">Vehicle Type</label>
-                <select name="vehicleType" class="driver-input" .value=${this.vehicleData.vehicleType || ""}>
+                <select
+                  name="vehicleType"
+                  class="driver-input"
+                  .value=${this.vehicleData.vehicleType || ""}
+                >
                   <option value="">Select vehicle type</option>
-                  <option value="truck" ?selected=${this.vehicleData.vehicleType === "truck"}>Truck</option>
-                  <option value="van" ?selected=${this.vehicleData.vehicleType === "van"}>Van</option>
-                  <option value="motorcycle" ?selected=${this.vehicleData.vehicleType === "motorcycle"}>Motorcycle</option>
-                  <option value="car" ?selected=${this.vehicleData.vehicleType === "car"}>Car</option>
+                  <option
+                    value="truck"
+                    ?selected=${this.vehicleData.vehicleType === "truck"}
+                  >
+                    Truck
+                  </option>
+                  <option
+                    value="van"
+                    ?selected=${this.vehicleData.vehicleType === "van"}
+                  >
+                    Van
+                  </option>
+                  <option
+                    value="motorcycle"
+                    ?selected=${this.vehicleData.vehicleType === "motorcycle"}
+                  >
+                    Motorcycle
+                  </option>
+                  <option
+                    value="car"
+                    ?selected=${this.vehicleData.vehicleType === "car"}
+                  >
+                    Car
+                  </option>
                 </select>
               </div>
 
               <div>
                 <label class="driver-label-text">License Number</label>
-                <input 
-                  type="text" 
-                  name="licenseNumber" 
-                  .value=${this.vehicleData.licenseNumber || ""} 
+                <input
+                  type="text"
+                  name="licenseNumber"
+                  .value=${this.vehicleData.licenseNumber || ""}
                   class="driver-input"
                   placeholder="Enter license number"
                 />
@@ -204,36 +251,36 @@ export class VehicleManagement extends LitElement {
               <div>
                 <label class="driver-label-text">Current Location</label>
                 <div class="flex gap-2">
-                  <input 
-                    type="text" 
-                    name="currentLocation" 
-                    .value=${this.vehicleData.currentLocation || ""} 
+                  <input
+                    type="text"
+                    name="currentLocation"
+                    .value=${this.vehicleData.currentLocation || ""}
                     class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     placeholder="Enter current location"
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     @click=${this.getCurrentLocation}
                     ?disabled=${this.isLoadingGPS}
                     class="driver-btn-secondary driver-btn-action"
                     title="Use GPS to get current location"
                   >
-                    ${this.isLoadingGPS 
-                      ? html`<div class="w-5 h-5 animate-spin" .innerHTML=${getIconHTML("rotate-ccw")}></div> Getting...`
-                      : html`<div class="w-5 h-5" .innerHTML=${getIconHTML("map-pin")}></div> GPS`
-                    }
+                    ${this.isLoadingGPS ? "Getting..." : "GPS"}
                   </button>
                 </div>
               </div>
             </div>
 
             <div class="flex gap-4 pt-4">
-              <button type="submit" class="flex-1 driver-btn-primary driver-btn-action">
+              <button
+                type="submit"
+                class="flex-1 driver-btn-primary driver-btn-action"
+              >
                 <div class="w-5 h-5" .innerHTML=${getIconHTML("check")}></div>
                 Update Vehicle Details
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 @click=${this.resetForm}
                 class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
               >
