@@ -76,11 +76,12 @@ export class ReceivingShipment extends LitElement {
   async getShipments() {
     try {
       const response = await Shipment.getAll();
+      const shipments = response.data?.data || response.data || [];
       this.shipments = {
-        in_transit: response.data.filter(
+        in_transit: shipments.filter(
           (s) => s.status === "in_transit" || s.status === "pending",
         ),
-        received: response.data.filter((s) => s.status === "received"),
+        received: shipments.filter((s) => s.status === "received"),
       };
       this.requestUpdate();
     } catch (error) {
@@ -94,13 +95,11 @@ export class ReceivingShipment extends LitElement {
     this.requestUpdate();
   }
 
-  // --- Item Management Methods ---
-
   handleSupplierChange(e) {
     this.selectedSupplierId = e.target.value;
-    this.tempItems = []; // Clear items when supplier changes
+    this.tempItems = [];
     if (this.selectedSupplierId) {
-      this.addItemRow(); // Add one initial row
+      this.addItemRow();
     }
   }
 
@@ -154,8 +153,6 @@ export class ReceivingShipment extends LitElement {
       return sum + (item.price || 0) * (item.quantity || 0);
     }, 0);
   }
-
-  // --- Actions ---
 
   async markAsReceived(shipmentId) {
     if (!confirm("Mark this shipment as received?")) {

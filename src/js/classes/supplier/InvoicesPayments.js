@@ -73,6 +73,20 @@ export class InvoicesPayments extends LitElement {
     this.requestUpdate();
   }
 
+  async updateInvoiceStatus(invoiceId, newStatus) {
+    try {
+      await PurchaseInvoice.update(invoiceId, { status: newStatus });
+      await this.getInvoices();
+      if (this.viewingInvoice && this.viewingInvoice.id === invoiceId) {
+        this.viewingInvoice = this.invoices.find((inv) => inv.id === invoiceId);
+      }
+      this.requestUpdate();
+    } catch (error) {
+      console.error("Error updating invoice status:", error);
+      alert("Failed to update invoice status. Please try again.");
+    }
+  }
+
   submitForm(e) {
     e.preventDefault();
     const form = e.target;
@@ -609,6 +623,45 @@ export class InvoicesPayments extends LitElement {
                   </div>
                 `
               : ""}
+
+            <!-- Update Status Section -->
+            <div class="border-t border-gray-100 pt-8">
+              <h4
+                class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
+              >
+                <span
+                  class="w-5 h-5 text-indigo-600"
+                  .innerHTML=${getIconHTML("edit")}
+                ></span>
+                Update Status
+              </h4>
+              <div class="flex items-center gap-4">
+                <select
+                  id="statusSelect"
+                  class="input-field flex-1"
+                  .value=${invoice.invoice?.status ||
+                  invoice.status ||
+                  "pending"}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                  <option value="overdue">Overdue</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <button
+                  @click=${() => {
+                    const select = this.querySelector("#statusSelect");
+                    if (select) {
+                      this.updateInvoiceStatus(invoice.id, select.value);
+                    }
+                  }}
+                  class="btn-primary flex items-center gap-2"
+                >
+                  <span .innerHTML=${getIconHTML("check-circle")}></span>
+                  Update Status
+                </button>
+              </div>
+            </div>
 
             <!-- Timestamps -->
             <div class="border-t border-gray-100 pt-8">
