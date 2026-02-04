@@ -42,6 +42,15 @@ app.use("/api/sales-orders", salesOrderRoutes);
 app.use("/api/carts", cartRoutes);
 app.use("/api/small-orders", smallOrderRoutes);
 
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.get(/^\/(?!api|dist|assets|static|favicon\.ico).*/, (req, res, next) => {
+  res.sendFile(path.join(__dirname, "../src/index.html"));
+});
+
 app.use((err, req, res, next) => {
   if (res.headersSent) {
     return next(err);
