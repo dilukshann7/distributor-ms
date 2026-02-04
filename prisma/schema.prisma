@@ -6,7 +6,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model Session {
@@ -63,7 +62,7 @@ model Driver {
 
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   deliveries  Delivery[]
-  salesOrders SalesOrder[]
+  salesOrders SalesOrder[] 
 }
 
 model Manager {
@@ -117,9 +116,9 @@ model Supplier {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  orders Order[]
+  purchaseOrders PurchaseOrder[]
 
-  invoices Invoice[]
+  purchaseInvoices PurchaseInvoice[]
 
   products Product[]
 
@@ -188,17 +187,16 @@ model Task {
 }
 
 model CustomerFeedback {
-  id          Int       @id @default(autoincrement())
-  customerId  Int
-  orderId     Int
-  comment     String?
-  status      String    @default("new")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           Int       @id @default(autoincrement())
+  customerId   Int
+  salesOrderId Int
+  comment      String?
+  status       String    @default("new")
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  customer Customer @relation(fields: [customerId], references: [id])
-
-  salesOrder SalesOrder @relation(fields: [orderId], references: [id])
+  customer   Customer   @relation(fields: [customerId], references: [id])
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id])
 }
 
 model Delivery {
@@ -217,55 +215,68 @@ model Delivery {
 
   driver Driver @relation(fields: [driverId], references: [id])
 
-  salesOrders SalesOrder[]
-
-  invoices SalesInvoice[]
-}
-
-model SalesOrder {
-  id             Int      @id @default(autoincrement())
-  orderNumber    String   @unique
-  customerId     Int
-  customerName   String
-  orderDate      DateTime
-  subtotal       Float
-  status         String   @default("pending")
-  paymentStatus  String   @default("unpaid")
-  items          Json
-  notes          String?
-  driverId       Int?
-  deliveryId     Int?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  delivery   Delivery? @relation(fields: [deliveryId], references: [id])
-
-  driver     Driver?   @relation(fields: [driverId], references: [id])
-
-  customer   Customer  @relation(fields: [customerId], references: [id])
-
-  invoices SalesInvoice[]
-
-  payments Payment[]
-
-  customerFeedbacks CustomerFeedback[]
+  salesOrders   SalesOrder[]    // Child of Order
+  salesInvoices SalesInvoice[]  // Child of Invoice
 }
 
 model Order {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
+  orderNumber String    @unique
+  orderType   String    // "purchase" | "sales" | "retail"
   orderDate   DateTime
-  status      String   @default("pending")
+  status      String    @default("pending")
   totalAmount Float
-  supplierId  Int
-  dueDate     DateTime
   items       Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
+  purchaseOrder PurchaseOrder?
+  salesOrder    SalesOrder?
+  retailOrder   RetailOrder?
+
+  invoices Invoice[]
+}
+
+model PurchaseOrder {
+  id         Int      @id @default(autoincrement())
+  orderId    Int      @unique
+  supplierId Int
+  dueDate    DateTime
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   supplier Supplier @relation(fields: [supplierId], references: [id])
 
-  shipments Shipment[]
-  invoices  Invoice[]
+  shipments        Shipment[]
+  purchaseInvoices PurchaseInvoice[]
+}
+
+model SalesOrder {
+  id            Int      @id @default(autoincrement())
+  orderId       Int      @unique
+  customerId    Int
+  customerName  String
+  paymentStatus String   @default("unpaid")
+  driverId      Int?
+  deliveryId    Int?
+
+  order    Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  customer Customer  @relation(fields: [customerId], references: [id])
+  driver   Driver?   @relation(fields: [driverId], references: [id])
+  delivery Delivery? @relation(fields: [deliveryId], references: [id])
+
+  salesInvoices     SalesInvoice[]
+  payments          Payment[]
+  customerFeedbacks CustomerFeedback[]
+}
+
+model RetailOrder {
+  id      Int @id @default(autoincrement())
+  orderId Int @unique
+  cartId  Int @unique
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  cart  Cart  @relation(fields: [cartId], references: [id])
 }
 
 model Supply {
@@ -284,24 +295,53 @@ model Supply {
 }
 
 model Invoice {
+  id            Int       @id @default(autoincrement())
+  invoiceNumber String    @unique
+  invoiceType   String    // "purchase" | "sales"
+  orderId       Int
+  invoiceDate   DateTime
+  dueDate       DateTime?
+  totalAmount   Float
+  status        String    @default("pending")
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  purchaseInvoice PurchaseInvoice?
+  salesInvoice    SalesInvoice?
+}
+
+model PurchaseInvoice {
   id              Int       @id @default(autoincrement())
-  invoiceNumber   String    @unique
+  invoiceId       Int       @unique
   purchaseOrderId Int
   supplierId      Int
-  invoiceDate     DateTime
-  dueDate         DateTime
   paidDate        DateTime?
-  totalAmount     Float
   paidAmount      Float?
   balance         Float?
-  status          String    @default("pending")
-  notes           String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
 
-  supplier Supplier @relation(fields: [supplierId], references: [id])
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  supplier      Supplier      @relation(fields: [supplierId], references: [id])
+}
 
-  order Order @relation(fields: [purchaseOrderId], references: [id])
+model SalesInvoice {
+  id              Int       @id @default(autoincrement())
+  invoiceId       Int       @unique
+  salesOrderId    Int?
+  customerId      Int
+  deliveryId      Int?
+  paymentMethod   String?
+  items           Json?
+  subtotal        Float?
+  collectedAmount Float?
+  collectedAt     DateTime?
+
+  invoice    Invoice    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
+  delivery   Delivery?  @relation(fields: [deliveryId], references: [id])
 }
 
 model Shipment {
@@ -318,7 +358,7 @@ model Shipment {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 
-  order Order @relation(fields: [purchaseOrderId], references: [id])
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
 }
 
 model Customer {
@@ -341,28 +381,6 @@ model Customer {
   customerFeedbacks CustomerFeedback[]
 }
 
-model SalesInvoice {
-  id              Int       @id @default(autoincrement())
-  invoiceNumber   String    @unique
-  customerId      Int
-  salesOrderId    Int?
-  deliveryId      Int?
-  date            DateTime
-  paymentMethod   String
-  items           Json
-  subtotal        Float
-  collectedAmount Float
-  collectedAt     DateTime?
-  status          String    @default("pending")
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
-
-  delivery Delivery? @relation(fields: [deliveryId], references: [id])
-
-}
-
 model Cart {
   id          Int      @id @default(autoincrement())
   items       Json
@@ -371,23 +389,12 @@ model Cart {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  smallOrder SmallOrder?
-}
-
-model SmallOrder {
-  id            Int      @id @default(autoincrement())
-  orderNumber   String   @unique
-  cartId        Int      @unique
-  status        String   @default("pending")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  cart Cart @relation(fields: [cartId], references: [id])
+  retailOrder RetailOrder?  // Renamed from smallOrder
 }
 
 model Payment {
   id            Int       @id @default(autoincrement())
-  salesOrderId     Int
+  salesOrderId  Int
   amount        Float
   paymentDate   DateTime
   paymentMethod String
@@ -395,5 +402,5 @@ model Payment {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  salesOrder SalesOrder? @relation(fields: [salesOrderId], references: [id])
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id])
 }
