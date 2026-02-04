@@ -14,40 +14,53 @@ router.get(
   asyncHandler(async (req, res) => {
     const payments = await prisma.payment.findMany({
       include: {
-        salesOrder: true,
+        salesOrder: {
+          include: {
+            order: true,
+            customer: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
     res.json(payments);
-  })
+  }),
 );
 
 /**
  * POST /api/payments
- * Create a new payment
+ * Create a new payment for a sales order
  */
 router.post(
   "/",
   asyncHandler(async (req, res) => {
     const paymentData = req.body;
 
-    const result = await prisma.$transaction(async (prisma) => {
-      const salesOrder = await prisma.salesOrder.findUnique({
+    const result = await prisma.$transaction(async (tx) => {
+      // Get the sales order with its base order
+      const salesOrder = await tx.salesOrder.findUnique({
         where: { id: paymentData.salesOrderId },
+        include: { order: true },
       });
 
       if (!salesOrder) {
         throw new Error("Sales order not found");
       }
 
-      if (paymentData.amount !== salesOrder.subtotal) {
+      // Check if payment amount matches order total
+      if (paymentData.amount !== salesOrder.order.totalAmount) {
         throw new Error("Payment amount must equal the full order amount");
       }
 
-      const newPayment = await prisma.payment.create({
+      // Create the payment
+      const newPayment = await tx.payment.create({
         data: paymentData,
       });
 
-      await prisma.salesOrder.update({
+      // Update sales order payment status
+      await tx.salesOrder.update({
         where: { id: paymentData.salesOrderId },
         data: {
           paymentStatus: "paid",
@@ -58,7 +71,7 @@ router.post(
     });
 
     res.status(201).json(result);
-  })
+  }),
 );
 
 /**
@@ -71,8 +84,8 @@ router.put(
     const id = parseInt(req.params.id, 10);
     const { status } = req.body;
 
-    const result = await prisma.$transaction(async (prisma) => {
-      const payment = await prisma.payment.findUnique({
+    const result = await prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.findUnique({
         where: { id },
       });
 
@@ -80,22 +93,31 @@ router.put(
         throw new Error("Payment not found");
       }
 
-      await prisma.salesOrder.update({
+      // Update sales order payment status
+      await tx.salesOrder.update({
         where: { id: payment.salesOrderId },
         data: { paymentStatus: status },
       });
 
-      const updatedPayment = await prisma.payment.update({
+      // Update payment
+      const updatedPayment = await tx.payment.update({
         where: { id },
         data: { status },
-        include: { salesOrder: true },
+        include: {
+          salesOrder: {
+            include: {
+              order: true,
+              customer: true,
+            },
+          },
+        },
       });
 
       return updatedPayment;
     });
 
     res.json(result);
-  })
+  }),
 );
 
 export default router;
