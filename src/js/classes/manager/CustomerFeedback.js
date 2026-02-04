@@ -31,7 +31,9 @@ export class CustomerFeedback extends LitElement {
       <div class="space-y-6">
         <div>
           <h3 class="manager-header-title">Customer Feedback</h3>
-          <p class="manager-header-subtitle">Review and respond to customer feedback</p>
+          <p class="manager-header-subtitle">
+            Review and respond to customer feedback
+          </p>
         </div>
         <div class="space-y-4">
           ${this.feedback.map(
@@ -40,14 +42,15 @@ export class CustomerFeedback extends LitElement {
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
                     <div class="flex items-center gap-3">
-                      <h4 class="font-semibold text-gray-900">${item.customer.name}</h4>
-                      <span class="text-xs text-gray-500">${new Date(item.createdAt).toLocaleDateString()}</span>
+                      <h4 class="font-semibold text-gray-900">
+                        ${item.customer.name}
+                      </h4>
                     </div>
                     <p class="text-gray-600 mt-2">${item.comment}</p>
                   </div>
                 </div>
               </div>
-            `
+            `,
           )}
         </div>
       </div>

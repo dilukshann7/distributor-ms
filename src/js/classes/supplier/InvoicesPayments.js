@@ -662,22 +662,6 @@ export class InvoicesPayments extends LitElement {
                 </button>
               </div>
             </div>
-
-            <!-- Timestamps -->
-            <div class="border-t border-gray-100 pt-8">
-              <div
-                class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600"
-              >
-                <div>
-                  <span class="font-medium">Created:</span>
-                  ${new Date(invoice.createdAt).toLocaleString()}
-                </div>
-                <div>
-                  <span class="font-medium">Last Updated:</span>
-                  ${new Date(invoice.updatedAt).toLocaleString()}
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- Footer Actions -->

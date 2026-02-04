@@ -46,7 +46,6 @@ export class DriverManagement extends LitElement {
                   <th class="dist-table-th">Vehicle</th>
                   <th class="dist-table-th">Current Route</th>
                   <th class="dist-table-th">Status</th>
-                  <th class="dist-table-th">Last Update</th>
                 </tr>
               </thead>
               <tbody>
@@ -100,11 +99,6 @@ export class DriverManagement extends LitElement {
                             .toUpperCase() +
                           (driver.user?.status || "inactive").slice(1)}
                         </span>
-                      </td>
-                      <td class="dist-table-td text-sm text-gray-600">
-                        ${new Date(
-                          driver.user?.updatedAt || Date.now(),
-                        ).toLocaleDateString()}
                       </td>
                     </tr>
                   `,

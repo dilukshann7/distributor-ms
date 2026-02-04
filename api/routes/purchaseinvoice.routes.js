@@ -32,7 +32,7 @@ router.get(
       },
       orderBy: {
         invoice: {
-          createdAt: "desc",
+          id: "desc",
         },
       },
     });

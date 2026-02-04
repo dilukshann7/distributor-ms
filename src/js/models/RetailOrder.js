@@ -47,9 +47,7 @@ export class RetailOrder {
       end.setHours(23, 59, 59, 999);
 
       const filteredOrders = allOrders.filter((retailOrder) => {
-        const orderDate = new Date(
-          retailOrder.order?.createdAt || retailOrder.createdAt,
-        );
+        const orderDate = new Date(retailOrder.order?.orderDate || new Date());
         return orderDate >= start && orderDate <= end;
       });
 
@@ -101,9 +99,7 @@ export class RetailOrder {
               retailOrder.cart?.totalAmount ||
               0,
           ),
-          formatDate(
-            new Date(retailOrder.order?.createdAt || retailOrder.createdAt),
-          ),
+          formatDate(new Date(retailOrder.order?.orderDate || new Date())),
         ]),
         {
           startY: yPos + 10,

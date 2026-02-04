@@ -28,7 +28,7 @@ export class smallOrder {
       end.setHours(23, 59, 59, 999);
 
       const filteredOrders = allOrders.filter((order) => {
-        const orderDate = new Date(order.createdAt);
+        const orderDate = new Date(order.order?.orderDate || order.orderDate);
         return orderDate >= start && orderDate <= end;
       });
 
@@ -37,7 +37,7 @@ export class smallOrder {
       const totalOrders = filteredOrders.length;
       const totalAmount = filteredOrders.reduce(
         (sum, order) => sum + parseFloat(order.cart?.totalAmount || 0),
-        0
+        0,
       );
 
       // Summary Section
@@ -53,7 +53,7 @@ export class smallOrder {
             value: `${formatDate(startDate)} - ${formatDate(endDate)}`,
           },
         ],
-        yPos
+        yPos,
       );
 
       // Detailed Table
@@ -68,7 +68,7 @@ export class smallOrder {
           order.id,
           order.cart.items.map((item) => item.productName).join(", "),
           formatCurrency(order.cart?.totalAmount || 0),
-          formatDate(new Date(order.createdAt)),
+          formatDate(new Date(order.order?.orderDate || order.orderDate)),
         ]),
         {
           startY: yPos + 10,
@@ -81,7 +81,7 @@ export class smallOrder {
             3: { cellWidth: 30, halign: "right" },
             4: { cellWidth: 30, halign: "center" },
           },
-        }
+        },
       );
 
       // Add Footer
@@ -89,8 +89,8 @@ export class smallOrder {
 
       doc.save(
         `small_order_report_${formatDate(startDate)}_to_${formatDate(
-          endDate
-        )}.pdf`
+          endDate,
+        )}.pdf`,
       );
     } catch (error) {
       console.error("Error exporting small order report:", error);

@@ -311,7 +311,6 @@ export class SalesTransaction extends LitElement {
                 <tr>
                   <th class="cashier-table-header">Order ID</th>
                   <th class="cashier-table-header">Amount</th>
-                  <th class="cashier-table-header">Time</th>
                   <th class="cashier-table-header">Status</th>
                 </tr>
               </thead>
@@ -330,12 +329,6 @@ export class SalesTransaction extends LitElement {
                               retailOrder.cart?.totalAmount ||
                               0
                             ).toFixed(2)}
-                          </td>
-                          <td class="cashier-table-cell text-gray-600">
-                            ${new Date(
-                              retailOrder.order?.createdAt ||
-                                retailOrder.createdAt,
-                            ).toLocaleString()}
                           </td>
                           <td class="cashier-table-cell">
                             <span

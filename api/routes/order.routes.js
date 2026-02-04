@@ -38,7 +38,7 @@ router.get(
         invoices: true,
       },
       orderBy: {
-        createdAt: "desc",
+        id: "desc",
       },
     });
     res.json(orders);

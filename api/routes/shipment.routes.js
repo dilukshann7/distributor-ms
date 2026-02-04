@@ -23,7 +23,7 @@ router.get(
         },
       },
       orderBy: {
-        createdAt: "desc",
+        id: "desc",
       },
     });
 

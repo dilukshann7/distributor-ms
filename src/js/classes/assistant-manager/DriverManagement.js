@@ -68,11 +68,6 @@ export class DriverManagement extends LitElement {
                   >
                     Status
                   </th>
-                  <th
-                    class="px-6 py-3 text-left text-sm font-semibold text-gray-700"
-                  >
-                    Last Update
-                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -87,7 +82,7 @@ export class DriverManagement extends LitElement {
                           <span
                             .innerHTML=${getIconHTML("phone").replace(
                               'class="w-5 h-5"',
-                              'class="w-4 h-4 text-gray-400"'
+                              'class="w-4 h-4 text-gray-400"',
                             )}
                           ></span>
                           ${driver.user?.phone || "N/A"}
@@ -101,7 +96,7 @@ export class DriverManagement extends LitElement {
                           <span
                             .innerHTML=${getIconHTML("map-pin").replace(
                               'class="w-5 h-5"',
-                              'class="w-4 h-4 text-amber-500"'
+                              'class="w-4 h-4 text-amber-500"',
                             )}
                           ></span>
                           ${driver.currentLocation || "Unknown"}
@@ -121,13 +116,8 @@ export class DriverManagement extends LitElement {
                           ).toUpperCase()}
                         </span>
                       </td>
-                      <td class="px-6 py-4 text-sm text-gray-600">
-                        ${driver.user?.updatedAt
-                          ? new Date(driver.user.updatedAt).toLocaleString()
-                          : "N/A"}
-                      </td>
                     </tr>
-                  `
+                  `,
                 )}
               </tbody>
             </table>

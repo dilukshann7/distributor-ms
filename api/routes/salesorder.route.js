@@ -31,7 +31,7 @@ router.get(
       },
       orderBy: {
         order: {
-          createdAt: "desc",
+          id: "desc",
         },
       },
     });

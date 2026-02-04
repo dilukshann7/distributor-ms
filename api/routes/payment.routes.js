@@ -22,7 +22,7 @@ router.get(
         },
       },
       orderBy: {
-        createdAt: "desc",
+        id: "desc",
       },
     });
     res.json(payments);

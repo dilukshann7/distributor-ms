@@ -63,11 +63,6 @@ export class DeliveryStockMaintenance extends LitElement {
                   >
                     Quantity
                   </th>
-                  <th
-                    class="px-6 py-3 text-left text-sm font-semibold text-gray-700"
-                  >
-                    Last Updated
-                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -86,11 +81,8 @@ export class DeliveryStockMaintenance extends LitElement {
                       <td class="px-6 py-4 text-sm text-gray-600">
                         ${item.quantity}
                       </td>
-                      <td class="px-6 py-4 text-sm text-gray-600">
-                        ${new Date(item.updatedAt).toLocaleString()}
-                      </td>
                     </tr>
-                  `
+                  `,
                 )}
               </tbody>
             </table>

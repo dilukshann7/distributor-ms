@@ -68,7 +68,6 @@ export class StockTracking extends LitElement {
                   <th class="dist-table-th">Product</th>
                   <th class="dist-table-th">Quantity</th>
                   <th class="dist-table-th">Location</th>
-                  <th class="dist-table-th">Last Updated</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -89,16 +88,13 @@ export class StockTracking extends LitElement {
                           class="text-orange-500"
                           .innerHTML=${getIconHTML("map-pin").replace(
                             "w-5 h-5",
-                            "w-4 h-4"
+                            "w-4 h-4",
                           )}
                         ></span>
                         ${item.location}
                       </td>
-                      <td class="dist-table-td text-gray-600 text-sm">
-                        ${new Date(item.updatedAt).toLocaleDateString()}
-                      </td>
                     </tr>
-                  `
+                  `,
                 )}
               </tbody>
             </table>
