@@ -381,20 +381,27 @@ export class ReceivingShipment extends LitElement {
     }
 
     return list.map(
-      (order) => html`
+      (purchaseOrder) => html`
         <div
           class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
         >
           <div class="flex items-start justify-between">
             <div class="flex-1">
-              <h4 class="font-semibold text-gray-800">Order #${order.id}</h4>
+              <h4 class="font-semibold text-gray-800">
+                Order #${purchaseOrder.order?.orderNumber || purchaseOrder.id}
+              </h4>
               <p class="text-sm sk-text-muted">
-                Order Date: ${new Date(order.orderDate).toLocaleDateString()}
+                Order Date:
+                ${new Date(
+                  purchaseOrder.order?.orderDate || purchaseOrder.orderDate,
+                ).toLocaleDateString()}
               </p>
               <p class="text-sm text-gray-600">
                 Items:
-                ${Array.isArray(order.items)
-                  ? order.items
+                ${Array.isArray(
+                  purchaseOrder.order?.items || purchaseOrder.items,
+                )
+                  ? (purchaseOrder.order?.items || purchaseOrder.items)
                       .filter((item) => item && item.name)
                       .map(
                         (item) =>
@@ -407,7 +414,11 @@ export class ReceivingShipment extends LitElement {
               </p>
               <p class="text-sm text-gray-600">
                 Total:
-                ${order.totalAmount.toLocaleString("en-US", {
+                ${(
+                  purchaseOrder.order?.totalAmount ||
+                  purchaseOrder.totalAmount ||
+                  0
+                ).toLocaleString("en-US", {
                   style: "currency",
                   currency: "LKR",
                 })}
@@ -420,7 +431,7 @@ export class ReceivingShipment extends LitElement {
                 Pending
               </span>
               <p class="text-sm text-gray-600 mt-2">
-                Due: ${new Date(order.dueDate).toLocaleDateString()}
+                Due: ${new Date(purchaseOrder.dueDate).toLocaleDateString()}
               </p>
             </div>
           </div>

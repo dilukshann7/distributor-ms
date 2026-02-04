@@ -9,6 +9,9 @@
     "server": "node ./api/server.js",
     "postinstall": "prisma generate"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "author": "Dilukshan Niranjan",
   "license": "MIT",
   "devDependencies": {
