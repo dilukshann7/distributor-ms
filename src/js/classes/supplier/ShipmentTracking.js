@@ -20,8 +20,9 @@ export class ShipmentTracking extends LitElement {
     try {
       const id = window.location.search.split("id=")[1];
       const response = await Shipment.getAll();
-      this.shipments = response.data.filter(
-        (shipment) => shipment.supplierId === Number(id)
+      const shipments = response.data?.data || response.data || [];
+      this.shipments = shipments.filter(
+        (shipment) => shipment.supplierId === Number(id),
       );
       this.requestUpdate();
     } catch (error) {
@@ -35,7 +36,9 @@ export class ShipmentTracking extends LitElement {
       <div class="space-y-6">
         <div>
           <h3 class="section-header">Shipment Tracking</h3>
-          <p class="section-subtitle">Track all shipments and delivery status</p>
+          <p class="section-subtitle">
+            Track all shipments and delivery status
+          </p>
         </div>
 
         <div class="card-container">
@@ -55,44 +58,48 @@ export class ShipmentTracking extends LitElement {
                 </tr>
               </thead>
               <tbody>
-                ${this.shipments
-                  .map(
-                    (shipment) => html`
-                  <tr class="table-row">
-                    <td class="table-cell-bold">${shipment.id}</td>
-                    <td class="px-6 py-4 text-sm text-indigo-600 font-medium">${
-                      shipment.purchaseOrderId
-                    }</td>
-                    <td class="table-cell">
-                      ${shipment.order.items
-                        .map((item) => `${item.name} (x${item.quantity})`)
-                        .join(", ")}
-                    </td>
-                    <td class="table-cell">${shipment.carrier}</td>
-                    <td class="table-cell">${new Date(
-                      shipment.expectedDeliveryDate
-                    ).toLocaleDateString()}</td>
-                    <td class="table-cell">
-                      <span class="status-badge ${
-                        shipment.status === "received"
-                          ? "status-green"
-                          : shipment.status === "in-transit"
-                          ? "status-blue"
-                          : "status-yellow"
-                      }">
-                        ${
-                          shipment.status === "received"
+                ${this.shipments.map(
+                  (shipment) => html`
+                    <tr class="table-row">
+                      <td class="table-cell-bold">${shipment.id}</td>
+                      <td class="px-6 py-4 text-sm text-indigo-600 font-medium">
+                        ${shipment.purchaseOrderId}
+                      </td>
+                      <td class="table-cell">
+                        ${shipment.purchaseOrder?.order?.items &&
+                        Array.isArray(shipment.purchaseOrder.order.items)
+                          ? shipment.purchaseOrder.order.items
+                              .map((item) => `${item.name} (x${item.quantity})`)
+                              .join(", ")
+                          : "No items"}
+                      </td>
+                      <td class="table-cell">${shipment.carrier || "N/A"}</td>
+                      <td class="table-cell">
+                        ${shipment.expectedDeliveryDate &&
+                        !isNaN(new Date(shipment.expectedDeliveryDate))
+                          ? new Date(
+                              shipment.expectedDeliveryDate,
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </td>
+                      <td class="table-cell">
+                        <span
+                          class="status-badge ${shipment.status === "received"
+                            ? "status-green"
+                            : shipment.status === "in-transit"
+                              ? "status-blue"
+                              : "status-yellow"}"
+                        >
+                          ${shipment.status === "received"
                             ? "Delivered"
                             : shipment.status === "in-transit"
-                            ? "In Transit"
-                            : "Preparing"
-                        }
-                      </span>
-                    </td>
-                    
-                  </tr>
-                `
-                  )}
+                              ? "In Transit"
+                              : "Preparing"}
+                        </span>
+                      </td>
+                    </tr>
+                  `,
+                )}
               </tbody>
             </table>
           </div>

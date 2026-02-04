@@ -64,10 +64,6 @@ export class PurchaseOrders extends LitElement {
     const rawData = Object.fromEntries(formData.entries());
 
     const orderData = {
-      customerId: parseInt(rawData.customerId, 10),
-      orderDate: new Date(rawData.orderDate).toISOString(),
-      dueDate: new Date(rawData.dueDate).toISOString(),
-      totalAmount: parseFloat(rawData.totalAmount),
       status: rawData.status,
     };
 
@@ -169,34 +165,47 @@ export class PurchaseOrders extends LitElement {
                     <tr class="table-row">
                       <td class="table-cell-bold">${order.id}</td>
                       <td class="table-cell">
-                        ${new Date(order.orderDate).toISOString().split("T")[0]}
+                        ${order.order?.orderDate &&
+                        !isNaN(new Date(order.order.orderDate))
+                          ? new Date(order.order.orderDate)
+                              .toISOString()
+                              .split("T")[0]
+                          : "N/A"}
                       </td>
                       <td class="table-cell-bold">
-                        ${order.items
-                          .map((i) => `${i.name} (${i.quantity})`)
-                          .join(", ")}
+                        ${order.order?.items && Array.isArray(order.order.items)
+                          ? order.order.items
+                              .map((i) => `${i.name} (${i.quantity})`)
+                              .join(", ")
+                          : "No items"}
                       </td>
                       <td class="table-cell">
-                        ${order.totalAmount.toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "LKR",
-                        })}
+                        ${order.order?.totalAmount != null
+                          ? order.order.totalAmount.toLocaleString("en-US", {
+                              style: "currency",
+                              currency: "LKR",
+                            })
+                          : "N/A"}
                       </td>
                       <td class="table-cell">
-                        ${new Date(order.dueDate).toISOString().split("T")[0]}
+                        ${order.dueDate && !isNaN(new Date(order.dueDate))
+                          ? new Date(order.dueDate).toISOString().split("T")[0]
+                          : "N/A"}
                       </td>
                       <td class="table-cell">
                         <span
-                          class="status-badge ${this.getStatusColor(
-                            order.status,
-                          )}"
+                          class="status-badge ${order.order?.status
+                            ? this.getStatusColor(order.order.status)
+                            : "bg-gray-100 text-gray-800"}"
                         >
-                          ${order.status.charAt(0).toUpperCase() +
-                          order.status.slice(1)}
+                          ${order.order?.status
+                            ? order.order.status.charAt(0).toUpperCase() +
+                              order.order.status.slice(1)
+                            : "Unknown"}
                         </span>
                       </td>
                       <td class="table-cell gap-2">
-                        ${order.status === "pending"
+                        ${order.order?.status === "pending"
                           ? html`
                               <button
                                 class="btn-action text-blue-600"
@@ -234,8 +243,10 @@ export class PurchaseOrders extends LitElement {
       <div class="max-w-4xl mx-auto animate-fade-in">
         <div class="flex items-center justify-between mb-8">
           <div>
-            <h3 class="section-header">Edit Purchase Order</h3>
-            <p class="section-subtitle">Update order information</p>
+            <h3 class="section-header">Update Order Status</h3>
+            <p class="section-subtitle">
+              Change the status of this purchase order
+            </p>
           </div>
         </div>
 
@@ -245,6 +256,47 @@ export class PurchaseOrders extends LitElement {
           @submit=${this.submitEditForm}
         >
           <div class="p-8 space-y-8">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 class="text-sm font-semibold text-blue-900 mb-2">
+                Order Details
+              </h4>
+              <div class="text-sm text-blue-800 space-y-1">
+                <p><strong>Order ID:</strong> ${order.id}</p>
+                <p>
+                  <strong>Order Date:</strong>
+                  ${order.order?.orderDate &&
+                  !isNaN(new Date(order.order.orderDate))
+                    ? new Date(order.order.orderDate)
+                        .toISOString()
+                        .split("T")[0]
+                    : "N/A"}
+                </p>
+                <p>
+                  <strong>Due Date:</strong>
+                  ${order.dueDate && !isNaN(new Date(order.dueDate))
+                    ? new Date(order.dueDate).toISOString().split("T")[0]
+                    : "N/A"}
+                </p>
+                <p>
+                  <strong>Total Amount:</strong>
+                  ${order.order?.totalAmount != null
+                    ? order.order.totalAmount.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "LKR",
+                      })
+                    : "N/A"}
+                </p>
+                <p>
+                  <strong>Items:</strong>
+                  ${order.order?.items && Array.isArray(order.order.items)
+                    ? order.order.items
+                        .map((i) => `${i.name} (${i.quantity})`)
+                        .join(", ")
+                    : "No items"}
+                </p>
+              </div>
+            </div>
+
             <div>
               <h4
                 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
@@ -253,138 +305,44 @@ export class PurchaseOrders extends LitElement {
                   class="w-5 h-5 text-indigo-600"
                   .innerHTML=${getIconHTML("shopping-bag")}
                 ></span>
-                Order Details
+                Update Status
               </h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700"
-                    >Order ID</label
+              <div class="space-y-2">
+                <label class="text-sm font-medium text-gray-700"
+                  >Order Status</label
+                >
+                <select name="status" class="input-field" required>
+                  <option
+                    value="pending"
+                    ?selected=${order.order?.status === "pending"}
                   >
-                  <input
-                    type="text"
-                    class="input-field bg-gray-100"
-                    value="${order.id}"
-                    disabled
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700"
-                    >Customer ID</label
+                    Pending
+                  </option>
+                  <option
+                    value="confirmed"
+                    ?selected=${order.order?.status === "confirmed"}
                   >
-                  <input
-                    type="number"
-                    name="customerId"
-                    required
-                    class="input-field"
-                    value="${order.customerId}"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700"
-                    >Order Date</label
+                    Confirmed
+                  </option>
+                  <option
+                    value="shipped"
+                    ?selected=${order.order?.status === "shipped"}
                   >
-                  <input
-                    type="date"
-                    name="orderDate"
-                    required
-                    class="input-field"
-                    value="${new Date(order.orderDate)
-                      .toISOString()
-                      .split("T")[0]}"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700"
-                    >Due Date</label
+                    Shipped
+                  </option>
+                  <option
+                    value="delivered"
+                    ?selected=${order.order?.status === "delivered"}
                   >
-                  <input
-                    type="date"
-                    name="dueDate"
-                    required
-                    class="input-field"
-                    value="${new Date(order.dueDate)
-                      .toISOString()
-                      .split("T")[0]}"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700"
-                    >Total Amount (LKR)</label
+                    Delivered
+                  </option>
+                  <option
+                    value="cancelled"
+                    ?selected=${order.order?.status === "cancelled"}
                   >
-                  <div class="relative">
-                    <input
-                      type="number"
-                      name="totalAmount"
-                      required
-                      min="0"
-                      step="0.01"
-                      class="input-field pl-12"
-                      value="${order.totalAmount}"
-                    />
-                  </div>
-                </div>
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700"
-                    >Status</label
-                  >
-                  <select name="status" class="input-field">
-                    <option
-                      value="pending"
-                      ?selected=${order.status === "pending"}
-                    >
-                      Pending
-                    </option>
-                    <option
-                      value="confirmed"
-                      ?selected=${order.status === "confirmed"}
-                    >
-                      Confirmed
-                    </option>
-                    <option
-                      value="shipped"
-                      ?selected=${order.status === "shipped"}
-                    >
-                      Shipped
-                    </option>
-                    <option
-                      value="delivered"
-                      ?selected=${order.status === "delivered"}
-                    >
-                      Delivered
-                    </option>
-                    <option
-                      value="cancelled"
-                      ?selected=${order.status === "cancelled"}
-                    >
-                      Cancelled
-                    </option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div class="border-t border-gray-100 pt-8">
-              <h4
-                class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2"
-              >
-                <span
-                  class="w-5 h-5 text-indigo-600"
-                  .innerHTML=${getIconHTML("package")}
-                ></span>
-                Order Items
-              </h4>
-              <div class="bg-gray-50 p-4 rounded-lg">
-                <p class="text-sm text-gray-600 mb-2">Current Items:</p>
-                <ul class="list-disc list-inside text-sm text-gray-700">
-                  ${order.items.map(
-                    (item) =>
-                      html`<li>${item.name} - Quantity: ${item.quantity}</li>`,
-                  )}
-                </ul>
-                <p class="text-xs text-gray-500 mt-2">
-                  Note: Item editing not available. Cancel and create a new
-                  order if items need to be changed.
-                </p>
+                    Cancelled
+                  </option>
+                </select>
               </div>
             </div>
           </div>
@@ -401,7 +359,7 @@ export class PurchaseOrders extends LitElement {
             </button>
             <button type="submit" class="btn-primary flex items-center gap-2">
               <span .innerHTML=${getIconHTML("check-circle")}></span>
-              Update Order
+              Update Status
             </button>
           </div>
         </form>
@@ -436,20 +394,29 @@ export class PurchaseOrders extends LitElement {
                 <p><strong>Order ID:</strong> ${order.id}</p>
                 <p>
                   <strong>Order Date:</strong>
-                  ${new Date(order.orderDate).toISOString().split("T")[0]}
+                  ${order.order?.orderDate &&
+                  !isNaN(new Date(order.order.orderDate))
+                    ? new Date(order.order.orderDate)
+                        .toISOString()
+                        .split("T")[0]
+                    : "N/A"}
                 </p>
                 <p>
                   <strong>Total Amount:</strong>
-                  ${order.totalAmount.toLocaleString("en-US", {
-                    style: "currency",
-                    currency: "LKR",
-                  })}
+                  ${order.order?.totalAmount != null
+                    ? order.order.totalAmount.toLocaleString("en-US", {
+                        style: "currency",
+                        currency: "LKR",
+                      })
+                    : "N/A"}
                 </p>
                 <p>
                   <strong>Items:</strong>
-                  ${order.items
-                    .map((i) => `${i.name} (${i.quantity})`)
-                    .join(", ")}
+                  ${order.order?.items && Array.isArray(order.order.items)
+                    ? order.order.items
+                        .map((i) => `${i.name} (${i.quantity})`)
+                        .join(", ")
+                    : "No items"}
                 </p>
               </div>
             </div>
