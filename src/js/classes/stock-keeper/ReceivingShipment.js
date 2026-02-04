@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import { Shipment } from "../../models/Shipment.js";
-import { Order } from "../../models/Order.js";
+import { PurchaseOrder } from "../../models/PurchaseOrder.js";
 import { Supplier } from "../../models/Supplier.js";
 import { Supply } from "../../models/Supply.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
@@ -41,9 +41,9 @@ export class ReceivingShipment extends LitElement {
 
   async getOrders() {
     try {
-      const response = await Order.getAll();
+      const response = await PurchaseOrder.getAll();
       this.orders =
-        response.data.filter((order) => order.status === "pending") || [];
+        response.data.filter((po) => po.order?.status === "pending") || [];
       this.requestUpdate();
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -78,7 +78,7 @@ export class ReceivingShipment extends LitElement {
       const response = await Shipment.getAll();
       this.shipments = {
         in_transit: response.data.filter(
-          (s) => s.status === "in_transit" || s.status === "pending"
+          (s) => s.status === "in_transit" || s.status === "pending",
         ),
         received: response.data.filter((s) => s.status === "received"),
       };
@@ -201,7 +201,7 @@ export class ReceivingShipment extends LitElement {
       .filter((item) => item.productId && item.quantity > 0)
       .map((item) => {
         const product = this.products.find(
-          (p) => p.id === parseInt(item.productId)
+          (p) => p.id === parseInt(item.productId),
         );
         return {
           name: product ? product.name : "Unknown Product",
@@ -218,6 +218,7 @@ export class ReceivingShipment extends LitElement {
 
     const orderData = {
       supplierId: parseInt(formData.get("supplierId")),
+      orderNumber: `PO-${Date.now()}`,
       orderDate: new Date(formData.get("orderDate")).toISOString(),
       dueDate: new Date(formData.get("dueDate")).toISOString(),
       totalAmount: this.calculatedTotal,
@@ -225,7 +226,7 @@ export class ReceivingShipment extends LitElement {
       items: items,
     };
 
-    Order.create(orderData)
+    PurchaseOrder.create(orderData)
       .then(() => {
         return Promise.all([this.getShipments(), this.getOrders()]);
       })
@@ -233,8 +234,8 @@ export class ReceivingShipment extends LitElement {
         this.switchToList();
       })
       .catch((error) => {
-        console.error("Error creating order:", error);
-        alert("Failed to create order. Please try again.");
+        console.error("Error creating purchase order:", error);
+        alert("Failed to create purchase order. Please try again.");
       });
   }
 
@@ -277,7 +278,7 @@ export class ReceivingShipment extends LitElement {
                   <span .innerHTML=${getIconHTML(tab.icon)}></span>
                   ${tab.label}
                 </button>
-              `
+              `,
             )}
           </div>
 
@@ -322,7 +323,7 @@ export class ReceivingShipment extends LitElement {
                     (item) =>
                       `${item.name}${
                         item.quantity ? ` (x${item.quantity})` : ""
-                      }`
+                      }`,
                   )
                   .join(", ") || "No items"}
               </p>
@@ -331,7 +332,7 @@ export class ReceivingShipment extends LitElement {
                     <p class="text-sm text-gray-500 mt-1">
                       Expected:
                       ${new Date(
-                        shipment.expectedDeliveryDate
+                        shipment.expectedDeliveryDate,
                       ).toLocaleDateString()}
                     </p>
                   `
@@ -342,7 +343,7 @@ export class ReceivingShipment extends LitElement {
                 ? html`<p class="text-sm text-green-600 font-medium">
                     Received:
                     ${new Date(
-                      shipment.actualDeliveryDate
+                      shipment.actualDeliveryDate,
                     ).toLocaleDateString()}
                   </p>`
                 : html`<p class="text-sm text-indigo-600 font-medium">
@@ -357,7 +358,7 @@ export class ReceivingShipment extends LitElement {
                       <span
                         .innerHTML=${getIconHTML("check-circle").replace(
                           'class="w-5 h-5"',
-                          'class="w-4 h-4"'
+                          'class="w-4 h-4"',
                         )}
                       ></span>
                       Mark as Received
@@ -367,7 +368,7 @@ export class ReceivingShipment extends LitElement {
             </div>
           </div>
         </div>
-      `
+      `,
     );
   }
 
@@ -399,7 +400,7 @@ export class ReceivingShipment extends LitElement {
                         (item) =>
                           `${item.name}${
                             item.quantity ? ` (x${item.quantity})` : ""
-                          }`
+                          }`,
                       )
                       .join(", ")
                   : "No items"}
@@ -424,14 +425,14 @@ export class ReceivingShipment extends LitElement {
             </div>
           </div>
         </div>
-      `
+      `,
     );
   }
 
   renderAddForm() {
     const availableProducts = this.selectedSupplierId
       ? this.products.filter(
-          (p) => p.supplierId === parseInt(this.selectedSupplierId)
+          (p) => p.supplierId === parseInt(this.selectedSupplierId),
         )
       : [];
 
@@ -476,7 +477,7 @@ export class ReceivingShipment extends LitElement {
                           supplier.user?.name ||
                           "Supplier " + supplier.id}
                         </option>
-                      `
+                      `,
                     )}
                   </select>
                 </div>
@@ -537,7 +538,7 @@ export class ReceivingShipment extends LitElement {
                             @change=${(e) =>
                               this.handleItemProductChange(
                                 index,
-                                e.target.value
+                                e.target.value,
                               )}
                             .value=${item.productId}
                             ?disabled=${!this.selectedSupplierId}
@@ -550,7 +551,7 @@ export class ReceivingShipment extends LitElement {
                             ${availableProducts.map(
                               (p) => html`
                                 <option value="${p.id}">${p.name}</option>
-                              `
+                              `,
                             )}
                           </select>
                         </div>
@@ -565,7 +566,7 @@ export class ReceivingShipment extends LitElement {
                             @input=${(e) =>
                               this.handleItemQuantityChange(
                                 index,
-                                e.target.value
+                                e.target.value,
                               )}
                             .value=${item.quantity}
                           />
@@ -609,7 +610,7 @@ export class ReceivingShipment extends LitElement {
                             `
                           : ""}
                       </div>
-                    `
+                    `,
                   )}
                 </div>
                 <button

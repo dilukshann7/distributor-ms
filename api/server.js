@@ -15,7 +15,11 @@ import taskRoutes from "./routes/task.routes.js";
 import salesOrderRoutes from "./routes/salesorder.route.js";
 import cartRoutes from "./routes/carts.route.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
-import smallOrderRoutes from "./routes/smallorder.route.js";
+// New routes for Class Table Inheritance
+import purchaseOrderRoutes from "./routes/purchaseorder.routes.js";
+import retailOrderRoutes from "./routes/retailorder.routes.js";
+import purchaseInvoiceRoutes from "./routes/purchaseinvoice.routes.js";
+import salesInvoiceRoutes from "./routes/salesinvoice.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,7 +44,12 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api", analyticsRoutes);
 app.use("/api/sales-orders", salesOrderRoutes);
 app.use("/api/carts", cartRoutes);
-app.use("/api/small-orders", smallOrderRoutes);
+// Order hierarchy routes
+app.use("/api/purchase-orders", purchaseOrderRoutes);
+app.use("/api/retail-orders", retailOrderRoutes);
+// Invoice hierarchy routes
+app.use("/api/purchase-invoices", purchaseInvoiceRoutes);
+app.use("/api/sales-invoices", salesInvoiceRoutes);
 
 import path from "path";
 import { fileURLToPath } from "url";
