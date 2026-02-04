@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { smallOrder } from "../../models/SmallOrder";
+import { RetailOrder } from "../../models/RetailOrder.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class FinancialReports extends LitElement {
@@ -38,9 +38,9 @@ export class FinancialReports extends LitElement {
     }
 
     try {
-      await smallOrder.exportSmallOrderReport(
+      await RetailOrder.exportRetailOrderReport(
         new Date(this.startDate),
-        new Date(this.endDate)
+        new Date(this.endDate),
       );
       alert("PDF exported successfully");
     } catch (error) {

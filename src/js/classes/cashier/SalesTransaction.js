@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import { Cart } from "../../models/Cart.js";
-import { smallOrder } from "../../models/SmallOrder.js";
+import { RetailOrder } from "../../models/RetailOrder.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 import { Product } from "../../models/Product.js";
 
@@ -9,7 +9,7 @@ export class SalesTransaction extends LitElement {
     cartItems: { type: Array },
     products: { type: Array },
     selectedProduct: { type: Object },
-    smallOrder: { type: Array },
+    retailOrders: { type: Array },
   };
 
   constructor() {
@@ -17,8 +17,8 @@ export class SalesTransaction extends LitElement {
     this.cartItems = [];
     this.products = [];
     this.selectedProduct = null;
-    this.smallOrder = null;
-    this.getSmallOrder();
+    this.retailOrders = null;
+    this.getRetailOrders();
     this.getProducts();
   }
 
@@ -40,28 +40,28 @@ export class SalesTransaction extends LitElement {
     }
   }
 
-  async getSmallOrder() {
+  async getRetailOrders() {
     try {
-      const response = await smallOrder.getAll();
+      const response = await RetailOrder.getAll();
 
       if (response.data && response.data.length > 0) {
         const completedOrders = response.data.filter(
-          (order) => order.status === "completed"
+          (order) => order.order?.status === "completed",
         );
-        this.smallOrder = completedOrders.length > 0 ? completedOrders : null;
+        this.retailOrders = completedOrders.length > 0 ? completedOrders : null;
       } else {
-        this.smallOrder = null;
+        this.retailOrders = null;
       }
     } catch (error) {
-      console.error("Error fetching small order:", error);
-      this.smallOrder = null;
+      console.error("Error fetching retail orders:", error);
+      this.retailOrders = null;
     }
   }
 
   handleProductChange(e) {
     const selectedProductName = e.target.value;
     this.selectedProduct = this.products.find(
-      (p) => p.name === selectedProductName
+      (p) => p.name === selectedProductName,
     );
     this.requestUpdate();
   }
@@ -98,7 +98,7 @@ export class SalesTransaction extends LitElement {
     const total = parseFloat(this.getTotalPrice());
 
     const existingItem = this.cartItems.find(
-      (item) => item.name === this.selectedProduct.name
+      (item) => item.name === this.selectedProduct.name,
     );
     if (existingItem) {
       existingItem.quantity += quantity;
@@ -133,7 +133,7 @@ export class SalesTransaction extends LitElement {
     try {
       const subtotal = this.cartItems.reduce(
         (sum, item) => sum + item.total,
-        0
+        0,
       );
       const tax = subtotal * 0.1;
       const totalAmount = subtotal + tax;
@@ -147,19 +147,19 @@ export class SalesTransaction extends LitElement {
       const cartResponse = await Cart.create(cartData);
       const createdCart = cartResponse.data;
 
-      const orderNumber = `ORD-${Date.now()}`;
+      const orderNumber = `RO-${Date.now()}`;
       const orderData = {
         orderNumber: orderNumber,
         cartId: createdCart.id,
         status: "completed",
       };
 
-      await smallOrder.create(orderData);
+      await RetailOrder.create(orderData);
 
       alert(`Order ${orderNumber} created successfully!`);
 
       this.cartItems = [];
-      await this.getSmallOrder();
+      await this.getRetailOrders();
       this.requestUpdate();
     } catch (error) {
       console.error("Error processing payment:", error);
@@ -192,7 +192,7 @@ export class SalesTransaction extends LitElement {
                     (product) =>
                       html`<option value="${product.name}">
                         ${product.name}
-                      </option>`
+                      </option>`,
                   )}
                 </select>
               </div>
@@ -294,7 +294,7 @@ export class SalesTransaction extends LitElement {
                         </button>
                       </td>
                     </tr>
-                  `
+                  `,
                 )}
               </tbody>
             </table>
@@ -316,32 +316,53 @@ export class SalesTransaction extends LitElement {
                 </tr>
               </thead>
               <tbody>
-                ${this.smallOrder && this.smallOrder.length > 0
-                  ? this.smallOrder.map(
-                      (order) => html`
+                ${this.retailOrders && this.retailOrders.length > 0
+                  ? this.retailOrders.map(
+                      (retailOrder) => html`
                         <tr class="cashier-table-row">
-                          <td class="cashier-table-cell">${order.cart.id}</td>
+                          <td class="cashier-table-cell">
+                            ${retailOrder.order?.orderNumber || retailOrder.id}
+                          </td>
                           <td class="cashier-table-cell font-semibold">
-                            Rs. ${order.cart.totalAmount.toFixed(2)}
+                            Rs.
+                            ${(
+                              retailOrder.order?.totalAmount ||
+                              retailOrder.cart?.totalAmount ||
+                              0
+                            ).toFixed(2)}
                           </td>
                           <td class="cashier-table-cell text-gray-600">
-                            ${new Date(order.createdAt).toLocaleString()}
+                            ${new Date(
+                              retailOrder.order?.createdAt ||
+                                retailOrder.createdAt,
+                            ).toLocaleString()}
                           </td>
                           <td class="cashier-table-cell">
                             <span
-                              class="cashier-badge ${order.status ===
-                              "completed"
+                              class="cashier-badge ${(retailOrder.order
+                                ?.status || retailOrder.status) === "completed"
                                 ? "cashier-badge-success"
-                                : order.status === "pending"
-                                ? "cashier-badge-warning"
-                                : "cashier-badge-error"}"
+                                : (retailOrder.order?.status ||
+                                      retailOrder.status) === "pending"
+                                  ? "cashier-badge-warning"
+                                  : "cashier-badge-error"}"
                             >
-                              ${order.status.charAt(0).toUpperCase() +
-                              order.status.slice(1)}
+                              ${(
+                                retailOrder.order?.status ||
+                                retailOrder.status ||
+                                ""
+                              )
+                                .charAt(0)
+                                .toUpperCase() +
+                              (
+                                retailOrder.order?.status ||
+                                retailOrder.status ||
+                                ""
+                              ).slice(1)}
                             </span>
                           </td>
                         </tr>
-                      `
+                      `,
                     )
                   : html`<tr>
                       <td
