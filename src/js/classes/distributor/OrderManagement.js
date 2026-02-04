@@ -79,38 +79,46 @@ export class OrderManagement extends LitElement {
                 (order) => html`
                   <tr class="hover:bg-gray-50 transition-colors">
                     <td class="dist-table-td font-semibold text-gray-800">
-                      ${order.orderNumber}
+                      ${order.order?.orderNumber || "N/A"}
                     </td>
                     <td class="dist-table-td text-gray-700">
                       ${order.customerName}
                     </td>
                     <td class="dist-table-td text-gray-700">
-                      ${order.items
+                      ${order.order?.items
                         ?.filter((item) => item && item.name)
                         .map(
                           (item) =>
                             `${item.name}${
                               item.quantity ? ` (x${item.quantity})` : ""
-                            }`
+                            }`,
                         )
                         .join(", ") || "No items"}
                     </td>
                     <td class="dist-table-td font-semibold text-gray-800">
-                      Rs. ${order.subtotal}
+                      Rs. ${order.order?.totalAmount || 0}
                     </td>
                     <td class="dist-table-td">
                       <span
-                        class="dist-badge ${this.getStatusColor(order.status)}"
+                        class="dist-badge ${this.getStatusColor(
+                          order.order?.status || "pending",
+                        )}"
                       >
-                        ${order.status.charAt(0).toUpperCase() +
-                        order.status.slice(1).replace("-", " ")}
+                        ${(order.order?.status || "pending")
+                          .charAt(0)
+                          .toUpperCase() +
+                        (order.order?.status || "pending")
+                          .slice(1)
+                          .replace("-", " ")}
                       </span>
                     </td>
                     <td class="dist-table-td text-gray-600">
-                      ${new Date(order.orderDate).toLocaleDateString()}
+                      ${new Date(
+                        order.order?.orderDate || Date.now(),
+                      ).toLocaleDateString()}
                     </td>
                   </tr>
-                `
+                `,
               )}
             </tbody>
           </table>

@@ -58,7 +58,7 @@ export class DriverManagement extends LitElement {
                       <td
                         class="dist-table-td text-sm font-medium text-gray-800"
                       >
-                        ${driver.user.name}
+                        ${driver.user?.name || "N/A"}
                       </td>
                       <td
                         class="dist-table-td text-sm text-gray-600 flex items-center gap-2"
@@ -67,14 +67,14 @@ export class DriverManagement extends LitElement {
                           class="text-gray-400"
                           .innerHTML=${getIconHTML("phone").replace(
                             "w-5 h-5",
-                            "w-4 h-4"
+                            "w-4 h-4",
                           )}
                         >
                         </span>
-                        ${driver.user.phone}
+                        ${driver.user?.phone || "N/A"}
                       </td>
                       <td class="dist-table-td text-sm text-gray-600">
-                        ${driver.licenseNumber}
+                        ${driver.licenseNumber || "N/A"}
                       </td>
                       <td
                         class="dist-table-td text-sm text-gray-600 flex items-center gap-2"
@@ -83,30 +83,31 @@ export class DriverManagement extends LitElement {
                           class="text-amber-500"
                           .innerHTML=${getIconHTML("map-pin").replace(
                             "w-5 h-5",
-                            "w-4 h-4"
+                            "w-4 h-4",
                           )}
                         >
-                        ${driver.currentLocation}
+                        </span>
+                        ${driver.currentLocation || "N/A"}
                       </td>
                       <td class="dist-table-td">
                         <span
-                          class="dist-badge ${
-                            driver.user.status === "active"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                          }"
+                          class="dist-badge ${driver.user?.status === "active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"}"
                         >
-                          ${
-                            driver.user.status.charAt(0).toUpperCase() +
-                            driver.user.status.slice(1)
-                          }
+                          ${(driver.user?.status || "inactive")
+                            .charAt(0)
+                            .toUpperCase() +
+                          (driver.user?.status || "inactive").slice(1)}
                         </span>
                       </td>
                       <td class="dist-table-td text-sm text-gray-600">
-                        ${new Date(driver.user.updatedAt).toLocaleDateString()}
+                        ${new Date(
+                          driver.user?.updatedAt || Date.now(),
+                        ).toLocaleDateString()}
                       </td>
                     </tr>
-                  `
+                  `,
                 )}
               </tbody>
             </table>

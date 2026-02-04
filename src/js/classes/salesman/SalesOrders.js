@@ -89,7 +89,7 @@ export class SalesOrders extends LitElement {
   deleteOrder(orderId) {
     if (
       confirm(
-        "Are you sure you want to delete this order? This action cannot be undone."
+        "Are you sure you want to delete this order? This action cannot be undone.",
       )
     ) {
       SalesOrder.delete(orderId)
@@ -200,7 +200,7 @@ export class SalesOrders extends LitElement {
       paymentStatus: "unpaid",
       notes: formData.get("notes") || null,
       items: items,
-      subtotal: this.calculatedTotal,
+      totalAmount: this.calculatedTotal,
     };
 
     SalesOrder.create(orderData)
@@ -292,30 +292,61 @@ export class SalesOrders extends LitElement {
                 (order) => html`
                   <tr class="sm-table-row">
                     <td class="sm-table-cell-main">${order.id}</td>
-                    <td class="sm-table-cell">${order.customerName}</td>
                     <td class="sm-table-cell">
-                      ${new Date(order.orderDate).toLocaleDateString()}
+                      ${order.customerName || "N/A"}
                     </td>
                     <td class="sm-table-cell">
-                      ${order.items
+                      ${order.order?.orderDate &&
+                      !isNaN(new Date(order.order.orderDate))
+                        ? new Date(order.order.orderDate).toLocaleDateString()
+                        : order.orderDate && !isNaN(new Date(order.orderDate))
+                          ? new Date(order.orderDate).toLocaleDateString()
+                          : "N/A"}
+                    </td>
+                    <td class="sm-table-cell">
+                      ${order.order?.items
                         ?.filter((item) => item && item.name)
                         .map(
                           (item) =>
                             `${item.name}${
                               item.quantity ? ` (x${item.quantity})` : ""
-                            }`
+                            }`,
                         )
-                        .join(", ") || "No items"}
+                        .join(", ") ||
+                      order.items
+                        ?.filter((item) => item && item.name)
+                        .map(
+                          (item) =>
+                            `${item.name}${
+                              item.quantity ? ` (x${item.quantity})` : ""
+                            }`,
+                        )
+                        .join(", ") ||
+                      "No items"}
                     </td>
                     <td class="sm-table-cell font-semibold text-gray-900">
-                      Rs. ${order.subtotal.toLocaleString()}
+                      Rs.
+                      ${(
+                        order.order?.totalAmount ||
+                        order.subtotal ||
+                        order.totalAmount ||
+                        0
+                      ).toLocaleString()}
                     </td>
                     <td class="px-6 py-4">
                       <span
-                        class="sm-badge ${this.getStatusColor(order.status)}"
+                        class="sm-badge ${this.getStatusColor(
+                          order.order?.status || order.status || "pending",
+                        )}"
                       >
-                        ${order.status.charAt(0).toUpperCase() +
-                        order.status.slice(1)}
+                        ${(order.order?.status || order.status || "pending")
+                          .charAt(0)
+                          .toUpperCase() +
+                        (
+                          order.order?.status ||
+                          order.status ||
+                          "pending"
+                        ).slice(1)}
                       </span>
                     </td>
                     <td class="px-6 py-4 flex gap-2">
@@ -327,7 +358,7 @@ export class SalesOrders extends LitElement {
                           class="text-blue-500"
                           .innerHTML=${getIconHTML("edit").replace(
                             "w-5 h-5",
-                            "w-4 h-4"
+                            "w-4 h-4",
                           )}
                         ></span>
                       </button>
@@ -339,13 +370,13 @@ export class SalesOrders extends LitElement {
                           class="text-red-700"
                           .innerHTML=${getIconHTML("trash").replace(
                             "w-5 h-5",
-                            "w-4 h-4"
+                            "w-4 h-4",
                           )}
                         ></span>
                       </button>
                     </td>
                   </tr>
-                `
+                `,
               )}
             </tbody>
           </table>
@@ -393,7 +424,7 @@ export class SalesOrders extends LitElement {
                     ${this.customers.map(
                       (customer) => html`
                         <option value="${customer.id}">${customer.name}</option>
-                      `
+                      `,
                     )}
                   </select>
                 </div>
@@ -432,14 +463,6 @@ export class SalesOrders extends LitElement {
                     <option value="confirmed">Confirmed</option>
                     <option value="delivered">Delivered</option>
                     <option value="processing">Processing</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="sm-label">Authorized</label>
-                  <select name="authorized" class="sm-input">
-                    <option value="false" selected>No</option>
-                    <option value="true">Yes</option>
                   </select>
                 </div>
 
@@ -491,7 +514,7 @@ export class SalesOrders extends LitElement {
                                 ${product.price.toFixed(2)} (Stock:
                                 ${product.quantity})
                               </option>
-                            `
+                            `,
                           )}
                         </select>
                       </div>
@@ -506,7 +529,7 @@ export class SalesOrders extends LitElement {
                           @input=${(e) =>
                             this.handleItemQuantityChange(
                               index,
-                              e.target.value
+                              e.target.value,
                             )}
                           .value=${item.quantity}
                         />
@@ -534,7 +557,7 @@ export class SalesOrders extends LitElement {
                         </button>
                       </div>
                     </div>
-                  `
+                  `,
                 )}
               </div>
               <button
@@ -598,7 +621,9 @@ export class SalesOrders extends LitElement {
                     name="orderNumber"
                     required
                     class="sm-input"
-                    value="${order.orderNumber || ""}"
+                    value="${order.order?.orderNumber ||
+                    order.orderNumber ||
+                    ""}"
                   />
                 </div>
 
@@ -624,8 +649,11 @@ export class SalesOrders extends LitElement {
                     name="orderDate"
                     required
                     class="sm-input"
-                    value="${order.orderDate
-                      ? order.orderDate.split("T")[0]
+                    value="${(order.order?.orderDate || order.orderDate) &&
+                    !isNaN(new Date(order.order?.orderDate || order.orderDate))
+                      ? new Date(order.order?.orderDate || order.orderDate)
+                          .toISOString()
+                          .split("T")[0]
                       : ""}"
                   />
                 </div>
@@ -640,7 +668,10 @@ export class SalesOrders extends LitElement {
                       min="0"
                       step="0.01"
                       class="sm-input pl-12"
-                      value="${order.subtotal || 0}"
+                      value="${order.order?.totalAmount ||
+                      order.subtotal ||
+                      order.totalAmount ||
+                      0}"
                     />
                   </div>
                 </div>
@@ -650,39 +681,31 @@ export class SalesOrders extends LitElement {
                   <select name="status" class="sm-input">
                     <option
                       value="pending"
-                      ?selected=${order.status === "pending"}
+                      ?selected=${(order.order?.status || order.status) ===
+                      "pending"}
                     >
                       Pending
                     </option>
                     <option
                       value="confirmed"
-                      ?selected=${order.status === "confirmed"}
+                      ?selected=${(order.order?.status || order.status) ===
+                      "confirmed"}
                     >
                       Confirmed
                     </option>
                     <option
                       value="delivered"
-                      ?selected=${order.status === "delivered"}
+                      ?selected=${(order.order?.status || order.status) ===
+                      "delivered"}
                     >
                       Delivered
                     </option>
                     <option
                       value="processing"
-                      ?selected=${order.status === "processing"}
+                      ?selected=${(order.order?.status || order.status) ===
+                      "processing"}
                     >
                       Processing
-                    </option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="sm-label">Authorized</label>
-                  <select name="authorized" class="sm-input">
-                    <option value="false" ?selected=${!order.authorized}>
-                      No
-                    </option>
-                    <option value="true" ?selected=${order.authorized}>
-                      Yes
                     </option>
                   </select>
                 </div>
@@ -741,7 +764,7 @@ ${order.notes || ""}</textarea
                         (item) =>
                           html`<li>
                             ${item.name} - Quantity: ${item.quantity}
-                          </li>`
+                          </li>`,
                       )
                     : html`<li>No items</li>`}
                 </ul>

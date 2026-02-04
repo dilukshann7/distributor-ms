@@ -28,7 +28,7 @@ export class OrderAuthorization extends LitElement {
     try {
       const response = await SalesOrder.getAll();
       this.pendingOrders = response.data.filter(
-        (order) => order.status === "pending"
+        (order) => order.order?.status === "pending",
       );
     } catch (error) {
       console.error("Error fetching sales orders:", error);
@@ -85,7 +85,7 @@ export class OrderAuthorization extends LitElement {
         const deliveryNumber = `DEL-${Date.now()}-${orderId}`;
 
         const deliveryAddress =
-          order.notes || `Delivery for ${order.customerName}`;
+          order.order?.notes || `Delivery for ${order.customerName}`;
 
         const scheduledDate = new Date();
         scheduledDate.setDate(scheduledDate.getDate() + 1);
@@ -98,7 +98,7 @@ export class OrderAuthorization extends LitElement {
           scheduledDate: scheduledDate.toISOString(),
           estimatedTime: 60, // Default 60 minutes
           status: "pending",
-          notes: `Order ${order.orderNumber} - ${order.customerName}`,
+          notes: `Order ${order.order?.orderNumber || orderId} - ${order.customerName}`,
         };
 
         const deliveryResponse = await Delivery.create(deliveryData);
@@ -151,7 +151,7 @@ export class OrderAuthorization extends LitElement {
                         <div class="flex-1">
                           <div class="flex items-center gap-3 mb-2">
                             <h4 class="text-lg font-semibold text-gray-900">
-                              ${order.orderNumber}
+                              ${order.order?.orderNumber || "N/A"}
                             </h4>
                           </div>
                           <p class="text-sm font-medium text-gray-700">
@@ -164,15 +164,15 @@ export class OrderAuthorization extends LitElement {
                         <div>
                           <p class="text-xs text-gray-500">Items</p>
                           <p class="text-sm font-semibold text-gray-900">
-                            ${order.items
+                            ${(order.order?.items || [])
                               .map((item) => `${item.name} (${item.quantity})`)
-                              .join(", ")}
+                              .join(", ") || "No items"}
                           </p>
                         </div>
                         <div>
                           <p class="text-xs text-gray-500">Order Value</p>
                           <p class="text-sm font-semibold text-green-600">
-                            Rs. ${order.subtotal.toFixed(2)}
+                            Rs. ${(order.order?.totalAmount || 0).toFixed(2)}
                           </p>
                         </div>
                         <div>
@@ -184,7 +184,9 @@ export class OrderAuthorization extends LitElement {
                         <div>
                           <p class="text-xs text-gray-500">Request Date</p>
                           <p class="text-sm font-semibold text-gray-900">
-                            ${new Date(order.orderDate).toLocaleDateString()}
+                            ${new Date(
+                              order.order?.orderDate || Date.now(),
+                            ).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -213,7 +215,7 @@ export class OrderAuthorization extends LitElement {
                                 ${driver.vehicleType || "N/A"}
                                 (${driver.vehicleId || "No Vehicle"})
                               </option>
-                            `
+                            `,
                           )}
                         </select>
                       </div>
@@ -237,7 +239,7 @@ export class OrderAuthorization extends LitElement {
                         </button>
                       </div>
                     </div>
-                  `
+                  `,
                 )}
           </div>
         </div>
