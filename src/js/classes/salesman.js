@@ -57,14 +57,14 @@ class SalesmanDashboard {
             .map(
               (item) => `
             <button data-section="${item.id}" class="nav-item sm-nav-item ${
-                this.currentSection === item.id
-                  ? "sm-nav-item-active"
-                  : "sm-nav-item-inactive"
-              }">
+              this.currentSection === item.id
+                ? "sm-nav-item-active"
+                : "sm-nav-item-inactive"
+            }">
               ${getIconHTML(item.icon)}
               <span class="font-medium">${item.label}</span>
             </button>
-          `
+          `,
             )
             .join("")}
         </nav>
@@ -84,7 +84,6 @@ class SalesmanDashboard {
         <div class="flex items-center gap-6">
           <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${getIconHTML("bell")}
-            <span class="absolute top-1 right-1 w-2 h-2 bg-sky-600 rounded-full"></span>
           </button>
 
           <button id="logoutBtn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
