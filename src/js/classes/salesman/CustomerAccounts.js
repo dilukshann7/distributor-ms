@@ -52,10 +52,6 @@ export class CustomerAccounts extends LitElement {
       address: formData.get("address") || null,
       businessName: formData.get("businessName") || null,
       customerType: formData.get("customerType") || null,
-      status: formData.get("status"),
-      loyaltyPoints: parseInt(formData.get("loyaltyPoints")) || 0,
-      totalPurchases: 0,
-      totalSpent: 0,
     };
 
     Customer.create(customerData)
@@ -109,9 +105,6 @@ export class CustomerAccounts extends LitElement {
               <tr>
                 <th class="sm-table-header">Customer Name</th>
                 <th class="sm-table-header">Contact Info</th>
-                <th class="sm-table-header">Total Orders</th>
-                <th class="sm-table-header">Total Spent</th>
-                <th class="sm-table-header">Loyalty Points</th>
                 <th class="sm-table-header">Actions</th>
               </tr>
             </thead>
@@ -120,14 +113,10 @@ export class CustomerAccounts extends LitElement {
                 (customer) => html`
                   <tr class="sm-table-row">
                     <td class="px-6 py-4">
-                      <div class="flex items-center gap-2">
-                        <span class="sm-table-cell-main">${customer.name}</span>
-                        ${customer.isVIP
-                          ? html`<span
-                              class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-semibold rounded"
-                              >VIP</span
-                            >`
-                          : ""}
+                      <div class="flex items-center">
+                        <span class="text-sm font-medium text-gray-900"
+                          >${customer.name}</span
+                        >
                       </div>
                       ${customer.businessName
                         ? html`<div class="text-sm text-gray-500">
@@ -155,15 +144,6 @@ export class CustomerAccounts extends LitElement {
                         </a>
                       </div>
                     </td>
-                    <td class="sm-table-cell font-semibold text-gray-700">
-                      ${customer.totalPurchases}
-                    </td>
-                    <td class="sm-table-cell font-semibold text-gray-700">
-                      Rs. ${customer.totalSpent.toLocaleString()}
-                    </td>
-                    <td class="sm-table-cell font-semibold text-gray-700">
-                      ${customer.loyaltyPoints}
-                    </td>
 
                     <td class="px-6 py-4 flex gap-2">
                       <button
@@ -174,7 +154,7 @@ export class CustomerAccounts extends LitElement {
                       </button>
                     </td>
                   </tr>
-                `
+                `,
               )}
             </tbody>
           </table>
@@ -281,7 +261,6 @@ export class CustomerAccounts extends LitElement {
               </div>
             </div>
 
-            <!-- Account Details -->
             <div class="border-t border-gray-100 pt-8">
               <h4 class="sm-subheader">
                 <span
@@ -299,26 +278,6 @@ export class CustomerAccounts extends LitElement {
                     <option value="retail">Retail</option>
                     <option value="corporate">Corporate</option>
                   </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="sm-label">Status</label>
-                  <select name="status" class="sm-input">
-                    <option value="active" selected>Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                </div>
-
-                <div class="space-y-2">
-                  <label class="sm-label">Initial Loyalty Points</label>
-                  <input
-                    type="number"
-                    name="loyaltyPoints"
-                    min="0"
-                    value="0"
-                    class="sm-input"
-                    placeholder="0"
-                  />
                 </div>
               </div>
             </div>
