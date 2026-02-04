@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
-import { Invoice } from "../../models/Invoice.js";
-import { Order } from "../../models/Order.js";
+import { PurchaseInvoice } from "../../models/PurchaseInvoice.js";
+import { PurchaseOrder } from "../../models/PurchaseOrder.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
 export class InvoicesPayments extends LitElement {
@@ -28,9 +28,9 @@ export class InvoicesPayments extends LitElement {
   async getInvoices() {
     try {
       const id = window.location.search.split("id=")[1];
-      const response = await Invoice.getAll();
+      const response = await PurchaseInvoice.getAll();
       this.invoices = response.data.filter(
-        (invoice) => invoice.supplierId === id
+        (invoice) => invoice.supplierId === Number(id),
       );
       this.requestUpdate();
     } catch (error) {
@@ -42,8 +42,8 @@ export class InvoicesPayments extends LitElement {
   async getOrders() {
     try {
       const id = window.location.search.split("id=")[1];
-      const response = await Order.getAll();
-      this.orders = response.data.filter((order) => order.supplierId === id);
+      const response = await PurchaseOrder.getAll();
+      this.orders = response.data.filter((po) => po.supplierId === Number(id));
       this.requestUpdate();
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -60,7 +60,7 @@ export class InvoicesPayments extends LitElement {
 
   switchToView(invoiceId) {
     this.viewingInvoice = this.invoices.find(
-      (inv) => inv.id === parseInt(invoiceId)
+      (inv) => inv.id === parseInt(invoiceId),
     );
     this.view = "view";
     this.requestUpdate();
@@ -93,7 +93,7 @@ export class InvoicesPayments extends LitElement {
       dueDate: new Date(rawData.dueDate),
     };
 
-    Invoice.create(invoiceData)
+    PurchaseInvoice.create(invoiceData)
       .then(() => {
         this.switchToList();
       })
@@ -168,8 +168,8 @@ export class InvoicesPayments extends LitElement {
                           class="status-badge ${invoice.status === "paid"
                             ? "status-green"
                             : invoice.status === "pending"
-                            ? "status-yellow"
-                            : "status-red"}"
+                              ? "status-yellow"
+                              : "status-red"}"
                         >
                           ${invoice.status.charAt(0).toUpperCase() +
                           invoice.status.slice(1)}
@@ -187,7 +187,7 @@ export class InvoicesPayments extends LitElement {
                         </div>
                       </td>
                     </tr>
-                  `
+                  `,
                 )}
               </tbody>
             </table>
@@ -249,7 +249,7 @@ export class InvoicesPayments extends LitElement {
                           Order #${order.id} - Rs. ${order.totalAmount}
                           (${order.status})
                         </option>
-                      `
+                      `,
                     )}
                   </select>
                   <p class="text-xs text-gray-500">
@@ -435,8 +435,8 @@ export class InvoicesPayments extends LitElement {
                     class="status-badge ${invoice.status === "paid"
                       ? "status-green"
                       : invoice.status === "pending"
-                      ? "status-yellow"
-                      : "status-red"} text-base px-4 py-2"
+                        ? "status-yellow"
+                        : "status-red"} text-base px-4 py-2"
                   >
                     ${invoice.status.charAt(0).toUpperCase() +
                     invoice.status.slice(1)}

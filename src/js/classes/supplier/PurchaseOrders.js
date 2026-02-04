@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { Order } from "../../models/Order.js";
+import { PurchaseOrder } from "../../models/PurchaseOrder.js";
 import { Shipment } from "../../models/Shipment.js";
 import { getIconHTML } from "../../../assets/icons/index.js";
 
@@ -29,10 +29,8 @@ export class PurchaseOrders extends LitElement {
   async getOrders() {
     try {
       const id = window.location.search.split("id=")[1];
-      const response = await Order.getAll();
-      this.orders = response.data.filter(
-        (order) => order.supplierId === Number(id)
-      );
+      const response = await PurchaseOrder.getAll();
+      this.orders = response.data.filter((po) => po.supplierId === Number(id));
       this.requestUpdate();
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -73,7 +71,7 @@ export class PurchaseOrders extends LitElement {
       status: rawData.status,
     };
 
-    Order.update(this.editingOrder.id, orderData)
+    PurchaseOrder.update(this.editingOrder.id, orderData)
       .then(() => {
         this.getOrders().then(() => this.switchToList());
       })
@@ -94,7 +92,7 @@ export class PurchaseOrders extends LitElement {
       supplierId: order.supplierId,
       shipmentDate: new Date(formData.get("shipmentDate")).toISOString(),
       expectedDeliveryDate: new Date(
-        formData.get("expectedDeliveryDate")
+        formData.get("expectedDeliveryDate"),
       ).toISOString(),
       carrier: formData.get("carrier"),
       status: "pending",
@@ -105,12 +103,12 @@ export class PurchaseOrders extends LitElement {
       .then(() => {
         const orderUpdateData = {
           customerId: order.customerId,
-          orderDate: order.orderDate,
+          orderDate: order.order?.orderDate || order.orderDate,
           dueDate: order.dueDate,
-          totalAmount: order.totalAmount,
+          totalAmount: order.order?.totalAmount || order.totalAmount,
           status: "confirmed",
         };
-        return Order.update(order.id, orderUpdateData);
+        return PurchaseOrder.update(order.id, orderUpdateData);
       })
       .then(() => {
         this.getOrders().then(() => this.switchToList());
@@ -190,7 +188,7 @@ export class PurchaseOrders extends LitElement {
                       <td class="table-cell">
                         <span
                           class="status-badge ${this.getStatusColor(
-                            order.status
+                            order.status,
                           )}"
                         >
                           ${order.status.charAt(0).toUpperCase() +
@@ -218,7 +216,7 @@ export class PurchaseOrders extends LitElement {
                         </button>
                       </td>
                     </tr>
-                  `
+                  `,
                 )}
               </tbody>
             </table>
@@ -379,9 +377,8 @@ export class PurchaseOrders extends LitElement {
                 <p class="text-sm text-gray-600 mb-2">Current Items:</p>
                 <ul class="list-disc list-inside text-sm text-gray-700">
                   ${order.items.map(
-                    (item) => html`<li>
-                      ${item.name} - Quantity: ${item.quantity}
-                    </li>`
+                    (item) =>
+                      html`<li>${item.name} - Quantity: ${item.quantity}</li>`,
                   )}
                 </ul>
                 <p class="text-xs text-gray-500 mt-2">
