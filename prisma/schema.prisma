@@ -24,8 +24,6 @@ model User {
   phone             String?
   address           String?
   status            String   @default("active")
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
 
   assignedTasks Task[] @relation("AssignedTasks")
   createdTasks  Task[] @relation("CreatedTasks")
@@ -155,15 +153,11 @@ model Product {
   category    String?
   price       Float
   quantity    Int
-  minStock    Int?
-  maxStock    Int?
   location    String?
   supplierId  Int?
   batchNumber String?
   expiryDate  DateTime?
   status      String    @default("active")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
 
   supplier Supplier? @relation(fields: [supplierId], references: [id])
 }
@@ -178,9 +172,6 @@ model Task {
   priority      String?
   status        String    @default("pending")
   completedDate DateTime?
-  notes         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
 
   assignee User @relation("AssignedTasks", fields: [assigneeId], references: [id])
   assigner User @relation("CreatedTasks", fields: [assignerId], references: [id])
@@ -191,9 +182,6 @@ model CustomerFeedback {
   customerId   Int
   salesOrderId Int
   comment      String?
-  status       String    @default("new")
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
 
   customer   Customer   @relation(fields: [customerId], references: [id])
   salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id])
@@ -210,26 +198,22 @@ model Delivery {
   estimatedTime   Int
   status          String
   notes           String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
 
   driver Driver @relation(fields: [driverId], references: [id])
 
-  salesOrders   SalesOrder[]    // Child of Order
-  salesInvoices SalesInvoice[]  // Child of Invoice
+  salesOrders   SalesOrder[]    
+  salesInvoices SalesInvoice[] 
 }
 
 model Order {
   id          Int       @id @default(autoincrement())
   orderNumber String    @unique
-  orderType   String    // "purchase" | "sales" | "retail"
+  orderType   String  
   orderDate   DateTime
   status      String    @default("pending")
   totalAmount Float
   items       Json
   notes       String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
 
   purchaseOrder PurchaseOrder?
   salesOrder    SalesOrder?
@@ -288,8 +272,6 @@ model Supply {
   stock     Int
   price     Float
   status    String   @default("available")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   supplier Supplier @relation(fields: [supplierId], references: [id])
 }
@@ -297,15 +279,13 @@ model Supply {
 model Invoice {
   id            Int       @id @default(autoincrement())
   invoiceNumber String    @unique
-  invoiceType   String    // "purchase" | "sales"
+  invoiceType   String   
   orderId       Int
   invoiceDate   DateTime
   dueDate       DateTime?
   totalAmount   Float
   status        String    @default("pending")
   notes         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
 
   order Order @relation(fields: [orderId], references: [id])
 
@@ -355,8 +335,6 @@ model Shipment {
   carrier              String
   status               String    @default("pending")
   notes                String?
-  createdAt            DateTime  @default(now())
-  updatedAt            DateTime  @updatedAt
 
   purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
 }
@@ -369,8 +347,6 @@ model Customer {
   address        String?
   businessName   String?
   customerType   String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
 
   salesOrders SalesOrder[]
 
@@ -382,8 +358,6 @@ model Cart {
   items       Json
   totalAmount Float
   status      String   @default("active")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
   retailOrder RetailOrder?
 }
@@ -395,8 +369,6 @@ model Payment {
   paymentDate   DateTime
   paymentMethod String
   status        String    @default("completed")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
 
   salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id])
 }
