@@ -5,7 +5,7 @@ import {
   addFooter,
   addSummarySection,
 } from "../utils/pdfReportTemplate.js";
-import { formatCurrency, formatDate } from "../utils/reportUtils.js";
+import { formatCurrency } from "../utils/reportUtils.js";
 
 export class Product {
   static async getAll(filters) {
@@ -37,9 +37,12 @@ export class Product {
     const totalProducts = products.length;
     const totalValue = products.reduce(
       (sum, p) => sum + p.price * p.quantity,
-      0
+      0,
     );
     const totalQuantity = products.reduce((sum, p) => sum + p.quantity, 0);
+    const averagePrice = totalProducts > 0 ? totalValue / totalQuantity : 0;
+    const averageQuantity =
+      totalProducts > 0 ? totalQuantity / totalProducts : 0;
     const lowStock = products.filter((p) => p.quantity < 10).length;
     const outOfStock = products.filter((p) => p.quantity === 0).length;
 
@@ -59,10 +62,12 @@ export class Product {
         { label: "Total Products", value: totalProducts.toString() },
         { label: "Total Inventory Value", value: formatCurrency(totalValue) },
         { label: "Total Units", value: totalQuantity.toString() },
+        { label: "Avg Unit Value", value: formatCurrency(averagePrice) },
+        { label: "Avg Units / SKU", value: averageQuantity.toFixed(1) },
         { label: "Low Stock (<10)", value: lowStock.toString() },
         { label: "Out of Stock", value: outOfStock.toString() },
       ],
-      yPos
+      yPos,
     );
 
     // Add Status Breakdown section
@@ -71,24 +76,30 @@ export class Product {
     doc.setFont(undefined, "bold");
     doc.text("Status Breakdown", 14, yPos + 5);
 
-    const statusData = Object.entries(statusCounts).map(([status, count]) => [
-      status,
-      count.toString(),
-      `${((count / totalProducts) * 100).toFixed(1)}%`,
-    ]);
+    if (totalProducts > 0) {
+      const statusData = Object.entries(statusCounts).map(([status, count]) => [
+        status,
+        count.toString(),
+        `${((count / totalProducts) * 100).toFixed(1)}%`,
+      ]);
 
-    exportTable(doc, ["Status", "Count", "Percentage"], statusData, {
-      startY: yPos + 10,
-      theme: "striped",
-      headColor: [52, 73, 94],
-      columnStyles: {
-        0: { cellWidth: 60 },
-        1: { cellWidth: 30, halign: "center" },
-        2: { cellWidth: 30, halign: "center" },
-      },
-    });
+      exportTable(doc, ["Status", "Count", "Percentage"], statusData, {
+        startY: yPos + 10,
+        theme: "striped",
+        headColor: [52, 73, 94],
+        columnStyles: {
+          0: { cellWidth: 60 },
+          1: { cellWidth: 30, halign: "center" },
+          2: { cellWidth: 30, halign: "center" },
+        },
+      });
 
-    yPos = doc.lastAutoTable.finalY + 12;
+      yPos = doc.lastAutoTable.finalY + 12;
+    } else {
+      doc.setFontSize(10);
+      doc.text("No inventory records available.", 14, yPos + 12);
+      yPos += 18;
+    }
 
     // Check if we need a new page
     if (yPos > 240) {
@@ -117,6 +128,7 @@ export class Product {
         "Quantity",
         "Unit Price",
         "Total Value",
+        "Supplier",
         "Status",
       ],
       sortedProducts.map((product) => [
@@ -125,20 +137,22 @@ export class Product {
         product.quantity.toString(),
         formatCurrency(product.price),
         formatCurrency(product.price * product.quantity),
+        product.supplier?.companyName || "N/A",
         product.status,
       ]),
       {
         startY: yPos + 5,
         headColor: [41, 128, 185],
         columnStyles: {
-          0: { cellWidth: 45 },
-          1: { cellWidth: 25 },
-          2: { cellWidth: 20, halign: "center" },
-          3: { cellWidth: 25, halign: "right" },
-          4: { cellWidth: 28, halign: "right" },
-          5: { cellWidth: 25, halign: "center" },
+          0: { cellWidth: 38 },
+          1: { cellWidth: 22 },
+          2: { cellWidth: 18, halign: "center" },
+          3: { cellWidth: 22, halign: "right" },
+          4: { cellWidth: 24, halign: "right" },
+          5: { cellWidth: 28 },
+          6: { cellWidth: 22, halign: "center" },
         },
-      }
+      },
     );
 
     // Add footer

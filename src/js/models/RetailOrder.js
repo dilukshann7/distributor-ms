@@ -42,6 +42,21 @@ export class RetailOrder {
       const response = await RetailOrder.getAll();
       const allOrders = response.data || [];
 
+      const getOrderItems = (retailOrder) => {
+        const rawItems = retailOrder.order?.items ?? retailOrder.cart?.items;
+        if (!rawItems) return [];
+        if (Array.isArray(rawItems)) return rawItems;
+        if (typeof rawItems === "string") {
+          try {
+            const parsed = JSON.parse(rawItems);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (error) {
+            return [];
+          }
+        }
+        return [];
+      };
+
       const start = new Date(startDate);
       const end = new Date(endDate);
       end.setHours(23, 59, 59, 999);
@@ -64,6 +79,17 @@ export class RetailOrder {
           ),
         0,
       );
+      const totalItems = filteredOrders.reduce((sum, retailOrder) => {
+        const items = getOrderItems(retailOrder);
+        const itemCount = items.reduce(
+          (itemSum, item) => itemSum + (item.quantity || 1),
+          0,
+        );
+        return sum + itemCount;
+      }, 0);
+      const averageOrderValue = totalOrders > 0 ? totalAmount / totalOrders : 0;
+      const averageItemsPerOrder =
+        totalOrders > 0 ? totalItems / totalOrders : 0;
 
       // Summary Section
       let yPos = 40;
@@ -74,6 +100,14 @@ export class RetailOrder {
           { label: "Total Orders", value: totalOrders.toString() },
           { label: "Total Revenue", value: formatCurrency(totalAmount) },
           {
+            label: "Avg Order Value",
+            value: formatCurrency(averageOrderValue),
+          },
+          {
+            label: "Avg Items / Order",
+            value: averageItemsPerOrder.toFixed(1),
+          },
+          {
             label: "Date Range",
             value: `${formatDate(startDate)} - ${formatDate(endDate)}`,
           },
@@ -81,25 +115,35 @@ export class RetailOrder {
         yPos,
       );
 
+      const sortedOrders = [...filteredOrders].sort((a, b) => {
+        const dateA = new Date(a.order?.orderDate || 0);
+        const dateB = new Date(b.order?.orderDate || 0);
+        return dateB - dateA;
+      });
+
       // Detailed Table
       doc.setFontSize(14);
       doc.text("Order Details", 14, yPos + 5);
+      if (sortedOrders.length === 0) {
+        doc.setFontSize(10);
+        doc.text("No orders found for the selected range.", 14, yPos + 12);
+      }
 
       exportTable(
         doc,
         ["Order Number", "Order ID", "Items", "Amount", "Date"],
-        filteredOrders.map((retailOrder) => [
+        sortedOrders.map((retailOrder) => [
           retailOrder.order?.orderNumber || "N/A",
           retailOrder.id,
-          (retailOrder.order?.items || retailOrder.cart?.items || [])
-            .map((item) => item.productName)
-            .join(", "),
+          getOrderItems(retailOrder)
+            .reduce((itemSum, item) => itemSum + (item.quantity || 1), 0)
+            .toString(),
           formatCurrency(
             retailOrder.order?.totalAmount ||
               retailOrder.cart?.totalAmount ||
               0,
           ),
-          formatDate(new Date(retailOrder.order?.orderDate || new Date())),
+          formatDate(retailOrder.order?.orderDate || new Date()),
         ]),
         {
           startY: yPos + 10,

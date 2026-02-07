@@ -7,7 +7,7 @@ import {
   addSummarySection,
 } from "../utils/pdfReportTemplate.js";
 import { Product } from "./Product.js";
-import { formatCurrency, formatDate } from "../utils/reportUtils.js";
+import { formatCurrency } from "../utils/reportUtils.js";
 
 export class StockKeeper extends User {
   static async getAll() {
@@ -49,6 +49,14 @@ export class StockKeeper extends User {
           parseFloat(product.price || 0) * parseFloat(product.quantity || 0),
         0,
       );
+      const totalQuantity = allProducts.reduce(
+        (sum, product) => sum + parseFloat(product.quantity || 0),
+        0,
+      );
+      const averageUnitValue =
+        totalQuantity > 0 ? totalStockValue / totalQuantity : 0;
+      const averageQuantity =
+        totalProducts > 0 ? totalQuantity / totalProducts : 0;
       const lowStockItems = allProducts.filter(
         (product) => product.quantity < 10,
       ).length;
@@ -68,25 +76,52 @@ export class StockKeeper extends User {
             label: "Total Stock Value",
             value: formatCurrency(totalStockValue),
           },
+          {
+            label: "Avg Unit Value",
+            value: formatCurrency(averageUnitValue),
+          },
+          { label: "Avg Units / SKU", value: averageQuantity.toFixed(1) },
           { label: "Low Stock Items", value: lowStockItems.toString() },
           { label: "Out of Stock", value: outOfStockItems.toString() },
         ],
         yPos,
       );
 
+      const sortedProducts = [...allProducts].sort((a, b) => {
+        if (a.quantity === 0 && b.quantity !== 0) return -1;
+        if (a.quantity !== 0 && b.quantity === 0) return 1;
+        if (a.quantity < 10 && b.quantity >= 10) return -1;
+        if (a.quantity >= 10 && b.quantity < 10) return 1;
+        return (a.name || "").localeCompare(b.name || "");
+      });
+
       // Stock Table
       doc.setFontSize(14);
       doc.text("Stock Details", 14, yPos + 5);
+      if (sortedProducts.length === 0) {
+        doc.setFontSize(10);
+        doc.text("No inventory records available.", 14, yPos + 12);
+      }
 
       exportTable(
         doc,
-        ["Product", "SKU", "Category", "Qty", "Price", "Status", "Location"],
-        allProducts.map((product) => [
+        [
+          "Product",
+          "SKU",
+          "Category",
+          "Qty",
+          "Price",
+          "Supplier",
+          "Status",
+          "Location",
+        ],
+        sortedProducts.map((product) => [
           product.name || "N/A",
           product.sku || "N/A",
           product.category || "N/A",
           product.quantity || 0,
           formatCurrency(product.price),
+          product.supplier?.companyName || "N/A",
           product.status || "N/A",
           product.location || "N/A",
         ]),
@@ -94,13 +129,14 @@ export class StockKeeper extends User {
           startY: yPos + 10,
           headColor: [147, 51, 234], // Purple
           columnStyles: {
-            0: { cellWidth: 40 },
-            1: { cellWidth: 25 },
-            2: { cellWidth: 30 },
-            3: { cellWidth: 15, halign: "center" },
-            4: { cellWidth: 25, halign: "right" },
-            5: { cellWidth: 25, halign: "center" },
-            6: { cellWidth: 25 },
+            0: { cellWidth: 34 },
+            1: { cellWidth: 20 },
+            2: { cellWidth: 24 },
+            3: { cellWidth: 12, halign: "center" },
+            4: { cellWidth: 20, halign: "right" },
+            5: { cellWidth: 24 },
+            6: { cellWidth: 20, halign: "center" },
+            7: { cellWidth: 22 },
           },
         },
       );

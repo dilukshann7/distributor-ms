@@ -1,10 +1,6 @@
 import axios from "axios";
 import { User } from "./User.js";
-import {
-  filterOrdersByDateRange,
-  formatDate,
-  formatCurrency,
-} from "../utils/reportUtils.js";
+import { formatDate, formatCurrency } from "../utils/reportUtils.js";
 import {
   preparePdfDoc,
   exportTable,
@@ -44,21 +40,55 @@ export class Salesman extends User {
       const orderResponse = await SalesOrder.getAll();
       const allOrders = orderResponse.data || [];
 
-      const filteredOrders = filterOrdersByDateRange(
-        allOrders,
-        startDate,
-        endDate,
-      );
+      const getOrderItems = (order) => {
+        const rawItems = order.order?.items ?? order.items;
+        if (!rawItems) return [];
+        if (Array.isArray(rawItems)) return rawItems;
+        if (typeof rawItems === "string") {
+          try {
+            const parsed = JSON.parse(rawItems);
+            return Array.isArray(parsed) ? parsed : [];
+          } catch (error) {
+            return [];
+          }
+        }
+        return [];
+      };
+
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+
+      const filteredOrders = allOrders.filter((order) => {
+        const orderDate = new Date(order.order?.orderDate || order.orderDate);
+        return orderDate >= start && orderDate <= end;
+      });
 
       const doc = preparePdfDoc("Sales Report", new Date());
 
       const totalOrders = filteredOrders.length;
-      const subtotal = filteredOrders.reduce(
-        (sum, order) => sum + parseFloat(order.subtotal || 0),
-        0,
-      );
+      const subtotal = filteredOrders.reduce((sum, order) => {
+        const total =
+          order.order?.totalAmount || order.subtotal || order.totalAmount || 0;
+        return sum + parseFloat(total || 0);
+      }, 0);
 
       const averageOrderValue = totalOrders > 0 ? subtotal / totalOrders : 0;
+      const totalItems = filteredOrders.reduce((sum, order) => {
+        const items = getOrderItems(order);
+        const itemCount = items.reduce(
+          (itemSum, item) => itemSum + (item.quantity || 0),
+          0,
+        );
+        return sum + itemCount;
+      }, 0);
+      const averageItemsPerOrder =
+        totalOrders > 0 ? totalItems / totalOrders : 0;
+      const uniqueCustomers = new Set(
+        filteredOrders.map(
+          (order) => order.customer?.name || order.customerName || "Unknown",
+        ),
+      ).size;
 
       // Add Summary Section
       let yPos = 40;
@@ -72,31 +102,118 @@ export class Salesman extends User {
             label: "Avg Order Value",
             value: formatCurrency(averageOrderValue),
           },
+          {
+            label: "Avg Items / Order",
+            value: averageItemsPerOrder.toFixed(1),
+          },
+          { label: "Unique Customers", value: uniqueCustomers.toString() },
+          {
+            label: "Date Range",
+            value: `${formatDate(startDate)} - ${formatDate(endDate)}`,
+          },
         ],
         yPos,
       );
 
-      // Detailed Table
+      const customerTotals = new Map();
+      filteredOrders.forEach((order) => {
+        const customerName =
+          order.customer?.name || order.customerName || "Unknown";
+        const orderTotal = parseFloat(
+          order.order?.totalAmount || order.subtotal || order.totalAmount || 0,
+        );
+        const items = getOrderItems(order);
+
+        if (!customerTotals.has(customerName)) {
+          customerTotals.set(customerName, {
+            orders: 0,
+            totalAmount: 0,
+            items: new Map(),
+          });
+        }
+
+        const entry = customerTotals.get(customerName);
+        entry.orders += 1;
+        entry.totalAmount += orderTotal;
+        items.forEach((item) => {
+          const name = item.name || "Item";
+          const qty = item.quantity || 0;
+          entry.items.set(name, (entry.items.get(name) || 0) + qty);
+        });
+      });
+
+      const customerEntries = Array.from(customerTotals.entries()).sort(
+        (a, b) => b[1].totalAmount - a[1].totalAmount,
+      );
+      const customerRows = customerEntries.map(([customerName, data]) => {
+        const itemSummary = Array.from(data.items.entries())
+          .map(([name, qty]) => `${name} (${qty})`)
+          .join(", ");
+
+        return [
+          customerName,
+          data.orders.toString(),
+          itemSummary || "No items",
+          formatCurrency(data.totalAmount),
+        ];
+      });
+
       doc.setFontSize(14);
-      doc.text("Detailed Sales Data", 14, yPos + 5);
+      doc.text("Customer Summary", 14, yPos + 5);
 
       exportTable(
         doc,
-        ["Order ID", "Customer Name", "Date", "Status", "Items", "Subtotal"],
-        filteredOrders.map((order) => [
-          order.id || "N/A",
-          order.customerName || "N/A",
-          formatDate(order.orderDate),
-          order.status || "N/A",
-          order.items
-            ? order.items
-                .map((element) => `${element.name} (${element.quantity})`)
-                .join(", ")
-            : "N/A",
-          formatCurrency(order.subtotal),
-        ]),
+        ["Customer", "Orders", "Items", "Total Sales"],
+        customerRows,
         {
           startY: yPos + 10,
+          headColor: [8, 145, 178],
+          columnStyles: {
+            0: { cellWidth: 35 },
+            1: { cellWidth: 16, halign: "center" },
+            2: { cellWidth: "auto" },
+            3: { cellWidth: 30, halign: "right" },
+          },
+        },
+      );
+
+      let detailsY = (doc.lastAutoTable?.finalY || yPos) + 15;
+      if (detailsY > 250) {
+        doc.addPage();
+        detailsY = 20;
+      }
+
+      const sortedOrders = [...filteredOrders].sort((a, b) => {
+        const dateA = new Date(a.order?.orderDate || a.orderDate || 0);
+        const dateB = new Date(b.order?.orderDate || b.orderDate || 0);
+        return dateB - dateA;
+      });
+
+      // Detailed Table
+      doc.setFontSize(14);
+      doc.text("Detailed Sales Data", 14, detailsY + 5);
+      if (sortedOrders.length === 0) {
+        doc.setFontSize(10);
+        doc.text("No sales found for the selected range.", 14, detailsY + 12);
+      }
+
+      exportTable(
+        doc,
+        ["Order ID", "Customer Name", "Date", "Status", "Items", "Total"],
+        sortedOrders.map((order) => [
+          order.id || "N/A",
+          order.customer?.name || order.customerName || "N/A",
+          formatDate(order.order?.orderDate || order.orderDate),
+          order.order?.status || order.status || "N/A",
+          getOrderItems(order)
+            .reduce((itemSum, item) => itemSum + (item.quantity || 0), 0)
+            .toString(),
+          formatCurrency(
+            order.order?.totalAmount || order.subtotal || order.totalAmount,
+          ),
+        ]),
+        {
+          startY: detailsY + 10,
           headColor: [14, 165, 233], // Sky blue
           columnStyles: {
             0: { cellWidth: 20 },

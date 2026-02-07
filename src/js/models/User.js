@@ -5,7 +5,7 @@ import {
   addFooter,
   addSummarySection,
 } from "../utils/pdfReportTemplate.js";
-import { formatDate } from "../utils/reportUtils.js";
+import { formatCurrency, formatDate } from "../utils/reportUtils.js";
 
 export class User {
   static async getAll() {
@@ -57,8 +57,33 @@ export class User {
 
       const totalEmployees = users.length;
       const activeEmployees = users.filter(
-        (u) => u.status === "Active" || u.status === "active"
+        (u) => u.status === "Active" || u.status === "active",
       ).length; // Assuming status values
+      const compensation = users.reduce(
+        (acc, user) => {
+          const profile = User.getProfileData(user);
+          const salary = parseFloat(profile?.salary || 0);
+          const bonus = parseFloat(profile?.bonus || 0);
+          if (!Number.isNaN(salary) && salary > 0) {
+            acc.totalSalary += salary;
+            acc.salaryCount += 1;
+          }
+          if (!Number.isNaN(bonus) && bonus > 0) {
+            acc.totalBonus += bonus;
+            acc.bonusCount += 1;
+          }
+          return acc;
+        },
+        { totalSalary: 0, salaryCount: 0, totalBonus: 0, bonusCount: 0 },
+      );
+      const averageSalary =
+        compensation.salaryCount > 0
+          ? compensation.totalSalary / compensation.salaryCount
+          : 0;
+      const averageBonus =
+        compensation.bonusCount > 0
+          ? compensation.totalBonus / compensation.bonusCount
+          : 0;
 
       // Summary
       let yPos = 40;
@@ -68,8 +93,10 @@ export class User {
         [
           { label: "Total Employees", value: totalEmployees.toString() },
           { label: "Active Status", value: activeEmployees.toString() },
+          { label: "Avg Salary", value: formatCurrency(averageSalary) },
+          { label: "Avg Bonus", value: formatCurrency(averageBonus) },
         ],
-        yPos
+        yPos,
       );
 
       // Detailed Table
@@ -84,8 +111,8 @@ export class User {
           user.email || "N/A",
           user.role || "N/A",
           profile?.performanceRating?.toString() || "N/A",
-          profile?.salary?.toString() || "N/A",
-          profile?.bonus?.toString() || "N/A",
+          profile?.salary ? formatCurrency(profile.salary) : "N/A",
+          profile?.bonus ? formatCurrency(profile.bonus) : "N/A",
           user.status || "N/A",
           user.phone || "N/A",
         ];
@@ -118,7 +145,7 @@ export class User {
             6: { cellWidth: 18 },
             7: { cellWidth: 25 },
           },
-        }
+        },
       );
 
       // Add Footer
