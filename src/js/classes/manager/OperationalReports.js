@@ -48,33 +48,49 @@ export class OperationalReports extends LitElement {
 
   render() {
     return html`
-        <div class=" space-y-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="manager-header-title">Reports & Analytics</h2>
-              <p class="manager-header-subtitle">Generate and view business reports</p>
-            </div>
+      <div class=" space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="manager-header-title">Reports & Analytics</h2>
+            <p class="manager-header-subtitle">
+              Generate and view business reports
+            </p>
           </div>
-  
-          <div class="grid grid-cols-2 gap-6">
+        </div>
 
+        <div class="grid grid-cols-2 gap-6">
           <div class="card-container col-span-2">
             <div class="p-6">
               <h4 class="card-title mb-2">Sales Report</h4>
-              
+
               <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">Start Date</label>
-                  <input type="date" id="sales-report-start" class="input-field" />
+                  <label class="text-sm font-medium text-gray-700"
+                    >Start Date</label
+                  >
+                  <input
+                    type="date"
+                    id="sales-report-start"
+                    class="input-field"
+                  />
                 </div>
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">End Date</label>
-                  <input type="date" id="sales-report-end" class="input-field" />
+                  <label class="text-sm font-medium text-gray-700"
+                    >End Date</label
+                  >
+                  <input
+                    type="date"
+                    id="sales-report-end"
+                    class="input-field"
+                  />
                 </div>
               </div>
 
               <div class="grid grid-cols-1 gap-4">
-                <button @click=${this.exportSalesReport} class="manager-btn-large">
+                <button
+                  @click=${this.exportSalesReport}
+                  class="manager-btn-large"
+                >
                   <div .innerHTML=${getIconHTML("download")}></div>
                   Generate Sales Report
                 </button>
@@ -87,11 +103,12 @@ export class OperationalReports extends LitElement {
               <h4 class="card-title mb-4">Inventory Report</h4>
 
               <div class="grid grid-cols-1 gap-4">
-                <button 
+                <button
                   @click=${this.exportInventoryReport}
-                  class="manager-btn-large">
-                    <div .innerHTML=${getIconHTML("download")}></div>
-                    Generate Inventory Report
+                  class="manager-btn-large"
+                >
+                  <div .innerHTML=${getIconHTML("download")}></div>
+                  Generate Inventory Report
                 </button>
               </div>
             </div>
@@ -102,18 +119,19 @@ export class OperationalReports extends LitElement {
               <h4 class="card-title mb-4">Employee Report</h4>
 
               <div class="grid grid-cols-1 gap-4">
-                <button 
-                  @click=${this.exportEmployeeReport} 
-                  class="manager-btn-large">
-                    <div .innerHTML=${getIconHTML("download")}></div>
-                    Generate Employee Report
+                <button
+                  @click=${this.exportEmployeeReport}
+                  class="manager-btn-large"
+                >
+                  <div .innerHTML=${getIconHTML("download")}></div>
+                  Generate Employee Report
                 </button>
               </div>
             </div>
           </div>
         </div>
-        </div>
-      `;
+      </div>
+    `;
   }
 }
 
