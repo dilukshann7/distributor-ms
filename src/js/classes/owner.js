@@ -63,25 +63,18 @@ class OwnerDashboard {
             .map(
               (item) => `
             <button data-section="${item.id}" class="nav-item owner-nav-item ${
-                this.currentSection === item.id
-                  ? "owner-nav-item-active"
-                  : "owner-nav-item-inactive"
-              }">
+              this.currentSection === item.id
+                ? "owner-nav-item-active"
+                : "owner-nav-item-inactive"
+            }">
               ${getIconHTML(item.icon)}
               <span class="text-sm font-medium">${item.label}</span>
             </button>
-          `
+          `,
             )
             .join("")}
         </nav>
 
-        <div class="p-4 border-t border-gray-200 space-y-2">
-
-          <button id="logoutBtn" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
-            ${getIconHTML("log-out")}
-            <span class="text-sm font-medium">Logout</span>
-          </button>
-        </div>
       </aside>
     `;
   }
@@ -96,6 +89,9 @@ class OwnerDashboard {
         <div class="flex items-center gap-4 ml-8">
           <button id="notificationBtn" class="relative p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
             ${getIconHTML("bell")}
+          </button>
+          <button id="logoutBtn" class="p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+            ${getIconHTML("log-out")}
           </button>
         </div>
       </header>

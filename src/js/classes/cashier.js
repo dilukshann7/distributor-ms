@@ -52,24 +52,18 @@ class CashierDashboard {
             <button data-section="${
               item.id
             }" class="cashier-nav-item nav-item ${
-                this.currentSection === item.id
-                  ? "cashier-nav-item-active"
-                  : "cashier-nav-item-inactive"
-              }">
+              this.currentSection === item.id
+                ? "cashier-nav-item-active"
+                : "cashier-nav-item-inactive"
+            }">
               ${getIconHTML(item.icon)}
               <span>${item.label}</span>
             </button>
-          `
+          `,
             )
             .join("")}
         </nav>
 
-        <div class="p-4 border-t border-cyan-600">
-          <button id="logoutBtn" class="cashier-nav-item cashier-nav-item-inactive">
-            ${getIconHTML("log-out")}
-            <span>Logout</span>
-          </button>
-        </div>
       </aside>
     `;
   }
@@ -85,6 +79,9 @@ class CashierDashboard {
         <div class="flex items-center gap-6">
           <button id="notificationBtn" class="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
             ${getIconHTML("bell")}
+          </button>
+          <button id="logoutBtn" class="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+            ${getIconHTML("log-out")}
           </button>
         </div>
       </header>
