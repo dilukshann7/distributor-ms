@@ -250,6 +250,21 @@ export class SalesOrders extends LitElement {
     }
   }
 
+  getOrderItems(order) {
+    const rawItems = order.order?.items ?? order.items;
+    if (!rawItems) return [];
+    if (Array.isArray(rawItems)) return rawItems;
+    if (typeof rawItems === "string") {
+      try {
+        const parsed = JSON.parse(rawItems);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        return [];
+      }
+    }
+    return [];
+  }
+
   render() {
     if (this.view === "add") {
       return this.renderAddForm();
@@ -759,11 +774,11 @@ ${order.notes || ""}</textarea
               <div class="sm-card-sub">
                 <p class="text-sm text-gray-600 mb-2">Current Items:</p>
                 <ul class="list-disc list-inside text-sm text-gray-700">
-                  ${order.items
-                    ? order.items.map(
+                  ${this.getOrderItems(order).length
+                    ? this.getOrderItems(order).map(
                         (item) =>
                           html`<li>
-                            ${item.name} - Quantity: ${item.quantity}
+                            ${item.name || "Item"} - Quantity: ${item.quantity || 0}
                           </li>`,
                       )
                     : html`<li>No items</li>`}
