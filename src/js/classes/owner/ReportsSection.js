@@ -3,6 +3,7 @@ import { getIconHTML } from "../../../assets/icons/index.js";
 import { Product } from "../../models/Product.js";
 import { SalesOrder } from "../../models/SalesOrder.js";
 import { User } from "../../models/User.js";
+import { CashFlowReport } from "../../models/CashFlowReport.js";
 
 export class ReportsSection extends LitElement {
   constructor() {
@@ -42,6 +43,27 @@ export class ReportsSection extends LitElement {
 
     SalesOrder.exportSalesReport(startDate, endDate);
     alert("PDF exported successfully");
+  }
+
+  exportCashFlowReport() {
+    const startDateInput = document.getElementById("cash-flow-start").value;
+    const endDateInput = document.getElementById("cash-flow-end").value;
+
+    const startDate = new Date(startDateInput);
+    const endDate = new Date(endDateInput);
+
+    if (!startDateInput || !endDateInput) {
+      alert("Please select a start and end date.");
+      return;
+    }
+
+    if (new Date(startDateInput) > new Date(endDateInput)) {
+      alert("Start date must be before end date.");
+      return;
+    }
+
+    CashFlowReport.exportCashFlowReport(startDate, endDate);
+    alert("Cash Flow Report exported successfully");
   }
 
   render() {
@@ -87,6 +109,37 @@ export class ReportsSection extends LitElement {
                 >
                   <div .innerHTML=${getIconHTML("download")}></div>
                   Generate Sales Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-container col-span-2">
+            <div class="p-6">
+              <h4 class="card-title mb-2">Cash Flow Report</h4>
+
+              <div class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700"
+                    >Start Date</label
+                  >
+                  <input type="date" id="cash-flow-start" class="input-field" />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-gray-700"
+                    >End Date</label
+                  >
+                  <input type="date" id="cash-flow-end" class="input-field" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4">
+                <button
+                  @click=${this.exportCashFlowReport}
+                  class="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                >
+                  <div .innerHTML=${getIconHTML("download")}></div>
+                  Generate Cash Flow Report
                 </button>
               </div>
             </div>

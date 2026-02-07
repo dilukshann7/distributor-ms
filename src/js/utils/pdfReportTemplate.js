@@ -2,38 +2,45 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { formatDate } from "./reportUtils.js";
 
+const COMPANY_NAME = "ADP Namasinghe Distributors";
+const BRAND_COLOR = [41, 128, 185]; // Professional Blue
+const ACCENT_COLOR = [52, 152, 219]; // Lighter Blue
+const TEXT_COLOR = [44, 62, 80]; // Dark Gray
+const HEADER_BG_COLOR = [236, 240, 241]; // Light Gray Background
+
 export function preparePdfDoc(title, dateLabel) {
   const doc = new jsPDF();
+  const width = doc.internal.pageSize.getWidth();
 
-  // Set default font to Helvetica
+  // --- Header Section ---
+  // Blue top strip
+  doc.setFillColor(...BRAND_COLOR);
+  doc.rect(0, 0, width, 5, "F");
+
+  // Company Name
   doc.setFont("helvetica", "bold");
+  doc.setFontSize(22);
+  doc.setTextColor(...BRAND_COLOR);
+  doc.text(COMPANY_NAME, 14, 22);
 
-  // Header with Company Name (Left) and Report Title (Right)
-  doc.setFontSize(20);
-  doc.setTextColor(41, 128, 185); // Professional Blue
-  doc.text("ADP Namasinghe Distributors", 14, 20);
+  // Report Title
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(...TEXT_COLOR);
+  doc.text(title.toUpperCase(), width - 14, 22, { align: "right" });
 
+  // Date Information
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(14);
-  doc.setTextColor(127, 140, 141); // Gray
-  doc.text(title, doc.internal.pageSize.getWidth() - 14, 20, {
+  doc.setFontSize(10);
+  doc.setTextColor(127, 140, 141);
+  doc.text(`Generated on: ${formatDate(dateLabel)}`, width - 14, 28, {
     align: "right",
   });
 
-  // Line Separator with gradient-like effect (two lines)
-  doc.setDrawColor(41, 128, 185);
-  doc.setLineWidth(1);
-  doc.line(14, 25, doc.internal.pageSize.getWidth() - 14, 25);
-
-  doc.setDrawColor(236, 240, 241); // Light gray under-line
+  // Decorative Line
+  doc.setDrawColor(...BRAND_COLOR);
   doc.setLineWidth(0.5);
-  doc.line(14, 26, doc.internal.pageSize.getWidth() - 14, 26);
-
-  doc.setFontSize(9);
-  doc.setTextColor(52, 73, 94);
-  doc.setFont("helvetica", "italic");
-  doc.text(`Generated: ${formatDate(dateLabel)}`, 14, 33);
-  doc.setFont("helvetica", "normal"); // Reset
+  doc.line(14, 35, width - 14, 35);
 
   return doc;
 }
@@ -45,75 +52,98 @@ export function addFooter(doc) {
 
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
+
+    // Footer Line
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.1);
+    doc.line(14, height - 15, width - 14, height - 15);
+
+    // Footer Text
     doc.setFontSize(8);
-    doc.setTextColor(149, 165, 166); // Lighter gray for footer
-    doc.setFont("helvetica", "normal");
+    doc.setTextColor(149, 165, 166);
+    doc.setFont("helvetica", "italic");
 
-    doc.text(`Page ${i} of ${pageCount}`, width / 2, height - 10, {
-      align: "center",
+    // Left: Confidentiality Notice
+    doc.text("Confidential - Internal Use Only", 14, height - 10);
+
+    // Center: Company Name Small
+    doc.text(COMPANY_NAME, width / 2, height - 10, { align: "center" });
+
+    // Right: Page Number
+    doc.text(`Page ${i} of ${pageCount}`, width - 14, height - 10, {
+      align: "right",
     });
-
-    doc.text("Confidential - ADP Namasinghe Distributors", 14, height - 10);
-
-    const date = new Date().toLocaleDateString();
-    doc.text(date, width - 14, height - 10, { align: "right" });
   }
 }
 
 export function addSummarySection(doc, title, metrics, startY) {
-  doc.setFontSize(13);
-  doc.setTextColor(44, 62, 80);
+  doc.setFontSize(14);
+  doc.setTextColor(...BRAND_COLOR);
   doc.setFont("helvetica", "bold");
   doc.text(title, 14, startY);
 
-  // Create a nice grid for metrics using autoTable
+  // Summary Table
+  const tableBody = [];
+  // Split metrics into rows of 2 or 3 for better layout, or just list them vertically if detailed
+  // Ideally, a summary is key-value pairs. Let's make it a clean vertical list or 2-column grid.
+
+  // Let's use a 2-column layout for metrics
+  for (let i = 0; i < metrics.length; i += 2) {
+    const row = [];
+    row.push(metrics[i].label.toUpperCase());
+    row.push(metrics[i].value);
+    if (i + 1 < metrics.length) {
+      row.push(metrics[i + 1].label.toUpperCase());
+      row.push(metrics[i + 1].value);
+    } else {
+      row.push("");
+      row.push("");
+    }
+    tableBody.push(row);
+  }
+
+  // However, the original code used a horizontal layout (all labels in row 0, all values in row 1).
+  // This can get crowded if there are many metrics.
+  // Let's switch to a vertical key-value list for better readability if there are many,
+  // OR stick to horizontal if few. The existing implementation was horizontal.
+  // Let's keep it horizontal but styled better.
+
   autoTable(doc, {
     startY: startY + 5,
-    head: [],
-    body: [
-      metrics.map((m) => m.label.toUpperCase()),
-      metrics.map((m) => m.value),
-    ],
+    head: [metrics.map((m) => m.label.toUpperCase())],
+    body: [metrics.map((m) => m.value)],
     theme: "grid",
     styles: {
       font: "helvetica",
-      fontSize: 10,
+      fontSize: 9,
       halign: "center",
       valign: "middle",
-      cellPadding: 6,
+      cellPadding: 8,
       lineWidth: 0.1,
-      lineColor: [224, 224, 224],
+      lineColor: [189, 195, 199], // Light gray border
     },
     headStyles: {
+      fillColor: HEADER_BG_COLOR,
+      textColor: [127, 140, 141],
+      fontStyle: "bold",
+      fontSize: 8,
+    },
+    bodyStyles: {
       fillColor: [255, 255, 255],
-      textColor: [0, 0, 0],
+      textColor: TEXT_COLOR,
+      fontStyle: "bold",
+      fontSize: 11,
     },
     columnStyles: {
-      // evenly distribute columns could be complex, but let's rely on autoTable defaults
-    },
-    didParseCell: (data) => {
-      // Label Row
-      if (data.row.index === 0) {
-        data.cell.styles.fillColor = [244, 246, 247];
-        data.cell.styles.textColor = [127, 140, 141];
-        data.cell.styles.fontStyle = "bold";
-        data.cell.styles.fontSize = 8;
-      }
-      // Value Row
-      if (data.row.index === 1) {
-        data.cell.styles.fillColor = [255, 255, 255];
-        data.cell.styles.textColor = [41, 128, 185]; // Brand Blue
-        data.cell.styles.fontStyle = "bold";
-        data.cell.styles.fontSize = 12;
-      }
+      // dynamic distribution
     },
   });
 
-  return doc.lastAutoTable.finalY + 12;
+  return doc.lastAutoTable.finalY + 15;
 }
 
 export function exportTable(doc, headers, rows, options = {}) {
-  const startY = options.startY ?? 50;
+  const startY = options.startY ?? 45;
 
   autoTable(doc, {
     startY,
@@ -123,18 +153,25 @@ export function exportTable(doc, headers, rows, options = {}) {
     styles: {
       font: "helvetica",
       fontSize: options.fontSize ?? 9,
-      overflow: "linebreak",
-      cellPadding: 4,
+      cellPadding: 6,
       valign: "middle",
+      overflow: "linebreak",
+      lineColor: [230, 230, 230],
+      lineWidth: 0.1,
     },
     headStyles: {
-      fillColor: options.headColor ?? [41, 128, 185],
+      fillColor: BRAND_COLOR,
       textColor: 255,
       fontStyle: "bold",
       halign: "center",
+      minCellHeight: 12,
+      valign: "middle",
+    },
+    bodyStyles: {
+      textColor: [50, 50, 50],
     },
     alternateRowStyles: {
-      fillColor: [248, 250, 252],
+      fillColor: [248, 250, 252], // Very light blue-gray
     },
     columnStyles: options.columnStyles,
     margin: options.margin || { left: 14, right: 14 },
