@@ -19,7 +19,7 @@ router.get(
       },
     });
     res.json(tasks);
-  })
+  }),
 );
 
 /**
@@ -29,12 +29,12 @@ router.get(
 router.post(
   "/",
   asyncHandler(async (req, res) => {
-    const taskData = req.body;
+    const { notes, ...taskData } = req.body;
     const newTask = await prisma.task.create({
       data: taskData,
     });
     res.status(201).json(newTask);
-  })
+  }),
 );
 
 /**
@@ -45,13 +45,13 @@ router.put(
   "/:id",
   asyncHandler(async (req, res) => {
     const id = parseInt(req.params.id, 10);
-    const taskData = req.body;
+    const { notes, ...taskData } = req.body;
     const updatedTask = await prisma.task.update({
       where: { id },
       data: taskData,
     });
     res.json(updatedTask);
-  })
+  }),
 );
 
 /**
@@ -64,7 +64,7 @@ router.delete(
     const id = parseInt(req.params.id, 10);
     await prisma.task.delete({ where: { id } });
     res.status(204).send();
-  })
+  }),
 );
 
 export default router;

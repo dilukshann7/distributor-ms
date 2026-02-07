@@ -57,7 +57,6 @@ export class InventoryControl extends LitElement {
                   <th class="owner-table-th">Product Name</th>
                   <th class="owner-table-th">SKU</th>
                   <th class="owner-table-th">Quantity</th>
-                  <th class="owner-table-th">Min Stock</th>
                   <th class="owner-table-th">Price</th>
                   <th class="owner-table-th">Status</th>
                 </tr>
@@ -74,9 +73,6 @@ export class InventoryControl extends LitElement {
                         ${item.quantity} units
                       </td>
                       <td class="owner-table-td text-gray-900">
-                        ${item.minStock} units
-                      </td>
-                      <td class="owner-table-td text-gray-900">
                         ${item.price.toLocaleString("en-US", {
                           style: "currency",
                           currency: "LKR",
@@ -87,14 +83,14 @@ export class InventoryControl extends LitElement {
                           class="owner-badge ${item.status === "In Stock"
                             ? "owner-badge-success"
                             : item.status === "Low Stock"
-                            ? "owner-badge-warning"
-                            : "owner-badge-danger"}"
+                              ? "owner-badge-warning"
+                              : "owner-badge-danger"}"
                         >
                           ${item.status}
                         </span>
                       </td>
                     </tr>
-                  `
+                  `,
                 )}
               </tbody>
             </table>

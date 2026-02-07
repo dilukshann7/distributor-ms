@@ -73,7 +73,7 @@ export class InventoryManagement extends LitElement {
 
   switchToEdit(itemId) {
     this.editingItem = this.inventoryItems.find(
-      (item) => item.id === parseInt(itemId)
+      (item) => item.id === parseInt(itemId),
     );
     this.view = "edit";
     this.requestUpdate();
@@ -94,8 +94,6 @@ export class InventoryManagement extends LitElement {
     const itemData = {
       ...rawData,
       quantity: parseInt(rawData.quantity, 10),
-      minStock: parseInt(rawData.minStock, 10),
-      maxStock: parseInt(rawData.maxStock, 10),
       price: parseFloat(rawData.price),
       supplierId: rawData.supplierId
         ? parseInt(rawData.supplierId, 10)
@@ -125,8 +123,6 @@ export class InventoryManagement extends LitElement {
     const itemData = {
       ...rawData,
       quantity: parseInt(rawData.quantity, 10),
-      minStock: parseInt(rawData.minStock, 10),
-      maxStock: parseInt(rawData.maxStock, 10),
       price: parseFloat(rawData.price),
       supplierId: rawData.supplierId
         ? parseInt(rawData.supplierId, 10)
@@ -210,11 +206,11 @@ export class InventoryManagement extends LitElement {
                       <td class="sk-table-cell">${item.sku}</td>
                       <td class="py-3 px-4">
                         <span
-                          class="sk-badge ${item.quantity < item.minStock
+                          class="sk-badge ${item.quantity === 0
                             ? "sk-badge-red"
-                            : item.quantity > item.maxStock
-                            ? "sk-badge-yellow"
-                            : "sk-badge-green"}"
+                            : item.quantity < 10
+                              ? "sk-badge-yellow"
+                              : "sk-badge-green"}"
                         >
                           ${item.quantity}
                         </span>
@@ -241,7 +237,7 @@ export class InventoryManagement extends LitElement {
                             <span
                               .innerHTML=${getIconHTML("edit").replace(
                                 "w-5 h-5",
-                                "w-4 h-4"
+                                "w-4 h-4",
                               )}
                             ></span>
                           </button>
@@ -249,14 +245,14 @@ export class InventoryManagement extends LitElement {
                             <span
                               .innerHTML=${getIconHTML("trash").replace(
                                 "w-5 h-5",
-                                "w-4 h-4"
+                                "w-4 h-4",
                               )}
                             ></span>
                           </button>
                         </div>
                       </td>
                     </tr>
-                  `
+                  `,
                 )}
               </tbody>
             </table>
@@ -334,7 +330,7 @@ export class InventoryManagement extends LitElement {
                         <option value="${supplier.id}">
                           ${supplier.companyName}
                         </option>
-                      `
+                      `,
                     )}
                   </select>
                 </div>
@@ -396,32 +392,6 @@ export class InventoryManagement extends LitElement {
                   <input
                     type="number"
                     name="quantity"
-                    required
-                    min="0"
-                    step="1"
-                    class="sk-input"
-                    placeholder="0"
-                  />
-                </div>
-
-                <div class="space-y-2">
-                  <label class="sk-label">Min Stock</label>
-                  <input
-                    type="number"
-                    name="minStock"
-                    required
-                    min="0"
-                    step="1"
-                    class="sk-input"
-                    placeholder="0"
-                  />
-                </div>
-
-                <div class="space-y-2">
-                  <label class="sk-label">Max Stock</label>
-                  <input
-                    type="number"
-                    name="maxStock"
                     required
                     min="0"
                     step="1"
@@ -559,7 +529,7 @@ export class InventoryManagement extends LitElement {
                         >
                           ${supplier.companyName}
                         </option>
-                      `
+                      `,
                     )}
                   </select>
                 </div>
@@ -628,32 +598,6 @@ ${item.description || ""}</textarea
                     class="sk-input"
                     placeholder="0"
                     value="${item.quantity}"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="sk-label">Min Stock</label>
-                  <input
-                    type="number"
-                    name="minStock"
-                    required
-                    min="0"
-                    step="1"
-                    class="sk-input"
-                    placeholder="0"
-                    value="${item.minStock}"
-                  />
-                </div>
-                <div class="space-y-2">
-                  <label class="sk-label">Max Stock</label>
-                  <input
-                    type="number"
-                    name="maxStock"
-                    required
-                    min="0"
-                    step="1"
-                    class="sk-input"
-                    placeholder="0"
-                    value="${item.maxStock}"
                   />
                 </div>
                 <div class="space-y-2">
