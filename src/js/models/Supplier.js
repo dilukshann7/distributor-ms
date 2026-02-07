@@ -1,19 +1,19 @@
 import axios from "axios";
-import { SalesOrder } from "./SalesOrder";
-import { Invoice } from "./Invoice";
+import { SalesOrder } from "./SalesOrder.js";
+import { Invoice } from "./Invoice.js";
 import {
   filterOrdersByDateRange,
   filterInvoicesByDateRange,
   formatDate,
   formatCurrency,
-} from "../utils/reportUtils";
+} from "../utils/reportUtils.js";
 import {
   preparePdfDoc,
   exportTable,
   addFooter,
   addSummarySection,
 } from "../utils/pdfReportTemplate.js";
-import { User } from "./User";
+import { User } from "./User.js";
 
 export class Supplier extends User {
   static async getAll() {
@@ -52,13 +52,13 @@ export class Supplier extends User {
       const filteredOrders = filterOrdersByDateRange(
         allOrders,
         startDate,
-        endDate
+        endDate,
       );
 
       const filteredInvoices = filterInvoicesByDateRange(
         allInvoices,
         startDate,
-        endDate
+        endDate,
       );
 
       const doc = preparePdfDoc("Supplier Activity Report", new Date());
@@ -67,13 +67,13 @@ export class Supplier extends User {
       const totalOrders = filteredOrders.length;
       const totalOrderAmount = filteredOrders.reduce(
         (sum, order) => sum + parseFloat(order.totalAmount || 0),
-        0
+        0,
       );
 
       const totalInvoices = filteredInvoices.length;
       const totalInvoiceAmount = filteredInvoices.reduce(
         (sum, invoice) => sum + parseFloat(invoice.totalAmount || 0),
-        0
+        0,
       );
 
       // Summary Section
@@ -93,7 +93,7 @@ export class Supplier extends User {
             value: formatCurrency(totalInvoiceAmount),
           },
         ],
-        yPos
+        yPos,
       );
 
       // Orders Section
@@ -129,7 +129,7 @@ export class Supplier extends User {
             4: { cellWidth: 30, halign: "center" },
             5: { cellWidth: 30, halign: "right" },
           },
-        }
+        },
       );
 
       // Invoices Section
@@ -161,7 +161,7 @@ export class Supplier extends User {
             4: { cellWidth: 30, halign: "center" },
             5: { cellWidth: 30, halign: "right" },
           },
-        }
+        },
       );
 
       // Add Footer

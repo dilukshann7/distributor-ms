@@ -1,13 +1,13 @@
 import axios from "axios";
-import { User } from "./User";
+import { User } from "./User.js";
 import {
   preparePdfDoc,
   exportTable,
   addFooter,
   addSummarySection,
 } from "../utils/pdfReportTemplate.js";
-import { Product } from "./Product";
-import { formatCurrency, formatDate } from "../utils/reportUtils";
+import { Product } from "./Product.js";
+import { formatCurrency, formatDate } from "../utils/reportUtils.js";
 
 export class StockKeeper extends User {
   static async getAll() {
@@ -47,14 +47,14 @@ export class StockKeeper extends User {
         (sum, product) =>
           sum +
           parseFloat(product.price || 0) * parseFloat(product.quantity || 0),
-        0
+        0,
       );
       const lowStockItems = allProducts.filter(
-        (product) => product.quantity <= product.minStock
+        (product) => product.quantity < 10,
       ).length;
 
       const outOfStockItems = allProducts.filter(
-        (product) => product.quantity === 0
+        (product) => product.quantity === 0,
       ).length;
 
       // Summary
@@ -71,7 +71,7 @@ export class StockKeeper extends User {
           { label: "Low Stock Items", value: lowStockItems.toString() },
           { label: "Out of Stock", value: outOfStockItems.toString() },
         ],
-        yPos
+        yPos,
       );
 
       // Stock Table
@@ -102,7 +102,7 @@ export class StockKeeper extends User {
             5: { cellWidth: 25, halign: "center" },
             6: { cellWidth: 25 },
           },
-        }
+        },
       );
 
       // Add Footer

@@ -1,17 +1,17 @@
 import axios from "axios";
-import { User } from "./User";
+import { User } from "./User.js";
 import {
   filterOrdersByDateRange,
   formatDate,
   formatCurrency,
-} from "../utils/reportUtils";
+} from "../utils/reportUtils.js";
 import {
   preparePdfDoc,
   exportTable,
   addFooter,
   addSummarySection,
 } from "../utils/pdfReportTemplate.js";
-import { SalesOrder } from "./SalesOrder";
+import { SalesOrder } from "./SalesOrder.js";
 
 export class Salesman extends User {
   static async getAll() {
@@ -47,7 +47,7 @@ export class Salesman extends User {
       const filteredOrders = filterOrdersByDateRange(
         allOrders,
         startDate,
-        endDate
+        endDate,
       );
 
       const doc = preparePdfDoc("Sales Report", new Date());
@@ -55,7 +55,7 @@ export class Salesman extends User {
       const totalOrders = filteredOrders.length;
       const subtotal = filteredOrders.reduce(
         (sum, order) => sum + parseFloat(order.subtotal || 0),
-        0
+        0,
       );
 
       const averageOrderValue = totalOrders > 0 ? subtotal / totalOrders : 0;
@@ -73,7 +73,7 @@ export class Salesman extends User {
             value: formatCurrency(averageOrderValue),
           },
         ],
-        yPos
+        yPos,
       );
 
       // Detailed Table
@@ -106,7 +106,7 @@ export class Salesman extends User {
             4: { cellWidth: "auto" },
             5: { cellWidth: 30, halign: "right" },
           },
-        }
+        },
       );
 
       // Add Footer

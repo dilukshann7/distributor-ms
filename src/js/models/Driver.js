@@ -1,5 +1,5 @@
 import axios from "axios";
-import { User } from "./User";
+import { User } from "./User.js";
 
 export class Driver extends User {
   static async getAll() {
