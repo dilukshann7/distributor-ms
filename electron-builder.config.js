@@ -119,7 +119,7 @@ module.exports = {
   ],
 
   // Disable ASAR - keep files unpacked for easier debugging and Node access
-  asar: true,
+  asar: false,
 
   // Windows configuration - build directory only, no installer/portable
   win: {
