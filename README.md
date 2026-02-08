@@ -3,97 +3,89 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
-![Express](https://img.shields.io/badge/express-v5.0-blue)
-![Prisma](https://img.shields.io/badge/prisma-v6.0-indigo)
+![Express](https://img.shields.io/badge/express-v5.1-blue)
+![Prisma](https://img.shields.io/badge/prisma-v6.19-indigo)
+![Electron](https://img.shields.io/badge/electron-33.0-9FEAF9)
 
-> **Academic Project:** This system was developed as the final year project for the first year of the **BSc (Hons) in Software Engineering** at **NIBM**.
+Academic project for the BSc (Hons) in Software Engineering at NIBM. A full-stack distribution management system with role-based dashboards, inventory, orders, deliveries, payments, and analytics.
 
-A comprehensive **Distribution Management System** designed to streamline operations for ADP Namasinghe. This full-stack application manages the entire supply chain workflow, including inventory tracking, order processing, delivery management, employee oversight, and financial reporting.
+## Highlights
 
-## Key Features
-
-- **Role-Based Access Control (RBAC):** Secure login and distinct dashboards for various roles:
-  - **Management:** Owner, Manager, Assistant Manager
-  - **Operations:** Distributor, Salesman, Cashier
-  - **Logistics & Supply:** Stock Keeper, Driver, Supplier
-- **Inventory & Stock Management:** Real-time tracking of stock levels, receiving shipments, and stock availability reports.
-- **Order Management:** Complete lifecycle management from order authorization to processing and invoicing.
-- **Logistics & Delivery:** Delivery route planning, driver management, and proof of delivery tracking.
-- **Financials:** Invoicing, payment collection, supplier payments, and sales reports.
-- **Employee Management:** Employee oversight, task assignment, and performance monitoring.
-- **Analytics & Reporting:** Detailed analytics for sales, operations, and customer feedback with PDF export capabilities.
-
-## Technical Architecture
-
-This project follows a **Monolithic Architecture** with a clear separation of concerns between the frontend view layer and backend API services.
-
-### Backend (Node.js & Express)
-
-- **API Design:** RESTful API architecture serving JSON data to the client.
-- **Database Access:** Uses **Prisma ORM** for type-safe database queries against a relational database (PostgreSQL).
-- **Session Management:** Implements stateful sessions using `express-session` backed by a database store (`@quixo3/prisma-session-store`) for persistence across server restarts.
-- **Routing:** Modularized route handlers (e.g., `auth.routes.js`, `order.routes.js`) to organize API logic.
-
-### Frontend (Vanilla JS & Lit)
-
-- **Single Page Application (SPA):** Uses a custom client-side router (`router.js`) using the History API to manage navigation without page reloads.
-- **Component-Based:** Utilizes **Lit** libraries for lightweight, efficient web components.
-- **Styling:** Styled with **Tailwind CSS** for a responsive and modern design system.
-- **Dynamic Rendering:** Dashboards and views are lazily loaded based on the authenticated user's role.
-
-### Security & Data
-
-- **Authentication:** Session-based authentication flow.
-- **Authorization:** Middleware checks verify user roles before granting access to specific API endpoints and frontend routes.
-- **Data Integrity:** Foreign key constraints and transaction management ensure data consistency across complex supply chain operations.
+- Role-based access for management, operations, logistics, and suppliers
+- End-to-end order and delivery workflows
+- Inventory, payments, and reporting with PDF exports
+- REST API with session-based auth
 
 ## Tech Stack
 
-**Backend:**
+- Frontend: Vanilla JS, Lit, Tailwind CSS, Webpack
+- Backend: Node.js, Express, Prisma
+- Database: PostgreSQL
+- Desktop shell: Electron
 
-- **Runtime:** Node.js
-- **Framework:** Express.js (v5)
-- **ORM:** Prisma
-- **Session Store:** Prisma Session Store
+## Project Structure
 
-**Frontend:**
+- [api/](api/) REST API and session handling
+- [src/](src/) SPA UI and assets
+- [prisma/](prisma/) database schema and seed
+- [docs/](docs/) diagrams and detailed documentation
 
-- **Core:** HTML5, JavaScript (ES6+)
-- **UI Framework:** Tailwind CSS
-- **Component Library:** Lit
-- **Build Tool:** Webpack
+## Quick Start
 
-**Utilities:**
+1. Install dependencies
 
-- **PDF Generation:** jsPDF & jsPDF-AutoTable
-- **HTTP Client:** Axios
+```bash
+npm install
+```
 
-## API Endpoints Overview
+2. Configure environment
 
-The API is structured under `/api` with the following main resources:
+Create a `.env` file at the project root:
 
-- **Auth:** `/api/auth` (Login, Logout, Session Check)
-- **Core Entities:** `/api/users`, `/api/products`, `/api/orders`
-- **Operations:** `/api/deliveries`, `/api/tasks`, `/api/supplies`
-- **Finance:** `/api/payments`, `/api/analytics`
+```bash
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DBNAME"
+PORT=3000
+```
 
-## Contributing
+3. Generate Prisma client and migrate your database
 
-Contributions are welcome! Please follow these steps:
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
 
-1.  Fork the repository.
-2.  Create a feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
+4. Run the API server
+
+```bash
+npm run server
+```
+
+5. Run the frontend dev server
+
+```bash
+npm run dev
+```
+
+6. (Optional) Run Electron
+
+```bash
+npm run electron:dev
+```
+
+## Scripts
+
+- `npm run dev` - Webpack dev server
+- `npm run build` - Production build
+- `npm run server` - API server
+- `npm run electron:dev` - Electron app (build + run)
+- `npm run electron:build` - Electron build
+
+## Docs
+
+- Overview: [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md)
+- Class diagram: [docs/CLASS_DIAGRAM.md](docs/CLASS_DIAGRAM.md)
+- API routes: [api/README.md](api/README.md)
 
 ## License
 
-This project is licensed under the MIT License - see the `package.json` file for details.
-
-## Authors
-
-- Anjana Dulan Wijerathna
-- Dilukshan Niranjan
-- Melisha Devaraj
-- Pabodhini Tharaka Perera
+MIT. See [package.json](package.json) for details.
