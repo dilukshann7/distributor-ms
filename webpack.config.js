@@ -2,9 +2,13 @@ const path = require("path");
 const htmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
+const isProduction =
+  process.argv.includes("--mode=production") ||
+  process.argv.includes("production");
+
 module.exports = {
-  mode: "development",
-  devtool: "source-map", // CSP-compliant devtool (no eval)
+  mode: isProduction ? "production" : "development",
+  devtool: isProduction ? false : "source-map", // No sourcemaps in production
   entry: "./src/index.js",
   output: {
     path: path.resolve(__dirname, "dist"),
