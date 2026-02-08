@@ -25,8 +25,8 @@ export class StockReports extends LitElement {
     return html`
       <div class="space-y-6">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900">Stock Reports</h2>
-          <p class="sk-text-muted">View and export stock reports</p>
+          <h2 class="text-2xl font-bold text-gray-900">Inventory Reports</h2>
+          <p class="sk-text-muted">View and export inventory reports</p>
         </div>
         <div class="sk-card p-6">
           <h4 class="font-bold text-gray-900 mb-4">Export Reports</h4>

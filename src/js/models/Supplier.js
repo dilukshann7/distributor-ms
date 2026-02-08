@@ -1,6 +1,6 @@
 import axios from "axios";
-import { SalesOrder } from "./SalesOrder.js";
-import { Invoice } from "./Invoice.js";
+import { PurchaseOrder } from "./PurchaseOrder.js";
+import { PurchaseInvoice } from "./PurchaseInvoice.js";
 import {
   filterOrdersByDateRange,
   filterInvoicesByDateRange,
@@ -43,36 +43,45 @@ export class Supplier extends User {
 
   static async exportSupplierReport(startDate, endDate) {
     try {
-      const orderResponse = await SalesOrder.getAll();
+      const orderResponse = await PurchaseOrder.getAll();
       const allOrders = orderResponse.data || [];
 
-      const invoiceResponse = await Invoice.getAll();
+      const invoiceResponse = await PurchaseInvoice.getAll();
       const allInvoices = invoiceResponse.data || [];
 
       const filteredOrders = filterOrdersByDateRange(
-        allOrders,
+        allOrders.map((order) => ({
+          ...order,
+          orderDate: order.order?.orderDate || order.orderDate,
+        })),
         startDate,
         endDate,
       );
 
       const filteredInvoices = filterInvoicesByDateRange(
-        allInvoices,
+        allInvoices.map((invoice) => ({
+          ...invoice,
+          invoiceDate: invoice.invoice?.invoiceDate || invoice.invoiceDate,
+        })),
         startDate,
         endDate,
       );
 
-      const doc = preparePdfDoc("Supplier Activity Report", new Date());
+      const doc = preparePdfDoc("Supplier Report", new Date());
 
       // Metrics
       const totalOrders = filteredOrders.length;
       const totalOrderAmount = filteredOrders.reduce(
-        (sum, order) => sum + parseFloat(order.totalAmount || 0),
+        (sum, order) =>
+          sum + parseFloat(order.order?.totalAmount || order.totalAmount || 0),
         0,
       );
 
       const totalInvoices = filteredInvoices.length;
       const totalInvoiceAmount = filteredInvoices.reduce(
-        (sum, invoice) => sum + parseFloat(invoice.totalAmount || 0),
+        (sum, invoice) =>
+          sum +
+          parseFloat(invoice.invoice?.totalAmount || invoice.totalAmount || 0),
         0,
       );
 
@@ -102,21 +111,14 @@ export class Supplier extends User {
 
       exportTable(
         doc,
-        [
-          "Order ID",
-          "Customer ID",
-          "Date",
-          "Status",
-          "Due Date",
-          "Total Amount",
-        ],
+        ["Order ID", "Supplier", "Date", "Status", "Due Date", "Total Amount"],
         filteredOrders.map((order) => [
-          order.id || "N/A",
-          order.customerId || "N/A",
-          formatDate(order.orderDate),
-          order.status || "N/A",
+          order.order?.orderNumber || order.id || "N/A",
+          order.supplier?.companyName || order.supplier?.user?.name || "N/A",
+          formatDate(order.order?.orderDate || order.orderDate),
+          order.order?.status || order.status || "N/A",
           order.dueDate ? formatDate(order.dueDate) : "N/A",
-          formatCurrency(order.totalAmount),
+          formatCurrency(order.order?.totalAmount || order.totalAmount || 0),
         ]),
         {
           startY: yPos + 10,
@@ -143,12 +145,18 @@ export class Supplier extends User {
         doc,
         ["Invoice ID", "PO ID", "Date", "Due Date", "Status", "Amount"],
         filteredInvoices.map((invoice) => [
-          invoice.id || "N/A",
+          invoice.invoice?.invoiceNumber || invoice.id || "N/A",
           invoice.purchaseOrderId || "N/A",
-          formatDate(invoice.invoiceDate),
-          invoice.dueDate ? formatDate(invoice.dueDate) : "N/A",
-          invoice.status || "N/A",
-          formatCurrency(invoice.totalAmount),
+          formatDate(invoice.invoice?.invoiceDate || invoice.invoiceDate),
+          invoice.invoice?.dueDate
+            ? formatDate(invoice.invoice.dueDate)
+            : invoice.dueDate
+              ? formatDate(invoice.dueDate)
+              : "N/A",
+          invoice.invoice?.status || invoice.status || "N/A",
+          formatCurrency(
+            invoice.invoice?.totalAmount || invoice.totalAmount || 0,
+          ),
         ]),
         {
           startY: yPos + 5,

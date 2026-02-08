@@ -42,7 +42,7 @@ class StockKeeperDashboard {
     const menuItems = [
       { id: "inventory", label: "Inventory", icon: "package" },
       { id: "receiving", label: "Shipment", icon: "inbox" },
-      { id: "reports", label: "Stock Reports", icon: "bar-chart" },
+      { id: "reports", label: "Inventory Reports", icon: "bar-chart" },
     ];
     return `
       <aside class="translate-x-0 lg:translate-x-0 fixed lg:relative w-64 h-screen bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 z-30 overflow-y-auto">
@@ -52,14 +52,14 @@ class StockKeeperDashboard {
             .map(
               (item) => `
             <button data-section="${item.id}" class="nav-item sk-nav-item ${
-                this.currentSection === item.id
-                  ? "sk-nav-item-active"
-                  : "sk-nav-item-inactive"
-              }">
+              this.currentSection === item.id
+                ? "sk-nav-item-active"
+                : "sk-nav-item-inactive"
+            }">
               ${getIconHTML(item.icon)}
               <span>${item.label}</span>
             </button>
-          `
+          `,
             )
             .join("")}
         </nav>
