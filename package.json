@@ -1,6 +1,7 @@
 {
   "name": "distributor-ms",
   "version": "1.0.0",
+  "type": "module",
   "description": "ADP Namasinghe Distribution Management System",
   "main": "./electron/main.js",
   "scripts": {
@@ -9,8 +10,8 @@
     "server": "node ./api/server.js",
     "postinstall": "prisma generate",
     "electron:dev": "npm run build && electron .",
-    "electron:build": "npm run build && electron-builder --config electron-builder.config.js",
-    "electron:pack": "npm run build && electron-builder --config electron-builder.config.js --dir"
+    "electron:build": "npm run build && electron-builder --config electron-builder.config.cjs",
+    "electron:pack": "npm run build && electron-builder --config electron-builder.config.cjs --dir"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -53,6 +54,6 @@
     "redis": "^5.10.0"
   },
   "build": {
-    "extends": "./electron-builder.config.js"
+    "extends": "./electron-builder.config.cjs"
   }
 }

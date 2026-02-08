@@ -1,7 +1,11 @@
-const { app, BrowserWindow, shell } = require("electron");
-const path = require("node:path");
-const { spawn } = require("node:child_process");
-const fs = require("node:fs");
+import { app, BrowserWindow, shell } from "electron";
+import path from "node:path";
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Handle portable path for userData
 if (process.env.PORTABLE_EXECUTABLE_DIR) {
@@ -42,6 +46,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       webSecurity: true,
+      devTools: true, // Enable dev tools for debugging
     },
   });
 
@@ -53,8 +58,12 @@ function createWindow() {
     mainWindow.show();
   });
 
-  // Load the app
-  mainWindow.loadURL(`http://localhost:${SERVER_PORT}`);
+  // Load the app with error handling
+  mainWindow.loadURL(`http://localhost:${SERVER_PORT}`).catch((err) => {
+    console.error("Failed to load URL:", err);
+    // Show error page
+    mainWindow.loadURL(`data:text/html,<html><body style="background:#1a1a2e;color:white;font-family:Arial;padding:50px;text-align:center;"><h1>Server Connection Failed</h1><p>Could not connect to the application server on port ${SERVER_PORT}</p><p>Please check the console logs for details.</p></body></html>`);
+  });
 
   // Handle external links
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
