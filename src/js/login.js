@@ -76,12 +76,104 @@ export function renderLogin(container) {
 
   const passwordInput = container.querySelector("#password");
   const togglePasswordBtn = container.querySelector("#togglePassword");
+  const loginForm = container.querySelector("#loginForm");
+  const errorBox = container.querySelector("#error");
+  const errorText = container.querySelector("#errorText");
+  const loginBtn = container.querySelector("#loginBtn");
+  const loginBtnText = container.querySelector("#loginBtnText");
+  const loginBtnIcon = container.querySelector("#loginBtnIcon");
+  const loginBtnSpinner = container.querySelector("#loginBtnSpinner");
 
   if (passwordInput && togglePasswordBtn) {
     togglePasswordBtn.addEventListener("click", () => {
       const isHidden = passwordInput.type === "password";
       passwordInput.type = isHidden ? "text" : "password";
       togglePasswordBtn.textContent = isHidden ? "Hide" : "Show";
+    });
+  }
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (errorBox) {
+        errorBox.classList.add("hidden");
+      }
+
+      if (loginBtn) {
+        loginBtn.disabled = true;
+      }
+      if (loginBtnText) {
+        loginBtnText.textContent = "Signing in...";
+      }
+      if (loginBtnIcon) {
+        loginBtnIcon.classList.add("hidden");
+      }
+      if (loginBtnSpinner) {
+        loginBtnSpinner.classList.remove("hidden");
+      }
+
+      try {
+        const email = container.querySelector("#email")?.value?.trim();
+        const password = container.querySelector("#password")?.value;
+
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (response.ok) {
+          if (response.redirected && response.url) {
+            const redirectUrl = new URL(response.url);
+            navigateTo(`${redirectUrl.pathname}${redirectUrl.search}`);
+          } else {
+            const authResponse = await fetch("/api/check-auth");
+            const authData = await authResponse.json();
+            if (authData?.isAuth && authData.user?.role) {
+              navigateTo(`/${authData.user.role}`);
+            }
+          }
+          return;
+        }
+
+        let message = "Invalid email or password";
+        try {
+          const data = await response.json();
+          message = data?.error || message;
+        } catch (parseError) {
+          // Keep fallback message when response body is not JSON.
+        }
+
+        if (errorText) {
+          errorText.textContent = message;
+        }
+        if (errorBox) {
+          errorBox.classList.remove("hidden");
+        }
+      } catch (error) {
+        if (errorText) {
+          errorText.textContent = "Unable to sign in. Please try again.";
+        }
+        if (errorBox) {
+          errorBox.classList.remove("hidden");
+        }
+        console.error("Login failed:", error);
+      } finally {
+        if (loginBtn) {
+          loginBtn.disabled = false;
+        }
+        if (loginBtnText) {
+          loginBtnText.textContent = "Sign In";
+        }
+        if (loginBtnIcon) {
+          loginBtnIcon.classList.remove("hidden");
+        }
+        if (loginBtnSpinner) {
+          loginBtnSpinner.classList.add("hidden");
+        }
+      }
     });
   }
 }

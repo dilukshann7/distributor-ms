@@ -55,8 +55,6 @@ api/
 - `POST /api/sales-orders` - Create a sales order
 - `PUT /api/sales-orders/:id` - Update a sales order
 - `DELETE /api/sales-orders/:id` - Delete a sales order
-- `GET /api/small-orders` - Get all small orders
-- `POST /api/small-orders` - Create a small order
 - `GET /api/carts` - Get all carts
 - `POST /api/carts` - Create a cart
 - `PUT /api/carts/:id` - Update a cart
@@ -165,7 +163,7 @@ router.get(
   "/",
   asyncHandler(async (req, res) => {
     // Your logic here
-  })
+  }),
 );
 
 export default router;

@@ -57,6 +57,15 @@ export class RetailOrder {
         return [];
       };
 
+      const formatItemSummary = (items) =>
+        items
+          .map((item) => {
+            const name = item.name || item.productName || "Item";
+            const qty = item.quantity || 1;
+            return `${name} (${qty})`;
+          })
+          .join(", ");
+
       const start = new Date(startDate);
       const end = new Date(endDate);
       end.setHours(23, 59, 59, 999);
@@ -135,9 +144,7 @@ export class RetailOrder {
         sortedOrders.map((retailOrder) => [
           retailOrder.order?.orderNumber || "N/A",
           retailOrder.id,
-          getOrderItems(retailOrder)
-            .reduce((itemSum, item) => itemSum + (item.quantity || 1), 0)
-            .toString(),
+          formatItemSummary(getOrderItems(retailOrder)) || "No items",
           formatCurrency(
             retailOrder.order?.totalAmount ||
               retailOrder.cart?.totalAmount ||
