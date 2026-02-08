@@ -1,6 +1,30 @@
 import { createSessionMiddleware } from "./SessionHandling.js";
 import express from "express";
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Get correct directory for this file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load .env from the correct location (parent of api folder)
+const envPath = path.join(__dirname, "..", ".env");
+console.log("Loading .env from:", envPath);
+const result = dotenv.config({ path: envPath });
+if (result.error) {
+  console.error("Error loading .env:", result.error);
+} else {
+  console.log(
+    "DATABASE_URL loaded:",
+    process.env.DATABASE_URL
+      ? "Yes (starts with: " +
+          process.env.DATABASE_URL.substring(0, 30) +
+          "...)"
+      : "No",
+  );
+}
+
 import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
@@ -27,6 +51,11 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static("dist"));
 app.use(cors());
 app.use(express.json());
+
+// Health check endpoint for Electron startup
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", timestamp: Date.now() });
+});
 app.use(express.urlencoded({ extended: true }));
 app.set("trust proxy", 1);
 app.use(createSessionMiddleware());
@@ -50,13 +79,8 @@ app.use("/api/purchase-invoices", purchaseInvoiceRoutes);
 app.use("/api/sales-invoices", salesInvoiceRoutes);
 app.use("/api/shipments", shipmentRoutes);
 
-import path from "path";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 app.get(/^\/(?!api|dist|assets|static|favicon\.ico).*/, (req, res, next) => {
-  res.sendFile(path.join(__dirname, "../src/index.html"));
+  res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
 app.use((err, req, res, next) => {

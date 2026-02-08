@@ -3,10 +3,10 @@ import { getIconHTML } from "../../assets/icons/index.js";
 import { NotificationPanel } from "../components/NotificationPanel.js";
 import { OrderManagement } from "./distributor/OrderManagement.js";
 import { DriverManagement } from "./distributor/DriverManagement.js";
-import { StockTracking } from "./distributor/StockTracking.js";
 import { DeliveryRoutes } from "./distributor/DeliveryRoutes.js";
 import { ProofOfDelivery } from "./distributor/ProofOfDelivery.js";
 import { OrderAuthorization } from "./distributor/OrderAuthorization.js";
+import { StockView } from "./distributor/StockView.js";
 import { User } from "../models/User.js";
 
 class DistributorDashboard {
@@ -16,10 +16,10 @@ class DistributorDashboard {
     this.sections = {
       orders: document.createElement("order-management"),
       drivers: document.createElement("driver-management-dist"),
-      stock: document.createElement("stock-tracking"),
       routes: document.createElement("delivery-routes"),
       delivery: document.createElement("proof-of-delivery"),
       authorization: document.createElement("order-authorization"),
+      stocks: document.createElement("stock-view"),
     };
     window.distributorDashboard = this;
     this.notificationPanel = new NotificationPanel(this.container);
@@ -48,7 +48,7 @@ class DistributorDashboard {
     const menuItems = [
       { id: "orders", label: "Order Management", icon: "package" },
       { id: "drivers", label: "Driver Management", icon: "users" },
-      { id: "stock", label: "Stock Tracking", icon: "map-pin" },
+      { id: "stocks", label: "Stock Tracking", icon: "map-pin" },
       { id: "routes", label: "Delivery Routes", icon: "truck" },
       { id: "delivery", label: "Proof of Delivery", icon: "check-circle" },
       { id: "authorization", label: "Order Authorization", icon: "lock" },
@@ -63,14 +63,14 @@ class DistributorDashboard {
             .map(
               (item) => `
             <button data-section="${item.id}" class="dist-nav-item ${
-                this.currentSection === item.id
-                  ? "dist-nav-item-active"
-                  : "dist-nav-item-inactive"
-              }">
+              this.currentSection === item.id
+                ? "dist-nav-item-active"
+                : "dist-nav-item-inactive"
+            }">
               ${getIconHTML(item.icon)}
               <span class="font-medium">${item.label}</span>
             </button>
-          `
+          `,
             )
             .join("")}
         </nav>
