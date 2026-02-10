@@ -132,6 +132,8 @@ export class RetailOrder {
 
       // Detailed Table
       doc.setFontSize(14);
+      doc.setTextColor(44, 62, 80);
+      doc.setFont("helvetica", "bold");
       doc.text("Order Details", 14, yPos + 5);
       if (sortedOrders.length === 0) {
         doc.setFontSize(10);

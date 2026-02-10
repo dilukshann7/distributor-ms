@@ -100,17 +100,21 @@ export class CashFlowReport {
         order.order?.totalAmount || order.cart?.totalAmount || 0,
       );
       const items = getOrderItems(order);
-      const itemCount = items.reduce(
-        (sum, item) => sum + (item.quantity || 1),
-        0,
-      );
       if (!retailByDate.has(dateKey)) {
-        retailByDate.set(dateKey, { totalAmount: 0, orders: 0, items: 0 });
+        retailByDate.set(dateKey, {
+          totalAmount: 0,
+          orders: 0,
+          items: new Map(),
+        });
       }
       const entry = retailByDate.get(dateKey);
       entry.totalAmount += amount;
       entry.orders += 1;
-      entry.items += itemCount;
+      items.forEach((item) => {
+        const name = item.name || "Item";
+        const qty = item.quantity || 0;
+        entry.items.set(name, (entry.items.get(name) || 0) + qty);
+      });
     });
 
     const purchasesBySupplier = new Map();
@@ -149,6 +153,8 @@ export class CashFlowReport {
     );
 
     doc.setFontSize(14);
+    doc.setTextColor(44, 62, 80);
+    doc.setFont("helvetica", "bold");
     doc.text("Sales by Customer", 14, yPos + 5);
 
     const salesRows = Array.from(salesByCustomer.entries())
@@ -183,16 +189,23 @@ export class CashFlowReport {
     }
 
     doc.setFontSize(14);
+    doc.setTextColor(44, 62, 80);
+    doc.setFont("helvetica", "bold");
     doc.text("Retail Summary", 14, sectionY + 5);
 
     const retailRows = Array.from(retailByDate.entries())
       .sort((a, b) => new Date(b[0]).getTime() - new Date(a[0]).getTime())
-      .map(([dateKey, data]) => [
-        dateKey,
-        data.orders.toString(),
-        data.items.toString(),
-        formatCurrency(data.totalAmount),
-      ]);
+      .map(([dateKey, data]) => {
+        const itemSummary = Array.from(data.items.entries())
+          .map(([name, qty]) => `${name} (${qty})`)
+          .join(", ");
+        return [
+          dateKey,
+          data.orders.toString(),
+          itemSummary || "No items",
+          formatCurrency(data.totalAmount),
+        ];
+      });
 
     exportTable(doc, ["Date", "Orders", "Items", "Sales"], retailRows, {
       startY: sectionY + 10,
@@ -212,6 +225,8 @@ export class CashFlowReport {
     }
 
     doc.setFontSize(14);
+    doc.setTextColor(44, 62, 80);
+    doc.setFont("helvetica", "bold");
     doc.text("Purchases by Supplier", 14, sectionY + 5);
 
     const purchaseRows = Array.from(purchasesBySupplier.entries())

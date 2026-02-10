@@ -82,16 +82,10 @@ export function addSummarySection(doc, title, metrics, startY) {
   doc.setFont("helvetica", "bold");
   doc.text(title, 14, startY);
 
-  // Summary Table
+  // Build a 2-column key-value pair grid for better readability
   const tableBody = [];
-  // Split metrics into rows of 2 or 3 for better layout, or just list them vertically if detailed
-  // Ideally, a summary is key-value pairs. Let's make it a clean vertical list or 2-column grid.
-
-  // Let's use a 2-column layout for metrics
   for (let i = 0; i < metrics.length; i += 2) {
-    const row = [];
-    row.push(metrics[i].label.toUpperCase());
-    row.push(metrics[i].value);
+    const row = [metrics[i].label.toUpperCase(), metrics[i].value];
     if (i + 1 < metrics.length) {
       row.push(metrics[i + 1].label.toUpperCase());
       row.push(metrics[i + 1].value);
@@ -102,57 +96,81 @@ export function addSummarySection(doc, title, metrics, startY) {
     tableBody.push(row);
   }
 
-  // However, the original code used a horizontal layout (all labels in row 0, all values in row 1).
-  // This can get crowded if there are many metrics.
-  // Let's switch to a vertical key-value list for better readability if there are many,
-  // OR stick to horizontal if few. The existing implementation was horizontal.
-  // Let's keep it horizontal but styled better.
-
   autoTable(doc, {
     startY: startY + 5,
-    head: [metrics.map((m) => m.label.toUpperCase())],
-    body: [metrics.map((m) => m.value)],
+    body: tableBody,
     theme: "grid",
     styles: {
       font: "helvetica",
       fontSize: 9,
-      halign: "center",
       valign: "middle",
-      cellPadding: 8,
+      cellPadding: 5,
       lineWidth: 0.1,
-      lineColor: [189, 195, 199], // Light gray border
-    },
-    headStyles: {
-      fillColor: HEADER_BG_COLOR,
-      textColor: [127, 140, 141],
-      fontStyle: "bold",
-      fontSize: 8,
-    },
-    bodyStyles: {
-      fillColor: [255, 255, 255],
-      textColor: TEXT_COLOR,
-      fontStyle: "bold",
-      fontSize: 11,
+      lineColor: [189, 195, 199],
+      overflow: "visible",
     },
     columnStyles: {
-      // dynamic distribution
+      0: {
+        fontStyle: "bold",
+        textColor: [127, 140, 141],
+        fillColor: HEADER_BG_COLOR,
+        fontSize: 8,
+      },
+      1: {
+        fontStyle: "bold",
+        textColor: TEXT_COLOR,
+        fontSize: 11,
+        halign: "center",
+      },
+      2: {
+        fontStyle: "bold",
+        textColor: [127, 140, 141],
+        fillColor: HEADER_BG_COLOR,
+        fontSize: 8,
+      },
+      3: {
+        fontStyle: "bold",
+        textColor: TEXT_COLOR,
+        fontSize: 11,
+        halign: "center",
+      },
     },
+    margin: { left: 14, right: 14 },
   });
 
   return doc.lastAutoTable.finalY + 15;
 }
 
 export function exportTable(doc, headers, rows, options = {}) {
-  const startY = options.startY ?? 45;
+  const {
+    startY: rawStartY,
+    columnStyles: rawColumnStyles,
+    margin,
+    fontSize,
+    ...extraOptions
+  } = options;
+
+  const startY = rawStartY ?? 45;
+  const columnStyles = rawColumnStyles
+    ? Object.fromEntries(
+        Object.entries(rawColumnStyles).map(([key, style]) => {
+          if (style?.cellWidth && typeof style.cellWidth === "number") {
+            return [key, { ...style, cellWidth: "auto" }];
+          }
+          return [key, style];
+        }),
+      )
+    : undefined;
 
   autoTable(doc, {
+    ...extraOptions,
     startY,
     head: [headers],
     body: rows,
     theme: "striped",
     styles: {
       font: "helvetica",
-      fontSize: options.fontSize ?? 9,
+      fontSize: fontSize ?? 9,
       cellPadding: 6,
       valign: "middle",
       overflow: "linebreak",
@@ -166,6 +184,7 @@ export function exportTable(doc, headers, rows, options = {}) {
       halign: "center",
       minCellHeight: 12,
       valign: "middle",
+      overflow: "visible",
     },
     bodyStyles: {
       textColor: [50, 50, 50],
@@ -173,8 +192,7 @@ export function exportTable(doc, headers, rows, options = {}) {
     alternateRowStyles: {
       fillColor: [248, 250, 252], // Very light blue-gray
     },
-    columnStyles: options.columnStyles,
-    margin: options.margin || { left: 14, right: 14 },
-    ...options,
+    columnStyles,
+    margin: margin || { left: 14, right: 14 },
   });
 }

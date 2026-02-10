@@ -101,6 +101,8 @@ export class User {
 
       // Detailed Table
       doc.setFontSize(14);
+      doc.setTextColor(44, 62, 80);
+      doc.setFont("helvetica", "bold");
       doc.text("Employee Roster", 14, yPos + 5);
 
       const tableData = users.map((user) => {

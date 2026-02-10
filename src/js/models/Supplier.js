@@ -107,6 +107,8 @@ export class Supplier extends User {
 
       // Orders Section
       doc.setFontSize(14);
+      doc.setTextColor(44, 62, 80);
+      doc.setFont("helvetica", "bold");
       doc.text("Purchase Orders", 14, yPos + 5);
 
       exportTable(
@@ -139,6 +141,8 @@ export class Supplier extends User {
       yPos = doc.lastAutoTable.finalY + 15;
 
       doc.setFontSize(14);
+      doc.setTextColor(44, 62, 80);
+      doc.setFont("helvetica", "bold");
       doc.text("Invoices", 14, yPos);
 
       exportTable(

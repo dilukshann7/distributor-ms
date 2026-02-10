@@ -20,6 +20,9 @@ export function renderLogin(container) {
             </div>
           </div>
 
+          <p class="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+            Demo login: owner@gmail.com / owner
+          </p>
           <form method="post" action="/api/login" id="loginForm" class="space-y-4">
             <div class="space-y-2">
               <label class="block text-sm font-medium text-slate-700">Email</label>

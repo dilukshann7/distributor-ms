@@ -32,7 +32,7 @@ export class Product {
     const response = await Product.getAll();
     const products = response.data || [];
 
-    const doc = preparePdfDoc("Inventory Valuation Report", new Date());
+    const doc = preparePdfDoc("Inventory Report", new Date());
 
     const totalProducts = products.length;
     const totalValue = products.reduce(
@@ -73,7 +73,7 @@ export class Product {
     // Add Status Breakdown section
     doc.setFontSize(14);
     doc.setTextColor(44, 62, 80);
-    doc.setFont(undefined, "bold");
+    doc.setFont("helvetica", "bold");
     doc.text("Status Breakdown", 14, yPos + 5);
 
     if (totalProducts > 0) {
@@ -109,6 +109,8 @@ export class Product {
 
     // Add Detailed Inventory section
     doc.setFontSize(14);
+    doc.setTextColor(44, 62, 80);
+    doc.setFont("helvetica", "bold");
     doc.text("Detailed Inventory", 14, yPos);
 
     // Sort products by status and quantity
