@@ -1,3 +1,5 @@
+![ADP Namasinghe Distribution Management System](https://i.imgur.com/l87Y9kk.png)
+
 # ADP Namasinghe Distribution Management System
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
